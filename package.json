@@ -1,9 +1,14 @@
 {
   "name": "claude-relay",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Access Claude Code on your machine, from anywhere. One command, no config.",
   "bin": {
-    "claude-relay": "./bin/cli.js"
+    "claude-relay": "./bin/cli.js",
+    "claude-relay-dev": "./bin/cli.js"
+  },
+  "scripts": {
+    "prepack": "npm pkg delete bin.claude-relay-dev",
+    "postpack": "npm pkg set bin.claude-relay-dev=./bin/cli.js"
   },
   "files": [
     "bin/",
@@ -23,9 +28,13 @@
     "type": "git",
     "url": "git+https://github.com/chadbyte/claude-relay.git"
   },
+  "bugs": {
+    "url": "https://github.com/chadbyte/claude-relay/issues"
+  },
   "homepage": "https://github.com/chadbyte/claude-relay#readme",
   "author": "Chad",
   "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.2.38",
     "qrcode-terminal": "^0.12.0",
     "ws": "^8.18.0"
   },

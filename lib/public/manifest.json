@@ -1,0 +1,8 @@
+{
+  "name": "Claude Relay",
+  "short_name": "Claude",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#2F2E2B",
+  "theme_color": "#2F2E2B"
+}
