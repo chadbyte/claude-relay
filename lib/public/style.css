@@ -289,6 +289,7 @@ html, body {
 }
 
 .md-content pre {
+  position: relative;
   background: var(--code-bg);
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -514,6 +515,7 @@ html, body {
 }
 
 .tool-result-block {
+  position: relative;
   margin: 4px 0 8px 0;
   background: var(--code-bg);
   border: 1px solid var(--border);
@@ -1185,6 +1187,49 @@ html, body {
 @keyframes sparkle {
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.5; transform: scale(0.85); }
+}
+
+/* --- Copy code button --- */
+.copy-code-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.06);
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s, background 0.15s;
+  z-index: 1;
+  padding: 0;
+}
+
+pre:hover .copy-code-btn { opacity: 1; }
+.tool-result-block:hover .copy-code-btn { opacity: 1; }
+
+.copy-code-btn:hover {
+  background: rgba(255,255,255,0.1);
+  color: var(--text);
+}
+
+.copy-code-btn .lucide {
+  width: 14px;
+  height: 14px;
+}
+
+.copy-code-btn.copied {
+  color: var(--success);
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .copy-code-btn { opacity: 1; }
 }
 
 /* --- Mobile responsive --- */
