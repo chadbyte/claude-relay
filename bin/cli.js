@@ -10,6 +10,7 @@ const { createServer } = require("../lib/server");
 const args = process.argv.slice(2);
 let port = 2633;
 let useHttps = true;
+let skipUpdate = false;
 
 for (let i = 0; i < args.length; i++) {
   if (args[i] === "-p" || args[i] === "--port") {
@@ -21,12 +22,15 @@ for (let i = 0; i < args.length; i++) {
     i++;
   } else if (args[i] === "--no-https") {
     useHttps = false;
+  } else if (args[i] === "--no-update" || args[i] === "--skip-update") {
+    skipUpdate = true;
   } else if (args[i] === "-h" || args[i] === "--help") {
-    console.log("Usage: claude-relay [-p|--port <port>] [--no-https]");
+    console.log("Usage: claude-relay [-p|--port <port>] [--no-https] [--no-update]");
     console.log("");
     console.log("Options:");
     console.log("  -p, --port <port>  Port to listen on (default: 2633)");
     console.log("  --no-https         Disable HTTPS (enabled by default via mkcert)");
+    console.log("  --no-update        Skip auto-update check on startup");
     process.exit(0);
   }
 }
@@ -370,4 +374,10 @@ function start(pin) {
   });
 }
 
-setup(start);
+const { checkAndUpdate } = require("../lib/updater");
+const currentVersion = require("../package.json").version;
+
+(async () => {
+  const updated = await checkAndUpdate(currentVersion, skipUpdate);
+  if (!updated) setup(start);
+})();
