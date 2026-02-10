@@ -28,10 +28,20 @@
         <button id="hamburger-btn" aria-label="Toggle sidebar"><i data-lucide="menu"></i></button>
         <span class="project-name" id="project-name">Connecting...</span>
       </div>
+      <div id="header-actions">
+        <button id="search-btn" aria-label="Search messages"><i data-lucide="search"></i></button>
+      </div>
       <div class="status">
         <span id="status-text">Disconnected</span>
         <span class="status-dot" id="status-dot"></span>
       </div>
+    </div>
+    <div id="search-bar" class="hidden">
+      <input id="search-input" type="text" placeholder="Search messages..." />
+      <span id="search-count"></span>
+      <button id="search-prev" aria-label="Previous match"><i data-lucide="chevron-up"></i></button>
+      <button id="search-next" aria-label="Next match"><i data-lucide="chevron-down"></i></button>
+      <button id="search-close" aria-label="Close search"><i data-lucide="x"></i></button>
     </div>
 
     <div id="messages"></div>
