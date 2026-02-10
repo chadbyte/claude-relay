@@ -130,16 +130,24 @@ html, body {
 }
 
 .session-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   padding: 10px 12px;
   border-radius: 10px;
   cursor: pointer;
   font-size: 14px;
   color: var(--text-secondary);
+  margin-bottom: 2px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.session-item-text {
+  flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  margin-bottom: 2px;
-  transition: background 0.15s, color 0.15s;
+  min-width: 0;
 }
 
 .session-item:hover {
@@ -161,6 +169,18 @@ html, body {
   animation: pulse 1.5s ease-in-out infinite;
   margin-right: 8px;
   vertical-align: middle;
+}
+
+.session-rename-input {
+  width: 100%;
+  background: var(--input-bg);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  color: var(--text);
+  font-size: 13px;
+  font-family: inherit;
+  padding: 2px 6px;
+  outline: none;
 }
 
 #sidebar-footer {
