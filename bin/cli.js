@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const os = require("os");
+const qrcode = require("qrcode-terminal");
 const { createServer } = require("../lib/server");
 
 const args = process.argv.slice(2);
@@ -107,14 +108,19 @@ function start() {
 
   server.listen(port, () => {
     const ip = getLocalIP();
+    const url = `http://${ip}:${port}`;
     const project = require("path").basename(cwd);
     console.log("");
-    console.log(`  Claude Relay running at http://${ip}:${port}`);
+    console.log(`  Claude Relay running at ${url}`);
     console.log(`  Project: ${project}`);
     console.log(`  Directory: ${cwd}`);
     console.log("");
-    console.log("  Open the URL on your phone to start chatting.");
-    console.log("");
+    qrcode.generate(url, { small: true }, (code) => {
+      console.log(code.replace(/^/gm, "  "));
+      console.log("");
+      console.log("  Scan the QR code or open the URL on your phone.");
+      console.log("");
+    });
   });
 }
 
