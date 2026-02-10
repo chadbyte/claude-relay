@@ -130,16 +130,24 @@ html, body {
 }
 
 .session-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   padding: 10px 12px;
   border-radius: 10px;
   cursor: pointer;
   font-size: 14px;
   color: var(--text-secondary);
+  margin-bottom: 2px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.session-item-text {
+  flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  margin-bottom: 2px;
-  transition: background 0.15s, color 0.15s;
+  min-width: 0;
 }
 
 .session-item:hover {
@@ -161,6 +169,38 @@ html, body {
   animation: pulse 1.5s ease-in-out infinite;
   margin-right: 8px;
   vertical-align: middle;
+}
+
+.session-delete-btn {
+  display: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: color 0.15s, background 0.15s;
+}
+
+.session-item:hover .session-delete-btn { display: flex; }
+
+.session-delete-btn:hover {
+  color: var(--error);
+  background: rgba(238, 85, 85, 0.1);
+}
+
+.session-delete-btn .lucide {
+  width: 14px;
+  height: 14px;
+}
+
+@media (hover: none) {
+  .session-delete-btn { display: flex; }
 }
 
 #sidebar-footer {
