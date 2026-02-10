@@ -116,6 +116,10 @@ We strongly recommend using a private network layer such as [Tailscale](https://
 
 If you choose to expose it beyond your private network, that's your call. **Entirely at your own risk.** The authors assume no responsibility for any damage, data loss, or security incidents.
 
+## Disclaimer
+
+claude-relay is an independent, unofficial project. It is not affiliated with, endorsed by, or sponsored by Anthropic. "Claude" is a trademark of Anthropic.
+
 ## License
 
 MIT

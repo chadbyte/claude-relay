@@ -102,8 +102,8 @@ var caffeinateProc = null;
 function startCaffeinate() {
   var { spawn } = require("child_process");
   caffeinateProc = spawn("caffeinate", ["-di"], { stdio: "ignore", detached: false });
-  caffeinateProc.on("error", function() { caffeinateProc = null; });
-  process.on("exit", function() { if (caffeinateProc) caffeinateProc.kill(); });
+  caffeinateProc.on("error", function () { caffeinateProc = null; });
+  process.on("exit", function () { if (caffeinateProc) caffeinateProc.kill(); });
 }
 
 // --- Certs ---
@@ -119,7 +119,7 @@ function ensureCerts(ip) {
       "rootCA.pem"
     );
     if (!fs.existsSync(caRoot)) caRoot = null;
-  } catch (e) {}
+  } catch (e) { }
 
   if (fs.existsSync(keyPath) && fs.existsSync(certPath)) {
     return { key: keyPath, cert: certPath, caRoot: caRoot };
@@ -142,36 +142,61 @@ function ensureCerts(ip) {
   return { key: keyPath, cert: certPath, caRoot: caRoot };
 }
 
+// --- Logo ---
+function printLogo() {
+  var c = "\x1b[38;2;218;119;86m";
+  var r = a.reset;
+  var lines = [
+    "  ██████╗ ██╗       █████╗  ██╗   ██╗ ██████╗  ███████╗     ██████╗  ███████╗ ██╗       █████╗  ██╗   ██╗",
+    " ██╔════╝ ██║      ██╔══██╗ ██║   ██║ ██╔══██╗ ██╔════╝     ██╔══██╗ ██╔════╝ ██║      ██╔══██╗ ╚██╗ ██╔╝",
+    " ██║      ██║      ███████║ ██║   ██║ ██║  ██║ █████╗       ██████╔╝ █████╗   ██║      ███████║  ╚████╔╝ ",
+    " ██║      ██║      ██╔══██║ ██║   ██║ ██║  ██║ ██╔══╝       ██╔══██╗ ██╔══╝   ██║      ██╔══██║   ╚██╔╝  ",
+    " ╚██████╗ ███████╗ ██║  ██║ ╚██████╔╝ ██████╔╝ ███████╗     ██║  ██║ ███████╗ ███████╗ ██║  ██║    ██║   ",
+    "  ╚═════╝ ╚══════╝ ╚═╝  ╚═╝  ╚═════╝  ╚═════╝  ╚══════╝     ╚═╝  ╚═╝ ╚══════╝ ╚══════╝ ╚═╝  ╚═╝    ╚═╝   ",
+  ];
+  console.log("");
+  for (var i = 0; i < lines.length; i++) {
+    console.log(c + lines[i] + r);
+  }
+}
+
 // --- Interactive setup (clack-style) ---
 function setup(callback) {
+  console.clear();
+  printLogo();
   log("");
-  log(sym.pointer + "  " + a.bold + "Claude Relay" + a.reset);
+  log(sym.pointer + "  " + a.bold + "Claude Relay" + a.reset + a.dim + "  ·  Unofficial, open-source project" + a.reset);
   log(sym.bar);
-  log(sym.warn + "  " + a.yellow + a.bold + "READ BEFORE CONTINUING" + a.reset);
-  log(sym.bar);
-  log(sym.bar + "  Anyone with access to the URL gets " + a.bold + "full Claude Code access" + a.reset);
-  log(sym.bar + "  to this machine, including reading, writing, and executing");
-  log(sym.bar + "  files with your user permissions.");
-  log(sym.bar);
-  log(sym.bar + "  We strongly recommend using a private network layer such as");
-  log(sym.bar + "  " + a.bold + "Tailscale" + a.reset + ", " + a.bold + "WireGuard" + a.reset + ", or a " + a.bold + "VPN" + a.reset + ".");
+  log(sym.bar + "  " + a.dim + "Anyone with the URL gets full Claude Code access to this machine." + a.reset);
+  log(sym.bar + "  " + a.dim + "Use a private network (Tailscale, VPN)." + a.reset);
+  log(sym.bar + "  " + a.dim + "The authors assume no responsibility for any damage or data loss." + a.reset);
   log(sym.bar);
 
-  promptPin(function(pin) {
-    promptToggle("Keep awake", "Prevent system sleep while relay is running", function(keepAwake) {
-      log(sym.bar);
-      log(sym.end + "  " + a.dim + "Starting relay..." + a.reset);
+  promptToggle("Accept and continue", null, true, function (accepted) {
+    if (!accepted) {
+      log(sym.end + "  " + a.dim + "Aborted." + a.reset);
       log("");
+      process.exit(0);
+      return;
+    }
+    log(sym.bar);
 
-      if (keepAwake) startCaffeinate();
-      callback(pin);
+    promptPin(function (pin) {
+      promptToggle("Keep awake", "Prevent system sleep while relay is running", false, function (keepAwake) {
+        log(sym.bar);
+        log(sym.end + "  " + a.dim + "Starting relay..." + a.reset);
+        log("");
+
+        if (keepAwake) startCaffeinate();
+        callback(pin);
+      });
     });
   });
 }
 
 function promptPin(callback) {
   log(sym.pointer + "  " + a.bold + "PIN protection" + a.reset);
-  log(sym.bar + "  " + a.dim + "6-digit PIN, or Enter to skip" + a.reset);
+  log(sym.bar + "  " + a.dim + "Require a 6-digit PIN to access the web UI. Enter to skip." + a.reset);
   process.stdout.write("  " + sym.bar + "  ");
 
   var pin = "";
@@ -221,8 +246,8 @@ function promptPin(callback) {
   });
 }
 
-function promptToggle(title, desc, callback) {
-  var value = false;
+function promptToggle(title, desc, defaultValue, callback) {
+  var value = defaultValue || false;
 
   function renderToggle() {
     var yes = value
@@ -234,12 +259,17 @@ function promptToggle(title, desc, callback) {
     return yes + a.dim + " / " + a.reset + no;
   }
 
+  var lines = 2;
   log(sym.pointer + "  " + a.bold + title + a.reset);
-  log(sym.bar + "  " + a.dim + desc + a.reset);
+  if (desc) {
+    log(sym.bar + "  " + a.dim + desc + a.reset);
+    lines = 3;
+  }
   process.stdout.write("  " + sym.bar + "  " + renderToggle());
 
   process.stdin.setRawMode(true);
   process.stdin.resume();
+  process.stdin.setEncoding("utf8");
 
   process.stdin.on("data", function onToggle(ch) {
     if (ch === "\x1b[D" || ch === "\x1b[C" || ch === "\t") {
@@ -257,14 +287,14 @@ function promptToggle(title, desc, callback) {
       process.stdin.removeListener("data", onToggle);
       process.stdout.write("\n");
 
-      clearUp(3);
+      clearUp(lines);
       var result = value ? a.green + "Yes" + a.reset : a.dim + "No" + a.reset;
       log(sym.done + "  " + title + " " + a.dim + "·" + a.reset + " " + result);
 
       callback(value);
     } else if (ch === "\x03") {
       process.stdout.write("\n");
-      clearUp(3);
+      clearUp(lines);
       log(sym.end + "  " + a.dim + "Cancelled" + a.reset);
       process.exit(0);
     }
@@ -296,7 +326,7 @@ function start(pin) {
   var entryServer = result.entryServer;
   var httpsServer = result.httpsServer;
 
-  entryServer.on("error", function(err) {
+  entryServer.on("error", function (err) {
     if (err.code === "EADDRINUSE") {
       log(a.red + "Port " + port + " is already in use." + a.reset);
       log(a.dim + "Run: claude-relay -p <port>" + a.reset);
@@ -308,7 +338,7 @@ function start(pin) {
 
   var httpsPort = port + 1;
   if (httpsServer) {
-    httpsServer.on("error", function(err) {
+    httpsServer.on("error", function (err) {
       if (err.code === "EADDRINUSE") {
         log(a.red + "HTTPS port " + httpsPort + " is already in use." + a.reset);
       } else {
@@ -319,13 +349,13 @@ function start(pin) {
     httpsServer.listen(httpsPort);
   }
 
-  entryServer.listen(port, function() {
+  entryServer.listen(port, function () {
     var project = path.basename(cwd);
     var url = "http://" + ip + ":" + port;
 
     if (ip !== "localhost") {
-      qrcode.generate(url, { small: true }, function(code) {
-        var lines = code.split("\n").map(function(l) { return "  " + l; }).join("\n");
+      qrcode.generate(url, { small: true }, function (code) {
+        var lines = code.split("\n").map(function (l) { return "  " + l; }).join("\n");
         console.log(lines);
         console.log("");
         log(a.bold + "Claude Relay" + a.reset + " running at " + a.bold + url + a.reset);
