@@ -1,6 +1,6 @@
 {
   "name": "claude-relay",
-  "version": "1.2.8",
+  "version": "1.2.9",
   "description": "Access Claude Code on your machine, from anywhere. One command, no config.",
   "bin": {
     "claude-relay": "./bin/cli.js",

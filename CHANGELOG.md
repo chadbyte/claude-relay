@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.2.9
+
+- Add automatic port hopping when default port is in use (increments by 2)
+
 ## v1.2.8
 
 - Add resume CLI session button to continue terminal conversations in the web UI

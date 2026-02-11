@@ -305,8 +305,32 @@ function promptToggle(title, desc, defaultValue, callback) {
   });
 }
 
+// --- Port availability check ---
+var net = require("net");
+
+function isPortFree(p) {
+  return new Promise(function (resolve) {
+    var srv = net.createServer();
+    srv.once("error", function () { resolve(false); });
+    srv.once("listening", function () { srv.close(function () { resolve(true); }); });
+    srv.listen(p);
+  });
+}
+
+async function findAvailablePort(startPort) {
+  var p = startPort;
+  var maxAttempts = 20;
+  for (var i = 0; i < maxAttempts; i++) {
+    var httpFree = await isPortFree(p);
+    var httpsFree = await isPortFree(p + 1);
+    if (httpFree && httpsFree) return p;
+    p += 2;
+  }
+  return null;
+}
+
 // --- Server start ---
-function start(pin) {
+async function start(pin) {
   var ip = getLocalIP();
   var tlsOptions = null;
   var caRoot = null;
@@ -326,28 +350,31 @@ function start(pin) {
     }
   }
 
+  var actualPort = await findAvailablePort(port);
+  if (actualPort === null) {
+    log(a.red + "No available port found (tried " + port + " to " + (port + 38) + ")." + a.reset);
+    process.exit(1);
+    return;
+  }
+  if (actualPort !== port) {
+    log(sym.warn + "  " + a.yellow + "Port " + port + " in use" + a.reset + a.dim + " · using " + actualPort + a.reset);
+    log(sym.bar);
+  }
+  port = actualPort;
+
   var result = createServer(cwd, tlsOptions, caRoot, pin, port);
   var entryServer = result.entryServer;
   var httpsServer = result.httpsServer;
 
   entryServer.on("error", function (err) {
-    if (err.code === "EADDRINUSE") {
-      log(a.red + "Port " + port + " is already in use." + a.reset);
-      log(a.dim + "Run: claude-relay -p <port>" + a.reset);
-    } else {
-      log(a.red + "Server error: " + err.message + a.reset);
-    }
+    log(a.red + "Server error: " + err.message + a.reset);
     process.exit(1);
   });
 
   var httpsPort = port + 1;
   if (httpsServer) {
     httpsServer.on("error", function (err) {
-      if (err.code === "EADDRINUSE") {
-        log(a.red + "HTTPS port " + httpsPort + " is already in use." + a.reset);
-      } else {
-        log(a.red + "HTTPS error: " + err.message + a.reset);
-      }
+      log(a.red + "HTTPS error: " + err.message + a.reset);
       process.exit(1);
     });
     httpsServer.listen(httpsPort);
