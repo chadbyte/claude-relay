@@ -103,6 +103,9 @@ html, body {
   gap: 10px;
 }
 
+.sidebar-header-top .sidebar-title { flex: 1; }
+
+
 #sidebar-toggle-btn {
   width: 30px;
   height: 30px;
@@ -136,8 +139,14 @@ html, body {
   text-transform: uppercase;
 }
 
-#new-session-btn {
-  width: 100%;
+.sidebar-header-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+#new-session-btn, #resume-session-btn {
+  flex: 1;
+  min-width: 0;
   height: 36px;
   border-radius: 8px;
   border: 1px solid var(--border-subtle);
@@ -156,13 +165,13 @@ html, body {
   overflow: hidden;
 }
 
-#new-session-btn .lucide {
+#new-session-btn .lucide, #resume-session-btn .lucide {
   width: 16px;
   height: 16px;
   flex-shrink: 0;
 }
 
-#new-session-btn:hover {
+#new-session-btn:hover, #resume-session-btn:hover {
   background: var(--sidebar-hover);
   color: var(--text);
   border-color: var(--border);
@@ -571,6 +580,63 @@ html, body {
 }
 
 .confirm-delete:hover { opacity: 0.85; }
+
+.confirm-ok {
+  background: var(--accent);
+  color: #fff;
+}
+
+.confirm-ok:hover { opacity: 0.85; }
+
+/* --- Resume modal --- */
+#resume-modal { position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; }
+#resume-modal.hidden { display: none; }
+
+.resume-modal-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+
+.resume-modal-body {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.resume-modal-body p { margin: 0 0 10px; }
+
+.resume-modal-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.resume-modal-hint code {
+  background: rgba(255, 255, 255, 0.07);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: "SF Mono", Menlo, Monaco, monospace;
+  font-size: 0.92em;
+}
+
+#resume-session-input {
+  width: 100%;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 13px;
+  font-family: "SF Mono", Menlo, Monaco, monospace;
+  padding: 10px 12px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+#resume-session-input:focus { border-color: var(--text-dimmer); }
+#resume-session-input::placeholder { color: var(--text-muted); font-family: "Inter", system-ui, sans-serif; }
 
 /* --- Notification help modal --- */
 #notif-help-modal { position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; }

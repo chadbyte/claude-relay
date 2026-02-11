@@ -1,10 +1,13 @@
 # Changelog
 
-## v1.2.7
+## v1.2.8
 
+- Add resume CLI session button to continue terminal conversations in the web UI
 - Add notification settings menu with browser alert and sound toggles
 - Add skip button and input lock for AskUserQuestion prompts
 - Add click-to-copy for assistant messages
+- Move sidebar close button to the right side of the header
+- Fix AudioContext being recreated on every notification sound
 
 ## v1.2.4
 

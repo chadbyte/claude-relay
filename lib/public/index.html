@@ -20,10 +20,13 @@
   <div id="sidebar">
     <div id="sidebar-header">
       <div class="sidebar-header-top">
-        <button id="sidebar-toggle-btn" title="Close sidebar"><i data-lucide="panel-left-close"></i></button>
         <span class="sidebar-title">Sessions</span>
+        <button id="sidebar-toggle-btn" title="Close sidebar"><i data-lucide="panel-left-close"></i></button>
       </div>
-      <button id="new-session-btn" title="New session"><i data-lucide="plus"></i> New Session</button>
+      <div class="sidebar-header-buttons">
+        <button id="new-session-btn" title="New session"><i data-lucide="plus"></i> New Session</button>
+        <button id="resume-session-btn" title="Resume CLI session"><i data-lucide="terminal"></i> Resume</button>
+      </div>
     </div>
     <div id="session-list"></div>
     <div id="sidebar-footer">
@@ -111,6 +114,22 @@
     </div>
     <div class="confirm-actions">
       <button class="confirm-btn confirm-cancel" id="notif-help-close">Close</button>
+    </div>
+  </div>
+</div>
+
+<div id="resume-modal" class="hidden">
+  <div class="confirm-backdrop"></div>
+  <div class="confirm-dialog">
+    <div class="resume-modal-title">Resume CLI session</div>
+    <div class="resume-modal-body">
+      <p>Paste a session ID to continue a CLI conversation here.</p>
+      <div class="resume-modal-hint">Run <code>claude conversation list</code> in your terminal to find session IDs.</div>
+      <input type="text" id="resume-session-input" placeholder="Session ID" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="confirm-actions">
+      <button class="confirm-btn confirm-cancel" id="resume-cancel">Cancel</button>
+      <button class="confirm-btn confirm-ok" id="resume-ok">Resume</button>
     </div>
   </div>
 </div>
