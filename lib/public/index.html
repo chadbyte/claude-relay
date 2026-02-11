@@ -34,6 +34,11 @@
   </div>
   <div id="sidebar-overlay"></div>
   <div id="app">
+    <div id="update-banner" class="hidden">
+      <span class="update-banner-text"><i data-lucide="arrow-up-circle"></i> A new version of Claude Relay is available: <strong id="update-version"></strong></span>
+      <button id="update-how" title="How to update">How to update</button>
+      <button id="update-banner-close" aria-label="Dismiss"><i data-lucide="x"></i></button>
+    </div>
     <div id="https-banner" class="hidden">
       <span class="https-banner-text"><i data-lucide="shield"></i> Your connection is not encrypted. <a id="https-banner-link" href="/setup">Set up HTTPS</a></span>
       <button id="https-banner-close" aria-label="Dismiss"><i data-lucide="x"></i></button>
@@ -68,6 +73,17 @@
           <button id="send-btn" disabled aria-label="Send"><i data-lucide="arrow-up"></i></button>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<div id="confirm-modal" class="hidden">
+  <div class="confirm-backdrop"></div>
+  <div class="confirm-dialog">
+    <div class="confirm-text" id="confirm-text"></div>
+    <div class="confirm-actions">
+      <button class="confirm-btn confirm-cancel" id="confirm-cancel">Cancel</button>
+      <button class="confirm-btn confirm-delete" id="confirm-ok">Delete</button>
     </div>
   </div>
 </div>
