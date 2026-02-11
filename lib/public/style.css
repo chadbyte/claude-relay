@@ -901,6 +901,58 @@ html, body {
 .diff-content .diff-file-header { color: #8B949E; font-weight: 600; }
 .diff-content .diff-ctx { color: var(--text-muted); }
 
+/* --- Code viewer (Read tool) --- */
+.code-viewer {
+  display: flex;
+  max-height: 300px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.code-viewer pre {
+  margin: 0;
+  max-height: none;
+  overflow-y: visible;
+  font-family: "SF Mono", Menlo, Monaco, monospace;
+  font-size: 12px;
+  line-height: 1.55;
+  white-space: pre;
+  word-break: normal;
+}
+
+.code-gutter {
+  flex-shrink: 0;
+  padding: 12px 12px 12px 14px;
+  text-align: right;
+  color: var(--text-dimmer);
+  user-select: none;
+  -webkit-user-select: none;
+  border-right: 1px solid var(--border-subtle);
+  min-width: 48px;
+}
+
+.code-content {
+  flex: 1;
+  padding: 12px 14px;
+  overflow-x: auto;
+  min-width: 0;
+  color: var(--text-muted);
+}
+
+.code-content code {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  background: none;
+  padding: 0;
+  border-radius: 0;
+}
+
+.code-content .hljs {
+  background: transparent;
+  padding: 0;
+}
+
 /* ==========================================================================
    Plan Mode
    ========================================================================== */
