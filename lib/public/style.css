@@ -572,6 +572,69 @@ html, body {
 
 .confirm-delete:hover { opacity: 0.85; }
 
+/* --- Notification help modal --- */
+#notif-help-modal { position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; }
+#notif-help-modal.hidden { display: none; }
+
+.notif-help-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+
+.notif-help-body {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.notif-help-body p { margin: 0 0 10px; }
+
+.notif-help-body ol {
+  margin: 0 0 14px;
+  padding-left: 20px;
+}
+
+.notif-help-body ol li { margin-bottom: 4px; }
+
+.notif-help-url {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.notif-help-url code {
+  font-family: "SF Mono", Menlo, Monaco, monospace;
+  font-size: 12px;
+  color: var(--text);
+  flex: 1;
+  user-select: all;
+  -webkit-user-select: all;
+}
+
+.notif-help-url .popover-copy {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px 6px;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.notif-help-url .popover-copy .lucide { width: 13px; height: 13px; }
+.notif-help-url .popover-copy:hover { color: var(--text); border-color: var(--text-dimmer); }
+.notif-help-url .popover-copy.copied { color: var(--success); border-color: var(--success); }
+
 /* --- Connect overlay --- */
 #connect-overlay {
   position: absolute;
@@ -692,6 +755,100 @@ html, body {
   border-radius: 50%;
   background: var(--error);
   transition: background 0.3s;
+}
+
+/* --- Notification menu --- */
+#notif-menu-wrap {
+  position: relative;
+}
+
+#notif-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--text-dimmer);
+  cursor: pointer;
+  padding: 4px;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+
+#notif-btn .lucide { width: 15px; height: 15px; }
+#notif-btn:hover { color: var(--text-secondary); background: rgba(255,255,255,0.04); border-color: var(--border); }
+#notif-btn.active { color: var(--text); background: rgba(255,255,255,0.06); border-color: var(--border); }
+
+#notif-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 0;
+  min-width: 200px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  z-index: 200;
+}
+
+#notif-menu.hidden { display: none; }
+
+.notif-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.notif-option:hover { background: rgba(255, 255, 255, 0.03); }
+.notif-option input { display: none; }
+
+#notif-blocked-hint {
+  padding: 6px 14px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--warning, #E5A84B);
+}
+
+#notif-blocked-hint.hidden { display: none; }
+#notif-blocked-hint a { color: var(--accent); text-decoration: none; }
+#notif-blocked-hint a:hover { text-decoration: underline; }
+
+.toggle-track {
+  width: 34px;
+  height: 20px;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  position: relative;
+  transition: background 0.2s, border-color 0.2s;
+  flex-shrink: 0;
+}
+
+.toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  background: var(--text-dimmer);
+  border-radius: 50%;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.notif-option input:checked + .toggle-track {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.notif-option input:checked + .toggle-track .toggle-thumb {
+  transform: translateX(14px);
+  background: #fff;
 }
 
 #terminal-btn {

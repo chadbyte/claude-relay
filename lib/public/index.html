@@ -50,6 +50,22 @@
         <span class="project-name" id="project-name">Connecting...</span>
       </div>
       <div class="status">
+        <div id="notif-menu-wrap">
+          <button id="notif-btn" title="Notifications"><i data-lucide="bell"></i></button>
+          <div id="notif-menu" class="hidden">
+            <label class="notif-option">
+              <span>Browser notifications</span>
+              <input type="checkbox" id="notif-toggle-alert">
+              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            </label>
+            <div id="notif-blocked-hint" class="hidden">Blocked by browser. <a href="#" id="notif-learn-more">Learn more</a></div>
+            <label class="notif-option">
+              <span>Sound</span>
+              <input type="checkbox" id="notif-toggle-sound">
+              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            </label>
+          </div>
+        </div>
         <button id="terminal-btn" title="Continue in terminal"><i data-lucide="terminal"></i><span class="terminal-cmd"></span></button>
         <span id="client-count" class="hidden"></span>
         <span id="status-text">Disconnected</span>
@@ -73,6 +89,28 @@
           <button id="send-btn" disabled aria-label="Send"><i data-lucide="arrow-up"></i></button>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<div id="notif-help-modal" class="hidden">
+  <div class="confirm-backdrop"></div>
+  <div class="confirm-dialog" style="max-width: 380px;">
+    <div class="notif-help-title">Notifications blocked</div>
+    <div class="notif-help-body">
+      <p>Your browser has blocked notification permissions for this site. To re-enable:</p>
+      <ol>
+        <li>Open your browser's notification settings by pasting the address below</li>
+        <li>Find this site and change the permission to <strong>Allow</strong></li>
+        <li>Reload the page</li>
+      </ol>
+      <div class="notif-help-url">
+        <code id="notif-settings-url">chrome://settings/content/notifications</code>
+        <button id="notif-url-copy" class="popover-copy" title="Copy"><i data-lucide="copy"></i></button>
+      </div>
+    </div>
+    <div class="confirm-actions">
+      <button class="confirm-btn confirm-cancel" id="notif-help-close">Close</button>
     </div>
   </div>
 </div>
