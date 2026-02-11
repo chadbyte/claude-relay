@@ -754,6 +754,22 @@ html, body {
   transition: background 0.15s;
 }
 
+.tool-chevron {
+  color: var(--text-dimmer);
+  transition: transform 0.2s;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.tool-chevron .lucide {
+  width: 14px;
+  height: 14px;
+}
+
+.tool-item.expanded .tool-chevron {
+  transform: rotate(90deg);
+}
+
 .tool-header:hover {
   background: rgba(255, 255, 255, 0.05);
 }
