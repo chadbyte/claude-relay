@@ -1529,6 +1529,27 @@ html, body {
 .ask-user-submit:hover { background: var(--accent-hover); }
 .ask-user-submit:disabled { opacity: 0.4; cursor: default; }
 
+.ask-user-skip {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 7px 18px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.ask-user-skip:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-secondary);
+  border-color: var(--text-dimmer);
+}
+
+.ask-user-container.answered .ask-user-skip { display: none; }
+
 .ask-user-container.answered .ask-user-option { cursor: default; opacity: 0.5; }
 .ask-user-container.answered .ask-user-option.selected { opacity: 1; }
 .ask-user-container.answered .ask-user-other input { opacity: 0.5; pointer-events: none; }
