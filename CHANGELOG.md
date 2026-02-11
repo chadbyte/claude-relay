@@ -1,11 +1,12 @@
 # Changelog
 
-## v1.2.5
+## v1.2.6
 
 - Add collapsible sidebar toggle for desktop (ChatGPT-style)
 - Add new version update banner with copy-to-clipboard command
 - Add confirmation modal for session deletion
 - Add skip button and input lock for AskUserQuestion prompts
+- Add click-to-copy for assistant messages
 - Add code viewer with line number gutter and syntax highlighting for Read tool results
 - Improve tool result blocks to collapse by default with expand chevron
 

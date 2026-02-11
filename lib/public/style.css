@@ -246,6 +246,7 @@ html, body {
 
 @media (hover: none) {
   .session-delete-btn { display: flex; }
+  .msg-copy-hint { opacity: 1; }
 }
 
 #sidebar-footer {
@@ -809,8 +810,36 @@ html, body {
 .msg-assistant {
   max-width: var(--content-width);
   margin: 0 auto 12px;
-  padding: 0 20px;
+  padding: 4px 20px;
+  border-radius: 12px;
+  transition: background 0.15s;
 }
+
+.msg-assistant:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.msg-assistant.copy-primed {
+  background: rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+}
+
+.msg-assistant.copy-done {
+  background: rgba(87, 171, 90, 0.06);
+}
+
+.msg-copy-hint {
+  font-size: 12px;
+  color: var(--text-dimmer);
+  min-height: 1.3em;
+  font-weight: 500;
+  opacity: 0;
+  transition: color 0.15s, opacity 0.15s;
+}
+
+.msg-assistant:hover .msg-copy-hint { opacity: 1; }
+.msg-assistant.copy-primed .msg-copy-hint { opacity: 1; color: var(--accent); }
+.msg-assistant.copy-done .msg-copy-hint { opacity: 1; color: var(--success); }
 
 /* ==========================================================================
    Markdown Content
