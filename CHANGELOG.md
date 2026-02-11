@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.2.3
+
+- Add collapsible sidebar toggle for desktop (ChatGPT-style)
+- Add code viewer with line number gutter and syntax highlighting for Read tool results
+- Improve tool result blocks to collapse by default with expand chevron
+
 ## v1.2.0
 
 - Add auto-update check on startup with `--no-update` flag to opt out

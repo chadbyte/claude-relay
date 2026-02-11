@@ -19,8 +19,11 @@
 <div id="layout">
   <div id="sidebar">
     <div id="sidebar-header">
-      <span class="sidebar-title">Sessions</span>
-      <button id="new-session-btn" title="New session"><i data-lucide="plus"></i></button>
+      <div class="sidebar-header-top">
+        <button id="sidebar-toggle-btn" title="Close sidebar"><i data-lucide="panel-left-close"></i></button>
+        <span class="sidebar-title">Sessions</span>
+      </div>
+      <button id="new-session-btn" title="New session"><i data-lucide="plus"></i> New Session</button>
     </div>
     <div id="session-list"></div>
     <div id="sidebar-footer">
@@ -37,6 +40,7 @@
     </div>
     <div id="header">
       <div id="header-left">
+        <button id="sidebar-expand-btn" title="Open sidebar"><i data-lucide="panel-left-open"></i></button>
         <button id="hamburger-btn" aria-label="Toggle sidebar"><i data-lucide="menu"></i></button>
         <span class="project-name" id="project-name">Connecting...</span>
       </div>

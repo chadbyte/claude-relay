@@ -82,24 +82,28 @@ html, body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  transition: width 0.2s ease;
+}
+
+#layout.sidebar-collapsed #sidebar {
+  width: 0;
+  border: none;
 }
 
 #sidebar-header {
   display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: calc(var(--safe-top) + 16px) 16px 12px;
+}
+
+.sidebar-header-top {
+  display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 16px 16px 12px;
+  gap: 10px;
 }
 
-.sidebar-title {
-  font-weight: 600;
-  font-size: 13px;
-  color: var(--text-muted);
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-}
-
-#new-session-btn {
+#sidebar-toggle-btn {
   width: 30px;
   height: 30px;
   border-radius: 8px;
@@ -111,16 +115,57 @@ html, body {
   align-items: center;
   justify-content: center;
   transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+#sidebar-toggle-btn .lucide {
+  width: 18px;
+  height: 18px;
+}
+
+#sidebar-toggle-btn:hover {
+  background: var(--sidebar-hover);
+  color: var(--text);
+}
+
+.sidebar-title {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text-muted);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+#new-session-btn {
+  width: 100%;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 #new-session-btn .lucide {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
 }
 
 #new-session-btn:hover {
   background: var(--sidebar-hover);
   color: var(--text);
+  border-color: var(--border);
 }
 
 #session-list {
@@ -239,6 +284,34 @@ html, body {
 }
 
 #sidebar-overlay.visible { display: block; }
+
+/* --- Sidebar expand (desktop collapsed) --- */
+#sidebar-expand-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px;
+  margin-right: 10px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s;
+}
+
+#sidebar-expand-btn .lucide {
+  width: 20px;
+  height: 20px;
+}
+
+#sidebar-expand-btn:hover {
+  color: var(--text);
+}
+
+#layout.sidebar-collapsed #sidebar-expand-btn {
+  display: flex;
+}
 
 /* --- Hamburger --- */
 #hamburger-btn {
@@ -1655,16 +1728,29 @@ html, body {
     z-index: 100;
     transform: translateX(-100%);
     transition: transform 0.25s ease;
+    width: 260px;
   }
 
   #sidebar.open {
     transform: translateX(0);
   }
 
+  /* On mobile, sidebar-collapsed should not affect sidebar (hamburger controls it) */
+  #layout.sidebar-collapsed #sidebar {
+    width: 260px;
+    border-right: 1px solid var(--border-subtle);
+  }
+
   #hamburger-btn {
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+
+  #sidebar-toggle-btn,
+  #sidebar-expand-btn,
+  #layout.sidebar-collapsed #sidebar-expand-btn {
+    display: none;
   }
 
   .msg-user .bubble {
