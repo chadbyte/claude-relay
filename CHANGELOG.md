@@ -2,6 +2,15 @@
 
 ## WIP
 
+- Consolidate notification bell and terminal button into unified settings panel
+  - Push notifications toggle (HTTPS only, user-driven subscribe/unsubscribe)
+  - Browser alerts and sound toggles
+  - Copy resume command integrated into the panel
+  - Replace bell icon with sliders icon
+- Add favicon I/O blink during processing
+- Replace session delete button with three-dots context menu
+  - Rename sessions inline
+  - Delete with confirmation
 - Add rewind feature to restore files and conversation to a previous turn
   - Click any user message to preview rewind with file diffs
   - `/rewind` slash command toggles timeline scrollbar for quick navigation
