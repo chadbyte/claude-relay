@@ -1,5 +1,9 @@
 # Changelog
 
+## WIP
+
+- Add copy button to code blocks
+
 ## v1.2.9
 
 - Add automatic port hopping when default port is in use (increments by 2)

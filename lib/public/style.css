@@ -1105,6 +1105,33 @@ html, body {
   overflow: hidden;
 }
 
+.code-copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 5px 6px;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s, background 0.15s;
+  z-index: 1;
+}
+
+pre:hover .code-copy-btn { opacity: 1; }
+
+.code-copy-btn:hover {
+  color: var(--text);
+  background: var(--sidebar-hover);
+}
+
+@media (pointer: coarse) {
+  .code-copy-btn { opacity: 1; }
+}
+
 .md-content pre code {
   display: block;
   padding: 16px 18px;
