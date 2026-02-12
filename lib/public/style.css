@@ -589,6 +589,118 @@ html, body {
 .confirm-ok:hover { opacity: 0.85; }
 
 /* --- Resume modal --- */
+/* --- Rewind modal --- */
+#rewind-modal { position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; }
+#rewind-modal.hidden { display: none; }
+
+#rewind-modal .confirm-dialog {
+  max-width: 620px;
+  width: 94%;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.rewind-modal-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 12px;
+  flex-shrink: 0;
+}
+
+.rewind-modal-body {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 16px;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.rewind-modal-body p { margin: 0 0 10px; }
+
+.rewind-file-section {
+  margin-top: 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.rewind-file-section + .rewind-file-section { margin-top: 8px; }
+
+.rewind-file-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s;
+}
+
+.rewind-file-header:hover { background: rgba(255, 255, 255, 0.06); }
+
+.rewind-file-chevron {
+  display: inline-flex;
+  color: var(--text-dimmer);
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+
+.rewind-file-chevron .lucide { width: 13px; height: 13px; }
+
+.rewind-file-section.expanded .rewind-file-chevron { transform: rotate(90deg); }
+
+.rewind-file-path {
+  flex: 1;
+  font-family: "SF Mono", Menlo, Monaco, monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  direction: rtl;
+  text-align: left;
+}
+
+.rewind-file-stats {
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.rewind-file-stats .stat-add { color: #3FB950; }
+.rewind-file-stats .stat-del { color: #F85149; }
+
+.rewind-file-diff {
+  display: none;
+  background: var(--code-bg);
+  border-top: 1px solid var(--border-subtle);
+  max-height: 280px;
+  overflow: auto;
+}
+
+.rewind-file-section.expanded .rewind-file-diff { display: block; }
+
+.rewind-file-diff pre {
+  margin: 0;
+  padding: 10px 12px;
+  font-family: "SF Mono", Menlo, Monaco, monospace;
+  font-size: 12px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.rewind-no-diff {
+  padding: 12px;
+  font-size: 12px;
+  color: var(--text-dimmer);
+  font-style: italic;
+}
+
+/* --- Resume modal --- */
 #resume-modal { position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; }
 #resume-modal.hidden { display: none; }
 
@@ -1647,6 +1759,165 @@ pre:hover .code-copy-btn { opacity: 1; }
   padding: 0 20px;
   font-size: 12px;
   color: var(--text-dimmer);
+}
+
+/* --- Rewindable user messages (always active) --- */
+.msg-user[data-uuid] .bubble {
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+}
+
+.msg-user[data-uuid] .bubble:hover {
+  box-shadow: 0 0 0 1.5px var(--text-dimmer);
+}
+
+/* --- Rewind mode (timeline visible, strong markers) --- */
+#app.rewind-mode .msg-user[data-uuid] .bubble {
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+#app.rewind-mode .msg-user[data-uuid] .bubble:hover {
+  box-shadow: 0 0 0 2px var(--accent-hover), 0 0 12px rgba(218, 119, 86, 0.2);
+}
+
+#app.rewind-mode .msg-user:not([data-uuid]) { opacity: 0.35; }
+#app.rewind-mode .msg-assistant { opacity: 0.5; }
+#app.rewind-mode .tool-item { opacity: 0.4; }
+#app.rewind-mode .thinking-item { opacity: 0.4; }
+#app.rewind-mode .permission-container { opacity: 0.4; }
+
+.rewind-mode-banner {
+  position: absolute;
+  bottom: 76px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 8px 12px 8px 14px;
+  font-size: 12px;
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-alt);
+  border: 1px solid rgba(218, 119, 86, 0.25);
+  border-radius: 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+  white-space: nowrap;
+}
+
+.rewind-mode-banner .lucide { width: 14px; height: 14px; }
+
+.rewind-banner-text {
+  font-weight: 500;
+}
+
+.rewind-exit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(218, 119, 86, 0.15);
+  color: var(--accent);
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.rewind-exit-btn .lucide { width: 12px; height: 12px; }
+.rewind-exit-btn:hover { background: rgba(218, 119, 86, 0.3); }
+
+/* --- Rewind timeline --- */
+.rewind-timeline {
+  position: absolute;
+  right: 8px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.rewind-timeline-track {
+  position: relative;
+  width: 2px;
+  height: 100%;
+  margin-left: auto;
+  margin-right: 4px;
+  background: var(--border);
+  border-radius: 1px;
+}
+
+.rewind-timeline-viewport {
+  position: absolute;
+  left: -3px;
+  width: 8px;
+  background: rgba(218, 119, 86, 0.2);
+  border-radius: 4px;
+  pointer-events: none;
+  transition: top 0.1s ease, height 0.1s ease;
+}
+
+.rewind-timeline-marker {
+  position: absolute;
+  right: -5px;
+  transform: translateY(-50%);
+  height: 26px;
+  max-width: 160px;
+  padding: 0 10px 0 7px;
+  border-radius: 13px;
+  background: var(--bg-alt);
+  border: 1.5px solid var(--border);
+  cursor: pointer;
+  pointer-events: all;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  z-index: 1;
+}
+
+.rewind-timeline-marker .lucide {
+  width: 13px;
+  height: 13px;
+  color: var(--text-dimmer);
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+
+.rewind-timeline-marker .marker-text {
+  font-size: 11px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.15s;
+}
+
+.rewind-timeline-marker:hover {
+  border-color: var(--accent);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.rewind-timeline-marker:hover .lucide,
+.rewind-timeline-marker:hover .marker-text {
+  color: var(--accent);
+}
+
+.rewind-timeline-marker.in-view {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+}
+
+.rewind-timeline-marker.in-view .lucide,
+.rewind-timeline-marker.in-view .marker-text {
+  color: var(--accent);
+}
+
+@media (max-width: 768px) {
+  .rewind-timeline-marker { max-width: 120px; height: 22px; padding: 0 7px 0 5px; gap: 3px; }
+  .rewind-timeline-marker .lucide { width: 11px; height: 11px; }
+  .rewind-timeline-marker .marker-text { font-size: 10px; }
 }
 
 .sys-msg {

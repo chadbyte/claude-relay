@@ -2,6 +2,12 @@
 
 ## WIP
 
+- Add rewind feature to restore files and conversation to a previous turn
+  - Click any user message to preview rewind with file diffs
+  - `/rewind` slash command toggles timeline scrollbar for quick navigation
+  - Rewind modal shows changed files with expandable git diffs and line stats
+  - File checkpointing and `resumeSessionAt` integration with Claude SDK
+  - Works on both active and idle sessions via temporary query
 - Add copy button to code blocks
 
 ## v1.2.9
