@@ -92,91 +92,63 @@ html, body {
   border: none;
 }
 
-#sidebar-header {
+#sidebar-nav {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: calc(var(--safe-top) + 16px) 16px 12px;
+  padding: calc(var(--safe-top) + 12px) 8px 4px;
 }
 
-.sidebar-header-top {
+.sidebar-nav-row {
   display: flex;
   align-items: center;
-  gap: 10px;
 }
 
-.sidebar-header-top .sidebar-title { flex: 1; }
+.sidebar-nav-row #new-session-btn {
+  flex: 1;
+  min-width: 0;
+}
 
-
-#sidebar-toggle-btn {
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
+#sidebar-nav button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
   border: none;
   background: transparent;
   color: var(--text-secondary);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.15s, color 0.15s;
-  flex-shrink: 0;
-}
-
-#sidebar-toggle-btn .lucide {
-  width: 18px;
-  height: 18px;
-}
-
-#sidebar-toggle-btn:hover {
-  background: var(--sidebar-hover);
-  color: var(--text);
-}
-
-.sidebar-title {
-  font-weight: 600;
-  font-size: 13px;
-  color: var(--text-muted);
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-}
-
-.sidebar-header-buttons {
-  display: flex;
-  gap: 8px;
-}
-
-#new-session-btn, #resume-session-btn {
-  flex: 1;
-  min-width: 0;
-  height: 36px;
-  border-radius: 8px;
-  border: 1px solid var(--border-subtle);
-  background: transparent;
-  color: var(--text-secondary);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
   font-family: inherit;
-  font-size: 13px;
-  font-weight: 500;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
-  white-space: nowrap;
-  overflow: hidden;
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
 }
 
-#new-session-btn .lucide, #resume-session-btn .lucide {
+#sidebar-nav button .lucide {
   width: 16px;
   height: 16px;
   flex-shrink: 0;
 }
 
-#new-session-btn:hover, #resume-session-btn:hover {
+#sidebar-nav button:hover {
   background: var(--sidebar-hover);
   color: var(--text);
-  border-color: var(--border);
+}
+
+#sidebar-toggle-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#sidebar-toggle-btn .lucide {
+  width: 18px;
+  height: 18px;
 }
 
 #session-list {
@@ -334,6 +306,11 @@ html, body {
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+.footer-mascot {
+  flex-shrink: 0;
+  border-radius: 3px;
 }
 
 .footer-version {
