@@ -272,6 +272,7 @@ html, body {
 @media (hover: none) {
   .session-more-btn { display: flex; }
   .msg-copy-hint { opacity: 1; }
+  .msg-user[data-uuid] .bubble::after { display: none; }
 }
 
 #sidebar-footer {
@@ -1113,6 +1114,18 @@ html, body {
   transition: background 0.15s;
 }
 
+.notif-option > span:first-child {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notif-option > span:first-child .lucide {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
 .notif-option:hover { background: rgba(255, 255, 255, 0.03); }
 .notif-option input { display: none; }
 
@@ -1885,13 +1898,36 @@ pre:hover .code-copy-btn { opacity: 1; }
 .msg-user[data-uuid] .bubble {
   cursor: pointer;
   transition: box-shadow 0.2s;
+  position: relative;
 }
 
 .msg-user[data-uuid] .bubble:hover {
   box-shadow: 0 0 0 1.5px var(--text-dimmer);
 }
 
+.msg-user[data-uuid] .bubble::after {
+  content: "Click to rewind";
+  position: absolute;
+  bottom: -22px;
+  right: 0;
+  font-size: 11px;
+  color: var(--text-dimmer);
+  opacity: 0;
+  transition: opacity 0.15s;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.msg-user[data-uuid] .bubble:hover::after {
+  opacity: 1;
+}
+
 /* --- Rewind mode (timeline visible, strong markers) --- */
+#app.rewind-mode .msg-user[data-uuid] .bubble::after {
+  content: "Rewind to here";
+  color: var(--accent);
+}
+
 #app.rewind-mode .msg-user[data-uuid] .bubble {
   box-shadow: 0 0 0 2px var(--accent);
 }
@@ -2387,16 +2423,167 @@ pre:hover .code-copy-btn { opacity: 1; }
 
 .bubble-img:hover { opacity: 0.85; }
 
+/* --- Pasted content chips (in chat bubble) --- */
+.bubble-pastes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.bubble-pastes:last-child { margin-bottom: 0; }
+
+.bubble-paste {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  max-width: 220px;
+}
+
+.bubble-paste:hover {
+  border-color: var(--text-dimmer);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.bubble-paste-preview {
+  font-size: 12px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.bubble-paste-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-dimmer);
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+}
+
+/* --- Pasted content chips (input preview) --- */
+.pasted-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-size: 12px;
+  max-width: 200px;
+}
+
+.pasted-chip-preview {
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.pasted-chip-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-dimmer);
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+}
+
+.pasted-chip-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.pasted-chip-remove .lucide { width: 12px; height: 12px; }
+.pasted-chip-remove:hover { color: var(--text); background: rgba(255, 255, 255, 0.1); }
+
+/* --- Paste viewer modal --- */
+#paste-modal { position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; }
+#paste-modal.hidden { display: none; }
+
+.paste-modal-dialog {
+  max-width: 620px;
+  width: 94%;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+.paste-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+
+.paste-modal-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.paste-modal-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  transition: color 0.15s, background 0.15s;
+}
+
+.paste-modal-close:hover { color: var(--text); background: rgba(255, 255, 255, 0.06); }
+
+.paste-modal-body {
+  margin: 0;
+  padding: 16px 20px;
+  font-family: "SF Mono", Menlo, Monaco, monospace;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-y: auto;
+  min-height: 0;
+}
+
 /* --- Image preview bar --- */
 #image-preview-bar {
   display: none;
-  padding: 8px 0 4px;
+  width: 100%;
+  padding: 6px 0 4px;
 }
 
 #image-preview-bar.visible {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
 }
 
 .image-preview-thumb {
@@ -2405,11 +2592,11 @@ pre:hover .code-copy-btn { opacity: 1; }
 }
 
 .image-preview-thumb img {
-  width: 56px;
-  height: 56px;
+  width: 48px;
+  height: 48px;
   object-fit: cover;
-  border-radius: 10px;
-  border: 1px solid var(--border);
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
 }
 
 .image-preview-remove {
@@ -2454,12 +2641,18 @@ pre:hover .code-copy-btn { opacity: 1; }
 
 #input-row {
   display: flex;
-  align-items: flex-end;
+  flex-direction: column;
   background: var(--input-bg);
   border: 1px solid var(--border);
   border-radius: 24px;
   padding: 6px 6px 6px 20px;
   transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+#input-inner {
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
 }
 
 #input-row:focus-within {
