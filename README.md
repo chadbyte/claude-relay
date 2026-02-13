@@ -109,11 +109,11 @@ npx claude-relay --debug      # debug panel
 
 ## Security
 
-**Anyone with the URL gets full Claude Code access to your machine.** Read, write, execute — your user permissions.
+claude-relay only listens on your local network. It is not accessible from the internet unless you explicitly expose it.
 
-PIN protection is enabled during setup — every new device must enter the PIN shown in your terminal before accessing any session. This prevents casual shoulder-surfing of the QR code, but is not a substitute for network-level security.
+Within your network, anyone with the URL and PIN can access your Claude Code session with your user permissions. PIN protection is enabled during setup — every new device must enter the PIN shown in your terminal before connecting.
 
-Private network only. [Tailscale](https://tailscale.com), WireGuard, or a VPN. Never expose to the public internet.
+For remote access, use [Tailscale](https://tailscale.com), WireGuard, or a VPN. Never expose to the public internet.
 
 **Entirely at your own risk.**
 

@@ -2,6 +2,34 @@
 
 ## WIP
 
+- Add Ctrl+J shortcut to insert newline in input (matches Claude CLI behavior)
+- Add QR code button in header to share current URL with click-to-copy
+
+## v1.5.0
+
+- Refactor monolithic codebase into modules
+  - app.js 3,258 → 1,090 lines (8 client modules)
+  - server.js 2,035 → 704 lines (3 server modules)
+  - style.css 3,005 → 7 lines (7 CSS files)
+- Push notification titles now show context ("Claude wants to edit auth.ts" instead of just "Edit")
+- Auto-resize images >5 MB to JPEG before sending (iPhone screenshots)
+- Add mermaid.js diagram rendering with expandable modal viewer and PNG export
+- Move TLS certs from per-project to `~/.claude-relay/certs` with auto-migration
+- Re-generate certs when current IP is not in SAN
+- Add toast notification system and clipboard fallback for HTTP contexts
+- Use grayscale mascot for PWA app icon
+
+## v1.4.0
+
+- Pasted content feature: long text (≥500 chars) shows as compact "PASTED" chip with modal viewer on click
+- Image previews now render inside the input box (Claude-style)
+- Rewindable user messages show "Click to rewind" hint on hover
+- Copy resume command moved to session context menu (⋯ button)
+- Notification menu: added icons to toggle labels, removed resume button
+- Security: shell injection fix (execFileSync), secure cookie flag, session I/O try/catch
+- Fix session rename persistence
+- Fix sending paste/image-only messages without text
+
 ## v1.3.0
 
 - Consolidate notification bell and terminal button into unified settings panel

@@ -74,6 +74,13 @@
             </label>
           </div>
         </div>
+        <button id="qr-btn" title="QR Code"><i data-lucide="qr-code"></i></button>
+        <div id="qr-overlay" class="hidden">
+          <div id="qr-overlay-inner">
+            <div id="qr-canvas"></div>
+            <div id="qr-url"></div>
+          </div>
+        </div>
         <div id="notif-menu-wrap">
           <button id="notif-btn" title="Notifications"><i data-lucide="sliders-horizontal"></i></button>
           <div id="notif-menu" class="hidden">
@@ -216,6 +223,7 @@
 <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/highlight.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 <script type="module" src="/app.js"></script>
 </body>
 </html>
