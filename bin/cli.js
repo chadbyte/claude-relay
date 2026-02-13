@@ -11,6 +11,7 @@ const args = process.argv.slice(2);
 let port = 2633;
 let useHttps = true;
 let skipUpdate = false;
+let debugMode = false;
 
 for (let i = 0; i < args.length; i++) {
   if (args[i] === "-p" || args[i] === "--port") {
@@ -24,13 +25,16 @@ for (let i = 0; i < args.length; i++) {
     useHttps = false;
   } else if (args[i] === "--no-update" || args[i] === "--skip-update") {
     skipUpdate = true;
+  } else if (args[i] === "--debug") {
+    debugMode = true;
   } else if (args[i] === "-h" || args[i] === "--help") {
-    console.log("Usage: claude-relay [-p|--port <port>] [--no-https] [--no-update]");
+    console.log("Usage: claude-relay [-p|--port <port>] [--no-https] [--no-update] [--debug]");
     console.log("");
     console.log("Options:");
     console.log("  -p, --port <port>  Port to listen on (default: 2633)");
     console.log("  --no-https         Disable HTTPS (enabled by default via mkcert)");
     console.log("  --no-update        Skip auto-update check on startup");
+    console.log("  --debug            Enable debug panel in the web UI");
     process.exit(0);
   }
 }
@@ -329,6 +333,250 @@ async function findAvailablePort(startPort) {
   return null;
 }
 
+// --- Detect tools ---
+function getTailscaleIP() {
+  var interfaces = os.networkInterfaces();
+  for (var name in interfaces) {
+    if (/^(tailscale|utun)/.test(name)) {
+      for (var i = 0; i < interfaces[name].length; i++) {
+        var addr = interfaces[name][i];
+        if (addr.family === "IPv4" && !addr.internal && addr.address.startsWith("100.")) {
+          return addr.address;
+        }
+      }
+    }
+  }
+  for (var addrs of Object.values(interfaces)) {
+    for (var j = 0; j < addrs.length; j++) {
+      if (addrs[j].family === "IPv4" && !addrs[j].internal && addrs[j].address.startsWith("100.")) {
+        return addrs[j].address;
+      }
+    }
+  }
+  return null;
+}
+
+function hasTailscale() {
+  return getTailscaleIP() !== null;
+}
+
+function hasMkcert() {
+  try {
+    execSync("mkcert -CAROOT", { stdio: "pipe", encoding: "utf8" });
+    return true;
+  } catch (e) { return false; }
+}
+
+// --- Re-check / back key listener ---
+function listenForKey(keys, callback) {
+  if (!process.stdin.isTTY) return;
+  process.stdin.setRawMode(true);
+  process.stdin.resume();
+  process.stdin.setEncoding("utf8");
+
+  var handler = function (ch) {
+    var lower = ch.toLowerCase();
+    if (ch === "\x03") { process.exit(0); return; }
+    if (keys[lower]) {
+      process.stdin.setRawMode(false);
+      process.stdin.pause();
+      process.stdin.removeListener("data", handler);
+      keys[lower]();
+    }
+  };
+  process.stdin.on("data", handler);
+}
+
+// --- Post-startup setup guide ---
+function showSetupGuide(serverIP, httpPort, httpsPort, showMainView) {
+  var wantRemote = false;
+  var wantPush = false;
+
+  function redraw(renderFn) {
+    console.clear();
+    printLogo();
+    log("");
+    log(sym.pointer + "  " + a.bold + "Setup Guide" + a.reset);
+    log(sym.bar);
+    if (wantRemote) log(sym.done + "  Access from outside your network? " + a.dim + "·" + a.reset + " " + a.green + "Yes" + a.reset);
+    else log(sym.done + "  Access from outside your network? " + a.dim + "· No" + a.reset);
+    log(sym.bar);
+    if (wantPush) log(sym.done + "  Want push notifications? " + a.dim + "·" + a.reset + " " + a.green + "Yes" + a.reset);
+    else log(sym.done + "  Want push notifications? " + a.dim + "· No" + a.reset);
+    log(sym.bar);
+    renderFn();
+  }
+
+  log("");
+  log(sym.pointer + "  " + a.bold + "Setup Guide" + a.reset);
+  log(sym.bar);
+
+  promptToggle("Access from outside your network?", "Requires Tailscale on both devices", false, function (remote) {
+    wantRemote = remote;
+    log(sym.bar);
+    promptToggle("Want push notifications?", "Requires HTTPS (mkcert certificate)", false, function (push) {
+      wantPush = push;
+      log(sym.bar);
+      afterToggles();
+    });
+  });
+
+  function showSetupQR() {
+    var tsIP = getTailscaleIP();
+    var setupUrl = "http://" + (tsIP || serverIP) + ":" + httpPort + "/setup";
+    log(sym.pointer + "  " + a.bold + "Continue on your device" + a.reset);
+    log(sym.bar + "  " + a.dim + "Scan the QR code or open:" + a.reset);
+    log(sym.bar + "  " + a.bold + setupUrl + a.reset);
+    log(sym.bar);
+    qrcode.generate(setupUrl, { small: true }, function (code) {
+      var lines = code.split("\n").map(function (l) { return "  " + sym.bar + "  " + l; }).join("\n");
+      console.log(lines);
+      log(sym.bar);
+      log(sym.bar + "  " + a.dim + "Can't connect?" + a.reset);
+      if (tsIP) {
+        log(sym.bar + "  " + a.dim + "Make sure Tailscale is installed on your phone too." + a.reset);
+      } else {
+        log(sym.bar + "  " + a.dim + "Your phone must be on the same Wi-Fi network." + a.reset);
+      }
+      log(sym.bar);
+      log(sym.done + "  " + a.dim + "Server setup complete." + a.reset);
+      log(sym.end);
+      log("");
+      listenForBackKey(showMainView);
+    });
+  }
+
+  function afterToggles() {
+    if (!wantRemote && !wantPush) {
+      log(sym.done + "  " + a.green + "All set!" + a.reset + a.dim + " · No additional setup needed." + a.reset);
+      log(sym.end);
+      log("");
+      listenForBackKey(showMainView);
+      return;
+    }
+    if (wantRemote) {
+      renderTailscale();
+    } else {
+      renderHttps();
+    }
+  }
+
+  function renderTailscale() {
+    var tsReady = hasTailscale();
+    var tsIP = tsReady ? getTailscaleIP() : null;
+
+    log(sym.pointer + "  " + a.bold + "Tailscale Setup" + a.reset);
+    if (tsReady && tsIP) {
+      log(sym.bar + "  " + a.green + "Tailscale is running" + a.reset + a.dim + " · " + tsIP + a.reset);
+      log(sym.bar);
+      log(sym.bar + "  On your phone/tablet:");
+      log(sym.bar + "  " + a.dim + "1. Install Tailscale (App Store / Google Play)" + a.reset);
+      log(sym.bar + "  " + a.dim + "2. Sign in with the same account" + a.reset);
+      log(sym.bar);
+      renderHttps();
+    } else if (tsReady) {
+      log(sym.bar + "  " + a.yellow + "Tailscale is installed but no IP found." + a.reset);
+      log(sym.bar + "  " + a.dim + "Run: tailscale up" + a.reset);
+      log(sym.bar);
+      log(sym.bar + "  " + a.dim + "Press " + a.reset + "r" + a.dim + " to re-check, " + a.reset + "h" + a.dim + " to go back." + a.reset);
+      log(sym.end);
+      log("");
+      listenForKey({ r: function () { redraw(renderTailscale); }, h: showMainView });
+    } else {
+      log(sym.bar + "  " + a.yellow + "Tailscale not found on this machine." + a.reset);
+      log(sym.bar + "  " + a.dim + "Install: https://tailscale.com/download" + a.reset);
+      log(sym.bar + "  " + a.dim + "Then run: tailscale up" + a.reset);
+      log(sym.bar);
+      log(sym.bar + "  On your phone/tablet:");
+      log(sym.bar + "  " + a.dim + "1. Install Tailscale (App Store / Google Play)" + a.reset);
+      log(sym.bar + "  " + a.dim + "2. Sign in with the same account" + a.reset);
+      log(sym.bar);
+      log(sym.bar + "  " + a.dim + "Press " + a.reset + "r" + a.dim + " to re-check, " + a.reset + "h" + a.dim + " to go back." + a.reset);
+      log(sym.end);
+      log("");
+      listenForKey({ r: function () { redraw(renderTailscale); }, h: showMainView });
+    }
+  }
+
+  function renderHttps() {
+    if (!wantPush) {
+      showSetupQR();
+      return;
+    }
+
+    var mcReady = hasMkcert();
+    var tsIP = getTailscaleIP();
+    log(sym.pointer + "  " + a.bold + "HTTPS Setup (for push notifications)" + a.reset);
+    if (mcReady) {
+      log(sym.bar + "  " + a.green + "mkcert is installed" + a.reset);
+      log(sym.bar);
+      showSetupQR();
+    } else {
+      log(sym.bar + "  " + a.yellow + "mkcert not found." + a.reset);
+      log(sym.bar + "  " + a.dim + "Install: brew install mkcert && mkcert -install" + a.reset);
+      log(sym.bar);
+      log(sym.bar + "  " + a.dim + "Press " + a.reset + "r" + a.dim + " to re-check, " + a.reset + "h" + a.dim + " to go back." + a.reset);
+      log(sym.end);
+      log("");
+      listenForKey({ r: function () { redraw(renderHttps); }, h: showMainView });
+    }
+  }
+}
+
+function listenForSetupKey(serverIP, httpPort, httpsPort, showMainView) {
+  if (!process.stdin.isTTY) return;
+  var bc = a.dim;
+  var rc = a.reset;
+  var msg1 = "Access from your phone or get notified when Claude is done?";
+  var msg2 = "Press " + a.cyan + a.bold + "s" + rc + " to set up.";
+  var w = msg1.length + 4;
+  var pad2 = " ".repeat(msg1.length - 18);
+  log(bc + "┌" + "─".repeat(w) + "┐" + rc);
+  log(bc + "│  " + rc + msg1 + bc + "  │" + rc);
+  log(bc + "│  " + rc + msg2 + pad2 + bc + "  │" + rc);
+  log(bc + "└" + "─".repeat(w) + "┘" + rc);
+  log("");
+
+  process.stdin.setRawMode(true);
+  process.stdin.resume();
+  process.stdin.setEncoding("utf8");
+
+  process.stdin.on("data", function onKey(ch) {
+    if (ch === "s" || ch === "S") {
+      process.stdin.setRawMode(false);
+      process.stdin.pause();
+      process.stdin.removeListener("data", onKey);
+      console.clear();
+      printLogo();
+      log("");
+      showSetupGuide(serverIP, httpPort, httpsPort, showMainView);
+    } else if (ch === "\x03") {
+      process.exit(0);
+    }
+  });
+}
+
+function listenForBackKey(showMainView) {
+  if (!process.stdin.isTTY) return;
+  log(a.dim + "Press " + a.reset + "h" + a.dim + " to go back." + a.reset);
+  log("");
+
+  process.stdin.setRawMode(true);
+  process.stdin.resume();
+  process.stdin.setEncoding("utf8");
+
+  process.stdin.on("data", function onBack(ch) {
+    if (ch === "h" || ch === "H") {
+      process.stdin.setRawMode(false);
+      process.stdin.pause();
+      process.stdin.removeListener("data", onBack);
+      showMainView();
+    } else if (ch === "\x03") {
+      process.exit(0);
+    }
+  });
+}
+
 // --- Server start ---
 async function start(pin) {
   var ip = getLocalIP();
@@ -362,7 +610,7 @@ async function start(pin) {
   }
   port = actualPort;
 
-  var result = createServer(cwd, tlsOptions, caRoot, pin, port);
+  var result = createServer(cwd, tlsOptions, caRoot, pin, port, debugMode);
   var entryServer = result.entryServer;
   var httpsServer = result.httpsServer;
 
@@ -380,9 +628,15 @@ async function start(pin) {
     httpsServer.listen(httpsPort);
   }
 
-  entryServer.listen(port, function () {
+  var hPort = httpsServer ? httpsPort : null;
+
+  function showMainView() {
     var project = path.basename(cwd);
     var url = "http://" + ip + ":" + port;
+
+    console.clear();
+    printLogo();
+    log("");
 
     if (ip !== "localhost") {
       qrcode.generate(url, { small: true }, function (code) {
@@ -392,13 +646,17 @@ async function start(pin) {
         log(a.bold + "Claude Relay" + a.reset + " running at " + a.bold + url + a.reset);
         log(a.dim + project + " · " + cwd + a.reset);
         log("");
+        listenForSetupKey(ip, port, hPort, showMainView);
       });
     } else {
       log(a.bold + "Claude Relay" + a.reset + " running at " + a.bold + url + a.reset);
       log(a.dim + project + " · " + cwd + a.reset);
       log("");
+      listenForSetupKey(ip, port, hPort, showMainView);
     }
-  });
+  }
+
+  entryServer.listen(port, showMainView);
 }
 
 const { checkAndUpdate } = require("../lib/updater");

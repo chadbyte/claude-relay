@@ -1,120 +1,121 @@
 # claude-relay
 
-Run `npx claude-relay` in any directory. Access Claude Code on that directory from any device.
+Claude Code on your phone with push notifications. One command, zero install.
 
 ![claude-relay demo](screenshot.gif)
 
-```
-$ cd ~/my-project
-$ npx claude-relay
+You start a long task in Claude Code. You step away. Claude needs permission to edit a file. It waits. You come back 30 minutes later to a stalled session.
 
-  ◆  Claude Relay
-  │
-  ▲  READ BEFORE CONTINUING
-  │
-  │  Anyone with access to the URL gets full Claude Code access
-  │  to this machine, including reading, writing, and executing
-  │  files with your user permissions.
-  │
-  ◆  PIN protection
-  │  6-digit PIN, or Enter to skip
-  │  ●●●●●●
-  ◇  PIN protection · Enabled
-  │
-  ◆  Keep awake
-  ◇  Keep awake · Yes
-  │
-  └  Starting relay...
-
-  Claude Relay running at http://100.64.1.5:2633
-  my-project · /Users/you/my-project
-```
-
-## Why?
-
-You can use Claude Code from the Claude app, but it requires a GitHub repo, runs in a sandboxed VM, and comes with limitations. No local tools, no custom skills, no access to your actual dev environment.
-
-**claude-relay** gives you the real thing. One command in any directory and you get full Claude Code on **your machine**, from any device. Your files, your tools, your skills, your environment. No GitHub required, no sandbox.
-
-## How it works
-
-claude-relay uses the [Claude Agent SDK](https://www.npmjs.com/package/@anthropic-ai/claude-agent-sdk) and bridges it to a web UI over WebSocket. Your browser talks to the relay, the relay talks to Claude Code. Sessions persist across reconnects.
+**claude-relay fixes this.** Run `npx claude-relay` and your phone gets push notifications when Claude needs you. Tap to approve. Claude keeps working. You keep living.
 
 ```
-Browser (any device)  <-->  claude-relay (your machine)  <-->  Claude Agent SDK
-        WebSocket                HTTP/HTTPS + WS
+npx claude-relay
 ```
+
+No app to install. No cloud server. No account to create. Your data stays on your machine.
+
+## Use Claude Code from your phone
+
+claude-relay runs on your machine and connects Claude Code to a web UI over WebSocket. Open the URL on your phone, add it to your home screen, and you get push notifications whenever Claude needs input.
+
+Sessions are real-time synced across all connected devices. Type on your PC, see it on your phone. Approve on your phone, see it on your PC. Everything is live.
+
+```
+Your phone/tablet  <-->  claude-relay (your machine)  <-->  Claude Code
+     browser               WebSocket + HTTPS
+```
+
+## Push notifications for Claude Code
+
+Get notified on your phone when Claude needs approval, finishes a task, or hits an error. Works even when the browser is closed. Tap the notification to jump straight in.
+
+No app required. Add to your home screen and notifications work like a native app (PWA). The built-in setup wizard walks you through it in 3 steps.
+
+## Approve Claude Code permissions remotely
+
+Kick off a refactoring task, go make coffee. Your phone buzzes: "Claude wants to edit `src/auth.ts`". Tap approve. Claude continues. No need to walk back to your desk.
+
+Running tests, migrations, or multi-file changes? Watch the progress from your phone or tablet without staying at your desk.
+
+## Claude Code on iPad and tablets
+
+Full Claude Code access from any browser. No SSH terminal app, no GitHub repo required, no sandboxed VM. Your actual dev environment, your tools, your MCP servers, your CLAUDE.md, your files.
+
+## Session handoff between CLI and browser
+
+Start a session in the terminal. Pick it up on your phone. Hand it back to the terminal. Sessions survive server restarts, browser closes, and reconnects. Your conversation is never lost.
+
+## Run Claude Code remotely with Tailscale
+
+To access Claude Code from outside your local network, use [Tailscale](https://tailscale.com). Install it on your machine and your phone, sign in with the same account, and you are connected. claude-relay detects Tailscale automatically.
+
+Tailscale creates a private encrypted tunnel between your devices. No port forwarding, no cloud relay, no data leaving your control.
 
 ## Features
 
-- **One command** — `npx claude-relay` and you're live
-- **Mobile-first UI** — designed for phones and tablets, works everywhere
-- **HTTPS** — automatic TLS via [mkcert](https://github.com/FiloSottile/mkcert), enabled by default
-- **PIN protection** — optional 6-digit PIN set at startup
-- **Permission control** — tool approval relayed to the browser (Allow / Allow for Session / Deny)
-- **Multi-session** — run multiple Claude Code sessions, switch between them
-- **Multi-device sync** — input, messages, and state sync across connected devices in real-time
-- **Streaming** — real-time token streaming, tool execution, thinking blocks
-- **Session persistence** — sessions survive server restarts and reconnects
-- **Tailscale-aware** — prefers Tailscale IP for secure remote access
-- **Slash commands** — full slash command support with autocomplete
-- **Keep awake** — optional macOS caffeinate to prevent sleep while running
-- **Zero config** — no API keys, no setup. Uses your local `claude` installation
+- **Push notifications** on permission requests, task completion, and errors
+- **Real-time sync** across all connected devices via WebSocket
+- **Session persistence** across server restarts and reconnects
+- **Mobile-first UI** with big tap targets for approve/deny
+- **Setup wizard** guides you through Tailscale, HTTPS, and push setup
+- **Multi-session** support with automatic port selection
+- **PIN protection** for access control
+- **HTTPS** via mkcert, automatic certificate generation
+- **Slash commands** with autocomplete
+- **Zero config** uses your local Claude Code installation as-is
 
-## Requirements
-
-- [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) installed and authenticated
-- Node.js 18+
-- [mkcert](https://github.com/FiloSottile/mkcert) (optional, for HTTPS)
-
-## Install
+## Quick start
 
 ```bash
-# Run directly (no install needed)
-npx claude-relay@latest
-```
-
-## Usage
-
-```bash
-# Start in current directory
+# 1. Run in your project directory
 npx claude-relay
 
-# Custom port (default: 2633)
-npx claude-relay -p 8080
+# 2. Scan the QR code with your phone
+#    or open the URL shown in the terminal
 
-# Disable HTTPS
-npx claude-relay --no-https
+# 3. Press 's' for the setup wizard
+#    to enable push notifications and remote access
 ```
 
-Then open the URL on any device connected to the same network, or scan the QR code shown in the terminal.
+## HTTPS setup for push notifications
 
-### HTTPS setup
-
-HTTPS is enabled by default when [mkcert](https://github.com/FiloSottile/mkcert) is installed. To set it up:
+Push notifications require HTTPS. claude-relay supports automatic HTTPS via [mkcert](https://github.com/FiloSottile/mkcert):
 
 ```bash
 brew install mkcert
 mkcert -install
 ```
 
-claude-relay will automatically generate certificates on first run. If mkcert is not installed, it falls back to HTTP.
+Certificates are generated automatically on first run. The setup wizard checks for mkcert and guides you if it is missing.
 
-### Remote access with Tailscale
+## CLI options
 
-claude-relay automatically detects [Tailscale](https://tailscale.com) and uses your Tailscale IP. Install Tailscale on your machine and phone, and you can access Claude Code from anywhere.
+```bash
+npx claude-relay              # Start with defaults
+npx claude-relay -p 8080      # Custom port (default: 2633)
+npx claude-relay --no-https   # Disable HTTPS
+npx claude-relay --no-update  # Skip auto-update check
+npx claude-relay --debug      # Enable debug panel
+```
+
+## Requirements
+
+- [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) installed and authenticated
+- Node.js 18+
+- [mkcert](https://github.com/FiloSottile/mkcert) (for HTTPS and push notifications)
+- [Tailscale](https://tailscale.com) (for remote access outside your network)
+
+## Security
+
+**Anyone with access to the URL gets full Claude Code access to your machine**, including reading, writing, and executing files with your user permissions.
+
+Use a private network. We strongly recommend [Tailscale](https://tailscale.com), WireGuard, or a VPN. PIN protection adds a layer of access control but is not a substitute for network-level security. Do not expose claude-relay to the public internet.
+
+**Entirely at your own risk.** The authors assume no responsibility for any damage, data loss, or security incidents.
 
 ## Issues
 
 Found a bug or have a feature request? [Open an issue](https://github.com/chadbyte/claude-relay/issues).
-
-## Security
-
-**Anyone with access to the URL gets full Claude Code access to your machine**, including reading, writing, and executing files with your user permissions. PIN protection adds a layer of access control, but is not a substitute for network-level security.
-
-We strongly recommend using a private network layer such as [Tailscale](https://tailscale.com), WireGuard, or a VPN. claude-relay automatically detects Tailscale and prefers its IP for this reason.
-
-If you choose to expose it beyond your private network, that's your call. **Entirely at your own risk.** The authors assume no responsibility for any damage, data loss, or security incidents.
 
 ## Disclaimer
 

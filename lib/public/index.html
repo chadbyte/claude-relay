@@ -30,9 +30,18 @@
     </div>
     <div id="session-list"></div>
     <div id="sidebar-footer">
-      <a href="https://github.com/chadbyte/claude-relay" target="_blank" rel="noopener">
-        <i data-lucide="github"></i> GitHub
-      </a>
+      <button id="sidebar-footer-btn">
+        <span class="footer-btn-label"><i data-lucide="radio-tower" style="width:14px;height:14px"></i> Claude Relay <span id="footer-version" class="footer-version"></span></span>
+        <i data-lucide="ellipsis" style="width:14px;height:14px"></i>
+      </button>
+      <div id="sidebar-footer-menu" class="hidden">
+        <a class="sidebar-menu-item" href="https://github.com/chadbyte/claude-relay" target="_blank" rel="noopener">
+          <i data-lucide="github"></i> <span>GitHub</span>
+        </a>
+        <button class="sidebar-menu-item" id="footer-update-check">
+          <i data-lucide="refresh-cw"></i> <span>Check for updates</span>
+        </button>
+      </div>
     </div>
   </div>
   <div id="sidebar-overlay"></div>
@@ -42,9 +51,9 @@
       <button id="update-how" title="How to update">How to update</button>
       <button id="update-banner-close" aria-label="Dismiss"><i data-lucide="x"></i></button>
     </div>
-    <div id="https-banner" class="hidden">
-      <span class="https-banner-text"><i data-lucide="shield"></i> Your connection is not encrypted. <a id="https-banner-link" href="/setup">Set up HTTPS</a></span>
-      <button id="https-banner-close" aria-label="Dismiss"><i data-lucide="x"></i></button>
+    <div id="onboarding-banner" class="hidden">
+      <span class="onboarding-banner-text" id="onboarding-banner-text"></span>
+      <button id="onboarding-banner-close" aria-label="Dismiss"><i data-lucide="x"></i></button>
     </div>
     <div id="header">
       <div id="header-left">
@@ -53,6 +62,21 @@
         <span class="project-name" id="project-name">Connecting...</span>
       </div>
       <div class="status">
+        <div id="debug-menu-wrap" class="hidden">
+          <button id="debug-btn" title="Debug"><i data-lucide="bug"></i></button>
+          <div id="debug-menu" class="hidden">
+            <label class="notif-option">
+              <span>Update banner</span>
+              <input type="checkbox" id="debug-toggle-update">
+              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            </label>
+            <label class="notif-option">
+              <span>Onboarding banner</span>
+              <input type="checkbox" id="debug-toggle-onboarding">
+              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            </label>
+          </div>
+        </div>
         <div id="notif-menu-wrap">
           <button id="notif-btn" title="Notifications"><i data-lucide="sliders-horizontal"></i></button>
           <div id="notif-menu" class="hidden">

@@ -2,15 +2,26 @@
 
 ## WIP
 
+## v1.3.0
+
 - Consolidate notification bell and terminal button into unified settings panel
   - Push notifications toggle (HTTPS only, user-driven subscribe/unsubscribe)
   - Browser alerts and sound toggles
   - Copy resume command integrated into the panel
   - Replace bell icon with sliders icon
+- Add web push notifications for response completion, permission requests, questions, errors, and connection changes
+  - Rich previews with response text and tool details
+  - Subscription persistence with VAPID key rotation handling
+  - Auto-resubscribe on VAPID key change
+  - Suppress notifications when app is in foreground
+- Add multi-step setup wizard with platform detection, PWA install, and push enable
 - Add favicon I/O blink during processing
 - Replace session delete button with three-dots context menu
   - Rename sessions inline
   - Delete with confirmation
+- Replace sidebar footer GitHub link with app menu button
+  - Shows current version, GitHub link, and check for updates
+  - Manual update check with badge when new version available
 - Add rewind feature to restore files and conversation to a previous turn
   - Click any user message to preview rewind with file diffs
   - `/rewind` slash command toggles timeline scrollbar for quick navigation
@@ -18,6 +29,11 @@
   - File checkpointing and `resumeSessionAt` integration with Claude SDK
   - Works on both active and idle sessions via temporary query
 - Add copy button to code blocks
+- Add `--debug` flag with debug panel for connection diagnostics
+- Fix push notifications failing silently on iOS
+- Fix push notification body stuck on previous response content
+- Fix AskUserQuestion input staying disabled after switching sessions
+- Fix duplicate submit buttons for multi-question prompts
 
 ## v1.2.9
 
