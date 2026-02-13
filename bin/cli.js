@@ -3,7 +3,7 @@
 const os = require("os");
 const fs = require("fs");
 const path = require("path");
-const { execSync } = require("child_process");
+const { execSync, execFileSync } = require("child_process");
 const qrcode = require("qrcode-terminal");
 const { createServer } = require("../lib/server");
 
@@ -116,9 +116,20 @@ function startCaffeinate() {
 
 // --- Certs ---
 function ensureCerts(ip) {
-  var certDir = path.join(cwd, ".claude-relay", "certs");
+  var homeDir = process.env.HOME || process.env.USERPROFILE || os.homedir();
+  var certDir = path.join(homeDir, ".claude-relay", "certs");
   var keyPath = path.join(certDir, "key.pem");
   var certPath = path.join(certDir, "cert.pem");
+
+  // Migrate from legacy per-project certs to shared home dir
+  var legacyDir = path.join(cwd, ".claude-relay", "certs");
+  var legacyKey = path.join(legacyDir, "key.pem");
+  var legacyCert = path.join(legacyDir, "cert.pem");
+  if (!fs.existsSync(keyPath) && fs.existsSync(legacyKey) && fs.existsSync(legacyCert)) {
+    fs.mkdirSync(certDir, { recursive: true });
+    fs.copyFileSync(legacyKey, keyPath);
+    fs.copyFileSync(legacyCert, certPath);
+  }
 
   var caRoot = null;
   try {
@@ -130,7 +141,15 @@ function ensureCerts(ip) {
   } catch (e) { }
 
   if (fs.existsSync(keyPath) && fs.existsSync(certPath)) {
-    return { key: keyPath, cert: certPath, caRoot: caRoot };
+    // Re-generate if current IP is not in the cert's SAN
+    var needRegen = false;
+    if (ip && ip !== "localhost") {
+      try {
+        var certText = execFileSync("openssl", ["x509", "-in", certPath, "-text", "-noout"], { encoding: "utf8" });
+        if (certText.indexOf(ip) === -1) needRegen = true;
+      } catch (e) { /* openssl not available, skip check */ }
+    }
+    if (!needRegen) return { key: keyPath, cert: certPath, caRoot: caRoot };
   }
 
   fs.mkdirSync(certDir, { recursive: true });

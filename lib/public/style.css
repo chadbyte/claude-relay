@@ -72,6 +72,31 @@ html, body {
   height: 100dvh;
 }
 
+/* --- Toast --- */
+.toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  background: var(--bg-alt);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 500;
+  z-index: 400;
+  opacity: 0;
+  transition: opacity 0.2s, transform 0.2s;
+  pointer-events: none;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
 /* ==========================================================================
    Sidebar
    ========================================================================== */
@@ -273,6 +298,7 @@ html, body {
   .session-more-btn { display: flex; }
   .msg-copy-hint { opacity: 1; }
   .msg-user[data-uuid] .bubble::after { display: none; }
+  .mermaid-diagram::after { display: none; }
 }
 
 #sidebar-footer {
@@ -1429,6 +1455,124 @@ pre:hover .code-copy-btn { opacity: 1; }
 .md-content th {
   background: rgba(255, 255, 255, 0.04);
   font-weight: 600;
+}
+
+/* --- Mermaid Diagrams --- */
+.mermaid-diagram {
+  margin: 14px 0;
+  padding: 16px;
+  background: var(--code-bg);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  overflow-x: auto;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  position: relative;
+}
+
+.mermaid-diagram:hover {
+  border-color: var(--text-dimmer);
+}
+
+.mermaid-diagram::after {
+  content: "Click to expand";
+  position: absolute;
+  bottom: 6px;
+  right: 12px;
+  font-size: 11px;
+  color: var(--text-dimmer);
+  opacity: 0;
+  transition: opacity 0.15s;
+  pointer-events: none;
+}
+
+.mermaid-diagram:hover::after {
+  opacity: 1;
+}
+
+.mermaid-diagram svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.mermaid-error-hint {
+  font-size: 12px;
+  color: var(--error);
+  padding: 4px 18px 8px;
+  font-style: italic;
+}
+
+pre.mermaid-error {
+  border-color: rgba(229, 83, 75, 0.25);
+}
+
+/* --- Mermaid Viewer Modal --- */
+#mermaid-modal { position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; }
+#mermaid-modal.hidden { display: none; }
+#mermaid-modal .confirm-backdrop { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(0, 0, 0, 0.7); }
+
+.mermaid-modal-dialog {
+  position: relative;
+  z-index: 1;
+  width: 94vw;
+  max-width: 1200px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+}
+
+.mermaid-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+
+.mermaid-modal-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.mermaid-modal-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.mermaid-modal-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  transition: color 0.15s, background 0.15s;
+}
+
+.mermaid-modal-btn:hover { color: var(--text); background: rgba(255, 255, 255, 0.06); }
+
+.mermaid-modal-body {
+  padding: 24px;
+  overflow: auto;
+  min-height: 0;
+  text-align: center;
+  flex: 1;
+}
+
+.mermaid-modal-body svg {
+  max-width: 100%;
+  height: auto;
+  max-height: 75vh;
 }
 
 /* ==========================================================================
