@@ -1,6 +1,10 @@
 # claude-relay
 
-Claude Code on your phone. Push notifications. Zero install.
+<p align="center">
+  <img src="media/phone.gif" alt="claude-relay on phone" width="300">
+</p>
+
+<h3 align="center">Claude Code on your phone. Push notifications. Zero install.</h3>
 
 [![npm](https://img.shields.io/npm/v/claude-relay)](https://www.npmjs.com/package/claude-relay) [![downloads](https://img.shields.io/npm/dw/claude-relay)](https://www.npmjs.com/package/claude-relay)
 
@@ -14,18 +18,9 @@ You step away. Claude Code stops.
 
 **claude-relay fixes this.** Your phone buzzes when Claude needs you. Tap approve. Claude keeps working. You keep doing whatever you were doing.
 
-```
-npx claude-relay
-```
-
 No app. No cloud. No account. Your code never touches a third-party server.
 
 Runs a Claude Code session on your machine via the [Claude Agent SDK](https://www.npmjs.com/package/@anthropic-ai/claude-agent-sdk) and streams it to your browser over WebSocket. Nothing is proxied through external servers.
-
----
-
-![claude-relay hero demo](media/hero.gif)
-<!-- Terminal runs npx claude-relay. QR code appears. Phone scans it — Claude Code opens in the browser, live. Claude starts writing files. The phone screen updates in real time. A permission prompt pops up. The phone buzzes. Tap approve. Claude continues. -->
 
 ---
 
@@ -35,21 +30,15 @@ Permission request. Task done. Error. Question. Your phone buzzes. Browser can b
 
 Add to home screen → PWA → push notifications work like a native app. Setup wizard handles everything.
 
-![push notification demo](media/push-notification.gif)
-<!-- Phone lock screen. A notification slides down: "claude-relay — Claude wants to run npm test". Tap. The app opens. Approve button, full screen, one tap. Done. -->
+<p align="center">
+  <img src="media/push-notification.jpg" alt="push notification" width="300">
+</p>
 
-## Approve permissions from your phone
+## Use Claude Code from any device
 
-Kick off a refactoring. Go make coffee. Your phone buzzes:
+Open claude-relay on your phone, tablet, or any browser. Type a prompt, watch Claude work, review code — all in real time. Every connected device sees the same session live.
 
-> "Claude wants to edit `src/auth.ts`"
-
-Tap. Approved. Claude continues. You never left the kitchen.
-
-Every connected device sees the same session, live. Approve from any device and every other device updates instantly.
-
-![remote approve demo](media/remote-approve.gif)
-<!-- Split screen: left is VS Code with terminal paused at a permission prompt. Right is a phone showing the same prompt. Phone taps approve. Left side immediately resumes — Claude starts writing code again. Both screens move together. -->
+Permission prompt? Approve from whichever device is closest. The session updates everywhere instantly.
 
 ## Quick start
 
@@ -62,8 +51,9 @@ npx claude-relay
 # Press 's' → setup wizard → push + remote access in 3 steps
 ```
 
-![quick start demo](media/quick-start.gif)
-<!-- Terminal shows the setup wizard. Step 1: "Tailscale detected ✓". Step 2: "Add to home screen" with a diagram. Step 3: "Enable notifications" — browser permission popup, allow. "Setup complete." -->
+<p align="center">
+  <img src="media/start.gif" alt="npx claude-relay" width="600">
+</p>
 
 ## All features
 
@@ -127,9 +117,9 @@ Private network only. [Tailscale](https://tailscale.com), WireGuard, or a VPN. N
 
 **Entirely at your own risk.**
 
-## Issues
+## Contributing
 
-Bug or feature request? [Open an issue](https://github.com/chadbyte/claude-relay/issues).
+Bug fixes and typos — PR welcome. Feature ideas — [open an issue](https://github.com/chadbyte/claude-relay/issues) first. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Disclaimer
 
