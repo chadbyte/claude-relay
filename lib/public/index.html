@@ -123,24 +123,24 @@
 </div>
 
 <div id="paste-modal" class="hidden">
-  <div class="confirm-backdrop" onclick="document.getElementById('paste-modal').classList.add('hidden')"></div>
+  <div class="confirm-backdrop"></div>
   <div class="confirm-dialog paste-modal-dialog">
     <div class="paste-modal-header">
       <span class="paste-modal-title">Pasted content</span>
-      <button class="paste-modal-close" onclick="document.getElementById('paste-modal').classList.add('hidden')"><i data-lucide="x" style="width:16px;height:16px"></i></button>
+      <button class="paste-modal-close"><i data-lucide="x" style="width:16px;height:16px"></i></button>
     </div>
     <pre class="paste-modal-body" id="paste-modal-body"></pre>
   </div>
 </div>
 
 <div id="mermaid-modal" class="hidden">
-  <div class="confirm-backdrop" onclick="closeMermaidModal()"></div>
+  <div class="confirm-backdrop"></div>
   <div class="mermaid-modal-dialog">
     <div class="mermaid-modal-header">
       <span class="mermaid-modal-title">Diagram</span>
       <div class="mermaid-modal-actions">
         <button class="mermaid-modal-btn" id="mermaid-download-btn" title="Download PNG"><i data-lucide="download" style="width:16px;height:16px"></i></button>
-        <button class="mermaid-modal-btn" onclick="closeMermaidModal()" title="Close"><i data-lucide="x" style="width:16px;height:16px"></i></button>
+        <button class="mermaid-modal-btn" title="Close"><i data-lucide="x" style="width:16px;height:16px"></i></button>
       </div>
     </div>
     <div class="mermaid-modal-body" id="mermaid-modal-body"></div>
@@ -216,6 +216,6 @@
 <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/highlight.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
-<script src="/app.js"></script>
+<script type="module" src="/app.js"></script>
 </body>
 </html>
