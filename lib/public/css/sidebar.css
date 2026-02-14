@@ -29,36 +29,8 @@
   align-items: center;
 }
 
-.sidebar-nav-row #new-session-btn {
-  flex: 1;
-  min-width: 0;
-}
-
-#sidebar-nav button {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  border-radius: 10px;
-  border: none;
-  background: transparent;
-  color: var(--text-secondary);
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 400;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-}
-
-#sidebar-nav button .lucide {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-}
-
-#sidebar-nav button:hover {
-  background: var(--sidebar-hover);
-  color: var(--text);
+.sidebar-nav-row {
+  gap: 4px;
 }
 
 #sidebar-toggle-btn {
@@ -70,6 +42,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+#sidebar-toggle-btn:hover {
+  background: var(--sidebar-hover);
+  color: var(--text);
 }
 
 #sidebar-toggle-btn .lucide {
