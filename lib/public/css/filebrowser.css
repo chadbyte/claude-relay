@@ -1,0 +1,195 @@
+/* ==========================================================================
+   File Browser
+   ========================================================================== */
+
+/* --- Sidebar tabs --- */
+#sidebar-tabs {
+  display: flex;
+  padding: 0 8px 4px;
+  gap: 2px;
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+
+.sidebar-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 0;
+  border: none;
+  background: transparent;
+  color: var(--text-dimmer);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.sidebar-tab .lucide { width: 14px; height: 14px; }
+.sidebar-tab:hover { color: var(--text-secondary); background: var(--sidebar-hover); }
+.sidebar-tab.active { color: var(--text); background: var(--sidebar-active); }
+
+/* --- Panels --- */
+.sidebar-panel { flex: 1; overflow-y: auto; min-height: 0; }
+.sidebar-panel.hidden { display: none; }
+
+/* --- File tree --- */
+#file-tree { padding: 4px 8px; }
+
+.file-tree-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-secondary);
+  transition: background 0.15s, color 0.15s;
+  user-select: none;
+}
+
+.file-tree-item:hover { background: var(--sidebar-hover); color: var(--text); }
+.file-tree-item.active { background: var(--sidebar-active); color: var(--text); }
+.file-tree-item .lucide { width: 14px; height: 14px; flex-shrink: 0; }
+
+.file-tree-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.file-tree-chevron {
+  display: inline-flex;
+  color: var(--text-dimmer);
+  transition: transform 0.15s;
+  flex-shrink: 0;
+}
+
+.file-tree-chevron .lucide { width: 12px; height: 12px; }
+.file-tree-item.expanded > .file-tree-chevron { transform: rotate(90deg); }
+
+.file-tree-spacer { width: 12px; flex-shrink: 0; }
+
+.file-tree-children.hidden { display: none; }
+
+.file-tree-loading,
+.file-tree-empty {
+  padding: 12px 16px;
+  font-size: 12px;
+  color: var(--text-dimmer);
+  font-style: italic;
+}
+
+.file-tree-error {
+  padding: 12px 16px;
+  font-size: 12px;
+  color: var(--error);
+}
+
+/* --- File viewer (main area overlay) --- */
+#file-viewer {
+  position: absolute;
+  inset: 0;
+  background: var(--bg);
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#file-viewer.hidden { display: none; }
+
+.file-viewer-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+  min-height: 44px;
+}
+
+.file-viewer-path {
+  flex: 1;
+  font-family: "SF Mono", Menlo, Monaco, monospace;
+  font-size: 13px;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  direction: rtl;
+  text-align: left;
+}
+
+.file-viewer-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+}
+
+.file-viewer-btn:hover { background: var(--sidebar-hover); color: var(--text); }
+.file-viewer-btn .lucide { width: 16px; height: 16px; }
+
+.file-viewer-body {
+  flex: 1;
+  overflow: auto;
+  padding: 0;
+}
+
+.file-viewer-body pre {
+  margin: 0;
+  padding: 16px 20px;
+  font-family: "SF Mono", Menlo, Monaco, monospace;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.file-viewer-body pre code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.file-viewer-binary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-dimmer);
+  font-size: 14px;
+}
+
+.file-viewer-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.file-viewer-image img {
+  max-width: 100%;
+  max-height: 80vh;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+}

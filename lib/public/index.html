@@ -25,7 +25,16 @@
       </div>
       <button id="resume-session-btn"><i data-lucide="terminal"></i> <span>Resume session</span></button>
     </nav>
-    <div id="session-list"></div>
+    <div id="sidebar-tabs">
+      <button class="sidebar-tab active" data-tab="sessions"><i data-lucide="messages-square"></i> <span>Sessions</span></button>
+      <button class="sidebar-tab" data-tab="files"><i data-lucide="folder-tree"></i> <span>Files</span></button>
+    </div>
+    <div id="sidebar-panel-sessions" class="sidebar-panel">
+      <div id="session-list"></div>
+    </div>
+    <div id="sidebar-panel-files" class="sidebar-panel hidden">
+      <div id="file-tree"></div>
+    </div>
     <div id="sidebar-footer">
       <button id="sidebar-footer-btn">
         <span class="footer-btn-label"><svg class="footer-mascot" viewBox="0 0 12 12" width="16" height="16"><rect x="0" y="0" width="12" height="12" rx="2" fill="#3E3C37"/><rect x="5" y="0" width="1" height="1" fill="#6D6860"/><rect x="6" y="0" width="1" height="1" fill="#6D6860"/><rect x="5" y="1" width="1" height="1" fill="#6D6860"/><rect x="6" y="1" width="1" height="1" fill="#6D6860"/><rect x="2" y="2" width="8" height="2" fill="#908B81"/><rect x="2" y="4" width="1" height="2" fill="#908B81"/><rect x="3" y="4" width="1" height="2" fill="#262522"/><rect x="4" y="4" width="4" height="2" fill="#908B81"/><rect x="8" y="4" width="1" height="2" fill="#262522"/><rect x="9" y="4" width="1" height="2" fill="#908B81"/><rect x="0" y="6" width="12" height="2" fill="#908B81"/><rect x="2" y="8" width="8" height="2" fill="#908B81"/><rect x="2" y="10" width="1" height="2" fill="#908B81"/><rect x="4" y="10" width="1" height="2" fill="#908B81"/><rect x="7" y="10" width="1" height="2" fill="#908B81"/><rect x="9" y="10" width="1" height="2" fill="#908B81"/></svg> Claude Relay <span id="footer-version" class="footer-version"></span></span>
@@ -105,6 +114,15 @@
         <span id="client-count" class="hidden"></span>
         <span class="status-dot" id="status-dot"></span>
       </div>
+    </div>
+
+    <div id="file-viewer" class="hidden">
+      <div class="file-viewer-header">
+        <span class="file-viewer-path" id="file-viewer-path"></span>
+        <button class="file-viewer-btn" id="file-viewer-copy" title="Copy contents"><i data-lucide="copy"></i></button>
+        <button class="file-viewer-btn" id="file-viewer-close" title="Close"><i data-lucide="x"></i></button>
+      </div>
+      <div class="file-viewer-body" id="file-viewer-body"></div>
     </div>
 
     <div id="connect-overlay">
