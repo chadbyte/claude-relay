@@ -13,6 +13,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600&family=Styrene+A+Web:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/github-dark-dimmed.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/file-icons-js@1/css/style.css">
 <link rel="stylesheet" href="/style.css">
 </head>
 <body>
@@ -20,16 +21,18 @@
   <div id="sidebar">
     <nav id="sidebar-nav">
       <div class="sidebar-nav-row">
-        <button id="new-session-btn"><i data-lucide="plus"></i> <span>New session</span></button>
+        <div id="sidebar-tabs">
+          <button class="sidebar-tab active" data-tab="sessions"><i data-lucide="messages-square"></i> <span>Sessions</span></button>
+          <button class="sidebar-tab" data-tab="files"><i data-lucide="folder-tree"></i> <span>Files</span></button>
+        </div>
         <button id="sidebar-toggle-btn" title="Close sidebar"><i data-lucide="panel-left-close"></i></button>
       </div>
-      <button id="resume-session-btn"><i data-lucide="terminal"></i> <span>Resume session</span></button>
     </nav>
-    <div id="sidebar-tabs">
-      <button class="sidebar-tab active" data-tab="sessions"><i data-lucide="messages-square"></i> <span>Sessions</span></button>
-      <button class="sidebar-tab" data-tab="files"><i data-lucide="folder-tree"></i> <span>Files</span></button>
-    </div>
     <div id="sidebar-panel-sessions" class="sidebar-panel">
+      <div id="session-actions">
+        <button id="new-session-btn"><i data-lucide="plus"></i> <span>New session</span></button>
+        <button id="resume-session-btn"><i data-lucide="terminal"></i> <span>Resume session</span></button>
+      </div>
       <div id="session-list"></div>
     </div>
     <div id="sidebar-panel-files" class="sidebar-panel hidden">
@@ -116,15 +119,6 @@
       </div>
     </div>
 
-    <div id="file-viewer" class="hidden">
-      <div class="file-viewer-header">
-        <span class="file-viewer-path" id="file-viewer-path"></span>
-        <button class="file-viewer-btn" id="file-viewer-copy" title="Copy contents"><i data-lucide="copy"></i></button>
-        <button class="file-viewer-btn" id="file-viewer-close" title="Close"><i data-lucide="x"></i></button>
-      </div>
-      <div class="file-viewer-body" id="file-viewer-body"></div>
-    </div>
-
     <div id="connect-overlay">
       <div id="pixel-canvas"></div>
       <div class="connect-verb" id="connect-verb"></div>
@@ -144,6 +138,15 @@
         </div>
       </div>
     </div>
+  </div>
+  <div id="file-viewer" class="hidden">
+    <div class="file-viewer-header">
+      <span class="file-viewer-path" id="file-viewer-path"></span>
+      <button class="file-viewer-btn hidden" id="file-viewer-render" title="Toggle rendered view"><i data-lucide="book-open"></i></button>
+      <button class="file-viewer-btn" id="file-viewer-copy" title="Copy contents"><i data-lucide="copy"></i></button>
+      <button class="file-viewer-btn" id="file-viewer-close" title="Close"><i data-lucide="x"></i></button>
+    </div>
+    <div class="file-viewer-body" id="file-viewer-body"></div>
   </div>
 </div>
 
@@ -242,6 +245,7 @@
 <script src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/file-icons-js@1/index.js"></script>
 <script type="module" src="/app.js"></script>
 </body>
 </html>
