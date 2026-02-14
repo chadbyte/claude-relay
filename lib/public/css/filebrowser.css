@@ -326,3 +326,54 @@
   border-radius: 8px;
   border: 1px solid var(--border-subtle);
 }
+
+/* --- Web Terminal --- */
+
+/* Wide screens: split panel beside #app */
+@media (min-width: 1024px) {
+  #terminal-container {
+    width: 50%;
+    max-width: 720px;
+    min-width: 360px;
+    border-left: 1px solid var(--border);
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  #terminal-container.hidden { display: none; }
+}
+
+/* Narrow screens: full overlay */
+@media (max-width: 1023px) {
+  #terminal-container {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 300;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  #terminal-container.hidden { display: none; }
+}
+
+#terminal-body {
+  flex: 1;
+  padding: 4px;
+  background: #1a1a1a;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#terminal-body .xterm {
+  height: 100%;
+}
+
+.terminal-hint {
+  padding: 16px;
+  font-size: 13px;
+  color: var(--text-dimmer);
+  font-style: italic;
+}
