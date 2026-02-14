@@ -8,9 +8,11 @@
   - Dashboard page at root (`/`) to browse all projects
   - "All projects" link in sidebar footer menu
 - **CLI management overhaul**
-  - Restructured menu: Setup notifications, Projects, Settings, Keep server alive & exit
+  - Restructured menu: Setup notifications, Projects, Settings, Shut down server, Keep server alive & exit
   - Projects sub-menu with add current directory, add by path, project detail, and remove
-  - Settings sub-menu with setup notifications, PIN, keep awake toggle, view logs, shut down
+  - Settings sub-menu with setup notifications, PIN, keep awake toggle, view logs
+  - Shut down server moved to main menu for quick access
+  - Other CLI instances auto-detect server shutdown and exit gracefully
   - Press `o` hotkey to open browser from main menu
   - Port selection during first-time setup with conflict detection
   - Shutdown confirmation prompt
@@ -20,6 +22,9 @@
   - `document.title` now shows `ProjectName - Claude Relay` (was `Claude Relay - ProjectName`)
 - **Setup notifications fast-path**: skip toggle flow when all prerequisites are already met
 - **Keep awake runtime toggle**: enable/disable caffeinate from Settings without restart
+- **Urgent attention signals**: favicon blinks and tab title flashes `⚠ Input needed` on permission requests and questions
+- **Push notification blocked hint**: show "Blocked by browser" message when push toggle fails
+- **File browser**: fix relative image paths in rendered markdown files
 - Gradient hint text in main menu
 - Add Ctrl+J shortcut to insert newline in input (matches Claude CLI behavior)
 - Add QR code button in header to share current URL with click-to-copy
