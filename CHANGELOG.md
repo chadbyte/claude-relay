@@ -1,7 +1,26 @@
 # Changelog
 
-## WIP
+## v2.0.0
 
+- **Multi-project support**: manage multiple projects on a single server and port
+  - Daemon runs in background, survives CLI exit
+  - URL routing via `/p/{slug}/` for each project
+  - Dashboard page at root (`/`) to browse all projects
+  - "All projects" link in sidebar footer menu
+- **CLI management overhaul**
+  - Restructured menu: Setup notifications, Projects, Settings, Keep server alive & exit
+  - Projects sub-menu with add current directory, add by path, project detail, and remove
+  - Settings sub-menu with setup notifications, PIN, keep awake toggle, view logs, shut down
+  - Press `o` hotkey to open browser from main menu
+  - Port selection during first-time setup with conflict detection
+  - Shutdown confirmation prompt
+  - ESC to go back from text prompts with visible hint
+  - 2-second feedback messages after adding projects (success/duplicate/error)
+- **Project titles**: set custom display names per project (CLI, browser tab, dashboard)
+  - `document.title` now shows `ProjectName - Claude Relay` (was `Claude Relay - ProjectName`)
+- **Setup notifications fast-path**: skip toggle flow when all prerequisites are already met
+- **Keep awake runtime toggle**: enable/disable caffeinate from Settings without restart
+- Gradient hint text in main menu
 - Add Ctrl+J shortcut to insert newline in input (matches Claude CLI behavior)
 - Add QR code button in header to share current URL with click-to-copy
 

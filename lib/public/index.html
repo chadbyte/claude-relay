@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="manifest" href="/manifest.json">
+<link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#2F2E2B">
-<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <title>Claude Relay</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,7 +15,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/github-dark-dimmed.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/file-icons-js@1/css/style.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5/css/xterm.min.css">
-<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div id="layout">
@@ -45,6 +45,9 @@
         <i data-lucide="ellipsis" style="width:14px;height:14px"></i>
       </button>
       <div id="sidebar-footer-menu" class="hidden">
+        <a class="sidebar-menu-item" href="/" id="footer-all-projects">
+          <i data-lucide="layout-grid"></i> <span>All projects</span>
+        </a>
         <a class="sidebar-menu-item" href="https://github.com/chadbyte/claude-relay" target="_blank" rel="noopener">
           <i data-lucide="github"></i> <span>GitHub</span>
         </a>
@@ -257,6 +260,6 @@
 <script src="https://cdn.jsdelivr.net/npm/file-icons-js@1/index.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@xterm/xterm@5/lib/xterm.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@xterm/addon-fit@0/lib/addon-fit.min.js"></script>
-<script type="module" src="/app.js"></script>
+<script type="module" src="app.js"></script>
 </body>
 </html>
