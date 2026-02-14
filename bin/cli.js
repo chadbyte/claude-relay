@@ -5,6 +5,7 @@ var fs = require("fs");
 var path = require("path");
 var { execSync, execFileSync, spawn } = require("child_process");
 var qrcode = require("qrcode-terminal");
+var net = require("net");
 var { loadConfig, saveConfig, configPath, socketPath, logPath, ensureConfigDir, isDaemonAlive, isDaemonAliveAsync, generateSlug, clearStaleConfig } = require("../lib/config");
 var { sendIPCCommand } = require("../lib/ipc");
 var { generateAuthToken } = require("../lib/server");
@@ -93,6 +94,52 @@ function clearUp(n) {
   for (var i = 0; i < n; i++) {
     process.stdout.write("\x1b[1A\x1b[2K");
   }
+}
+
+// --- Daemon watcher ---
+// Polls daemon socket; if connection fails, the server is down.
+var _daemonWatcher = null;
+
+function startDaemonWatcher() {
+  if (_daemonWatcher) return;
+  _daemonWatcher = setInterval(function () {
+    var client = net.connect(socketPath());
+    var timer = setTimeout(function () {
+      client.destroy();
+      onDaemonDied();
+    }, 1500);
+    client.on("connect", function () {
+      clearTimeout(timer);
+      client.destroy();
+    });
+    client.on("error", function () {
+      clearTimeout(timer);
+      client.destroy();
+      onDaemonDied();
+    });
+  }, 3000);
+}
+
+function stopDaemonWatcher() {
+  if (_daemonWatcher) {
+    clearInterval(_daemonWatcher);
+    _daemonWatcher = null;
+  }
+}
+
+function onDaemonDied() {
+  stopDaemonWatcher();
+  // Clean up stdin in case a prompt is active
+  try {
+    process.stdin.setRawMode(false);
+    process.stdin.pause();
+    process.stdin.removeAllListeners("data");
+  } catch (e) {}
+  log("");
+  log(sym.warn + "  " + a.yellow + "Server has been shut down." + a.reset);
+  log(a.dim + "     Run " + a.reset + "npx claude-relay" + a.dim + " to start again." + a.reset);
+  log("");
+  process.exit(0);
 }
 
 // --- Network ---
@@ -568,7 +615,6 @@ function promptSelect(title, items, callback, opts) {
 }
 
 // --- Port availability ---
-var net = require("net");
 
 function isPortFree(p) {
   return new Promise(function (resolve) {
@@ -760,6 +806,7 @@ function showServerStarted(config, ip) {
 // Main management menu
 // ==============================
 function showMainMenu(config, ip) {
+  startDaemonWatcher();
   var protocol = config.tls ? "https" : "http";
   var url = protocol + "://" + ip + ":" + config.port;
 
@@ -809,6 +856,7 @@ function showMainMenu(config, ip) {
         { label: "Setup notifications", value: "notifications" },
         { label: "Projects", value: "projects" },
         { label: "Settings", value: "settings" },
+        { label: "Shut down server", value: "shutdown" },
         { label: "Keep server alive & exit", value: "exit" },
       ];
 
@@ -826,6 +874,29 @@ function showMainMenu(config, ip) {
 
           case "settings":
             showSettingsMenu(config, ip);
+            break;
+
+          case "shutdown":
+            log(sym.bar);
+            log(sym.bar + "  " + a.yellow + "This will stop the server completely." + a.reset);
+            log(sym.bar + "  " + a.dim + "All connected sessions will be disconnected." + a.reset);
+            log(sym.bar);
+            promptSelect("Are you sure?", [
+              { label: "Cancel", value: "cancel" },
+              { label: "Shut down", value: "confirm" },
+            ], function (confirm) {
+              if (confirm === "confirm") {
+                stopDaemonWatcher();
+                sendIPCCommand(socketPath(), { cmd: "shutdown" }).then(function () {
+                  log(sym.done + "  " + a.green + "Server stopped." + a.reset);
+                  log("");
+                  clearStaleConfig();
+                  process.exit(0);
+                });
+              } else {
+                showMainMenu(config, ip);
+              }
+            });
             break;
 
           case "exit":
@@ -1260,7 +1331,6 @@ function showSettingsMenu(config, ip) {
     }
     items.push({ label: isAwake ? "Disable keep awake" : "Enable keep awake", value: "awake" });
     items.push({ label: "View logs", value: "logs" });
-    items.push({ label: "Shut down server", value: "shutdown" });
     items.push({ label: "Back", value: "back" });
 
   promptSelect("Select", items, function (choice) {
@@ -1322,28 +1392,6 @@ function showSettingsMenu(config, ip) {
             config.keepAwake = !isAwake;
           }
           showSettingsMenu(config, ip);
-        });
-        break;
-
-      case "shutdown":
-        log(sym.bar);
-        log(sym.bar + "  " + a.yellow + "This will stop the server completely." + a.reset);
-        log(sym.bar + "  " + a.dim + "All connected sessions will be disconnected." + a.reset);
-        log(sym.bar);
-        promptSelect("Are you sure?", [
-          { label: "Cancel", value: "cancel" },
-          { label: "Shut down", value: "confirm" },
-        ], function (confirm) {
-          if (confirm === "confirm") {
-            sendIPCCommand(socketPath(), { cmd: "shutdown" }).then(function () {
-              log(sym.done + "  " + a.green + "Server stopped." + a.reset);
-              log("");
-              clearStaleConfig();
-              process.exit(0);
-            });
-          } else {
-            showSettingsMenu(config, ip);
-          }
         });
         break;
 
