@@ -1266,6 +1266,10 @@ function showSetupGuide(config, ip, goBack) {
       } else {
         log(sym.bar + "  " + a.dim + "Can't connect? Your phone must be on the same Wi-Fi network." + a.reset);
       }
+      if (config.tls) {
+        var httpOnboardUrl = "http://" + (tsIP || ip) + ":" + (config.port + 1) + "/setup";
+        log(sym.bar + "  " + a.dim + "Certificate warning? Open " + a.reset + httpOnboardUrl);
+      }
       log(sym.bar);
       log(sym.done + "  " + a.dim + "Setup complete." + a.reset);
       log(sym.end);
