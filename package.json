@@ -1,7 +1,7 @@
 {
   "name": "claude-relay",
   "version": "2.0.0",
-  "description": "Claude Code on your phone. Push notifications. Zero install.",
+  "description": "Web UI for Claude Code. Any device. Push notifications.",
   "bin": {
     "claude-relay": "./bin/cli.js",
     "claude-relay-dev": "./bin/cli.js"
