@@ -2,10 +2,13 @@
 
 ## WIP
 
+## v2.0.5
+
 - Rate limit PIN attempts: 5 failures per IP triggers 15-minute lockout
 - PIN page shows remaining attempts and lockout timer
 - Add WebSocket Origin header validation (CSRF prevention)
 - Gate /info endpoint behind PIN auth, remove path exposure
+- Add `--shutdown` CLI flag to stop daemon without interactive menu
 
 ## v2.0.4
 

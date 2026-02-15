@@ -17,6 +17,7 @@ var skipUpdate = false;
 var debugMode = false;
 var autoYes = false;
 var cliPin = null;
+var shutdownMode = false;
 
 for (var i = 0; i < args.length; i++) {
   if (args[i] === "-p" || args[i] === "--port") {
@@ -37,8 +38,10 @@ for (var i = 0; i < args.length; i++) {
   } else if (args[i] === "--pin") {
     cliPin = args[i + 1] || null;
     i++;
+  } else if (args[i] === "--shutdown") {
+    shutdownMode = true;
   } else if (args[i] === "-h" || args[i] === "--help") {
-    console.log("Usage: claude-relay [-p|--port <port>] [--no-https] [--no-update] [--debug] [-y|--yes] [--pin <pin>]");
+    console.log("Usage: claude-relay [-p|--port <port>] [--no-https] [--no-update] [--debug] [-y|--yes] [--pin <pin>] [--shutdown]");
     console.log("");
     console.log("Options:");
     console.log("  -p, --port <port>  Port to listen on (default: 2633)");
@@ -47,8 +50,29 @@ for (var i = 0; i < args.length; i++) {
     console.log("  --debug            Enable debug panel in the web UI");
     console.log("  -y, --yes          Skip interactive prompts (accept defaults)");
     console.log("  --pin <pin>        Set 6-digit PIN (use with --yes)");
+    console.log("  --shutdown         Shut down the running relay daemon");
     process.exit(0);
   }
+}
+
+// --- Handle --shutdown before anything else ---
+if (shutdownMode) {
+  var shutdownConfig = loadConfig();
+  isDaemonAliveAsync(shutdownConfig).then(function (alive) {
+    if (!alive) {
+      console.error("No running daemon found.");
+      process.exit(1);
+    }
+    sendIPCCommand(socketPath(), { cmd: "shutdown" }).then(function () {
+      console.log("Server stopped.");
+      clearStaleConfig();
+      process.exit(0);
+    }).catch(function (err) {
+      console.error("Shutdown failed:", err.message);
+      process.exit(1);
+    });
+  });
+  return;
 }
 
 var cwd = process.cwd();
