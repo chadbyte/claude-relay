@@ -2,6 +2,12 @@
 
 ## WIP
 
+## v2.1.3
+
+- Fix certificate trust detection on iOS: onboarding page always showed "Certificate not trusted yet" even after installing and trusting the mkcert CA
+  - HTTPS `/info` 401 response lacked CORS headers → browser treated as network error → misreported as untrusted cert
+  - Switch certificate check fetch to `no-cors` mode so any TLS handshake success = cert trusted
+
 ## v2.1.2
 
 - Fix session list reordering on every click (only update order on actual messages, not view switches)
