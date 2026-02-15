@@ -1,5 +1,22 @@
 # Changelog
 
+## WIP
+
+- Rate limit PIN attempts: 5 failures per IP triggers 15-minute lockout
+- PIN page shows remaining attempts and lockout timer
+
+## v2.0.4
+
+- Fix setup flow broken after daemon refactor
+  - CORS preflight for HTTP→HTTPS cross-origin setup requests
+  - Timing fix: cert/pwa/push init moved into buildSteps() (was running before steps populated)
+  - iOS variable shadowing fix (steps array overwritten by DOM element)
+- Unify Service Worker scope to root (fix duplicate push notifications per project)
+- PWA manifest scope changed to / (one install covers all projects)
+- Generate PNG icons for iOS apple-touch-icon support
+- Add root-level push API endpoints for setup page
+- CLI QR code now always shows HTTP onboarding URL
+
 ## v2.0.0
 
 - **Multi-project support**: manage multiple projects on a single server and port
