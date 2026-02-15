@@ -2,6 +2,12 @@
 
 ## WIP
 
+## v2.1.1
+
+- Fix session list reordering on every click (only update order on actual messages, not view switches)
+- Fix project switcher losing name/count after incomplete `info` message (defensive caching)
+- Remove unselected projects from `~/.clayrc` during restore prompt
+
 ## v2.1.0
 
 - **Project persistence via `~/.clayrc`**: project list saved automatically; on daemon restart, CLI prompts to restore previous projects with multi-select

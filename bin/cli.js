@@ -6,7 +6,7 @@ var path = require("path");
 var { execSync, execFileSync, spawn } = require("child_process");
 var qrcode = require("qrcode-terminal");
 var net = require("net");
-var { loadConfig, saveConfig, configPath, socketPath, logPath, ensureConfigDir, isDaemonAlive, isDaemonAliveAsync, generateSlug, clearStaleConfig, loadClayrc } = require("../lib/config");
+var { loadConfig, saveConfig, configPath, socketPath, logPath, ensureConfigDir, isDaemonAlive, isDaemonAliveAsync, generateSlug, clearStaleConfig, loadClayrc, saveClayrc } = require("../lib/config");
 var { sendIPCCommand } = require("../lib/ipc");
 var { generateAuthToken } = require("../lib/server");
 
@@ -809,6 +809,21 @@ function promptRestoreProjects(projects, callback) {
   });
 
   promptMultiSelect("Restore projects", items, function (selected) {
+    // Remove unselected projects from ~/.clayrc
+    if (selected.length < projects.length) {
+      var selectedPaths = {};
+      for (var si = 0; si < selected.length; si++) {
+        selectedPaths[selected[si].path] = true;
+      }
+      try {
+        var rc = loadClayrc();
+        rc.recentProjects = (rc.recentProjects || []).filter(function (p) {
+          return selectedPaths[p.path];
+        });
+        saveClayrc(rc);
+      } catch (e) {}
+    }
+
     log(sym.bar);
     if (selected.length > 0) {
       log(sym.done + "  " + a.green + "Restoring " + selected.length + (selected.length === 1 ? " project" : " projects") + a.reset);
