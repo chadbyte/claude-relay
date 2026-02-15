@@ -6,7 +6,7 @@ var path = require("path");
 var { execSync, execFileSync, spawn } = require("child_process");
 var qrcode = require("qrcode-terminal");
 var net = require("net");
-var { loadConfig, saveConfig, configPath, socketPath, logPath, ensureConfigDir, isDaemonAlive, isDaemonAliveAsync, generateSlug, clearStaleConfig } = require("../lib/config");
+var { loadConfig, saveConfig, configPath, socketPath, logPath, ensureConfigDir, isDaemonAlive, isDaemonAliveAsync, generateSlug, clearStaleConfig, loadClayrc } = require("../lib/config");
 var { sendIPCCommand } = require("../lib/ipc");
 var { generateAuthToken } = require("../lib/server");
 
@@ -563,7 +563,16 @@ function promptText(title, placeholder, callback) {
  */
 function promptSelect(title, items, callback, opts) {
   var idx = 0;
-  var hotkey = opts && opts.key ? opts.key : null;
+  // Build hotkeys map: { key: handler }
+  var hotkeys = {};
+  if (opts && opts.key && opts.onKey) {
+    hotkeys[opts.key] = opts.onKey;
+  }
+  if (opts && opts.keys) {
+    for (var ki = 0; ki < opts.keys.length; ki++) {
+      hotkeys[opts.keys[ki].key] = opts.keys[ki].onKey;
+    }
+  }
   var hintLines = null;
   if (opts && opts.hint) {
     hintLines = Array.isArray(opts.hint) ? opts.hint : [opts.hint];
@@ -615,12 +624,26 @@ function promptSelect(title, items, callback, opts) {
     } else if (ch === "\x03") {
       process.stdout.write("\n");
       process.exit(0);
-    } else if (hotkey && ch === hotkey) {
+    } else if (hotkeys[ch]) {
       process.stdin.setRawMode(false);
       process.stdin.pause();
       process.stdin.removeListener("data", onSelect);
       clearUp(lineCount);
-      opts.onKey();
+      hotkeys[ch]();
+      return;
+    } else if (ch === "\x7f" || ch === "\b") {
+      // Backspace — trigger "back" if available
+      for (var bi = 0; bi < items.length; bi++) {
+        if (items[bi].value === "back") {
+          process.stdin.setRawMode(false);
+          process.stdin.pause();
+          process.stdin.removeListener("data", onSelect);
+          clearUp(lineCount);
+          log(sym.done + "  " + title + " " + a.dim + "·" + a.reset + " " + items[bi].label);
+          callback("back");
+          return;
+        }
+      }
       return;
     } else {
       return;
@@ -635,6 +658,90 @@ function promptSelect(title, items, callback, opts) {
         log("   " + gradient(hintLines[rh]));
       }
     }
+  });
+}
+
+/**
+ * Multi-select menu: space to toggle, enter to confirm.
+ * items: [{ label, value, checked? }]
+ * callback(selectedValues[])
+ */
+function promptMultiSelect(title, items, callback) {
+  var selected = [];
+  for (var si = 0; si < items.length; si++) {
+    selected.push(items[si].checked !== false);
+  }
+  var idx = 0;
+
+  function render() {
+    var out = "";
+    for (var i = 0; i < items.length; i++) {
+      var cursor = i === idx ? a.cyan + ">" + a.reset : " ";
+      var check = selected[i]
+        ? a.green + a.bold + "■" + a.reset
+        : a.dim + "□" + a.reset;
+      out += "  " + sym.bar + " " + cursor + " " + check + " " + items[i].label + "\n";
+    }
+    out += "  " + sym.bar + "  " + a.dim + "space: toggle · enter: confirm" + a.reset + "\n";
+    return out;
+  }
+
+  log(sym.pointer + "  " + a.bold + title + a.reset);
+  process.stdout.write(render());
+
+  var lineCount = items.length + 2; // title + items + hint
+
+  process.stdin.setRawMode(true);
+  process.stdin.resume();
+  process.stdin.setEncoding("utf8");
+
+  process.stdin.on("data", function onMulti(ch) {
+    if (ch === "\x1b[A") { // up
+      if (idx > 0) idx--;
+    } else if (ch === "\x1b[B") { // down
+      if (idx < items.length - 1) idx++;
+    } else if (ch === " ") { // toggle
+      selected[idx] = !selected[idx];
+    } else if (ch === "a" || ch === "A") { // toggle all
+      var allSelected = selected.every(function (s) { return s; });
+      for (var ai = 0; ai < selected.length; ai++) selected[ai] = !allSelected;
+    } else if (ch === "\r" || ch === "\n") {
+      process.stdin.setRawMode(false);
+      process.stdin.pause();
+      process.stdin.removeListener("data", onMulti);
+      clearUp(lineCount);
+      var result = [];
+      var labels = [];
+      for (var ri = 0; ri < items.length; ri++) {
+        if (selected[ri]) {
+          result.push(items[ri].value);
+          labels.push(items[ri].label);
+        }
+      }
+      var summary = result.length === items.length
+        ? "All (" + result.length + ")"
+        : result.length + " of " + items.length;
+      log(sym.done + "  " + title + " " + a.dim + "·" + a.reset + " " + summary);
+      callback(result);
+      return;
+    } else if (ch === "\x03") {
+      process.stdout.write("\n");
+      process.exit(0);
+    } else if (ch === "\x1b") {
+      // Escape — select none
+      process.stdin.setRawMode(false);
+      process.stdin.pause();
+      process.stdin.removeListener("data", onMulti);
+      clearUp(lineCount);
+      log(sym.done + "  " + title + " " + a.dim + "· Skipped" + a.reset);
+      callback([]);
+      return;
+    } else {
+      return;
+    }
+    // Redraw
+    clearUp(items.length + 1); // items + hint (not title)
+    process.stdout.write(render());
   });
 }
 
@@ -681,6 +788,37 @@ function hasMkcert() {
     execSync("mkcert -CAROOT", { stdio: "pipe", encoding: "utf8" });
     return true;
   } catch (e) { return false; }
+}
+
+// ==============================
+// Restore projects from ~/.clayrc
+// ==============================
+function promptRestoreProjects(projects, callback) {
+  log(sym.bar);
+  log(sym.pointer + "  " + a.bold + "Previous projects found" + a.reset);
+  log(sym.bar + "  " + a.dim + "Restore projects from your last session?" + a.reset);
+  log(sym.bar);
+
+  var items = projects.map(function (p) {
+    var name = p.title || path.basename(p.path);
+    return {
+      label: a.bold + name + a.reset + "  " + a.dim + p.path + a.reset,
+      value: p,
+      checked: true,
+    };
+  });
+
+  promptMultiSelect("Restore projects", items, function (selected) {
+    log(sym.bar);
+    if (selected.length > 0) {
+      log(sym.done + "  " + a.green + "Restoring " + selected.length + (selected.length === 1 ? " project" : " projects") + a.reset);
+    } else {
+      log(sym.done + "  " + a.dim + "Starting fresh" + a.reset);
+    }
+    log(sym.end + "  " + a.dim + "Starting relay..." + a.reset);
+    log("");
+    callback(selected);
+  });
 }
 
 // ==============================
@@ -731,9 +869,6 @@ function setup(callback) {
 
           promptPin(function (pin) {
             promptToggle("Keep awake", "Prevent system sleep while relay is running", false, function (keepAwake) {
-              log(sym.bar);
-              log(sym.end + "  " + a.dim + "Starting relay..." + a.reset);
-              log("");
               callback(pin, keepAwake);
             });
           });
@@ -747,7 +882,7 @@ function setup(callback) {
 // ==============================
 // Fork the daemon process
 // ==============================
-async function forkDaemon(pin, keepAwake) {
+async function forkDaemon(pin, keepAwake, extraProjects) {
   var ip = getLocalIP();
   var hasTls = false;
 
@@ -770,6 +905,21 @@ async function forkDaemon(pin, keepAwake) {
   }
 
   var slug = generateSlug(cwd, []);
+  var allProjects = [{ path: cwd, slug: slug, addedAt: Date.now() }];
+
+  // Add restored projects (from ~/.clayrc)
+  if (extraProjects && extraProjects.length > 0) {
+    var usedSlugs = [slug];
+    for (var ep = 0; ep < extraProjects.length; ep++) {
+      var rp = extraProjects[ep];
+      if (rp.path === cwd) continue; // skip if same as cwd
+      if (!fs.existsSync(rp.path)) continue; // skip missing directories
+      var rpSlug = generateSlug(rp.path, usedSlugs);
+      usedSlugs.push(rpSlug);
+      allProjects.push({ path: rp.path, slug: rpSlug, title: rp.title || undefined, addedAt: rp.addedAt || Date.now() });
+    }
+  }
+
   var config = {
     pid: null,
     port: port,
@@ -777,7 +927,7 @@ async function forkDaemon(pin, keepAwake) {
     tls: hasTls,
     debug: debugMode,
     keepAwake: keepAwake,
-    projects: [{ path: cwd, slug: slug, addedAt: Date.now() }],
+    projects: allProjects,
   };
 
   ensureConfigDir();
@@ -931,13 +1081,28 @@ function showMainMenu(config, ip) {
             process.exit(0);
             break;
         }
-      }, { hint: "★ Multiple projects now supported — github.com/chadbyte/claude-relay", key: "o", onKey: function () {
-        try {
-          var openCmd = process.platform === "darwin" ? "open" : "xdg-open";
-          spawn(openCmd, [url], { stdio: "ignore", detached: true }).unref();
-        } catch (e) {}
-        showMainMenu(config, ip);
-      }});
+      }, {
+        hint: [
+          "Run npx claude-relay in other directories to add more projects.",
+          "★ github.com/chadbyte/claude-relay — Press s to star the repo",
+        ],
+        keys: [
+          { key: "o", onKey: function () {
+            try {
+              var openCmd = process.platform === "darwin" ? "open" : "xdg-open";
+              spawn(openCmd, [url], { stdio: "ignore", detached: true }).unref();
+            } catch (e) {}
+            showMainMenu(config, ip);
+          }},
+          { key: "s", onKey: function () {
+            try {
+              var openCmd = process.platform === "darwin" ? "open" : "xdg-open";
+              spawn(openCmd, ["https://github.com/chadbyte/claude-relay"], { stdio: "ignore", detached: true }).unref();
+            } catch (e) {}
+            showMainMenu(config, ip);
+          }},
+        ],
+      });
     }
   });
 }
@@ -1506,10 +1671,32 @@ var currentVersion = require("../package.json").version;
       var pin = cliPin || null;
       console.log("  " + sym.done + "  Auto-accepted disclaimer");
       console.log("  " + sym.done + "  PIN: " + (pin ? "Enabled" : "Skipped"));
-      await forkDaemon(pin, false);
+      var autoRc = loadClayrc();
+      var autoRestorable = (autoRc.recentProjects || []).filter(function (p) {
+        return p.path !== cwd && fs.existsSync(p.path);
+      });
+      if (autoRestorable.length > 0) {
+        console.log("  " + sym.done + "  Restoring " + autoRestorable.length + " previous project(s)");
+      }
+      await forkDaemon(pin, false, autoRestorable.length > 0 ? autoRestorable : undefined);
     } else {
       setup(function (pin, keepAwake) {
-        forkDaemon(pin, keepAwake);
+        // Check ~/.clayrc for previous projects to restore
+        var rc = loadClayrc();
+        var restorable = (rc.recentProjects || []).filter(function (p) {
+          return p.path !== cwd && fs.existsSync(p.path);
+        });
+
+        if (restorable.length > 0) {
+          promptRestoreProjects(restorable, function (selected) {
+            forkDaemon(pin, keepAwake, selected);
+          });
+        } else {
+          log(sym.bar);
+          log(sym.end + "  " + a.dim + "Starting relay..." + a.reset);
+          log("");
+          forkDaemon(pin, keepAwake);
+        }
       });
     }
   }
