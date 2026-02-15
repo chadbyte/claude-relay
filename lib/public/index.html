@@ -21,23 +21,51 @@
 <body>
 <div id="layout">
   <div id="sidebar">
+    <div id="sidebar-header">
+      <a href="/" class="sidebar-logo">
+        <svg class="footer-mascot" viewBox="0 0 12 12" width="16" height="16"><rect x="0" y="0" width="12" height="12" rx="2" fill="#3E3C37"/><rect x="5" y="0" width="1" height="1" fill="#6D6860"/><rect x="6" y="0" width="1" height="1" fill="#6D6860"/><rect x="5" y="1" width="1" height="1" fill="#6D6860"/><rect x="6" y="1" width="1" height="1" fill="#6D6860"/><rect x="2" y="2" width="8" height="2" fill="#908B81"/><rect x="2" y="4" width="1" height="2" fill="#908B81"/><rect x="3" y="4" width="1" height="2" fill="#262522"/><rect x="4" y="4" width="4" height="2" fill="#908B81"/><rect x="8" y="4" width="1" height="2" fill="#262522"/><rect x="9" y="4" width="1" height="2" fill="#908B81"/><rect x="0" y="6" width="12" height="2" fill="#908B81"/><rect x="2" y="8" width="8" height="2" fill="#908B81"/><rect x="2" y="10" width="1" height="2" fill="#908B81"/><rect x="4" y="10" width="1" height="2" fill="#908B81"/><rect x="7" y="10" width="1" height="2" fill="#908B81"/><rect x="9" y="10" width="1" height="2" fill="#908B81"/></svg>
+      </a>
+      <button id="sidebar-toggle-btn" title="Close sidebar"><i data-lucide="panel-left-close"></i></button>
+    </div>
     <nav id="sidebar-nav">
-      <div class="sidebar-nav-row">
-        <div id="sidebar-tabs">
-          <button class="sidebar-tab active" data-tab="sessions"><i data-lucide="messages-square"></i> <span>Sessions</span></button>
-          <button class="sidebar-tab" data-tab="files"><i data-lucide="folder-tree"></i> <span>Files</span></button>
+      <div id="project-switcher">
+        <button id="project-switcher-btn" type="button">
+          <div id="project-switcher-label">
+            <span class="ps-title">Projects</span>
+            <div class="ps-current">
+              <span id="project-switcher-name"></span>
+              <span id="project-switcher-count" class="ps-count"></span>
+            </div>
+          </div>
+          <i data-lucide="chevron-down" class="ps-chevron"></i>
+        </button>
+        <div id="project-dropdown" class="hidden">
+          <div class="project-dropdown-header">Projects</div>
+          <div id="project-dropdown-list"></div>
+          <div class="project-dropdown-footer">
+            <button id="project-dropdown-add" type="button"><i data-lucide="plus"></i> <span>Add project</span></button>
+          </div>
         </div>
-        <button id="sidebar-toggle-btn" title="Close sidebar"><i data-lucide="panel-left-close"></i></button>
+      </div>
+      <div id="project-hint" class="hidden">
+        <span class="project-hint-text">Run <code>npx claude-relay</code> in other directories to add more projects.</span>
+        <button id="project-hint-dismiss" type="button" aria-label="Dismiss"><i data-lucide="x"></i></button>
       </div>
     </nav>
     <div id="sidebar-panel-sessions" class="sidebar-panel">
       <div id="session-actions">
         <button id="new-session-btn"><i data-lucide="plus"></i> <span>New session</span></button>
-        <button id="resume-session-btn"><i data-lucide="terminal"></i> <span>Resume session</span></button>
+        <button id="resume-session-btn"><i data-lucide="link"></i> <span>Resume with ID</span></button>
+        <button id="file-browser-btn"><i data-lucide="folder-tree"></i> <span>File browser</span></button>
+        <button id="terminal-sidebar-btn"><i data-lucide="square-terminal"></i> <span>Terminal</span></button>
       </div>
+      <div class="session-list-header">Sessions</div>
       <div id="session-list"></div>
     </div>
     <div id="sidebar-panel-files" class="sidebar-panel hidden">
+      <div id="file-panel-header">
+        <button id="file-panel-back" type="button"><i data-lucide="arrow-left"></i> <span>Sessions</span></button>
+      </div>
       <div id="file-tree"></div>
     </div>
     <div id="sidebar-footer">
@@ -46,9 +74,6 @@
         <i data-lucide="ellipsis" style="width:14px;height:14px"></i>
       </button>
       <div id="sidebar-footer-menu" class="hidden">
-        <a class="sidebar-menu-item" href="/" id="footer-all-projects">
-          <i data-lucide="layout-grid"></i> <span>All projects</span>
-        </a>
         <a class="sidebar-menu-item" href="https://github.com/chadbyte/claude-relay" target="_blank" rel="noopener">
           <i data-lucide="github"></i> <span>GitHub</span>
         </a>

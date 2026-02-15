@@ -2,37 +2,7 @@
    File Browser
    ========================================================================== */
 
-/* --- Sidebar tabs --- */
-#sidebar-tabs {
-  display: flex;
-  flex: 1;
-  min-width: 0;
-  gap: 2px;
-}
-
-.sidebar-tab {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 8px 0;
-  border: none;
-  background: transparent;
-  color: var(--text-dimmer);
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  border-radius: 10px;
-  transition: background 0.15s, color 0.15s;
-}
-
-.sidebar-tab .lucide { width: 14px; height: 14px; }
-.sidebar-tab:hover { color: var(--text-secondary); background: var(--sidebar-hover); }
-.sidebar-tab.active { color: var(--text); background: var(--sidebar-active); }
-
-/* --- Session actions (inside sessions panel) --- */
+/* --- Session actions --- */
 #session-actions {
   display: flex;
   flex-direction: column;
@@ -52,15 +22,39 @@
   font-size: 14px;
   font-weight: 400;
   cursor: pointer;
+  margin-bottom: 0;
   transition: background 0.15s, color 0.15s;
 }
 
 #session-actions button .lucide { width: 16px; height: 16px; flex-shrink: 0; }
 #session-actions button:hover { background: var(--sidebar-hover); color: var(--text); }
-
 /* --- Panels --- */
 .sidebar-panel { flex: 1; overflow-y: auto; min-height: 0; }
 .sidebar-panel.hidden { display: none; }
+
+/* --- File panel header --- */
+#file-panel-header {
+  padding: 4px 8px;
+}
+
+#file-panel-back {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+#file-panel-back .lucide { width: 16px; height: 16px; flex-shrink: 0; }
+#file-panel-back:hover { background: var(--sidebar-hover); color: var(--text); }
 
 /* --- File tree --- */
 #file-tree { padding: 4px 8px; }

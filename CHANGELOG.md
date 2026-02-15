@@ -9,6 +9,12 @@
 - Add WebSocket Origin header validation (CSRF prevention)
 - Gate /info endpoint behind PIN auth, remove path exposure
 - Add `--shutdown` CLI flag to stop daemon without interactive menu
+- Sidebar redesign: logo + collapse header, project switcher dropdown, session actions (New session, Resume with ID, File browser, Terminal)
+- Project switcher: "Projects" as top-level concept, project name below, count badge with accent color
+- Project dropdown: indicator dots, session counts, "+ Add project" with onboarding hint
+- Remove Sessions/Files tab toggle — File browser now opens as full panel with back button
+- Group sessions by date (Today / Yesterday / This Week / Older) based on last interaction
+- Session timestamps derived from .jsonl file mtime for accurate ordering
 
 ## v2.0.4
 
