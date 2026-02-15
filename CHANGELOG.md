@@ -2,6 +2,19 @@
 
 ## WIP
 
+## v2.1.0
+
+- **Project persistence via `~/.clayrc`**: project list saved automatically; on daemon restart, CLI prompts to restore previous projects with multi-select
+  - Interactive multi-select prompt (space to toggle, `a` for all, esc to skip)
+  - Auto-restore all projects when using `--yes` flag
+  - Syncs on project add/remove/title change and daemon startup
+  - Keeps up to 20 recent projects sorted by last used
+- CLI main menu hint redesign: repo link with `s` to star, project tip
+- CLI backspace-to-go-back in all select menus
+- CLI hotkey system extended to support multiple keys per menu
+- Fix current project indicator lost in sidebar dropdown after server restart (slug now sent via WebSocket `info` message)
+- Fix `setTitle` info broadcast missing `projectCount` and `projects` fields
+
 ## v2.0.5
 
 - Rate limit PIN attempts: 5 failures per IP triggers 15-minute lockout
