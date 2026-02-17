@@ -152,7 +152,7 @@
 #image-preview-bar {
   display: none;
   width: 100%;
-  padding: 6px 0 4px;
+  padding: 6px 4px 4px 14px;
 }
 
 #image-preview-bar.visible {
@@ -220,7 +220,7 @@
   background: var(--input-bg);
   border: 1px solid var(--border);
   border-radius: 24px;
-  padding: 6px 6px 6px 20px;
+  padding: 6px;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
@@ -243,7 +243,7 @@
   font-size: 16px;
   font-family: inherit;
   line-height: 1.4;
-  padding: 8px 0;
+  padding: 10px 4px;
   resize: none;
   outline: none;
   min-height: 24px;
@@ -254,6 +254,72 @@
 #input::placeholder {
   color: var(--text-muted);
 }
+
+/* --- Attach button & menu --- */
+#attach-wrap {
+  position: relative;
+  flex-shrink: 0;
+  align-self: flex-end;
+}
+
+#attach-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+  touch-action: manipulation;
+}
+
+#attach-btn .lucide { width: 20px; height: 20px; }
+#attach-btn:hover { background: rgba(255, 255, 255, 0.06); color: var(--text); }
+
+#attach-menu {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  min-width: 170px;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.4);
+  z-index: 10;
+  overflow: hidden;
+}
+
+#attach-menu.hidden { display: none; }
+
+.attach-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  background: none;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.attach-menu-item:not(:last-child) {
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.attach-menu-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+}
+
+.attach-menu-item .lucide { width: 18px; height: 18px; flex-shrink: 0; }
 
 #send-btn {
   flex-shrink: 0;
