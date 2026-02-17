@@ -257,8 +257,8 @@
 
 #send-btn {
   flex-shrink: 0;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   border: none;
   background: var(--accent);
@@ -272,8 +272,8 @@
 }
 
 #send-btn .lucide {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
 }
 
 #send-btn:hover:not(:disabled) {
