@@ -224,47 +224,54 @@
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-#input-inner {
-  display: flex;
-  align-items: flex-end;
-  width: 100%;
-}
-
 #input-row:focus-within {
   border-color: var(--text-dimmer);
   box-shadow: 0 0 0 1px rgba(109, 104, 96, 0.15);
 }
 
 #input {
-  flex: 1;
+  width: 100%;
   background: transparent;
   border: none;
   color: var(--text);
   font-size: 16px;
   font-family: inherit;
   line-height: 1.4;
-  padding: 10px 4px;
+  padding: 8px 10px 4px;
   resize: none;
   outline: none;
   min-height: 24px;
   max-height: 120px;
   overflow-y: auto;
+  box-sizing: border-box;
 }
 
 #input::placeholder {
   color: var(--text-muted);
 }
 
+/* --- Bottom toolbar (attach left, model+send right) --- */
+#input-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#input-bottom-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 /* --- Attach button & menu --- */
 #attach-wrap {
   position: relative;
   flex-shrink: 0;
-  align-self: flex-end;
 }
 
 #attach-btn {
-  width: 44px;
-  height: 44px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   border: none;
   background: transparent;
@@ -323,8 +330,8 @@
 
 #send-btn {
   flex-shrink: 0;
-  width: 44px;
-  height: 44px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   border: none;
   background: var(--accent);
@@ -338,8 +345,8 @@
 }
 
 #send-btn .lucide {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
 }
 
 #send-btn:hover:not(:disabled) {

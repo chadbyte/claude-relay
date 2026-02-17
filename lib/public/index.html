@@ -164,7 +164,8 @@
         <div id="slash-menu"></div>
         <div id="input-row">
           <div id="image-preview-bar"></div>
-          <div id="input-inner">
+          <textarea id="input" rows="1" placeholder="Message Claude Code..." enterkeyhint="send"></textarea>
+          <div id="input-bottom">
             <div id="attach-wrap">
               <button id="attach-btn" type="button" aria-label="Attach"><i data-lucide="plus"></i></button>
               <div id="attach-menu" class="hidden">
@@ -172,8 +173,13 @@
                 <button class="attach-menu-item" id="attach-photos"><i data-lucide="image"></i> <span>Add Photos</span></button>
               </div>
             </div>
-            <textarea id="input" rows="1" placeholder="Message Claude Code..." enterkeyhint="send"></textarea>
-            <button id="send-btn" disabled aria-label="Send"><i data-lucide="arrow-up"></i></button>
+            <div id="input-bottom-right">
+              <div id="model-menu-wrap" class="hidden">
+                <button id="model-btn" title="Model"><span id="model-label"></span> <i data-lucide="chevron-down"></i></button>
+                <div id="model-menu" class="hidden"></div>
+              </div>
+              <button id="send-btn" disabled aria-label="Send"><i data-lucide="arrow-up"></i></button>
+            </div>
           </div>
         </div>
       </div>

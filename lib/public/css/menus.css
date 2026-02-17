@@ -338,6 +338,69 @@
 
 .tooltip.visible { opacity: 1; }
 
+/* --- Model selector (inline in input bottom bar) --- */
+#model-menu-wrap {
+  position: relative;
+}
+
+#model-menu-wrap.hidden { display: none; }
+
+#model-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 36px;
+  padding: 0 8px;
+  border-radius: 10px;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+  white-space: nowrap;
+}
+
+#model-btn .lucide { width: 10px; height: 10px; }
+#model-btn:hover { color: var(--text-secondary); background: rgba(255,255,255,0.06); }
+#model-btn.active { color: var(--text-secondary); background: rgba(255,255,255,0.06); }
+
+#model-menu {
+  position: absolute;
+  bottom: calc(100% + 4px);
+  right: 0;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 4px 0;
+  min-width: 200px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  z-index: 200;
+}
+
+#model-menu.hidden { display: none; }
+
+.model-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 14px;
+  border: none;
+  background: none;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.model-menu-item:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+.model-menu-item.active { color: var(--accent); font-weight: 600; }
+
 .status-dot.connected { background: var(--success); }
 .status-dot.processing { background: var(--success); }
 .status-dot.io { opacity: 0.15; }
