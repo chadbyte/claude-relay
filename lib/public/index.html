@@ -239,9 +239,12 @@
     <div class="file-viewer-body" id="file-viewer-body"></div>
   </div>
   <div id="terminal-container" class="hidden">
-    <div class="file-viewer-header">
-      <span class="file-viewer-path">Terminal</span>
-      <button class="file-viewer-btn" id="terminal-close" title="Close"><i data-lucide="x"></i></button>
+    <div class="terminal-header">
+      <div id="terminal-tabs" class="terminal-tabs"></div>
+      <div class="terminal-header-actions">
+        <button class="file-viewer-btn" id="terminal-new-tab" title="New tab"><i data-lucide="plus"></i></button>
+        <button class="file-viewer-btn" id="terminal-close" title="Close panel"><i data-lucide="x"></i></button>
+      </div>
     </div>
     <div id="terminal-toolbar" class="hidden">
       <button class="term-key" data-key="tab">Tab</button>
