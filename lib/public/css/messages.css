@@ -9,6 +9,31 @@
   padding: 20px 0 12px;
 }
 
+/* --- Scroll-to-bottom floating button --- */
+#new-msg-btn {
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-alt);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 6px 16px;
+  font-size: 13px;
+  cursor: pointer;
+  z-index: 10;
+  transition: opacity 0.15s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+#new-msg-btn:hover {
+  background: var(--sidebar-hover);
+  color: var(--text);
+}
+#new-msg-btn.hidden {
+  display: none;
+}
+
 /* --- User message --- */
 .msg-user {
   display: flex;
