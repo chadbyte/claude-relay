@@ -837,6 +837,9 @@ pre.mermaid-error {
 .plan-card-icon { display: inline-flex; color: var(--accent); }
 .plan-card-icon .lucide { width: 16px; height: 16px; }
 .plan-card-title { font-size: 14px; font-weight: 600; color: var(--accent); flex: 1; }
+.plan-card-copy { display: inline-flex; align-items: center; justify-content: center; background: none; border: none; color: var(--text-dimmer); cursor: pointer; padding: 2px; border-radius: 4px; transition: color 0.15s; }
+.plan-card-copy:hover { color: var(--text); }
+.plan-card-copy .lucide { width: 14px; height: 14px; }
 .plan-card-chevron { display: inline-flex; color: var(--text-muted); transition: transform 0.2s; }
 .plan-card-chevron .lucide { width: 14px; height: 14px; }
 .plan-card.collapsed .plan-card-chevron { transform: rotate(-90deg); }
