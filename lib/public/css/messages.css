@@ -714,6 +714,34 @@ pre.mermaid-error {
 .plan-card-body strong { font-weight: 600; }
 .plan-card-body blockquote { border-left: 3px solid var(--border); padding-left: 12px; color: var(--text-muted); margin: 8px 0; }
 
+/* --- Plan permission (ExitPlanMode) --- */
+.plan-permission-header {
+  background: rgba(87, 171, 90, 0.08) !important;
+  border-color: rgba(87, 171, 90, 0.2) !important;
+}
+.plan-permission-header .permission-icon { color: var(--success) !important; }
+.plan-permission-header .permission-title { color: var(--success) !important; }
+
+.plan-permission-content {
+  font-size: 14px;
+  line-height: 1.65;
+  max-height: 400px;
+  overflow-y: auto;
+}
+.plan-permission-content p { margin-bottom: 10px; }
+.plan-permission-content p:last-child { margin-bottom: 0; }
+.plan-permission-content h1, .plan-permission-content h2, .plan-permission-content h3 { margin: 14px 0 8px; font-weight: 600; line-height: 1.3; }
+.plan-permission-content h1 { font-size: 1.3em; }
+.plan-permission-content h2 { font-size: 1.15em; }
+.plan-permission-content h3 { font-size: 1.05em; }
+.plan-permission-content code { background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px; font-family: "SF Mono", Menlo, Monaco, monospace; font-size: 0.88em; }
+.plan-permission-content pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; margin: 8px 0; }
+.plan-permission-content pre code { display: block; padding: 10px 12px; overflow-x: auto; font-size: 12px; line-height: 1.5; background: none; border-radius: 0; }
+.plan-permission-content ul, .plan-permission-content ol { padding-left: 22px; margin: 6px 0; }
+.plan-permission-content li { margin-bottom: 3px; }
+.plan-permission-content strong { font-weight: 600; }
+.plan-permission-content blockquote { border-left: 3px solid var(--border); padding-left: 12px; color: var(--text-muted); margin: 8px 0; }
+
 /* ==========================================================================
    Todo Widget
    ========================================================================== */
