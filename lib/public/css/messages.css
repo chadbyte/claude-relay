@@ -52,7 +52,7 @@
 
 #todo-sticky .todo-sticky-items { padding: 0 4px 6px; }
 #todo-sticky.collapsed .todo-sticky-items { display: none; }
-#todo-sticky.collapsed .todo-sticky-progress { display: none; }
+#todo-sticky.collapsed .todo-sticky-progress { height: 3px; border-radius: 0 0 12px 12px; overflow: hidden; }
 
 #todo-sticky .todo-sticky-item {
   display: flex;
