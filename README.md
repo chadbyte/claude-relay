@@ -185,6 +185,10 @@ npx claude-relay -p 8080      # Specify port
 npx claude-relay --no-https   # Disable HTTPS
 npx claude-relay --no-update  # Skip update check
 npx claude-relay --debug      # Enable debug panel
+npx claude-relay --add .      # Add current directory to running daemon
+npx claude-relay --add /path  # Add a project by path
+npx claude-relay --remove .   # Remove a project
+npx claude-relay --list       # List registered projects
 ```
 
 ## Requirements
