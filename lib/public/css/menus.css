@@ -401,6 +401,103 @@
 .model-menu-item:hover { background: rgba(255,255,255,0.05); color: var(--text); }
 .model-menu-item.active { color: var(--accent); font-weight: 600; }
 
+/* --- Usage panel --- */
+#usage-panel {
+  position: fixed;
+  top: 80px;
+  right: 16px;
+  width: 200px;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  z-index: 50;
+  font-size: 12px;
+}
+
+#usage-panel.hidden { display: none; }
+
+.usage-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-subtle);
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.usage-panel-header button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 4px;
+}
+
+.usage-panel-header button:hover { color: var(--text); background: rgba(255,255,255,0.06); }
+.usage-panel-header button .lucide { width: 14px; height: 14px; }
+
+.usage-panel-body {
+  padding: 8px 14px 12px;
+}
+
+.usage-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  color: var(--text-secondary);
+}
+
+.usage-label {
+  color: var(--text-muted);
+}
+
+.usage-value {
+  font-family: "SF Mono", Menlo, Monaco, monospace;
+  font-weight: 500;
+}
+
+/* --- Usage FAB --- */
+#usage-fab {
+  position: fixed;
+  bottom: calc(var(--safe-bottom, 0px) + 16px);
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg-alt);
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  z-index: 90;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+
+#usage-fab.hidden { display: none; }
+#usage-fab .lucide { width: 18px; height: 18px; }
+#usage-fab:hover { color: var(--text); border-color: var(--text-dimmer); }
+#usage-fab.active { color: var(--accent); border-color: var(--accent); }
+
+@media (max-width: 768px) {
+  #usage-panel {
+    top: auto;
+    bottom: calc(var(--safe-bottom, 0px) + 64px);
+    right: 12px;
+    left: 12px;
+    width: auto;
+  }
+}
+
 .status-dot.connected { background: var(--success); }
 .status-dot.processing { background: var(--success); }
 .status-dot.io { opacity: 0.15; }
