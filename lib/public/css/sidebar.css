@@ -335,12 +335,104 @@
 }
 
 .session-list-header {
-  padding: 24px 20px 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 24px 12px 4px 20px;
   font-size: 11px;
   font-weight: 600;
   color: var(--text-dimmer);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+#search-session-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--text-dimmer);
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s, background 0.15s;
+}
+
+#search-session-btn .lucide { width: 14px; height: 14px; }
+#search-session-btn:hover { color: var(--text); background: var(--sidebar-hover); }
+
+/* --- Session search --- */
+#session-search {
+  padding: 0 12px 8px;
+}
+
+#session-search.hidden {
+  display: none;
+}
+
+#session-search-input {
+  width: 100%;
+  padding: 7px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--input-bg);
+  color: var(--text);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+#session-search-input:focus {
+  border-color: var(--accent);
+}
+
+#session-search-input::placeholder {
+  color: var(--text-dimmer);
+}
+
+#search-session-btn.active {
+  color: var(--accent);
+}
+
+.session-item.search-match {
+  background: rgba(218, 119, 86, 0.1);
+  color: var(--text);
+}
+
+.session-item.search-match .session-item-text {
+  color: var(--accent);
+}
+
+.session-item.search-dimmed {
+  opacity: 0.35;
+}
+
+.session-highlight {
+  background: rgba(218, 119, 86, 0.3);
+  color: var(--text);
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+/* --- Search hit timeline (right-side markers) --- */
+.search-timeline {
+  position: absolute;
+  right: 8px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.search-blink {
+  animation: searchBlink 0.4s ease-in-out 3;
+}
+
+@keyframes searchBlink {
+  0%, 100% { box-shadow: none; }
+  50% { box-shadow: 0 0 0 2px var(--accent); border-radius: 12px; }
 }
 
 #session-list {

@@ -59,7 +59,13 @@
         <button id="file-browser-btn"><i data-lucide="folder-tree"></i> <span>File browser</span></button>
         <button id="terminal-sidebar-btn"><i data-lucide="square-terminal"></i> <span>Terminal</span></button>
       </div>
-      <div class="session-list-header">Sessions</div>
+      <div class="session-list-header">
+        <span>Sessions</span>
+        <button id="search-session-btn" type="button" title="Search sessions"><i data-lucide="search"></i></button>
+      </div>
+      <div id="session-search" class="hidden">
+        <input id="session-search-input" type="text" placeholder="Search sessions..." autocomplete="off" spellcheck="false" />
+      </div>
       <div id="session-list"></div>
     </div>
     <div id="sidebar-panel-files" class="sidebar-panel hidden">
