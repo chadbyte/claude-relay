@@ -642,6 +642,99 @@ pre.mermaid-error {
 .diff-content .diff-file-header { color: #8B949E; font-weight: 600; }
 .diff-content .diff-ctx { color: var(--text-muted); }
 
+/* --- Edit diff viewer --- */
+.edit-diff-header {
+  display: flex;
+  align-items: center;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-family: "SF Mono", Menlo, Monaco, monospace;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.edit-diff-path { flex: 1; }
+
+.edit-diff-toggles {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.edit-diff-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background: var(--bg-alt);
+  color: var(--text-dimmer);
+  cursor: pointer;
+}
+.edit-diff-toggle .lucide { width: 14px; height: 14px; }
+.edit-diff-toggle:hover { color: var(--text-secondary); background: var(--sidebar-hover); }
+.edit-diff-toggle.active { color: var(--text); background: var(--sidebar-active); }
+.edit-diff-toggle + .edit-diff-toggle { border-left: 1px solid var(--border); }
+
+.edit-diff-body {
+  display: flex;
+  max-height: 300px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.edit-diff-body pre {
+  margin: 0;
+  max-height: none;
+  overflow-y: visible;
+  font-family: "SF Mono", Menlo, Monaco, monospace;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.edit-diff-gutter {
+  flex-shrink: 0;
+  padding: 12px 12px 12px 14px;
+  text-align: right;
+  color: var(--text-dimmer);
+  user-select: none;
+  -webkit-user-select: none;
+  min-width: 36px;
+  border-right: 1px solid var(--border-subtle);
+}
+
+.edit-diff-content {
+  flex: 1;
+  padding: 12px 14px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.edit-diff-content .diff-add {
+  color: #3FB950;
+  background: rgba(63, 185, 80, 0.08);
+  display: inline-block;
+  width: 100%;
+}
+
+.edit-diff-content .diff-del {
+  color: #F85149;
+  background: rgba(248, 81, 73, 0.08);
+  display: inline-block;
+  width: 100%;
+}
+
+/* Split view */
+.edit-diff-split { overflow-x: auto; }
+.edit-diff-split .edit-diff-side-old { border-right: 1px solid var(--border); }
+.edit-diff-split .edit-diff-side-old,
+.edit-diff-split .edit-diff-side-new { min-width: 0; flex: 1; }
+.edit-diff-split .edit-diff-gutter { min-width: 30px; padding: 12px 8px 12px 10px; }
+
 /* --- Code viewer (Read tool) --- */
 .code-viewer {
   display: flex;
