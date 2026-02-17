@@ -157,8 +157,23 @@
     </div>
     <div id="messages"></div>
 
+    <div id="usage-panel" class="hidden">
+      <div class="usage-panel-header">
+        <span>Usage</span>
+        <button id="usage-panel-close" aria-label="Close"><i data-lucide="x"></i></button>
+      </div>
+      <div class="usage-panel-body">
+        <div class="usage-row"><span class="usage-label">Cost</span><span id="usage-cost" class="usage-value">$0.0000</span></div>
+        <div class="usage-row"><span class="usage-label">Input tokens</span><span id="usage-input" class="usage-value">0</span></div>
+        <div class="usage-row"><span class="usage-label">Output tokens</span><span id="usage-output" class="usage-value">0</span></div>
+        <div class="usage-row"><span class="usage-label">Cache read</span><span id="usage-cache-read" class="usage-value">0</span></div>
+        <div class="usage-row"><span class="usage-label">Cache write</span><span id="usage-cache-write" class="usage-value">0</span></div>
+        <div class="usage-row"><span class="usage-label">Turns</span><span id="usage-turns" class="usage-value">0</span></div>
+      </div>
+    </div>
     <div id="todo-sticky" class="hidden"></div>
     <button id="new-msg-btn" class="hidden" aria-label="Scroll to bottom"></button>
+    <button id="usage-fab" class="hidden" aria-label="Usage"><i data-lucide="gauge"></i></button>
     <div id="input-area">
       <div id="input-wrapper">
         <div id="slash-menu"></div>
