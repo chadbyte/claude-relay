@@ -365,6 +365,64 @@
   height: 100%;
 }
 
+/* --- Terminal key toolbar (mobile) --- */
+#terminal-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  background: #252525;
+  border-bottom: 1px solid #333;
+  flex-shrink: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+#terminal-toolbar.hidden { display: none; }
+
+.term-key {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  min-width: 40px;
+  padding: 0 10px;
+  border-radius: 6px;
+  border: 1px solid #444;
+  background: #333;
+  color: #d4d4d4;
+  font-family: "SF Mono", Menlo, Monaco, monospace;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  transition: background 0.1s, border-color 0.1s;
+}
+
+.term-key:active {
+  background: #555;
+  border-color: #666;
+}
+
+.term-key-toggle.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.term-key-arrow {
+  min-width: 34px;
+  padding: 0 6px;
+  font-size: 10px;
+}
+
+.term-key-spacer {
+  flex: 1;
+  min-width: 4px;
+}
+
 .terminal-hint {
   padding: 16px;
   font-size: 13px;
