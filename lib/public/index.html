@@ -116,6 +116,7 @@
             </label>
           </div>
         </div>
+        <button id="usage-header-btn" class="hidden" title="Usage"><i data-lucide="dollar-sign"></i></button>
         <button id="terminal-toggle-btn" title="Terminal"><i data-lucide="square-terminal"></i></button>
         <button id="qr-btn" title="QR Code"><i data-lucide="qr-code"></i></button>
         <div id="qr-overlay" class="hidden">
@@ -163,6 +164,34 @@
         <button id="usage-panel-close" aria-label="Close"><i data-lucide="x"></i></button>
       </div>
       <div class="usage-panel-body">
+        <div id="usage-rate-limits">
+          <div id="usage-loading" class="usage-loading">Loading...</div>
+          <div id="usage-error" class="usage-error hidden"></div>
+          <div id="usage-bars" class="hidden">
+            <div class="usage-bar-group" id="usage-bar-session">
+              <div class="usage-bar-label"><span>Current session</span><span class="usage-bar-pct" id="usage-pct-session"></span></div>
+              <div class="usage-bar-track"><div class="usage-bar-fill" id="usage-fill-session"></div></div>
+              <div class="usage-bar-reset" id="usage-reset-session"></div>
+            </div>
+            <div class="usage-bar-group" id="usage-bar-weekly">
+              <div class="usage-bar-label"><span>Current week (all models)</span><span class="usage-bar-pct" id="usage-pct-weekly"></span></div>
+              <div class="usage-bar-track"><div class="usage-bar-fill" id="usage-fill-weekly"></div></div>
+              <div class="usage-bar-reset" id="usage-reset-weekly"></div>
+            </div>
+            <div class="usage-bar-group" id="usage-bar-sonnet">
+              <div class="usage-bar-label"><span>Current week (Sonnet only)</span><span class="usage-bar-pct" id="usage-pct-sonnet"></span></div>
+              <div class="usage-bar-track"><div class="usage-bar-fill" id="usage-fill-sonnet"></div></div>
+              <div class="usage-bar-reset" id="usage-reset-sonnet"></div>
+            </div>
+            <div class="usage-bar-group hidden" id="usage-bar-extra">
+              <div class="usage-bar-label"><span>Extra usage</span><span class="usage-bar-pct" id="usage-pct-extra"></span></div>
+              <div class="usage-bar-track"><div class="usage-bar-fill usage-bar-fill-extra" id="usage-fill-extra"></div></div>
+              <div class="usage-bar-reset" id="usage-reset-extra"></div>
+            </div>
+          </div>
+        </div>
+        <div class="usage-divider" id="usage-session-divider"></div>
+        <div class="usage-section-label">Session</div>
         <div class="usage-row"><span class="usage-label">Cost</span><span id="usage-cost" class="usage-value">$0.0000</span></div>
         <div class="usage-row"><span class="usage-label">Input tokens</span><span id="usage-input" class="usage-value">0</span></div>
         <div class="usage-row"><span class="usage-label">Output tokens</span><span id="usage-output" class="usage-value">0</span></div>
