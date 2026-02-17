@@ -18,6 +18,9 @@ var debugMode = false;
 var autoYes = false;
 var cliPin = null;
 var shutdownMode = false;
+var addPath = null;
+var removePath = null;
+var listMode = false;
 
 for (var i = 0; i < args.length; i++) {
   if (args[i] === "-p" || args[i] === "--port") {
@@ -40,8 +43,19 @@ for (var i = 0; i < args.length; i++) {
     i++;
   } else if (args[i] === "--shutdown") {
     shutdownMode = true;
+  } else if (args[i] === "--add") {
+    addPath = args[i + 1] || ".";
+    i++;
+  } else if (args[i] === "--remove") {
+    removePath = args[i + 1] || null;
+    i++;
+  } else if (args[i] === "--list") {
+    listMode = true;
   } else if (args[i] === "-h" || args[i] === "--help") {
     console.log("Usage: claude-relay [-p|--port <port>] [--no-https] [--no-update] [--debug] [-y|--yes] [--pin <pin>] [--shutdown]");
+    console.log("       claude-relay --add <path>     Add a project to the running daemon");
+    console.log("       claude-relay --remove <path>  Remove a project from the running daemon");
+    console.log("       claude-relay --list            List registered projects");
     console.log("");
     console.log("Options:");
     console.log("  -p, --port <port>  Port to listen on (default: 2633)");
@@ -51,6 +65,9 @@ for (var i = 0; i < args.length; i++) {
     console.log("  -y, --yes          Skip interactive prompts (accept defaults)");
     console.log("  --pin <pin>        Set 6-digit PIN (use with --yes)");
     console.log("  --shutdown         Shut down the running relay daemon");
+    console.log("  --add <path>       Add a project directory (use '.' for current)");
+    console.log("  --remove <path>    Remove a project directory");
+    console.log("  --list             List all registered projects");
     process.exit(0);
   }
 }
@@ -70,6 +87,93 @@ if (shutdownMode) {
     }).catch(function (err) {
       console.error("Shutdown failed:", err.message);
       process.exit(1);
+    });
+  });
+  return;
+}
+
+// --- Handle --add before anything else ---
+if (addPath !== null) {
+  var absAdd = path.resolve(addPath);
+  try {
+    var stat = fs.statSync(absAdd);
+    if (!stat.isDirectory()) {
+      console.error("Not a directory: " + absAdd);
+      process.exit(1);
+    }
+  } catch (e) {
+    console.error("Directory not found: " + absAdd);
+    process.exit(1);
+  }
+  var addConfig = loadConfig();
+  isDaemonAliveAsync(addConfig).then(function (alive) {
+    if (!alive) {
+      console.error("No running daemon. Start with: npx claude-relay");
+      process.exit(1);
+    }
+    sendIPCCommand(socketPath(), { cmd: "add_project", path: absAdd }).then(function (res) {
+      if (res.ok) {
+        if (res.existing) {
+          console.log("Already registered: " + res.slug);
+        } else {
+          console.log("Added: " + res.slug + " \u2192 " + absAdd);
+        }
+        process.exit(0);
+      } else {
+        console.error("Failed: " + (res.error || "unknown error"));
+        process.exit(1);
+      }
+    });
+  });
+  return;
+}
+
+// --- Handle --remove before anything else ---
+if (removePath !== null) {
+  var absRemove = path.resolve(removePath);
+  var removeConfig = loadConfig();
+  isDaemonAliveAsync(removeConfig).then(function (alive) {
+    if (!alive) {
+      console.error("No running daemon. Start with: npx claude-relay");
+      process.exit(1);
+    }
+    sendIPCCommand(socketPath(), { cmd: "remove_project", path: absRemove }).then(function (res) {
+      if (res.ok) {
+        console.log("Removed: " + path.basename(absRemove));
+        process.exit(0);
+      } else {
+        console.error("Failed: " + (res.error || "project not found"));
+        process.exit(1);
+      }
+    });
+  });
+  return;
+}
+
+// --- Handle --list before anything else ---
+if (listMode) {
+  var listConfig = loadConfig();
+  isDaemonAliveAsync(listConfig).then(function (alive) {
+    if (!alive) {
+      console.error("No running daemon. Start with: npx claude-relay");
+      process.exit(1);
+    }
+    sendIPCCommand(socketPath(), { cmd: "get_status" }).then(function (res) {
+      if (!res.ok || !res.projects || res.projects.length === 0) {
+        console.log("No projects registered.");
+        process.exit(0);
+        return;
+      }
+      console.log("Projects (" + res.projects.length + "):\n");
+      for (var p = 0; p < res.projects.length; p++) {
+        var proj = res.projects[p];
+        var label = "  " + proj.slug;
+        if (proj.title) label += " (" + proj.title + ")";
+        label += "\n    " + proj.path;
+        console.log(label);
+      }
+      console.log("");
+      process.exit(0);
     });
   });
   return;
