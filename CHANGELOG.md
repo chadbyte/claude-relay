@@ -2,6 +2,12 @@
 
 ## WIP
 
+## v2.2.1
+
+- Add `--add`, `--remove`, `--list` CLI flags for non-interactive project management (#75)
+- Show active task with spinner in collapsed sticky todo overlay
+- Fix sidebar footer Usage button not opening usage panel (pass `toggleUsagePanel` to notifications context)
+
 ## v2.2.0
 
 - Add full-text session search with hit timeline (search all message content, highlighted matches in sidebar, rewind-style timeline markers with click-to-navigate and blink)
