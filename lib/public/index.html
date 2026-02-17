@@ -74,6 +74,9 @@
         <i data-lucide="ellipsis" style="width:14px;height:14px"></i>
       </button>
       <div id="sidebar-footer-menu" class="hidden">
+        <button class="sidebar-menu-item" id="footer-usage">
+          <i data-lucide="gauge"></i> <span>Usage</span>
+        </button>
         <a class="sidebar-menu-item" href="https://github.com/chadbyte/claude-relay" target="_blank" rel="noopener">
           <i data-lucide="github"></i> <span>GitHub</span>
         </a>
@@ -117,8 +120,8 @@
           </div>
         </div>
         <button id="usage-header-btn" class="hidden" title="Usage"><i data-lucide="dollar-sign"></i></button>
-        <button id="terminal-toggle-btn" title="Terminal"><i data-lucide="square-terminal"></i></button>
-        <button id="qr-btn" title="QR Code"><i data-lucide="qr-code"></i></button>
+        <button id="terminal-toggle-btn" title="Terminal"><i data-lucide="square-terminal"></i><span id="terminal-count" class="hidden"></span></button>
+        <button id="qr-btn" title="Share"><i data-lucide="share"></i></button>
         <div id="qr-overlay" class="hidden">
           <div id="qr-overlay-inner">
             <div id="qr-canvas"></div>
