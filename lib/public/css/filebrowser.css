@@ -384,6 +384,20 @@
 .terminal-tab.active .terminal-tab-close { display: flex; }
 .terminal-tab-close:hover { background: rgba(255,255,255,0.1); color: var(--text); }
 
+.terminal-tab-label { cursor: default; }
+
+.terminal-tab-rename {
+  background: var(--bg);
+  border: 1px solid var(--accent);
+  border-radius: 3px;
+  color: var(--text);
+  font-size: 12px;
+  font-family: "SF Mono", Menlo, Monaco, monospace;
+  padding: 1px 4px;
+  outline: none;
+  width: 100px;
+}
+
 .terminal-header-actions {
   display: flex;
   align-items: center;
