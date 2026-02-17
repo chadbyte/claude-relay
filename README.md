@@ -87,8 +87,10 @@ Scan the QR code with your phone to connect instantly, or open the URL displayed
 
 * **Push Approvals** - Approve or reject from your phone while away, so Claude Code does not get stuck waiting.
 * **Multi Project Daemon** - Manage all projects via a single port.
+* **Usage and Model Switching** - View token usage, rate limit bars, and switch models from the browser.
+* **Session Search** - Full-text search across all session messages with hit timeline.
 * **Auto Session Logs (JSONL)** - Conversations and execution history are always saved locally. No data loss on crashes or restarts. Location: `./.claude-relay/sessions/`
-* **File Browser and Terminal** - Inspect files and execute commands directly from the browser.
+* **File Browser and Terminal** - Inspect files, execute commands, and manage multiple terminal tabs from the browser.
 
 > Note: Session logs may contain prompts, outputs, and commands. Do not share this folder.
 
@@ -107,22 +109,30 @@ Scan the QR code with your phone to connect instantly, or open the URL displayed
 * **Project Names** - Custom names make it easy to distinguish tabs.
 * **Session Persistence** - Sessions survive server restarts, browser crashes, and network drops.
 * **Session Handoff** - Start in the terminal, continue on your phone, pass back to desktop.
+* **Session Search** - Full-text search across all session content with highlighted results and a rewind-style hit timeline.
 * **Rewind (Native Claude Code)** - Accessible directly from the browser UI.
+* **Draft Persistence** - Unsent messages are saved per session and restored when you switch back.
 
 **Rendering and Tools**
 
 * **Mermaid and Markdown** - Proper rendering for diagrams, tables, and code blocks.
 * **Syntax Highlighting** - Support for over 180 languages with copy buttons on every block.
-* **File Browser** - Sidebar navigation with file previews and markdown rendering.
-* **Built in Terminal** - Full shell access within the browser.
+* **File Browser** - Sidebar navigation with file previews, markdown rendering, and live-reload on external changes.
+* **Built in Terminal** - Multi-tab terminal sessions with rename, reorder, and a mobile special-key toolbar.
 * **Slash Commands** - Execute standard Claude Code commands from the browser, with autocomplete.
+* **Usage Panel** - View token counts and rate limit progress bars via `/usage` command or header button.
+* **Model Switching** - Change the active model directly from the browser header.
+* **Plan Approval** - Review and approve Claude implementation plans from the browser UI.
 
 **UI**
 
 * **Mobile Optimized** - Large approve and reject buttons. Behaves like a native app via PWA.
 * **Real time Sync** - All devices view the exact same session state.
 * **QR Code** - Scan to connect instantly.
-* **Image Paste** - Paste images directly from your clipboard into the input.
+* **Image Paste and Camera** - Paste images from clipboard or attach photos directly from your camera.
+* **Send While Processing** - Queue messages without waiting for the current response to finish.
+* **Sticky Todo Overlay** - TodoWrite tasks float as a progress bar while you scroll through the conversation.
+* **Scroll Position Hold** - Reading earlier messages will not get interrupted by new content arriving.
 
 **Server and Security**
 

@@ -2,6 +2,35 @@
 
 ## WIP
 
+## v2.2.0
+
+- Add full-text session search with hit timeline (search all message content, highlighted matches in sidebar, rewind-style timeline markers with click-to-navigate and blink)
+- Add live-reload file viewer: files update automatically when changed externally via `fs.watch()` (#80)
+- Add persistent multi-tab terminal sessions with rename, reorder, and independent scrollback (#76)
+- Add usage panel with `/usage` slash command and rate limit progress bars (#66)
+- Add model switching UI in header (#67)
+- Add plan approval UI: render `ExitPlanMode` as confirmation card with approve/reject (#74)
+- Add image attach button with camera and photo library picker for mobile (#48)
+- Add send messages while processing (queue input without waiting for completion) (#52)
+- Add draft persistence: unsent input saved per session, restored on switch (#60)
+- Add compacting indicator when session context is being compacted (#44)
+- Add sticky todo overlay: `TodoWrite` tasks float during scroll with collapsed progress bar
+- Add copy button to implementation plan cards
+- Add special key toolbar for terminal on mobile (Tab, Ctrl+C, arrows) (#58)
+- Add newline input support on mobile keyboard (#68)
+- Add hold scroll position when user is reading earlier messages (#49)
+- UI polish batch: terminal tab badge, tab rename, share button, scrollbar styling, tooltip, usage menu
+- Fix Edit tool diff rendering with line numbers, file header, and split view (#73)
+- Fix fallback CLI rendering for macOS Terminal.app
+- Fix answered AskUserQuestion reverting to pending on page refresh (#79)
+- Fix SDK import failures not surfaced to user (#56)
+- Fix push notifications firing when PWA is in foreground (#53)
+- Fix send/stop button tap target increased to 44px (#50)
+- Fix terminal height constrained to visible area above keyboard on mobile (#57)
+- Fix stale push subscriptions purged on startup (#51)
+- Fix duplicate plan content in plan approval UI
+- Fix CLAUDE.md and settings files not loaded in SDK sessions
+
 ## v2.1.3
 
 - Fix certificate trust detection on iOS: onboarding page always showed "Certificate not trusted yet" even after installing and trusting the mkcert CA
