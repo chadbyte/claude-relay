@@ -78,6 +78,7 @@ if (shutdownMode) {
 var cwd = process.cwd();
 
 // --- ANSI helpers ---
+var isBasicTerm = process.env.TERM_PROGRAM === "Apple_Terminal";
 var a = {
   reset: "\x1b[0m",
   bold: "\x1b[1m",
@@ -89,6 +90,9 @@ var a = {
 };
 
 function gradient(text) {
+  if (isBasicTerm) {
+    return a.yellow + text + a.reset;
+  }
   // Orange (#DA7756) → Gold (#D4A574)
   var r0 = 218, g0 = 119, b0 = 86;
   var r1 = 212, g1 = 165, b1 = 116;
@@ -258,7 +262,7 @@ function ensureCerts(ip) {
 
 // --- Logo ---
 function printLogo() {
-  var c = "\x1b[38;2;218;119;86m";
+  var c = isBasicTerm ? a.yellow : "\x1b[38;2;218;119;86m";
   var r = a.reset;
   var lines = [
     "  ██████╗ ██╗       █████╗  ██╗   ██╗ ██████╗  ███████╗     ██████╗  ███████╗ ██╗       █████╗  ██╗   ██╗",
@@ -1029,7 +1033,7 @@ function showMainMenu(config, ip) {
     }
 
     if (ip !== "localhost") {
-      qrcode.generate(url, { small: true }, function (code) {
+      qrcode.generate(url, { small: !isBasicTerm }, function (code) {
         var lines = code.split("\n").map(function (l) { return "  " + l; }).join("\n");
         console.log(lines);
         afterQr();
@@ -1464,7 +1468,7 @@ function showSetupGuide(config, ip, goBack) {
     log(sym.bar + "  " + a.dim + "Scan the QR code or open:" + a.reset);
     log(sym.bar + "  " + a.bold + setupUrl + a.reset);
     log(sym.bar);
-    qrcode.generate(setupUrl, { small: true }, function (code) {
+    qrcode.generate(setupUrl, { small: !isBasicTerm }, function (code) {
       var lines = code.split("\n").map(function (l) { return "  " + sym.bar + "  " + l; }).join("\n");
       console.log(lines);
       log(sym.bar);
