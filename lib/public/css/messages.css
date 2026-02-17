@@ -46,6 +46,21 @@
 #todo-sticky .todo-sticky-chevron { display: inline-flex; color: var(--text-muted); transition: transform 0.2s; }
 #todo-sticky .todo-sticky-chevron .lucide { width: 12px; height: 12px; }
 #todo-sticky.collapsed .todo-sticky-chevron { transform: rotate(-90deg); }
+#todo-sticky .todo-sticky-active { display: none; }
+#todo-sticky.collapsed .todo-sticky-active {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+  font-size: 11px;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#todo-sticky.collapsed .todo-sticky-active .lucide { width: 12px; height: 12px; color: var(--accent); flex-shrink: 0; }
+#todo-sticky.collapsed .todo-sticky-title { flex: none; }
 
 #todo-sticky .todo-sticky-progress { height: 2px; background: var(--border); }
 #todo-sticky .todo-sticky-progress-bar { height: 100%; background: var(--success); transition: width 0.3s ease; }
