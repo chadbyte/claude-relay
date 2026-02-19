@@ -2,6 +2,16 @@
 
 ## WIP
 
+## v2.2.3
+
+- Fix setup page showing Tailscale onboarding for LAN-only users (#90)
+- Add `?mode=lan` query parameter to skip Tailscale step when remote access is not needed
+- Always ask "Access from outside?" even when Tailscale is installed
+- Generate mkcert certs with all routable IPs (Tailscale + LAN) using whitelist
+- Auto-regenerate cert when any routable IP is missing from SAN
+- Reorder Android setup: push notifications first, PWA optional with skip
+- Add iOS notice that PWA install is required for push notifications
+
 ## v2.2.2
 
 - Remove OAuth usage API to comply with Anthropic Consumer ToS (OAuth tokens are now restricted to Claude Code and claude.ai only)
