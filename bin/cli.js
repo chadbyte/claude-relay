@@ -1566,7 +1566,12 @@ function showSetupGuide(config, ip, goBack) {
       showSetupQR();
     } else {
       log(sym.bar + "  " + a.yellow + "mkcert not found." + a.reset);
-      log(sym.bar + "  " + a.dim + "Install: " + a.reset + "brew install mkcert && mkcert -install");
+      var mkcertHint = process.platform === "win32"
+        ? "choco install mkcert && mkcert -install"
+        : process.platform === "darwin"
+          ? "brew install mkcert && mkcert -install"
+          : "apt install mkcert && mkcert -install";
+      log(sym.bar + "  " + a.dim + "Install: " + a.reset + mkcertHint);
       log(sym.bar);
       promptSelect("Select", [
         { label: "Re-check", value: "recheck" },
