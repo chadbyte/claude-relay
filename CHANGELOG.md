@@ -2,6 +2,9 @@
 
 ## WIP
 
+- Auto-restart daemon with HTTPS when mkcert is installed but TLS was not active (#90)
+- Reload config from disk after setup guide completes (pick up TLS state changes)
+
 ## v2.2.4
 
 - Fix Windows IPC failure: use named pipe (`\\.\pipe\claude-relay-daemon`) instead of Unix domain socket

@@ -1142,6 +1142,96 @@ async function forkDaemon(pin, keepAwake, extraProjects) {
 }
 
 // ==============================
+// Restart daemon with TLS enabled
+// ==============================
+async function restartDaemonWithTLS(config, callback) {
+  var ip = getLocalIP();
+  var certPaths = ensureCerts(ip);
+  if (!certPaths) {
+    callback(config);
+    return;
+  }
+
+  // Shut down old daemon
+  stopDaemonWatcher();
+  try {
+    await sendIPCCommand(socketPath(), { cmd: "shutdown" });
+  } catch (e) {}
+
+  // Wait for port to be released
+  var waited = 0;
+  while (waited < 5000) {
+    await new Promise(function (resolve) { setTimeout(resolve, 300); });
+    waited += 300;
+    var free = await isPortFree(config.port);
+    if (free) break;
+  }
+  clearStaleConfig();
+
+  // Re-fork with TLS
+  var newConfig = {
+    pid: null,
+    port: config.port,
+    pinHash: config.pinHash || null,
+    tls: true,
+    debug: config.debug || false,
+    keepAwake: config.keepAwake || false,
+    projects: config.projects || [],
+  };
+
+  ensureConfigDir();
+  saveConfig(newConfig);
+
+  var daemonScript = path.join(__dirname, "..", "lib", "daemon.js");
+  var logFile = logPath();
+  var logFd = fs.openSync(logFile, "a");
+
+  var child = spawn(process.execPath, [daemonScript], {
+    detached: true,
+    windowsHide: true,
+    stdio: ["ignore", logFd, logFd],
+    env: Object.assign({}, process.env, {
+      CLAUDE_RELAY_CONFIG: configPath(),
+    }),
+  });
+  child.unref();
+  fs.closeSync(logFd);
+
+  newConfig.pid = child.pid;
+  saveConfig(newConfig);
+
+  await new Promise(function (resolve) { setTimeout(resolve, 800); });
+
+  var alive = await isDaemonAliveAsync(newConfig);
+  if (!alive) {
+    log(sym.warn + "  " + a.yellow + "Failed to restart with HTTPS, falling back to HTTP..." + a.reset);
+    // Re-fork without TLS so the server is at least running
+    newConfig.tls = false;
+    saveConfig(newConfig);
+    var logFd2 = fs.openSync(logFile, "a");
+    var child2 = spawn(process.execPath, [daemonScript], {
+      detached: true,
+      windowsHide: true,
+      stdio: ["ignore", logFd2, logFd2],
+      env: Object.assign({}, process.env, {
+        CLAUDE_RELAY_CONFIG: configPath(),
+      }),
+    });
+    child2.unref();
+    fs.closeSync(logFd2);
+    newConfig.pid = child2.pid;
+    saveConfig(newConfig);
+    await new Promise(function (resolve) { setTimeout(resolve, 800); });
+    startDaemonWatcher();
+    callback(newConfig);
+    return;
+  }
+
+  startDaemonWatcher();
+  callback(newConfig);
+}
+
+// ==============================
 // Show server started info
 // ==============================
 function showServerStarted(config, ip) {
@@ -1210,6 +1300,7 @@ function showMainMenu(config, ip) {
         switch (choice) {
           case "notifications":
             showSetupGuide(config, ip, function () {
+              config = loadConfig() || config;
               showMainMenu(config, ip);
             });
             break;
@@ -1570,6 +1661,15 @@ function showSetupGuide(config, ip, goBack) {
     log(sym.pointer + "  " + a.bold + "HTTPS Setup (for push notifications)" + a.reset);
     if (mcReady) {
       log(sym.bar + "  " + a.green + "mkcert is installed" + a.reset);
+      if (!config.tls) {
+        log(sym.bar + "  " + a.dim + "Restarting server with HTTPS..." + a.reset);
+        restartDaemonWithTLS(config, function (newConfig) {
+          config = newConfig;
+          log(sym.bar);
+          showSetupQR();
+        });
+        return;
+      }
       log(sym.bar);
       showSetupQR();
     } else {
@@ -1697,6 +1797,7 @@ function showSettingsMenu(config, ip) {
     switch (choice) {
       case "guide":
         showSetupGuide(config, ip, function () {
+          config = loadConfig() || config;
           showSettingsMenu(config, ip);
         });
         break;
