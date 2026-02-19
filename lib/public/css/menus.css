@@ -485,68 +485,29 @@
   padding: 8px 14px 12px;
 }
 
-/* --- Rate limit bars --- */
-.usage-loading {
-  color: var(--text-muted);
-  padding: 8px 0;
-  text-align: center;
-}
-
-.usage-error {
-  color: var(--error);
-  padding: 6px 0;
-  font-size: 11px;
-  line-height: 1.4;
-}
-
-.usage-error.hidden { display: none; }
-
-.usage-bar-group {
-  margin-bottom: 10px;
-}
-
-.usage-bar-group:last-child { margin-bottom: 0; }
-.usage-bar-group.hidden { display: none; }
-
-.usage-bar-label {
+/* --- Plan usage link --- */
+.usage-external-link {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 4px;
-  color: var(--text-secondary);
-  font-size: 11px;
-}
-
-.usage-bar-pct {
-  font-family: "SF Mono", Menlo, Monaco, monospace;
-  font-weight: 600;
-  font-size: 11px;
-}
-
-.usage-bar-track {
-  height: 6px;
-  background: var(--input-bg);
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 6px;
   border: 1px solid var(--border-subtle);
-  border-radius: 3px;
-  overflow: hidden;
+  background: var(--input-bg);
+  color: var(--text-secondary);
+  font-size: 12px;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
 }
-
-.usage-bar-fill {
-  height: 100%;
-  border-radius: 3px;
-  background: var(--accent);
-  transition: width 0.4s ease;
-  min-width: 0;
+.usage-external-link:hover {
+  background: var(--hover-bg);
+  color: var(--text-primary);
 }
-
-.usage-bar-fill.warn { background: var(--warning, #E5A84B); }
-.usage-bar-fill.critical { background: var(--error); }
-.usage-bar-fill-extra { background: var(--text-dimmer); }
-
-.usage-bar-reset {
-  font-size: 10px;
-  color: var(--text-muted);
-  margin-top: 2px;
+.usage-external-link svg {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
 }
 
 .usage-divider {
