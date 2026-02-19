@@ -85,24 +85,6 @@
   flex-shrink: 0;
 }
 
-/* --- Usage header button (mobile only) --- */
-#usage-header-btn {
-  display: none;
-  align-items: center;
-  justify-content: center;
-  background: none;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  color: var(--text-dimmer);
-  cursor: pointer;
-  padding: 4px;
-  transition: color 0.15s, background 0.15s, border-color 0.15s;
-}
-#usage-header-btn .lucide { width: 15px; height: 15px; }
-#usage-header-btn:hover { color: var(--text-secondary); background: rgba(255,255,255,0.04); border-color: var(--border); }
-#usage-header-btn.active { color: var(--accent); border-color: var(--accent); }
-#usage-header-btn.hidden { display: none !important; }
-
 /* --- Terminal toggle button --- */
 #terminal-toggle-btn {
   display: flex;
@@ -541,31 +523,6 @@
   font-weight: 500;
 }
 
-/* --- Usage FAB --- */
-#usage-fab {
-  position: fixed;
-  bottom: calc(var(--safe-bottom, 0px) + 16px);
-  right: 16px;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 1px solid var(--border);
-  background: var(--bg-alt);
-  color: var(--text-muted);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  z-index: 90;
-  transition: color 0.15s, background 0.15s, border-color 0.15s;
-}
-
-#usage-fab.hidden { display: none; }
-#usage-fab .lucide { width: 18px; height: 18px; }
-#usage-fab:hover { color: var(--text); border-color: var(--text-dimmer); }
-#usage-fab.active { color: var(--accent); border-color: var(--accent); }
-
 @media (max-width: 768px) {
   #usage-panel {
     top: auto;
@@ -575,8 +532,6 @@
     width: auto;
     max-height: 60vh;
   }
-  #usage-fab { display: none !important; }
-  #usage-header-btn:not(.hidden) { display: flex; }
 }
 
 .status-dot.connected { background: var(--success); }
