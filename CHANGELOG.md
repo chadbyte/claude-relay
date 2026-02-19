@@ -2,6 +2,19 @@
 
 ## WIP
 
+## v2.2.4
+
+- Fix Windows IPC failure: use named pipe (`\\.\pipe\claude-relay-daemon`) instead of Unix domain socket
+- Fix terminal shell fallback to `cmd.exe`/`COMSPEC` on Windows instead of `/bin/bash`
+- Fix browser open using `cmd /c start` on Windows instead of `open`/`xdg-open`
+- Fix daemon spawn flashing console window on Windows (`windowsHide`)
+- Fix daemon graceful shutdown on Windows via `SIGHUP` listener
+- Fix mkcert invocation breaking on paths with spaces (use `execFileSync` with array args)
+- Fix file path splitting for Windows backslash paths in push notification titles
+- Fix `path.relative` sending backslash paths to browser client
+- Show platform-appropriate mkcert install command (choco/apt/brew)
+- Hide keep-awake toggle on non-macOS platforms (caffeinate is macOS only)
+
 ## v2.2.3
 
 - Fix setup page showing Tailscale onboarding for LAN-only users (#90)

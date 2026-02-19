@@ -10,6 +10,17 @@ var { loadConfig, saveConfig, configPath, socketPath, logPath, ensureConfigDir, 
 var { sendIPCCommand } = require("../lib/ipc");
 var { generateAuthToken } = require("../lib/server");
 
+function openUrl(url) {
+  try {
+    if (process.platform === "win32") {
+      spawn("cmd", ["/c", "start", "", url], { stdio: "ignore", detached: true, windowsHide: true }).unref();
+    } else {
+      var cmd = process.platform === "darwin" ? "open" : "xdg-open";
+      spawn(cmd, [url], { stdio: "ignore", detached: true }).unref();
+    }
+  } catch (e) {}
+}
+
 var args = process.argv.slice(2);
 var port = 2633;
 var useHttps = true;
@@ -388,10 +399,8 @@ function ensureCerts(ip) {
   }
 
   try {
-    execSync(
-      "mkcert -key-file " + keyPath + " -cert-file " + certPath + " " + domains.join(" "),
-      { stdio: "pipe" }
-    );
+    var mkcertArgs = ["-key-file", keyPath, "-cert-file", certPath].concat(domains);
+    execFileSync("mkcert", mkcertArgs, { stdio: "pipe" });
   } catch (err) {
     return null;
   }
@@ -1026,9 +1035,13 @@ function setup(callback) {
           log(sym.bar);
 
           promptPin(function (pin) {
-            promptToggle("Keep awake", "Prevent system sleep while relay is running", false, function (keepAwake) {
-              callback(pin, keepAwake);
-            });
+            if (process.platform === "darwin") {
+              promptToggle("Keep awake", "Prevent system sleep while relay is running", false, function (keepAwake) {
+                callback(pin, keepAwake);
+              });
+            } else {
+              callback(pin, false);
+            }
           });
         });
       });
@@ -1098,6 +1111,7 @@ async function forkDaemon(pin, keepAwake, extraProjects) {
 
   var child = spawn(process.execPath, [daemonScript], {
     detached: true,
+    windowsHide: true,
     stdio: ["ignore", logFd, logFd],
     env: Object.assign({}, process.env, {
       CLAUDE_RELAY_CONFIG: configPath(),
@@ -1246,17 +1260,11 @@ function showMainMenu(config, ip) {
         ],
         keys: [
           { key: "o", onKey: function () {
-            try {
-              var openCmd = process.platform === "darwin" ? "open" : "xdg-open";
-              spawn(openCmd, [url], { stdio: "ignore", detached: true }).unref();
-            } catch (e) {}
+            openUrl(url);
             showMainMenu(config, ip);
           }},
           { key: "s", onKey: function () {
-            try {
-              var openCmd = process.platform === "darwin" ? "open" : "xdg-open";
-              spawn(openCmd, ["https://github.com/chadbyte/claude-relay"], { stdio: "ignore", detached: true }).unref();
-            } catch (e) {}
+            openUrl("https://github.com/chadbyte/claude-relay");
             showMainMenu(config, ip);
           }},
         ],
@@ -1566,7 +1574,12 @@ function showSetupGuide(config, ip, goBack) {
       showSetupQR();
     } else {
       log(sym.bar + "  " + a.yellow + "mkcert not found." + a.reset);
-      log(sym.bar + "  " + a.dim + "Install: " + a.reset + "brew install mkcert && mkcert -install");
+      var mkcertHint = process.platform === "win32"
+        ? "choco install mkcert && mkcert -install"
+        : process.platform === "darwin"
+          ? "brew install mkcert && mkcert -install"
+          : "apt install mkcert && mkcert -install";
+      log(sym.bar + "  " + a.dim + "Install: " + a.reset + mkcertHint);
       log(sym.bar);
       promptSelect("Select", [
         { label: "Re-check", value: "recheck" },
@@ -1658,7 +1671,9 @@ function showSettingsMenu(config, ip) {
     log(sym.bar + "  mkcert       " + mcStatus);
     log(sym.bar + "  HTTPS        " + tlsStatus);
     log(sym.bar + "  PIN          " + pinStatus);
-    log(sym.bar + "  Keep awake   " + awakeStatus);
+    if (process.platform === "darwin") {
+      log(sym.bar + "  Keep awake   " + awakeStatus);
+    }
     log(sym.bar);
 
     // Build items
@@ -1672,7 +1687,9 @@ function showSettingsMenu(config, ip) {
     } else {
       items.push({ label: "Set PIN", value: "pin" });
     }
-    items.push({ label: isAwake ? "Disable keep awake" : "Enable keep awake", value: "awake" });
+    if (process.platform === "darwin") {
+      items.push({ label: isAwake ? "Disable keep awake" : "Enable keep awake", value: "awake" });
+    }
     items.push({ label: "View logs", value: "logs" });
     items.push({ label: "Back", value: "back" });
 
