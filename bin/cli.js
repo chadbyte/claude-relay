@@ -1035,9 +1035,13 @@ function setup(callback) {
           log(sym.bar);
 
           promptPin(function (pin) {
-            promptToggle("Keep awake", "Prevent system sleep while relay is running", false, function (keepAwake) {
-              callback(pin, keepAwake);
-            });
+            if (process.platform === "darwin") {
+              promptToggle("Keep awake", "Prevent system sleep while relay is running", false, function (keepAwake) {
+                callback(pin, keepAwake);
+              });
+            } else {
+              callback(pin, false);
+            }
           });
         });
       });
@@ -1667,7 +1671,9 @@ function showSettingsMenu(config, ip) {
     log(sym.bar + "  mkcert       " + mcStatus);
     log(sym.bar + "  HTTPS        " + tlsStatus);
     log(sym.bar + "  PIN          " + pinStatus);
-    log(sym.bar + "  Keep awake   " + awakeStatus);
+    if (process.platform === "darwin") {
+      log(sym.bar + "  Keep awake   " + awakeStatus);
+    }
     log(sym.bar);
 
     // Build items
@@ -1681,7 +1687,9 @@ function showSettingsMenu(config, ip) {
     } else {
       items.push({ label: "Set PIN", value: "pin" });
     }
-    items.push({ label: isAwake ? "Disable keep awake" : "Enable keep awake", value: "awake" });
+    if (process.platform === "darwin") {
+      items.push({ label: isAwake ? "Disable keep awake" : "Enable keep awake", value: "awake" });
+    }
     items.push({ label: "View logs", value: "logs" });
     items.push({ label: "Back", value: "back" });
 
