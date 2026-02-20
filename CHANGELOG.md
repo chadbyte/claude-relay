@@ -6,9 +6,18 @@
 
 - Add `--dangerously-skip-permissions` CLI flag to bypass all permission prompts via SDK native `permissionMode` (#100)
   - Requires `--pin` for safety; shows red warning banner in web UI when active
-- Fix iOS push notifications not delivered in background by adding `urgency: high` header (#94)
+- Fix iOS push notifications not delivered in background (#94)
 - Fix notification click opening blank session instead of correct project (#94)
 - Fix silent validation pushes showing empty notifications in service worker (#94)
+- Fix duplicate done notifications when both browser and push notifications active (#94)
+- Fix stale push subscriptions accumulating on PWA reinstall (client sends `replaceEndpoint`)
+- Fix share button copying localhost URL instead of LAN/Tailscale address
+- Fix setup onboarding showing Tailscale page after selecting LAN-only mode
+- Fix dashboard appearing before setup completion for PWA users
+- Fix foreground notification suppression on iOS PWA (restore pre-v2.2.0 type-based exceptions)
+- Add welcome push notification on push subscribe with confetti
+- Auto-hide onboarding banner when push notifications are active
+- Restore most recently used session on daemon restart
 - Add `/context` command with context window usage panel (#84)
   - Minimizable context panel with inline mini bar (#96)
   - Green/yellow/red color coding for context bar
