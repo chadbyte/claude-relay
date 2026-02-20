@@ -419,23 +419,34 @@
 .model-menu-item:hover { background: rgba(255,255,255,0.05); color: var(--text); }
 .model-menu-item.active { color: var(--accent); font-weight: 600; }
 
-/* --- Usage panel --- */
-#usage-panel {
+/* --- Info panels container --- */
+#info-panels {
   position: fixed;
   top: 80px;
   right: 16px;
   width: 280px;
   max-height: calc(100vh - 160px);
   overflow-y: auto;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+#info-panels:empty { display: none; }
+
+/* --- Usage panel --- */
+#usage-panel, #status-panel {
   background: var(--bg-alt);
   border: 1px solid var(--border);
   border-radius: 12px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-  z-index: 50;
   font-size: 12px;
+  pointer-events: auto;
 }
 
-#usage-panel.hidden { display: none; }
+#usage-panel.hidden, #status-panel.hidden { display: none; }
 
 .usage-panel-header {
   display: flex;
@@ -524,7 +535,7 @@
 }
 
 @media (max-width: 768px) {
-  #usage-panel {
+  #info-panels {
     top: auto;
     bottom: calc(var(--safe-bottom, 0px) + 64px);
     right: 12px;

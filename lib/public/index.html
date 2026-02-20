@@ -84,6 +84,9 @@
         <a class="sidebar-menu-item" href="https://github.com/chadbyte/claude-relay" target="_blank" rel="noopener">
           <i data-lucide="github"></i> <span>GitHub</span>
         </a>
+        <button class="sidebar-menu-item" id="footer-status">
+          <i data-lucide="activity"></i> <span>Status</span>
+        </button>
         <button class="sidebar-menu-item" id="footer-update-check">
           <i data-lucide="refresh-cw"></i> <span>Check for updates</span>
         </button>
@@ -164,24 +167,47 @@
     </div>
     <div id="messages"></div>
 
-    <div id="usage-panel" class="hidden">
-      <div class="usage-panel-header">
-        <span>Usage</span>
-        <button id="usage-panel-close" aria-label="Close"><i data-lucide="x"></i></button>
+    <div id="info-panels">
+      <div id="usage-panel" class="hidden">
+        <div class="usage-panel-header">
+          <span>Usage</span>
+          <button id="usage-panel-close" aria-label="Close"><i data-lucide="x"></i></button>
+        </div>
+        <div class="usage-panel-body">
+          <a href="https://claude.ai/settings/usage" target="_blank" rel="noopener" class="usage-external-link">
+            <span>Check plan usage on claude.ai</span>
+            <i data-lucide="external-link"></i>
+          </a>
+          <div class="usage-divider"></div>
+          <div class="usage-section-label">Session</div>
+          <div class="usage-row"><span class="usage-label">Cost</span><span id="usage-cost" class="usage-value">$0.0000</span></div>
+          <div class="usage-row"><span class="usage-label">Input tokens</span><span id="usage-input" class="usage-value">0</span></div>
+          <div class="usage-row"><span class="usage-label">Output tokens</span><span id="usage-output" class="usage-value">0</span></div>
+          <div class="usage-row"><span class="usage-label">Cache read</span><span id="usage-cache-read" class="usage-value">0</span></div>
+          <div class="usage-row"><span class="usage-label">Cache write</span><span id="usage-cache-write" class="usage-value">0</span></div>
+          <div class="usage-row"><span class="usage-label">Turns</span><span id="usage-turns" class="usage-value">0</span></div>
+        </div>
       </div>
-      <div class="usage-panel-body">
-        <a href="https://claude.ai/settings/usage" target="_blank" rel="noopener" class="usage-external-link">
-          <span>Check plan usage on claude.ai</span>
-          <i data-lucide="external-link"></i>
-        </a>
-        <div class="usage-divider"></div>
-        <div class="usage-section-label">Session</div>
-        <div class="usage-row"><span class="usage-label">Cost</span><span id="usage-cost" class="usage-value">$0.0000</span></div>
-        <div class="usage-row"><span class="usage-label">Input tokens</span><span id="usage-input" class="usage-value">0</span></div>
-        <div class="usage-row"><span class="usage-label">Output tokens</span><span id="usage-output" class="usage-value">0</span></div>
-        <div class="usage-row"><span class="usage-label">Cache read</span><span id="usage-cache-read" class="usage-value">0</span></div>
-        <div class="usage-row"><span class="usage-label">Cache write</span><span id="usage-cache-write" class="usage-value">0</span></div>
-        <div class="usage-row"><span class="usage-label">Turns</span><span id="usage-turns" class="usage-value">0</span></div>
+      <div id="status-panel" class="hidden">
+        <div class="usage-panel-header">
+          <span>Status</span>
+          <button id="status-panel-close" aria-label="Close"><i data-lucide="x"></i></button>
+        </div>
+        <div class="usage-panel-body">
+          <div class="usage-section-label">Process</div>
+          <div class="usage-row"><span class="usage-label">PID</span><span id="status-pid" class="usage-value">-</span></div>
+          <div class="usage-row"><span class="usage-label">Uptime</span><span id="status-uptime" class="usage-value">-</span></div>
+          <div class="usage-row"><span class="usage-label">RSS Memory</span><span id="status-rss" class="usage-value">-</span></div>
+          <div class="usage-row"><span class="usage-label">Heap Used</span><span id="status-heap-used" class="usage-value">-</span></div>
+          <div class="usage-row"><span class="usage-label">Heap Total</span><span id="status-heap-total" class="usage-value">-</span></div>
+          <div class="usage-row"><span class="usage-label">External</span><span id="status-external" class="usage-value">-</span></div>
+          <div class="usage-divider"></div>
+          <div class="usage-section-label">Sessions</div>
+          <div class="usage-row"><span class="usage-label">Active</span><span id="status-sessions" class="usage-value">-</span></div>
+          <div class="usage-row"><span class="usage-label">Processing</span><span id="status-processing" class="usage-value">-</span></div>
+          <div class="usage-row"><span class="usage-label">Clients</span><span id="status-clients" class="usage-value">-</span></div>
+          <div class="usage-row"><span class="usage-label">Terminals</span><span id="status-terminals" class="usage-value">-</span></div>
+        </div>
       </div>
     </div>
     <div id="todo-sticky" class="hidden"></div>
@@ -216,6 +242,7 @@
     <div class="file-viewer-header">
       <span class="file-viewer-path" id="file-viewer-path"></span>
       <button class="file-viewer-btn hidden" id="file-viewer-render" title="Toggle rendered view"><i data-lucide="book-open"></i></button>
+      <button class="file-viewer-btn hidden" id="file-viewer-history" title="Edit history"><i data-lucide="clock"></i></button>
       <button class="file-viewer-btn" id="file-viewer-copy" title="Copy contents"><i data-lucide="copy"></i></button>
       <button class="file-viewer-btn" id="file-viewer-close" title="Close"><i data-lucide="x"></i></button>
     </div>
