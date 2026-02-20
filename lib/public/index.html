@@ -209,6 +209,35 @@
           <div class="usage-row"><span class="usage-label">Terminals</span><span id="status-terminals" class="usage-value">-</span></div>
         </div>
       </div>
+      <div id="context-panel" class="hidden">
+        <div class="usage-panel-header">
+          <span>Context</span>
+          <button id="context-panel-close" aria-label="Close"><i data-lucide="x"></i></button>
+        </div>
+        <div class="usage-panel-body">
+          <div class="usage-section-label">Context Window</div>
+          <div class="context-bar-wrap">
+            <div class="context-bar">
+              <div class="context-bar-fill" id="context-bar-fill"></div>
+            </div>
+            <span class="context-bar-pct" id="context-bar-pct">0%</span>
+          </div>
+          <div class="usage-row"><span class="usage-label">Used</span><span id="context-used" class="usage-value">-</span></div>
+          <div class="usage-row"><span class="usage-label">Window</span><span id="context-window" class="usage-value">-</span></div>
+          <div class="usage-row"><span class="usage-label">Max output</span><span id="context-max-output" class="usage-value">-</span></div>
+          <div class="usage-divider"></div>
+          <div class="usage-section-label">Session Tokens</div>
+          <div class="usage-row"><span class="usage-label">Input</span><span id="context-input" class="usage-value">0</span></div>
+          <div class="usage-row"><span class="usage-label">Output</span><span id="context-output" class="usage-value">0</span></div>
+          <div class="usage-row"><span class="usage-label">Cache read</span><span id="context-cache-read" class="usage-value">0</span></div>
+          <div class="usage-row"><span class="usage-label">Cache write</span><span id="context-cache-write" class="usage-value">0</span></div>
+          <div class="usage-divider"></div>
+          <div class="usage-section-label">Model</div>
+          <div class="usage-row"><span class="usage-label">Name</span><span id="context-model" class="usage-value">-</span></div>
+          <div class="usage-row"><span class="usage-label">Cost</span><span id="context-cost" class="usage-value">$0.0000</span></div>
+          <div class="usage-row"><span class="usage-label">Turns</span><span id="context-turns" class="usage-value">0</span></div>
+        </div>
+      </div>
     </div>
     <div id="todo-sticky" class="hidden"></div>
     <button id="new-msg-btn" class="hidden" aria-label="Scroll to bottom"></button>

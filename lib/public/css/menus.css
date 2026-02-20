@@ -437,7 +437,7 @@
 #info-panels:empty { display: none; }
 
 /* --- Usage panel --- */
-#usage-panel, #status-panel {
+#usage-panel, #status-panel, #context-panel {
   background: var(--bg-alt);
   border: 1px solid var(--border);
   border-radius: 12px;
@@ -446,7 +446,7 @@
   pointer-events: auto;
 }
 
-#usage-panel.hidden, #status-panel.hidden { display: none; }
+#usage-panel.hidden, #status-panel.hidden, #context-panel.hidden { display: none; }
 
 .usage-panel-header {
   display: flex;
@@ -532,6 +532,38 @@
 .usage-value {
   font-family: "SF Mono", Menlo, Monaco, monospace;
   font-weight: 500;
+}
+
+/* --- Context bar --- */
+.context-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0 8px;
+}
+.context-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.context-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+.context-bar-fill.warn { background: #E5A84B; }
+.context-bar-fill.danger { background: var(--error); }
+.context-bar-pct {
+  font-family: "SF Mono", Menlo, Monaco, monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  min-width: 32px;
+  text-align: right;
 }
 
 @media (max-width: 768px) {
