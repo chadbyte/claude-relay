@@ -178,6 +178,24 @@
 #update-banner-close .lucide { width: 14px; height: 14px; }
 #update-banner-close:hover { color: var(--text-secondary); }
 
+/* --- Skip permissions banner --- */
+#skip-perms-banner {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 7px 16px;
+  background: rgba(229, 83, 75, 0.12);
+  border-bottom: 1px solid rgba(229, 83, 75, 0.25);
+  font-size: 12px;
+  font-weight: 500;
+  color: #E5534B;
+}
+
+#skip-perms-banner.hidden { display: none; }
+#skip-perms-banner .lucide { width: 14px; height: 14px; flex-shrink: 0; }
+
 /* --- Confirm modal --- */
 #confirm-modal {
   position: fixed;

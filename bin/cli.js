@@ -32,6 +32,7 @@ var shutdownMode = false;
 var addPath = null;
 var removePath = null;
 var listMode = false;
+var dangerouslySkipPermissions = false;
 
 for (var i = 0; i < args.length; i++) {
   if (args[i] === "-p" || args[i] === "--port") {
@@ -62,6 +63,8 @@ for (var i = 0; i < args.length; i++) {
     i++;
   } else if (args[i] === "--list") {
     listMode = true;
+  } else if (args[i] === "--dangerously-skip-permissions") {
+    dangerouslySkipPermissions = true;
   } else if (args[i] === "-h" || args[i] === "--help") {
     console.log("Usage: claude-relay [-p|--port <port>] [--no-https] [--no-update] [--debug] [-y|--yes] [--pin <pin>] [--shutdown]");
     console.log("       claude-relay --add <path>     Add a project to the running daemon");
@@ -79,6 +82,8 @@ for (var i = 0; i < args.length; i++) {
     console.log("  --add <path>       Add a project directory (use '.' for current)");
     console.log("  --remove <path>    Remove a project directory");
     console.log("  --list             List all registered projects");
+    console.log("  --dangerously-skip-permissions");
+    console.log("                     Bypass all permission prompts (requires --pin)");
     process.exit(0);
   }
 }
@@ -354,6 +359,7 @@ async function restartDaemonFromConfig() {
     tls: lastConfig.tls !== undefined ? lastConfig.tls : useHttps,
     debug: lastConfig.debug || false,
     keepAwake: lastConfig.keepAwake || false,
+    dangerouslySkipPermissions: lastConfig.dangerouslySkipPermissions || false,
     projects: (lastConfig.projects || []).filter(function (p) {
       return fs.existsSync(p.path);
     }),
@@ -1207,6 +1213,7 @@ async function forkDaemon(pin, keepAwake, extraProjects) {
     tls: hasTls,
     debug: debugMode,
     keepAwake: keepAwake,
+    dangerouslySkipPermissions: dangerouslySkipPermissions,
     projects: allProjects,
   };
 
@@ -1285,6 +1292,7 @@ async function restartDaemonWithTLS(config, callback) {
     tls: true,
     debug: config.debug || false,
     keepAwake: config.keepAwake || false,
+    dangerouslySkipPermissions: config.dangerouslySkipPermissions || false,
     projects: config.projects || [],
   };
 
@@ -2047,8 +2055,16 @@ var currentVersion = require("../package.json").version;
     // No daemon running — first-time setup
     if (autoYes) {
       var pin = cliPin || null;
+      if (dangerouslySkipPermissions && !pin) {
+        console.error("  " + sym.warn + "  " + a.red + "--dangerously-skip-permissions requires --pin <pin>" + a.reset);
+        process.exit(1);
+        return;
+      }
       console.log("  " + sym.done + "  Auto-accepted disclaimer");
       console.log("  " + sym.done + "  PIN: " + (pin ? "Enabled" : "Skipped"));
+      if (dangerouslySkipPermissions) {
+        console.log("  " + sym.warn + "  " + a.yellow + "Skip permissions mode enabled" + a.reset);
+      }
       var autoRc = loadClayrc();
       var autoRestorable = (autoRc.recentProjects || []).filter(function (p) {
         return p.path !== cwd && fs.existsSync(p.path);
@@ -2059,6 +2075,12 @@ var currentVersion = require("../package.json").version;
       await forkDaemon(pin, false, autoRestorable.length > 0 ? autoRestorable : undefined);
     } else {
       setup(function (pin, keepAwake) {
+        if (dangerouslySkipPermissions && !pin) {
+          log(sym.warn + "  " + a.red + "--dangerously-skip-permissions requires a PIN." + a.reset);
+          log(a.dim + "     Please set a PIN to use skip permissions mode." + a.reset);
+          process.exit(1);
+          return;
+        }
         // Check ~/.clayrc for previous projects to restore
         var rc = loadClayrc();
         var restorable = (rc.recentProjects || []).filter(function (p) {
