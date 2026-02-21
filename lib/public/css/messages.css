@@ -130,6 +130,8 @@
   word-break: break-word;
   white-space: pre-wrap;
   color: var(--text);
+  unicode-bidi: plaintext;
+  text-align: start;
 }
 
 /* --- Assistant message --- */
@@ -176,6 +178,8 @@
   line-height: 1.7;
   word-break: break-word;
   color: var(--text);
+  unicode-bidi: plaintext;
+  text-align: start;
 }
 
 .md-content p { margin-bottom: 14px; }
@@ -282,7 +286,7 @@ pre:hover .code-copy-btn { opacity: 1; }
 .md-content th, .md-content td {
   border: 1px solid var(--border);
   padding: 8px 12px;
-  text-align: left;
+  text-align: start;
 }
 .md-content th {
   background: rgba(255, 255, 255, 0.04);

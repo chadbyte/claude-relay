@@ -245,6 +245,8 @@
   max-height: 120px;
   overflow-y: auto;
   box-sizing: border-box;
+  unicode-bidi: plaintext;
+  text-align: start;
 }
 
 #input::placeholder {
