@@ -6,6 +6,13 @@ var path = require("path");
 var { execSync, execFileSync, spawn } = require("child_process");
 var qrcode = require("qrcode-terminal");
 var net = require("net");
+
+// Detect dev mode before loading config (env must be set before require)
+var _isDev = process.argv[1] && path.basename(process.argv[1]) === "claude-relay-dev";
+if (_isDev) {
+  process.env.CLAUDE_RELAY_HOME = path.join(os.homedir(), ".claude-relay-dev");
+}
+
 var { loadConfig, saveConfig, configPath, socketPath, logPath, ensureConfigDir, isDaemonAlive, isDaemonAliveAsync, generateSlug, clearStaleConfig, loadClayrc, saveClayrc, readCrashInfo } = require("../lib/config");
 var { sendIPCCommand } = require("../lib/ipc");
 var { generateAuthToken } = require("../lib/server");
@@ -22,7 +29,7 @@ function openUrl(url) {
 }
 
 var args = process.argv.slice(2);
-var port = 2633;
+var port = _isDev ? 2635 : 2633;
 var useHttps = true;
 var skipUpdate = false;
 var debugMode = false;
@@ -467,7 +474,7 @@ function getAllIPs() {
 
 function ensureCerts(ip) {
   var homeDir = os.homedir();
-  var certDir = path.join(homeDir, ".claude-relay", "certs");
+  var certDir = path.join(process.env.CLAUDE_RELAY_HOME || path.join(homeDir, ".claude-relay"), "certs");
   var keyPath = path.join(certDir, "key.pem");
   var certPath = path.join(certDir, "cert.pem");
 

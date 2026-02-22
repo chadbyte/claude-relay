@@ -2,6 +2,7 @@
 
 ## WIP
 
+- Support `claude-relay-dev` running independently from production daemon (separate port 2635, config dir `~/.claude-relay-dev/`)
 - Add right-click context menu on terminal with Copy Terminal and Clear Terminal actions
 - Add RTL (bidi) text support for prompt field and responses (#114)
 - Fix duplicate approval prompts appearing when browser tab returns from background (#112)
