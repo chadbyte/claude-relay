@@ -2,6 +2,8 @@
 
 ## WIP
 
+## v2.3.1
+
 - Support `claude-relay-dev` running independently from production daemon (separate port 2635, config dir `~/.claude-relay-dev/`)
 - Add right-click context menu on terminal with Copy Terminal and Clear Terminal actions
 - Add RTL (bidi) text support for prompt field and responses (#114)

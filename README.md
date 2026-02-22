@@ -133,6 +133,7 @@ Scan the QR code with your phone to connect instantly, or open the URL displayed
 * **Send While Processing** - Queue messages without waiting for the current response to finish.
 * **Sticky Todo Overlay** - TodoWrite tasks float as a progress bar while you scroll through the conversation.
 * **Scroll Position Hold** - Reading earlier messages will not get interrupted by new content arriving.
+* **RTL Text Support** - Automatic bidirectional text rendering for Arabic, Hebrew, and other RTL languages.
 
 **Server and Security**
 
