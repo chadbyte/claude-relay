@@ -302,6 +302,30 @@
   display: none;
 }
 
+/* iOS Safari notification info */
+.notif-ios-info { cursor: default; }
+.notif-ios-info-btn {
+  background: none;
+  border: none;
+  color: var(--text-dimmer);
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s;
+}
+.notif-ios-info-btn:hover { color: var(--text-secondary); }
+
+#notif-ios-hint {
+  padding: 6px 14px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+#notif-ios-hint .lucide { flex-shrink: 0; }
+#notif-ios-hint strong { color: var(--text-secondary); }
+#notif-ios-hint.hidden { display: none; }
+
 .notif-action {
   display: flex;
   align-items: center;
