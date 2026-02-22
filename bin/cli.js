@@ -70,6 +70,10 @@ for (var i = 0; i < args.length; i++) {
     i++;
   } else if (args[i] === "--list") {
     listMode = true;
+  } else if (args[i] === "--dev") {
+    _isDev = true;
+    process.env.CLAUDE_RELAY_HOME = path.join(os.homedir(), ".claude-relay-dev");
+    port = 2635;
   } else if (args[i] === "--dangerously-skip-permissions") {
     dangerouslySkipPermissions = true;
   } else if (args[i] === "-h" || args[i] === "--help") {
@@ -89,6 +93,7 @@ for (var i = 0; i < args.length; i++) {
     console.log("  --add <path>       Add a project directory (use '.' for current)");
     console.log("  --remove <path>    Remove a project directory");
     console.log("  --list             List all registered projects");
+    console.log("  --dev              Dev mode: run daemon in foreground, auto-restart on file changes");
     console.log("  --dangerously-skip-permissions");
     console.log("                     Bypass all permission prompts (requires --pin)");
     process.exit(0);
@@ -1173,6 +1178,56 @@ function setup(callback) {
 }
 
 // ==============================
+// Dev mode: foreground daemon with file watching
+// ==============================
+function devMode(config) {
+  var libDir = path.join(__dirname, "..", "lib");
+  var daemonScript = path.join(libDir, "daemon.js");
+  var child = null;
+  var restarting = false;
+
+  function spawnDaemon() {
+    child = spawn(process.execPath, [daemonScript], {
+      stdio: "inherit",
+      env: Object.assign({}, process.env, { CLAUDE_RELAY_CONFIG: configPath() }),
+    });
+    child.on("exit", function (code) {
+      if (!restarting) process.exit(code || 0);
+    });
+  }
+
+  function restart() {
+    if (restarting) return;
+    restarting = true;
+    console.log("\n  [dev] File changed, restarting...\n");
+    child.kill("SIGTERM");
+    child.on("exit", function () {
+      restarting = false;
+      setTimeout(spawnDaemon, 500);
+    });
+  }
+
+  // Watch lib/ recursively, skip public/ and node_modules/
+  var debounce = null;
+  fs.watch(libDir, { recursive: true }, function (event, filename) {
+    if (!filename) return;
+    if (filename.startsWith("public/") || filename.startsWith("public" + path.sep)) return;
+    if (filename.indexOf("node_modules") !== -1) return;
+    if (debounce) clearTimeout(debounce);
+    debounce = setTimeout(restart, 200);
+  });
+
+  console.log("  [dev] Watching lib/ for changes (excluding public/)");
+  console.log("  [dev] Ctrl+C to stop\n");
+  spawnDaemon();
+
+  process.on("SIGINT", function () {
+    if (child) child.kill("SIGTERM");
+    process.exit(0);
+  });
+}
+
+// ==============================
 // Fork the daemon process
 // ==============================
 async function forkDaemon(pin, keepAwake, extraProjects) {
@@ -1226,6 +1281,11 @@ async function forkDaemon(pin, keepAwake, extraProjects) {
 
   ensureConfigDir();
   saveConfig(config);
+
+  if (_isDev) {
+    devMode(config);
+    return;
+  }
 
   // Fork daemon
   var daemonScript = path.join(__dirname, "..", "lib", "daemon.js");
@@ -2060,7 +2120,9 @@ var currentVersion = require("../package.json").version;
     }
   } else {
     // No daemon running — first-time setup
-    if (autoYes) {
+    if (_isDev) {
+      await forkDaemon(null, false);
+    } else if (autoYes) {
       var pin = cliPin || null;
       if (dangerouslySkipPermissions && !pin) {
         console.error("  " + sym.warn + "  " + a.red + "--dangerously-skip-permissions requires --pin <pin>" + a.reset);
