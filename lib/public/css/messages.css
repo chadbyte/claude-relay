@@ -26,7 +26,7 @@
   background: var(--bg-alt);
   border: 1px solid var(--border);
   border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 16px var(--shadow-color);
   overflow: hidden;
 }
 
@@ -38,7 +38,7 @@
   cursor: pointer;
   user-select: none;
 }
-#todo-sticky .todo-sticky-header:hover { background: rgba(255, 255, 255, 0.03); }
+#todo-sticky .todo-sticky-header:hover { background: var(--overlay-hover); }
 #todo-sticky .todo-sticky-icon { display: inline-flex; color: var(--accent); }
 #todo-sticky .todo-sticky-icon .lucide { width: 14px; height: 14px; }
 #todo-sticky .todo-sticky-title { font-size: 12px; font-weight: 600; color: var(--text-secondary); flex: 1; }
@@ -101,7 +101,7 @@
   cursor: pointer;
   z-index: 10;
   transition: opacity 0.15s;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 8px var(--shadow-color);
 }
 #new-msg-btn:hover {
   background: var(--sidebar-hover);
@@ -144,11 +144,11 @@
 }
 
 .msg-assistant:hover {
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--overlay-subtle);
 }
 
 .msg-assistant.copy-primed {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--overlay-hover);
   cursor: pointer;
 }
 
@@ -197,7 +197,7 @@
 .md-content h3 { font-size: 1.1em; }
 
 .md-content code {
-  background: rgba(255, 255, 255, 0.07);
+  background: var(--overlay-strong);
   padding: 2px 7px;
   border-radius: 6px;
   font-family: "SF Mono", "Fira Code", Menlo, Monaco, "Cascadia Code", monospace;
@@ -289,7 +289,7 @@ pre:hover .code-copy-btn { opacity: 1; }
   text-align: start;
 }
 .md-content th {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--overlay-hover);
   font-weight: 600;
 }
 
@@ -346,7 +346,7 @@ pre.mermaid-error {
 /* --- Mermaid Viewer Modal --- */
 #mermaid-modal { position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; }
 #mermaid-modal.hidden { display: none; }
-#mermaid-modal .confirm-backdrop { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(0, 0, 0, 0.7); }
+#mermaid-modal .confirm-backdrop { backdrop-filter: none; -webkit-backdrop-filter: none; background: var(--backdrop-color); }
 
 .mermaid-modal-dialog {
   position: relative;
@@ -359,7 +359,7 @@ pre.mermaid-error {
   background: var(--bg-alt);
   border: 1px solid var(--border);
   border-radius: 16px;
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 24px 80px var(--shadow-heavy);
 }
 
 .mermaid-modal-header {
@@ -395,7 +395,7 @@ pre.mermaid-error {
   transition: color 0.15s, background 0.15s;
 }
 
-.mermaid-modal-btn:hover { color: var(--text); background: rgba(255, 255, 255, 0.06); }
+.mermaid-modal-btn:hover { color: var(--text); background: var(--overlay-active); }
 
 .mermaid-modal-body {
   padding: 24px;
@@ -414,7 +414,7 @@ pre.mermaid-error {
 /* --- Image lightbox modal --- */
 #image-modal { position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; }
 #image-modal.hidden { display: none; }
-#image-modal .confirm-backdrop { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(0, 0, 0, 0.8); }
+#image-modal .confirm-backdrop { backdrop-filter: none; -webkit-backdrop-filter: none; background: var(--backdrop-heavy); }
 
 .image-modal-dialog {
   position: relative;
@@ -429,7 +429,7 @@ pre.mermaid-error {
   max-height: 90vh;
   border-radius: 12px;
   object-fit: contain;
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 24px 80px var(--shadow-heavy);
 }
 
 .image-modal-close {
@@ -440,7 +440,7 @@ pre.mermaid-error {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--backdrop-color);
   border: none;
   color: #fff;
   cursor: pointer;
@@ -448,7 +448,7 @@ pre.mermaid-error {
   border-radius: 50%;
   transition: background 0.15s;
 }
-.image-modal-close:hover { background: rgba(255, 255, 255, 0.2); }
+.image-modal-close:hover { background: var(--overlay-strong); }
 
 /* ==========================================================================
    Thinking
@@ -467,13 +467,13 @@ pre.mermaid-error {
   cursor: pointer;
   padding: 6px 12px;
   user-select: none;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--overlay-hover);
   border-radius: 8px;
   transition: background 0.15s;
 }
 
 .thinking-header:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--overlay-active);
 }
 
 .thinking-chevron {
@@ -525,7 +525,7 @@ pre.mermaid-error {
   word-break: break-word;
   max-height: 300px;
   overflow-y: auto;
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--overlay-subtle);
   border-radius: 8px;
 }
 
@@ -548,7 +548,7 @@ pre.mermaid-error {
   padding: 8px 12px;
   cursor: pointer;
   user-select: none;
-  background: rgba(255, 255, 255, 0.025);
+  background: var(--overlay-subtle);
   border-radius: 10px;
   transition: background 0.15s;
 }
@@ -570,7 +570,7 @@ pre.mermaid-error {
 }
 
 .tool-header:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--overlay-mid);
 }
 
 .tool-bullet {
@@ -739,7 +739,7 @@ pre.mermaid-error {
   font-size: 12px;
   font-family: "SF Mono", Menlo, Monaco, monospace;
   color: var(--text-muted);
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--overlay-hover);
   border-bottom: 1px solid var(--border-subtle);
 }
 
@@ -900,7 +900,7 @@ pre.mermaid-error {
 
 .plan-card-body {
   padding: 16px 18px;
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--overlay-subtle);
   border: 1px solid var(--border);
   border-top: none;
   border-radius: 0 0 12px 12px;
@@ -918,7 +918,7 @@ pre.mermaid-error {
 .plan-card-body h1 { font-size: 1.3em; }
 .plan-card-body h2 { font-size: 1.15em; }
 .plan-card-body h3 { font-size: 1.05em; }
-.plan-card-body code { background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px; font-family: "SF Mono", Menlo, Monaco, monospace; font-size: 0.88em; }
+.plan-card-body code { background: var(--overlay-active); padding: 2px 6px; border-radius: 4px; font-family: "SF Mono", Menlo, Monaco, monospace; font-size: 0.88em; }
 .plan-card-body pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; margin: 8px 0; }
 .plan-card-body pre code { display: block; padding: 10px 12px; overflow-x: auto; font-size: 12px; line-height: 1.5; background: none; border-radius: 0; }
 .plan-card-body ul, .plan-card-body ol { padding-left: 22px; margin: 6px 0; }
@@ -949,7 +949,7 @@ pre.mermaid-error {
   align-items: center;
   gap: 8px;
   padding: 10px 16px;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--overlay-hover);
   border: 1px solid var(--border);
   border-radius: 12px 12px 0 0;
 }

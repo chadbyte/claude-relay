@@ -12,7 +12,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--overlay-active);
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 8px 12px;
@@ -23,7 +23,7 @@
 
 .bubble-paste:hover {
   border-color: var(--text-dimmer);
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--overlay-strong);
 }
 
 .bubble-paste-preview {
@@ -90,7 +90,7 @@
 }
 
 .pasted-chip-remove .lucide { width: 12px; height: 12px; }
-.pasted-chip-remove:hover { color: var(--text); background: rgba(255, 255, 255, 0.1); }
+.pasted-chip-remove:hover { color: var(--text); background: var(--overlay-strong); }
 
 /* --- Paste viewer modal --- */
 #paste-modal { position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; }
@@ -133,7 +133,7 @@
   transition: color 0.15s, background 0.15s;
 }
 
-.paste-modal-close:hover { color: var(--text); background: rgba(255, 255, 255, 0.06); }
+.paste-modal-close:hover { color: var(--text); background: var(--overlay-active); }
 
 .paste-modal-body {
   margin: 0;
@@ -288,7 +288,7 @@
 }
 
 #attach-btn .lucide { width: 20px; height: 20px; }
-#attach-btn:hover { background: rgba(255, 255, 255, 0.06); color: var(--text); }
+#attach-btn:hover { background: var(--overlay-active); color: var(--text); }
 
 #attach-menu {
   position: absolute;
@@ -298,7 +298,7 @@
   background: var(--bg-alt);
   border: 1px solid var(--border);
   border-radius: 14px;
-  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 -4px 24px var(--shadow-color);
   z-index: 10;
   overflow: hidden;
 }
@@ -325,7 +325,7 @@
 }
 
 .attach-menu-item:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--overlay-mid);
   color: var(--text);
 }
 
@@ -381,7 +381,7 @@
   border: 1px solid var(--border);
   border-radius: 14px;
   margin-bottom: 8px;
-  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 -4px 24px var(--shadow-color);
   z-index: 10;
 }
 
@@ -400,7 +400,7 @@
 
 .slash-item:hover,
 .slash-item.active {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--overlay-mid);
 }
 
 .slash-item .slash-cmd {

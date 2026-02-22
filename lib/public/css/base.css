@@ -9,14 +9,15 @@
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
   scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,0.15) transparent;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
 }
 
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
 
+/* --- Default theme (warm dark) --- */
 :root {
   --bg: #2F2E2B;
   --bg-alt: #35332F;
@@ -40,6 +41,95 @@
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --content-width: 760px;
+  /* Overlay / shadow / scrollbar */
+  --overlay-hover: rgba(255, 255, 255, 0.04);
+  --overlay-active: rgba(255, 255, 255, 0.06);
+  --overlay-strong: rgba(255, 255, 255, 0.1);
+  --overlay-subtle: rgba(255, 255, 255, 0.02);
+  --overlay-mid: rgba(255, 255, 255, 0.05);
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --shadow-heavy: rgba(0, 0, 0, 0.5);
+  --backdrop-color: rgba(0, 0, 0, 0.5);
+  --backdrop-heavy: rgba(0, 0, 0, 0.8);
+  --scrollbar-thumb: rgba(255, 255, 255, 0.15);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.25);
+  --toast-warn-bg: #3a2a00;
+  --toast-warn-border: #7a5a00;
+  --toast-warn-text: #ffc107;
+}
+
+/* --- Anthropic theme (light) --- */
+[data-theme="anthropic"] {
+  --bg: #F5F0E8;
+  --bg-alt: #EDE7DD;
+  --text: #1A1816;
+  --text-secondary: #4A4540;
+  --text-muted: #7A756E;
+  --text-dimmer: #A09A92;
+  --accent: #DA7756;
+  --accent-hover: #C5684A;
+  --accent-bg: rgba(218, 119, 86, 0.10);
+  --code-bg: #E5DFD5;
+  --border: #D5CFC5;
+  --border-subtle: #DDD7CD;
+  --input-bg: #FFFFFF;
+  --user-bubble: #E8E0D4;
+  --error: #D93025;
+  --success: #34A853;
+  --sidebar-bg: #EBE5DB;
+  --sidebar-hover: #E2DCD2;
+  --sidebar-active: #D8D2C8;
+  --overlay-hover: rgba(0, 0, 0, 0.04);
+  --overlay-active: rgba(0, 0, 0, 0.06);
+  --overlay-strong: rgba(0, 0, 0, 0.1);
+  --overlay-subtle: rgba(0, 0, 0, 0.02);
+  --overlay-mid: rgba(0, 0, 0, 0.05);
+  --shadow-color: rgba(0, 0, 0, 0.08);
+  --shadow-heavy: rgba(0, 0, 0, 0.15);
+  --backdrop-color: rgba(0, 0, 0, 0.3);
+  --backdrop-heavy: rgba(0, 0, 0, 0.6);
+  --scrollbar-thumb: rgba(0, 0, 0, 0.15);
+  --scrollbar-thumb-hover: rgba(0, 0, 0, 0.25);
+  --toast-warn-bg: #FFF3CD;
+  --toast-warn-border: #FFCA28;
+  --toast-warn-text: #856404;
+}
+
+/* --- Anthropic theme (dark) --- */
+[data-theme="anthropic-dark"] {
+  --bg: #2B2A27;
+  --bg-alt: #333230;
+  --text: #ECECEC;
+  --text-secondary: #B0AFAB;
+  --text-muted: #8A8884;
+  --text-dimmer: #5E5D5A;
+  --accent: #DA7756;
+  --accent-hover: #E5886A;
+  --accent-bg: rgba(218, 119, 86, 0.12);
+  --code-bg: #1C1B19;
+  --border: #3C3B38;
+  --border-subtle: #343331;
+  --input-bg: #3A3937;
+  --user-bubble: #3D3C39;
+  --error: #F85149;
+  --success: #57AB5A;
+  --sidebar-bg: #232220;
+  --sidebar-hover: #2E2D2A;
+  --sidebar-active: #383735;
+  --overlay-hover: rgba(255, 255, 255, 0.04);
+  --overlay-active: rgba(255, 255, 255, 0.06);
+  --overlay-strong: rgba(255, 255, 255, 0.1);
+  --overlay-subtle: rgba(255, 255, 255, 0.02);
+  --overlay-mid: rgba(255, 255, 255, 0.05);
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --shadow-heavy: rgba(0, 0, 0, 0.5);
+  --backdrop-color: rgba(0, 0, 0, 0.5);
+  --backdrop-heavy: rgba(0, 0, 0, 0.8);
+  --scrollbar-thumb: rgba(255, 255, 255, 0.15);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.25);
+  --toast-warn-bg: #3a2a00;
+  --toast-warn-border: #7a5a00;
+  --toast-warn-text: #ffc107;
 }
 
 html, body {
@@ -96,7 +186,7 @@ html, body {
   opacity: 0;
   transition: opacity 0.2s, transform 0.2s;
   pointer-events: none;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 20px var(--shadow-color);
 }
 
 .toast.visible {
@@ -104,8 +194,8 @@ html, body {
   transform: translateX(-50%) translateY(0);
 }
 .toast.toast-warn {
-  background: #3a2a00;
-  border-color: #7a5a00;
-  color: #ffc107;
+  background: var(--toast-warn-bg);
+  border-color: var(--toast-warn-border);
+  color: var(--toast-warn-text);
 }
 

@@ -60,7 +60,7 @@
   background: var(--bg-alt);
   border: 1px solid rgba(218, 119, 86, 0.25);
   border-radius: 20px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 16px var(--shadow-color);
   z-index: 10;
   white-space: nowrap;
 }
@@ -156,7 +156,7 @@
 
 .rewind-timeline-marker:hover {
   border-color: var(--accent);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 8px var(--shadow-color);
 }
 
 .rewind-timeline-marker:hover .lucide,
@@ -280,7 +280,7 @@
 }
 
 .ask-user-option:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--overlay-active);
   border-color: var(--accent);
 }
 
@@ -353,7 +353,7 @@
 }
 
 .ask-user-skip:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--overlay-hover);
   color: var(--text-secondary);
   border-color: var(--text-dimmer);
 }
@@ -382,7 +382,7 @@
   align-items: center;
   gap: 8px;
   padding: 10px 14px;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--overlay-hover);
   border: 1px solid var(--border);
   border-bottom: none;
   border-radius: 12px 12px 0 0;
@@ -398,7 +398,7 @@
   border: 1px solid var(--border);
   border-top: none;
   border-bottom: none;
-  background: rgba(255, 255, 255, 0.015);
+  background: var(--overlay-subtle);
 }
 
 .permission-summary {
@@ -464,7 +464,7 @@
   border: 1px solid var(--border);
   border-top: none;
   border-radius: 0 0 12px 12px;
-  background: rgba(255, 255, 255, 0.015);
+  background: var(--overlay-subtle);
 }
 
 .permission-btn {
