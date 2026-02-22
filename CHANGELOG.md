@@ -2,6 +2,12 @@
 
 ## WIP
 
+- Add RTL (bidi) text support for prompt field and responses (#114)
+- Fix duplicate approval prompts appearing when browser tab returns from background (#112)
+- Fix excessive "Server Connection Lost" notifications by adding 5-second debounce before showing push notification (#113)
+- Defer server-side query abort by 30 seconds when all clients disconnect, allowing brief reconnections from mobile app switching (#113)
+- Suppress "Server connection restored" notification when disconnection was too brief to notify
+
 ## v2.3.0
 
 - Add `--dangerously-skip-permissions` CLI flag to bypass all permission prompts via SDK native `permissionMode` (#100)
