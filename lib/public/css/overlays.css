@@ -196,6 +196,22 @@
 #skip-perms-banner.hidden { display: none; }
 #skip-perms-banner .lucide { width: 14px; height: 14px; flex-shrink: 0; }
 
+#api-key-banner {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 7px 16px;
+  background: rgba(210, 153, 34, 0.12);
+  border-bottom: 1px solid rgba(210, 153, 34, 0.25);
+  font-size: 12px;
+  font-weight: 500;
+  color: #D29922;
+}
+#api-key-banner.hidden { display: none; }
+#api-key-banner .lucide { width: 14px; height: 14px; flex-shrink: 0; }
+
 /* --- Confirm modal --- */
 #confirm-modal {
   position: fixed;
