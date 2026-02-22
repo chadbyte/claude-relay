@@ -148,7 +148,7 @@
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 4px 0;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 16px var(--shadow-color);
   z-index: 120;
   max-height: 320px;
   overflow-y: auto;
@@ -181,7 +181,7 @@
 }
 
 .project-dropdown-item:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--overlay-mid);
 }
 
 .project-dropdown-item.current {
@@ -246,7 +246,7 @@
 }
 
 .project-dropdown-footer button:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--overlay-mid);
   color: var(--text-secondary);
 }
 
@@ -508,7 +508,7 @@
 
 .session-more-btn .lucide { width: 14px; height: 14px; }
 .session-item:hover .session-more-btn { display: flex; }
-.session-more-btn:hover { color: var(--text); background: rgba(255, 255, 255, 0.06); }
+.session-more-btn:hover { color: var(--text); background: var(--overlay-active); }
 
 /* --- Session context menu --- */
 .session-ctx-menu {
@@ -521,7 +521,7 @@
   border-radius: 10px;
   padding: 4px 0;
   min-width: 140px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 16px var(--shadow-color);
   z-index: 110;
 }
 
@@ -541,7 +541,7 @@
 }
 
 .session-ctx-item .lucide { width: 14px; height: 14px; flex-shrink: 0; }
-.session-ctx-item:hover { background: rgba(255, 255, 255, 0.05); }
+.session-ctx-item:hover { background: var(--overlay-mid); }
 
 .session-ctx-item.session-ctx-delete { color: var(--error); }
 .session-ctx-item.session-ctx-delete:hover { background: rgba(229, 83, 75, 0.08); }
@@ -621,7 +621,7 @@
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 4px 0;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 16px var(--shadow-color);
   z-index: 110;
 }
 
@@ -644,7 +644,7 @@
 }
 
 .sidebar-menu-item .lucide { width: 14px; height: 14px; flex-shrink: 0; }
-.sidebar-menu-item:hover { background: rgba(255, 255, 255, 0.05); }
+.sidebar-menu-item:hover { background: var(--overlay-mid); }
 
 .sidebar-menu-item.has-badge { position: relative; }
 .sidebar-menu-item .menu-badge {
@@ -654,12 +654,26 @@
   color: var(--success);
 }
 
+/* --- Theme picker in sidebar menu --- */
+.sidebar-menu-theme {
+  justify-content: flex-start;
+}
+.sidebar-menu-value {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-dimmer);
+  padding: 2px 8px;
+  background: var(--overlay-hover);
+  border-radius: 6px;
+}
+
 /* --- Sidebar overlay (mobile) --- */
 #sidebar-overlay {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: var(--backdrop-color);
   z-index: 99;
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);

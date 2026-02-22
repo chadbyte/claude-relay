@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600&family=Styrene+A+Web:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/github-dark-dimmed.min.css">
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/github-dark-dimmed.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/file-icons-js@1/css/style.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5/css/xterm.min.css">
 <link rel="stylesheet" href="style.css">
@@ -86,6 +86,10 @@
         </a>
         <button class="sidebar-menu-item" id="footer-status">
           <i data-lucide="activity"></i> <span>Status</span>
+        </button>
+        <button class="sidebar-menu-item sidebar-menu-theme" id="footer-theme">
+          <i data-lucide="palette"></i> <span>Theme</span>
+          <span id="footer-theme-value" class="sidebar-menu-value">Default</span>
         </button>
         <button class="sidebar-menu-item" id="footer-update-check">
           <i data-lucide="refresh-cw"></i> <span>Check for updates</span>

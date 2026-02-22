@@ -70,7 +70,7 @@
   border-radius: 10px;
   padding: 8px 0;
   min-width: 200px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 16px var(--shadow-color);
   z-index: 200;
 }
 
@@ -99,7 +99,7 @@
   transition: color 0.15s, background 0.15s, border-color 0.15s;
 }
 #terminal-toggle-btn .lucide { width: 15px; height: 15px; }
-#terminal-toggle-btn:hover { color: var(--text-secondary); background: rgba(255,255,255,0.04); border-color: var(--border); }
+#terminal-toggle-btn:hover { color: var(--text-secondary); background: var(--overlay-hover); border-color: var(--border); }
 #terminal-toggle-btn { position: relative; }
 #terminal-count {
   position: absolute;
@@ -134,13 +134,13 @@
   transition: color 0.15s, background 0.15s, border-color 0.15s;
 }
 #qr-btn .lucide { width: 15px; height: 15px; }
-#qr-btn:hover { color: var(--text-secondary); background: rgba(255,255,255,0.04); border-color: var(--border); }
-#qr-btn.active { color: var(--text); background: rgba(255,255,255,0.06); border-color: var(--border); }
+#qr-btn:hover { color: var(--text-secondary); background: var(--overlay-hover); border-color: var(--border); }
+#qr-btn.active { color: var(--text); background: var(--overlay-active); border-color: var(--border); }
 
 #qr-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: var(--backdrop-color);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -156,7 +156,7 @@
   flex-direction: column;
   align-items: center;
   gap: 14px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 8px 32px var(--shadow-heavy);
 }
 
 #qr-canvas table { border-collapse: collapse; }
@@ -204,8 +204,8 @@
 }
 
 #notif-btn .lucide { width: 15px; height: 15px; }
-#notif-btn:hover { color: var(--text-secondary); background: rgba(255,255,255,0.04); border-color: var(--border); }
-#notif-btn.active { color: var(--text); background: rgba(255,255,255,0.06); border-color: var(--border); }
+#notif-btn:hover { color: var(--text-secondary); background: var(--overlay-hover); border-color: var(--border); }
+#notif-btn.active { color: var(--text); background: var(--overlay-active); border-color: var(--border); }
 
 #notif-menu {
   position: absolute;
@@ -216,7 +216,7 @@
   border-radius: 10px;
   padding: 8px 0;
   min-width: 200px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 16px var(--shadow-color);
   z-index: 200;
 }
 
@@ -245,7 +245,7 @@
   flex-shrink: 0;
 }
 
-.notif-option:hover { background: rgba(255, 255, 255, 0.03); }
+.notif-option:hover { background: var(--overlay-hover); }
 .notif-option input { display: none; }
 
 #notif-blocked-hint {
@@ -317,7 +317,7 @@
   transition: background 0.15s;
 }
 
-.notif-action:hover { background: rgba(255, 255, 255, 0.03); }
+.notif-action:hover { background: var(--overlay-hover); }
 .notif-action .lucide { flex-shrink: 0; }
 
 .notif-action.copied { color: var(--success); }
@@ -382,8 +382,8 @@
 }
 
 #model-btn .lucide { width: 10px; height: 10px; }
-#model-btn:hover { color: var(--text-secondary); background: rgba(255,255,255,0.06); }
-#model-btn.active { color: var(--text-secondary); background: rgba(255,255,255,0.06); }
+#model-btn:hover { color: var(--text-secondary); background: var(--overlay-active); }
+#model-btn.active { color: var(--text-secondary); background: var(--overlay-active); }
 
 #model-menu {
   position: absolute;
@@ -394,7 +394,7 @@
   border-radius: 12px;
   padding: 4px 0;
   min-width: 200px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 16px var(--shadow-color);
   z-index: 200;
 }
 
@@ -416,7 +416,7 @@
   white-space: nowrap;
 }
 
-.model-menu-item:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+.model-menu-item:hover { background: var(--overlay-mid); color: var(--text); }
 .model-menu-item.active { color: var(--accent); font-weight: 600; }
 
 /* --- Info panels container --- */
@@ -441,7 +441,7 @@
   background: var(--bg-alt);
   border: 1px solid var(--border);
   border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 16px var(--shadow-color);
   font-size: 12px;
   pointer-events: auto;
 }
@@ -476,7 +476,7 @@
   border-radius: 4px;
 }
 
-.usage-panel-header button:hover { color: var(--text); background: rgba(255,255,255,0.06); }
+.usage-panel-header button:hover { color: var(--text); background: var(--overlay-active); }
 .usage-panel-header button .lucide { width: 14px; height: 14px; }
 
 .usage-panel-body {
