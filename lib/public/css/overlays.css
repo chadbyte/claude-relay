@@ -91,7 +91,7 @@
 .update-banner-text .lucide { width: 13px; height: 13px; color: var(--success); }
 .update-banner-text strong { color: var(--text); font-weight: 600; }
 
-#update-how {
+#update-now {
   background: var(--success-15);
   border: 1px solid var(--success-25);
   border-radius: 6px;
@@ -105,7 +105,24 @@
   transition: background 0.15s;
 }
 
-#update-how:hover { background: var(--success-25); }
+#update-now:hover { background: var(--success-25); }
+#update-now:disabled { opacity: 0.6; cursor: default; }
+
+#update-how {
+  background: transparent;
+  border: 1px solid var(--text-dimmer);
+  border-radius: 6px;
+  color: var(--text-dimmer);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 7px;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+}
+
+#update-how:hover { background: rgba(var(--overlay-rgb), 0.05); color: var(--text-secondary); }
 
 #update-popover {
   display: none;

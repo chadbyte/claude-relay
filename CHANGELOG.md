@@ -4,6 +4,17 @@
 
 ## v2.4.1
 
+- One-click update from web UI ("Update now" button in update banner)
+  - Production: fetches latest package via npx, spawns updated daemon, graceful handoff
+  - Dev mode: daemon restarts via dev watcher (exit code 120)
+  - Port retry on startup (EADDRINUSE) for seamless daemon handoff
+  - Full-screen overlay blocks UI during update
+- Centralize session storage in `~/.claude-relay/sessions/` to prevent chat history from ending up in git repos (auto-migrates existing sessions)
+- Material Icon Theme file browser icons (colored SVG icons for files and folders, replaces broken file-icons-js)
+- Smooth session list hover: fixed height, opacity transitions, no layout shift
+- Fix light theme sidebar hover visibility (darken-based contrast)
+- Add `Cache-Control: no-cache` to static file responses
+- Dev mode: `--watch` / `-w` flag for hot reload (off by default)
 - Fix false "Failed to start daemon" error on slow startup by retrying alive check (500ms × 10 attempts instead of single 800ms wait)
 - Fix `--headless` hanging when daemon is already running (now reports status and exits immediately)
 
