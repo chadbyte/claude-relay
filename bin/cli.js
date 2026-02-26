@@ -41,6 +41,7 @@ var removePath = null;
 var listMode = false;
 var dangerouslySkipPermissions = false;
 var headlessMode = false;
+var watchMode = false;
 
 for (var i = 0; i < args.length; i++) {
   if (args[i] === "-p" || args[i] === "--port") {
@@ -56,6 +57,8 @@ for (var i = 0; i < args.length; i++) {
     skipUpdate = true;
   } else if (args[i] === "--dev") {
     // Already handled above for CLAUDE_RELAY_HOME, just skip
+  } else if (args[i] === "--watch" || args[i] === "-w") {
+    watchMode = true;
   } else if (args[i] === "--debug") {
     debugMode = true;
   } else if (args[i] === "-y" || args[i] === "--yes") {
@@ -1369,6 +1372,13 @@ async function devMode(pin, keepAwake, existingPinHash) {
         intentionalKill = false;
         return;
       }
+      // Exit code 120 = update restart — respawn daemon with current dev code
+      if (code === 120) {
+        console.log("\x1b[36m[dev]\x1b[0m Update restart — respawning daemon...");
+        console.log("");
+        setTimeout(spawnDaemon, 500);
+        return;
+      }
       // Unexpected exit — auto restart
       console.log("\x1b[33m[dev] Daemon exited (code " + code + "), restarting...\x1b[0m");
       setTimeout(spawnDaemon, 500);
@@ -1388,7 +1398,9 @@ async function devMode(pin, keepAwake, existingPinHash) {
   }
 
   console.log("\x1b[36m[dev]\x1b[0m Starting relay on port " + port + "...");
-  console.log("\x1b[36m[dev]\x1b[0m Watching lib/ for changes (excluding lib/public/)");
+  if (watchMode) {
+    console.log("\x1b[36m[dev]\x1b[0m Watching lib/ for changes (excluding lib/public/)");
+  }
   console.log("");
 
   spawnDaemon();
@@ -1407,22 +1419,25 @@ async function devMode(pin, keepAwake, existingPinHash) {
     showServerStarted(config, ip);
   }
 
-  // Watch lib/ for server-side file changes
-  var watcher = fs.watch(libDir, { recursive: true }, function (eventType, filename) {
-    if (!filename) return;
-    // Skip client-side files — they're served from disk
-    if (filename.startsWith("public" + path.sep) || filename.startsWith("public/")) return;
-    // Skip non-JS files
-    if (!filename.endsWith(".js")) return;
+  // Watch lib/ for server-side file changes (only with --watch)
+  var watcher = null;
+  if (watchMode) {
+    watcher = fs.watch(libDir, { recursive: true }, function (eventType, filename) {
+      if (!filename) return;
+      // Skip client-side files — they're served from disk
+      if (filename.startsWith("public" + path.sep) || filename.startsWith("public/")) return;
+      // Skip non-JS files
+      if (!filename.endsWith(".js")) return;
 
-    if (debounceTimer) clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(function () {
-      console.log("\x1b[36m[dev]\x1b[0m File changed: lib/" + filename);
-      console.log("\x1b[36m[dev]\x1b[0m Restarting...");
-      console.log("");
-      restartDaemon();
-    }, 300);
-  });
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(function () {
+        console.log("\x1b[36m[dev]\x1b[0m File changed: lib/" + filename);
+        console.log("\x1b[36m[dev]\x1b[0m Restarting...");
+        console.log("");
+        restartDaemon();
+      }, 300);
+    });
+  }
 
   // Clean exit on Ctrl+C
   var shuttingDown = false;
@@ -1430,7 +1445,7 @@ async function devMode(pin, keepAwake, existingPinHash) {
     if (shuttingDown) return;
     shuttingDown = true;
     console.log("\n\x1b[36m[dev]\x1b[0m Shutting down...");
-    watcher.close();
+    if (watcher) watcher.close();
     if (debounceTimer) clearTimeout(debounceTimer);
     intentionalKill = true;
     if (child) {
