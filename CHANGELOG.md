@@ -4,6 +4,11 @@
 
 ## v2.4.1
 
+- Centralize session storage in `~/.claude-relay/sessions/` to prevent chat history from ending up in git repos (auto-migrates existing sessions)
+- Material Icon Theme file browser icons (colored SVG icons for files and folders, replaces broken file-icons-js)
+- Smooth session list hover: fixed height, opacity transitions, no layout shift
+- Fix light theme sidebar hover visibility (darken-based contrast)
+- Add `Cache-Control: no-cache` to static file responses
 - Fix false "Failed to start daemon" error on slow startup by retrying alive check (500ms × 10 attempts instead of single 800ms wait)
 - Fix `--headless` hanging when daemon is already running (now reports status and exits immediately)
 
