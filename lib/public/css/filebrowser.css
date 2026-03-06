@@ -207,12 +207,10 @@
 }
 
 .project-settings-close-col {
-  width: 60px;
-  flex-shrink: 0;
-  background: var(--bg);
-  display: flex;
-  justify-content: center;
-  padding-top: 60px;
+  position: absolute;
+  top: 60px;
+  right: 20px;
+  z-index: 5;
 }
 
 /* Project settings sections */
@@ -497,12 +495,8 @@
   }
 
   .project-settings-close-col {
-    position: fixed;
     top: 12px;
     right: 12px;
-    width: auto;
-    padding-top: 0;
-    background: none;
   }
 }
 

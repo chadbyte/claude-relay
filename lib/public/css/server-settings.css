@@ -712,23 +712,6 @@
   margin-top: 8px;
 }
 
-/* --- Embedded theme picker in settings --- */
-#settings-theme-picker-container {
-  margin-top: 8px;
-}
-
-#settings-theme-picker-container .theme-picker {
-  position: static !important;
-  opacity: 1 !important;
-  transform: none !important;
-  pointer-events: auto !important;
-  max-height: none !important;
-  box-shadow: none !important;
-  border: 1px solid var(--border-subtle) !important;
-  border-radius: 8px !important;
-  background: var(--bg) !important;
-  min-width: auto !important;
-}
 
 /* ==========  RESPONSIVE  ========== */
 @media (max-width: 768px) {

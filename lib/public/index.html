@@ -543,18 +543,16 @@
         <div class="server-settings-nav-header" id="settings-server-name"></div>
         <div class="server-settings-nav-items">
           <div class="settings-nav-category">General</div>
-          <button class="settings-nav-item active" data-section="overview"><span>Overview</span></button>
-          <button class="settings-nav-item" data-section="models"><span>Model &amp; Behavior</span></button>
-          <div class="settings-nav-separator"></div>
-          <div class="settings-nav-category">Configuration</div>
-          <button class="settings-nav-item" data-section="security"><span>Security</span></button>
+          <button class="settings-nav-item active" data-section="overview"><span>Status</span></button>
           <button class="settings-nav-item" data-section="notifications"><span>Notifications</span></button>
-          <button class="settings-nav-item" data-section="appearance"><span>Appearance</span></button>
+          <div class="settings-nav-separator"></div>
+          <div class="settings-nav-category">Session</div>
+          <button class="settings-nav-item" data-section="models"><span>Model &amp; Behavior</span></button>
           <button class="settings-nav-item" data-section="claudemd"><span>CLAUDE.md</span></button>
           <button class="settings-nav-item" data-section="environment"><span>Environment Variables</span></button>
           <div class="settings-nav-separator"></div>
-          <div class="settings-nav-category">System</div>
-          <button class="settings-nav-item" data-section="advanced"><span>Advanced</span></button>
+          <div class="settings-nav-category">Server</div>
+          <button class="settings-nav-item" data-section="security"><span>Security</span></button>
           <div class="settings-nav-separator"></div>
           <button class="settings-nav-item settings-nav-danger" data-section="shutdown"><span>Shutdown Server</span></button>
         </div>
@@ -563,7 +561,7 @@
     <div class="server-settings-content">
       <div class="server-settings-content-inner">
         <div class="server-settings-section active" data-section="overview">
-          <h2>Server Overview</h2>
+          <h2>Status</h2>
           <div class="settings-card">
             <div class="settings-field">
               <label class="settings-label">Project Name</label>
@@ -613,6 +611,26 @@
               <label class="settings-label">Connected Clients</label>
               <span class="settings-value" id="settings-status-clients">-</span>
             </div>
+          </div>
+          <div class="settings-card">
+            <div class="settings-field-row">
+              <label class="settings-label">WebSocket Path</label>
+              <span class="settings-value settings-mono" id="settings-ws-path">-</span>
+            </div>
+            <div class="settings-field-row">
+              <label class="settings-label">Project Slug</label>
+              <span class="settings-value settings-mono" id="settings-project-slug">-</span>
+            </div>
+          </div>
+          <div class="settings-card hidden" id="settings-keep-awake-card">
+            <label class="settings-toggle-row">
+              <div>
+                <span class="settings-label">Keep Awake</span>
+                <div class="settings-hint">Prevent the system from sleeping while the server is running (macOS only).</div>
+              </div>
+              <input type="checkbox" id="settings-keep-awake">
+              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            </label>
           </div>
         </div>
         <div class="server-settings-section" data-section="models">
@@ -727,25 +745,6 @@
             </label>
           </div>
         </div>
-        <div class="server-settings-section" data-section="appearance">
-          <h2>Appearance</h2>
-          <div class="settings-card">
-            <div class="settings-field">
-              <label class="settings-label">Skin</label>
-              <div class="settings-hint">Choose a color theme. Use the toggle in the title bar to switch between light and dark mode.</div>
-              <div id="settings-theme-picker-container"></div>
-            </div>
-            <div class="settings-field">
-              <label class="settings-label">Context Display</label>
-              <div class="settings-hint">How context window usage is displayed.</div>
-              <div class="settings-btn-group" id="settings-context-view">
-                <button class="settings-btn-option" data-view="off">Off</button>
-                <button class="settings-btn-option" data-view="mini">Mini</button>
-                <button class="settings-btn-option" data-view="panel">Panel</button>
-              </div>
-            </div>
-          </div>
-        </div>
         <div class="server-settings-section" data-section="claudemd">
           <h2>CLAUDE.md</h2>
           <p class="ps-section-desc">Edit the global CLAUDE.md file. These instructions apply to all projects and sessions on this server.</p>
@@ -773,29 +772,6 @@
           </div>
           <div class="ps-env-list" id="ss-env-list">
             <!-- rows rendered by JS -->
-          </div>
-        </div>
-        <div class="server-settings-section" data-section="advanced">
-          <h2>Advanced</h2>
-          <div class="settings-card">
-            <div class="settings-field">
-              <label class="settings-label">WebSocket Path</label>
-              <div class="settings-value settings-mono" id="settings-ws-path">-</div>
-            </div>
-            <div class="settings-field">
-              <label class="settings-label">Project Slug</label>
-              <div class="settings-value settings-mono" id="settings-project-slug">-</div>
-            </div>
-          </div>
-          <div class="settings-card hidden" id="settings-keep-awake-card">
-            <label class="settings-toggle-row">
-              <div>
-                <span class="settings-label">Keep Awake</span>
-                <div class="settings-hint">Prevent the system from sleeping while the server is running (macOS only).</div>
-              </div>
-              <input type="checkbox" id="settings-keep-awake">
-              <span class="toggle-track"><span class="toggle-thumb"></span></span>
-            </label>
           </div>
         </div>
         <div class="server-settings-section" data-section="shutdown">
