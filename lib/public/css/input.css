@@ -148,6 +148,69 @@
   min-height: 0;
 }
 
+/* --- File chips (input preview) --- */
+.file-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-size: 12px;
+  max-width: 200px;
+}
+
+.file-chip-icon {
+  display: flex;
+  align-items: center;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.file-chip-icon .lucide { width: 14px; height: 14px; }
+
+.file-chip-name {
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.file-chip-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.file-chip-remove .lucide { width: 12px; height: 12px; }
+.file-chip-remove:hover { color: var(--text); background: rgba(var(--overlay-rgb), 0.1); }
+
+.file-chip-uploading {
+  opacity: 0.6;
+}
+
+.file-chip-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--border);
+  border-top-color: var(--text-muted);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
 /* --- Image preview bar --- */
 #image-preview-bar {
   display: none;
@@ -266,13 +329,17 @@
   gap: 4px;
 }
 
-/* --- Attach button & menu --- */
+/* --- Attach buttons & menu --- */
 #attach-wrap {
   position: relative;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 2px;
 }
 
-#attach-btn {
+#attach-file-btn,
+#attach-image-btn {
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -287,49 +354,11 @@
   touch-action: manipulation;
 }
 
-#attach-btn .lucide { width: 20px; height: 20px; }
-#attach-btn:hover { background: rgba(var(--overlay-rgb), 0.06); color: var(--text); }
+#attach-file-btn .lucide,
+#attach-image-btn .lucide { width: 20px; height: 20px; }
 
-#attach-menu {
-  position: absolute;
-  bottom: calc(100% + 8px);
-  left: 0;
-  min-width: 170px;
-  background: var(--bg-alt);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  box-shadow: 0 -4px 24px rgba(var(--shadow-rgb), 0.4);
-  z-index: 10;
-  overflow: hidden;
-}
-
-#attach-menu.hidden { display: none; }
-
-.attach-menu-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  padding: 12px 16px;
-  border: none;
-  background: none;
-  color: var(--text-secondary);
-  font-family: inherit;
-  font-size: 14px;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-}
-
-.attach-menu-item:not(:last-child) {
-  border-bottom: 1px solid var(--border-subtle);
-}
-
-.attach-menu-item:hover {
-  background: rgba(var(--overlay-rgb), 0.05);
-  color: var(--text);
-}
-
-.attach-menu-item .lucide { width: 18px; height: 18px; flex-shrink: 0; }
+#attach-file-btn:hover,
+#attach-image-btn:hover { background: rgba(var(--overlay-rgb), 0.06); color: var(--text); }
 
 #send-btn {
   flex-shrink: 0;
