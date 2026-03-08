@@ -100,6 +100,7 @@
             <button id="terminal-sidebar-btn"><i data-lucide="square-terminal"></i> <span>Terminal</span><span id="terminal-sidebar-count" class="sidebar-badge hidden"></span></button>
             <button id="sticky-notes-sidebar-btn"><i data-lucide="sticky-note"></i> <span>Sticky Notes</span><span id="sticky-notes-sidebar-count" class="sidebar-badge hidden"></span></button>
             <button id="skills-btn"><i data-lucide="puzzle"></i> <span>Skills</span></button>
+            <button id="scheduler-btn"><i data-lucide="calendar-clock"></i> <span>Scheduled Tasks</span></button>
           </div>
         </div>
         <div id="sidebar-sessions-header">
@@ -127,6 +128,7 @@
             </div>
           </div>
         </div>
+        <div id="ralph-loop-section"></div>
         <div id="sidebar-panel-projects" class="sidebar-panel hidden">
           <div id="project-list"></div>
         </div>
@@ -990,7 +992,6 @@
     <div class="ralph-wizard-progress">
       <span class="ralph-dot active" data-step="1"></span>
       <span class="ralph-dot" data-step="2"></span>
-      <span class="ralph-dot" data-step="3"></span>
     </div>
     <div class="ralph-wizard-steps">
       <div class="ralph-step active" data-step="1">
@@ -1026,15 +1027,7 @@
         <label class="ralph-field-label" for="ralph-task">Task description <span class="ralph-field-req">*</span></label>
         <textarea id="ralph-task" rows="5" placeholder="e.g. Add dark mode toggle to the settings page with system preference detection..."></textarea>
       </div>
-      <div class="ralph-step" data-step="3">
-        <h3>Settings &amp; Review</h3>
-        <div class="ralph-settings-row">
-          <label for="ralph-max-iterations">Max iterations</label>
-          <input type="number" id="ralph-max-iterations" min="1" max="100" value="25" class="ralph-input-number">
-          <span class="ralph-settings-hint">How many code → judge cycles before stopping.</span>
-        </div>
-        <div id="ralph-review-summary"></div>
-      </div>
+      <input type="hidden" id="ralph-max-iterations" value="25">
     </div>
     <div class="ralph-wizard-footer">
       <button id="ralph-wizard-back" class="ralph-btn secondary">Back</button>
@@ -1058,6 +1051,86 @@
     <button id="ralph-preview-close" class="ralph-btn secondary">Close</button>
   </div>
 </div>
+
+<!-- Scheduler panel is dynamically created in #app by scheduler.js -->
+
+<!-- Schedule Edit Modal -->
+<div id="schedule-edit-modal" class="hidden">
+  <div class="confirm-backdrop"></div>
+  <div class="confirm-dialog schedule-edit-dialog">
+    <div class="schedule-edit-header">
+      <span class="schedule-edit-title" id="schedule-edit-title">New Schedule</span>
+      <button class="schedule-edit-close" id="schedule-edit-close">&times;</button>
+    </div>
+    <div class="schedule-edit-body">
+      <div class="sched-field">
+        <label class="sched-field-label" for="sched-name">Name</label>
+        <input type="text" class="sched-field-input" id="sched-name" placeholder="e.g. Daily Code Review" maxlength="60" spellcheck="false" autocomplete="off">
+      </div>
+      <div class="sched-field" id="sched-job-field">
+        <label class="sched-field-label">Job</label>
+        <div class="sched-field-hint" id="sched-job-name" style="font-weight:600;color:var(--text)"></div>
+      </div>
+      <div class="sched-field">
+        <label class="sched-field-label">Repeat</label>
+        <div class="sched-preset-group" id="sched-presets">
+          <button class="sched-preset-btn" data-preset="daily">Every day</button>
+          <button class="sched-preset-btn" data-preset="weekdays">Weekdays</button>
+          <button class="sched-preset-btn" data-preset="weekly">Weekly</button>
+          <button class="sched-preset-btn" data-preset="monthly">Monthly</button>
+          <button class="sched-preset-btn" data-preset="custom">Custom</button>
+        </div>
+      </div>
+      <div class="sched-field" id="sched-dow-field" style="display:none">
+        <label class="sched-field-label">Days of week</label>
+        <div class="sched-dow-row" id="sched-dow-row">
+          <button class="sched-dow-btn" data-dow="0">Su</button>
+          <button class="sched-dow-btn" data-dow="1">Mo</button>
+          <button class="sched-dow-btn" data-dow="2">Tu</button>
+          <button class="sched-dow-btn" data-dow="3">We</button>
+          <button class="sched-dow-btn" data-dow="4">Th</button>
+          <button class="sched-dow-btn" data-dow="5">Fr</button>
+          <button class="sched-dow-btn" data-dow="6">Sa</button>
+        </div>
+      </div>
+      <div class="sched-field">
+        <label class="sched-field-label">Time</label>
+        <div class="sched-time-row">
+          <input type="time" class="sched-time-input" id="sched-time" value="09:00">
+        </div>
+      </div>
+      <div class="sched-field">
+        <label class="sched-field-label">Preview</label>
+        <div class="sched-cron-preview" id="sched-cron-preview">
+          <span class="human" id="sched-human-text">Every day at 09:00</span>
+          <span id="sched-cron-text">0 9 * * *</span>
+        </div>
+      </div>
+      <div class="sched-field">
+        <div class="sched-toggle-row">
+          <span class="sched-field-label" style="margin:0">Enabled</span>
+          <label class="sched-toggle">
+            <input type="checkbox" id="sched-enabled" checked>
+            <span class="sched-toggle-track"></span>
+            <span class="sched-toggle-thumb"></span>
+          </label>
+        </div>
+      </div>
+      <div class="sched-field" id="sched-history-field" style="display:none">
+        <label class="sched-field-label">Run History</label>
+        <div class="sched-history" id="sched-history"></div>
+      </div>
+    </div>
+    <div class="schedule-edit-footer">
+      <button class="sched-btn sched-btn-delete" id="sched-delete" style="display:none">Delete</button>
+      <button class="sched-btn sched-btn-cancel" id="sched-cancel">Cancel</button>
+      <button class="sched-btn sched-btn-save" id="sched-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Schedule Popover -->
+<div id="schedule-popover" class="schedule-popover hidden"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/marked@14/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>

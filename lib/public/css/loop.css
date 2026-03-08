@@ -38,7 +38,68 @@
 .loop-stop-btn:hover {
   opacity: 0.85;
 }
-/* .loop-start-btn is now inside #session-actions, inherits sidebar button styles */
+/* Ralph Loop sidebar section */
+#ralph-loop-section {
+  border-left: 3px solid var(--accent);
+  background: rgba(var(--overlay-rgb), 0.03);
+  padding: 8px 12px;
+  margin: 0 8px;
+  border-radius: 6px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 4px;
+}
+.ralph-section-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ralph-section-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+}
+.ralph-section-header .ralph-section-icon { display: inline-flex; color: var(--accent); }
+.ralph-section-header .ralph-section-icon .lucide { width: 13px; height: 13px; }
+.ralph-section-header .ralph-section-label { flex: 1; }
+.ralph-section-header .loop-experimental { margin-left: 0; font-size: 9.5px; }
+.ralph-section-body {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  padding-left: 2px;
+  margin-top: 2px;
+}
+.ralph-section-hint {
+  color: var(--text-muted);
+}
+.ralph-section-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.ralph-section-status .lucide { width: 11px; height: 11px; }
+.ralph-section-status.crafting { color: var(--accent); }
+.ralph-section-status.ready { color: var(--success, #27ae60); font-weight: 600; }
+.ralph-section-status.running { color: var(--accent); }
+.ralph-section-status.done { color: var(--success, #27ae60); }
+.ralph-section-tasks-link {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--accent);
+  text-decoration: none;
+  cursor: pointer;
+}
+.ralph-section-tasks-link:hover { text-decoration: underline; }
+
+/* Section accent states */
+.ralph-section-ready { border-left-color: var(--success, #27ae60); }
+.ralph-section-running { border-left-color: var(--accent); }
+.ralph-section-done { border-left-color: var(--success, #27ae60); }
+
+/* .loop-start-btn is now inside #ralph-loop-section, inherits sidebar button styles */
 .loop-experimental {
   display: inline-flex;
   align-items: center;

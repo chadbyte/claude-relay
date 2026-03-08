@@ -4,8 +4,8 @@
   "description": "Web UI for Claude Code. Any device. Push notifications.",
   "bin": {
     "clay-server": "./bin/cli.js",
-    "clay-dev": "./bin/cli.js",
-    "claude-relay": "./bin/claude-relay.js"
+    "claude-relay": "./bin/claude-relay.js",
+    "clay-dev": "./bin/cli.js"
   },
   "scripts": {
     "dev": "node bin/cli.js --dev",

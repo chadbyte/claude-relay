@@ -21,8 +21,9 @@ var { execSync, execFileSync, spawn } = require("child_process");
 var qrcode = require("qrcode-terminal");
 var net = require("net");
 
-// Detect dev mode (no separate storage — dev and prod share ~/.clay)
+// Detect dev mode — dev and prod use separate daemon files so they can run simultaneously
 var _isDev = (process.argv[1] && path.basename(process.argv[1]) === "clay-dev") || process.argv.includes("--dev");
+if (_isDev) process.env.CLAY_DEV = "1";
 
 var { loadConfig, saveConfig, configPath, socketPath, logPath, ensureConfigDir, isDaemonAlive, isDaemonAliveAsync, generateSlug, clearStaleConfig, loadClayrc, saveClayrc, readCrashInfo } = require("../lib/config");
 var { sendIPCCommand } = require("../lib/ipc");
