@@ -1,5 +1,14 @@
 # Changelog
 
+## v2.7.1
+
+- Fix mobile send button pushed off-screen by long config chip label (#184)
+  - Show icon-only config chip on mobile instead of full text label
+- Redesign mobile tab bar + button: inline with other tabs, muted circle style
+- Fix theme toggle icon order to match current active mode
+- Fix context panel showing inflated usage on turns with tool use (#181)
+- Fix encodeCwd to match Claude Code's path encoding (#182)
+
 ## v2.7.0
 
 - **Ralph Loop**: full autonomous loop cycle with wizard, crafting, approval, and preview
