@@ -7,23 +7,26 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
-  min-height: 0;
   position: relative;
 }
 
-/* --- Onboarding banner (sits above #top-bar) --- */
+/* --- Onboarding banner --- */
+#onboarding-banner {
+  display: none !important;
+}
+
+/* --- Onboarding banner (original styles below for reference) --- */
 #onboarding-banner {
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 6px 16px;
+  padding: 8px 16px;
   background: var(--accent-8);
   border-bottom: 1px solid var(--accent-15);
   font-size: 12px;
   color: var(--text-secondary);
-  z-index: 20;
 }
 
 #onboarding-banner.hidden { display: none; }
@@ -67,20 +70,24 @@
 #onboarding-banner-close .lucide { width: 14px; height: 14px; }
 #onboarding-banner-close:hover { color: var(--text-secondary); }
 
-/* --- Update / Announce banner (sits above #top-bar, full width) --- */
+/* --- Update banner --- */
+#update-banner {
+  display: none !important;
+}
+
+/* --- Update banner (original styles below for reference) --- */
 #update-banner {
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 6px 16px;
+  padding: 8px 16px;
   background: var(--success-8);
   border-bottom: 1px solid var(--success-15);
   font-size: 12px;
   color: var(--text-secondary);
   position: relative;
-  z-index: 20;
 }
 
 #update-banner.hidden { display: none; }
@@ -157,7 +164,7 @@
 }
 
 #update-popover .popover-cmd code {
-  font-family: "Roboto Mono", monospace;
+  font-family: "SF Mono", Menlo, Monaco, monospace;
   font-size: 13px;
   color: var(--text);
   background: rgba(var(--overlay-rgb), 0.06);
@@ -198,20 +205,19 @@
 #update-banner-close .lucide { width: 14px; height: 14px; }
 #update-banner-close:hover { color: var(--text-secondary); }
 
-/* --- Skip permissions banner (sits above #top-bar) --- */
+/* --- Skip permissions banner --- */
 #skip-perms-banner {
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 6px 16px;
+  padding: 7px 16px;
   background: var(--error-12);
   border-bottom: 1px solid var(--error-25);
   font-size: 12px;
   font-weight: 500;
   color: var(--error);
-  z-index: 20;
 }
 
 #skip-perms-banner.hidden { display: none; }
@@ -383,7 +389,7 @@
 
 .rewind-file-path {
   flex: 1;
-  font-family: "Roboto Mono", monospace;
+  font-family: "SF Mono", Menlo, Monaco, monospace;
   font-size: 12px;
   color: var(--text-muted);
   overflow: hidden;
@@ -414,7 +420,7 @@
 .rewind-file-diff pre {
   margin: 0;
   padding: 10px 12px;
-  font-family: "Roboto Mono", monospace;
+  font-family: "SF Mono", Menlo, Monaco, monospace;
   font-size: 12px;
   line-height: 1.55;
   white-space: pre-wrap;
@@ -498,7 +504,7 @@
 .cli-session-meta .badge {
   background: rgba(var(--overlay-rgb), 0.07);
   padding: 1px 6px; border-radius: 4px;
-  font-family: "Roboto Mono", monospace;
+  font-family: "SF Mono", Menlo, Monaco, monospace;
   font-size: 10px;
 }
 
@@ -540,7 +546,7 @@
 }
 
 .notif-help-url code {
-  font-family: "Roboto Mono", monospace;
+  font-family: "SF Mono", Menlo, Monaco, monospace;
   font-size: 12px;
   color: var(--text);
   flex: 1;
@@ -589,14 +595,14 @@
   border-radius: 8px;
   color: var(--text);
   font-size: 13px;
-  font-family: "Roboto Mono", monospace;
+  font-family: "SF Mono", Menlo, Monaco, monospace;
   padding: 10px 12px;
   outline: none;
   transition: border-color 0.2s;
 }
 
 #add-project-input:focus { border-color: var(--text-dimmer); }
-#add-project-input::placeholder { color: var(--text-muted); font-family: "Pretendard", system-ui, sans-serif; }
+#add-project-input::placeholder { color: var(--text-muted); font-family: "Inter", system-ui, sans-serif; }
 
 #add-project-suggestions {
   position: absolute;
@@ -675,26 +681,61 @@
   pointer-events: none;
 }
 
-.connect-logo {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  animation: connect-breathe 3s ease-in-out infinite;
+#pixel-canvas {
+  position: relative;
+  width: 144px;
+  height: 144px;
 }
 
-.connect-wordmark {
-  margin-top: 12px;
-  font-family: "Nunito", sans-serif;
-  font-size: 20px;
-  font-weight: 800;
+.px {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  transition: none;
+}
+
+.px.settle {
+  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
+}
+
+.px.scatter {
+  transition: transform 0.5s cubic-bezier(0.55, 0, 1, 0.45), opacity 0.5s ease;
+}
+
+.connect-verb {
+  margin-top: 24px;
+  font-size: 16px;
+  font-weight: 500;
+  min-height: 1.4em;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  background: linear-gradient(
+    90deg,
+    var(--accent) 0%,
+    var(--accent) 35%,
+    var(--accent-hover) 50%,
+    var(--accent) 65%,
+    var(--accent) 100%
+  );
+  background-size: 250% 100%;
+  background-position: 100% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 2.5s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+.connect-verb.fade-out { opacity: 0; transform: translateY(-6px); }
+.connect-verb.fade-in { opacity: 1; transform: translateY(0); }
+
+.connect-status {
+  margin-top: 8px;
+  font-size: 13px;
   color: var(--text-dimmer);
-  letter-spacing: 0.5px;
-  animation: connect-breathe 3s ease-in-out infinite;
-  animation-delay: 0.3s;
-}
-
-@keyframes connect-breathe {
-  0%, 100% { opacity: 0.35; }
-  50% { opacity: 0.7; }
 }
 
