@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.7.2
+
+- Fix encodeCwd to match Claude Code's path encoding (#182)
+- Allow message queueing on mobile during processing
+- Remove scheduled tasks feature shipped prematurely in v2.7.1
+
 ## v2.7.1
 
 - Fix mobile send button pushed off-screen by long config chip label (#184)
