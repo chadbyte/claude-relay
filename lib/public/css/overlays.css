@@ -629,9 +629,10 @@ button.top-bar-pill.pill-success:hover { background: color-mix(in srgb, var(--su
   pointer-events: none;
 }
 
-.connect-wordmark {
-  height: 400px;
-  width: auto;
-  position: relative;
+#ascii-logo-canvas {
+  width: 100%;
+  height: 100%;
+  max-width: 800px;
+  max-height: 400px;
 }
 
