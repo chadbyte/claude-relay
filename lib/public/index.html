@@ -1133,6 +1133,143 @@
   </div>
 </div>
 
+<!-- Schedule Create Popover (inline) -->
+<div id="schedule-create-popover" class="sched-create-popover hidden">
+  <input type="hidden" id="sched-create-date" value="">
+  <!-- Top row: date + time + recurrence + close -->
+  <div class="sched-create-top-row">
+    <div class="sched-create-date-chips">
+      <input type="date" class="sched-create-date-input" id="sched-create-date-picker" value="">
+      <input type="time" class="sched-create-time-input" id="sched-create-time" value="09:00">
+      <button class="sched-create-recurrence-btn" id="sched-create-recurrence-btn" title="Recurrence"><i data-lucide="repeat"></i></button>
+    </div>
+    <button class="sched-create-close-btn" id="sched-create-cancel" title="Close"><i data-lucide="x"></i></button>
+  </div>
+  <!-- Title with color picker -->
+  <div class="sched-create-title-row">
+    <div class="sched-create-color-picker-wrap">
+      <button class="sched-create-color-btn" id="sched-create-color-btn" title="Pick color"><span class="sched-create-color-dot" id="sched-create-color-dot"></span></button>
+      <div class="sched-create-color-palette hidden" id="sched-create-color-palette">
+        <button class="sched-color-swatch" data-color="#ffb86c" style="background:#ffb86c"></button>
+        <button class="sched-color-swatch" data-color="#f87171" style="background:#f87171"></button>
+        <button class="sched-color-swatch" data-color="#fbbf24" style="background:#fbbf24"></button>
+        <button class="sched-color-swatch" data-color="#34d399" style="background:#34d399"></button>
+        <button class="sched-color-swatch" data-color="#22d3ee" style="background:#22d3ee"></button>
+        <button class="sched-color-swatch" data-color="#f472b6" style="background:#f472b6"></button>
+        <button class="sched-color-swatch" data-color="#6366f1" style="background:#6366f1"></button>
+        <button class="sched-color-swatch" data-color="#a78bfa" style="background:#a78bfa"></button>
+        <button class="sched-color-swatch" data-color="#3b82f6" style="background:#3b82f6"></button>
+        <button class="sched-color-swatch" data-color="#e879f9" style="background:#e879f9"></button>
+        <button class="sched-color-swatch" data-color="#10b981" style="background:#10b981"></button>
+        <button class="sched-color-swatch" data-color="#8b5cf6" style="background:#8b5cf6"></button>
+      </div>
+    </div>
+    <input type="text" class="sched-create-title-input" id="sched-create-title" placeholder="Schedule Title" maxlength="80" spellcheck="false" autocomplete="off">
+  </div>
+  <!-- Task (JS dropdown) -->
+  <div class="sched-create-row">
+    <i data-lucide="list-todo" class="sched-create-row-icon"></i>
+    <div class="sched-create-task-dropdown" id="sched-create-task-wrap">
+      <button class="sched-create-task-btn" id="sched-create-task-btn" type="button">
+        <span class="sched-create-task-label" id="sched-create-task-label">Select a task</span>
+        <i data-lucide="chevron-down"></i>
+      </button>
+      <input type="hidden" id="sched-create-task" value="">
+      <div class="sched-create-task-list hidden" id="sched-create-task-list"></div>
+    </div>
+  </div>
+  <!-- Description -->
+  <div class="sched-create-row">
+    <i data-lucide="align-left" class="sched-create-row-icon"></i>
+    <textarea class="sched-create-row-textarea" id="sched-create-desc" rows="3" placeholder="Description"></textarea>
+  </div>
+  <!-- Bottom bar -->
+  <div class="sched-create-bottom">
+    <div class="sched-create-bottom-left"></div>
+    <button class="sched-create-save-btn" id="sched-create-submit">Save</button>
+  </div>
+  <!-- Recurrence dropdown -->
+  <div class="sched-create-recurrence-dropdown hidden" id="sched-create-recurrence-dropdown">
+    <div class="sched-recurrence-options" id="sched-create-recurrence-list">
+      <button class="sched-recurrence-option active" data-recurrence="none">Does not repeat</button>
+      <button class="sched-recurrence-option" data-recurrence="daily">Every day</button>
+      <button class="sched-recurrence-option" data-recurrence="weekly" id="sched-recurrence-weekly">Weekly on Tuesday</button>
+      <button class="sched-recurrence-option" data-recurrence="biweekly" id="sched-recurrence-biweekly">Every 2nd Tuesday of the month</button>
+      <button class="sched-recurrence-option" data-recurrence="yearly" id="sched-recurrence-yearly">Every year on Mar 10</button>
+      <button class="sched-recurrence-option" data-recurrence="monthly" id="sched-recurrence-monthly">Every month on the 10th</button>
+      <button class="sched-recurrence-option" data-recurrence="weekdays">Every weekday</button>
+      <button class="sched-recurrence-option" data-recurrence="custom">Custom&hellip;</button>
+    </div>
+    <div class="sched-custom-repeat-panel hidden" id="sched-custom-repeat-panel">
+      <div class="sched-custom-header">
+        <button class="sched-custom-back" id="sched-custom-back"><i data-lucide="chevron-left"></i> Back</button>
+      </div>
+      <div class="sched-custom-row">
+        <span class="sched-custom-label">Every</span>
+        <input type="number" class="sched-custom-interval" id="sched-custom-interval" value="1" min="1" max="99">
+        <select class="sched-field-select sched-custom-unit" id="sched-custom-unit">
+          <option value="day">Day</option>
+          <option value="week" selected>Week</option>
+          <option value="month">Month</option>
+          <option value="year">Year</option>
+        </select>
+      </div>
+      <div class="sched-custom-dow-section" id="sched-custom-dow-section">
+        <span class="sched-custom-label">On</span>
+        <div class="sched-dow-row" id="sched-custom-dow-row">
+          <button class="sched-dow-btn" data-dow="0">Su</button>
+          <button class="sched-dow-btn" data-dow="1">Mo</button>
+          <button class="sched-dow-btn" data-dow="2">Tu</button>
+          <button class="sched-dow-btn" data-dow="3">We</button>
+          <button class="sched-dow-btn" data-dow="4">Th</button>
+          <button class="sched-dow-btn" data-dow="5">Fr</button>
+          <button class="sched-dow-btn" data-dow="6">Sa</button>
+        </div>
+      </div>
+      <div class="sched-custom-row sched-custom-end-row" id="sched-custom-end-row">
+        <span class="sched-custom-label">End</span>
+        <div class="sched-custom-end-dropdown" id="sched-custom-end-wrap">
+          <button class="sched-custom-end-btn" id="sched-custom-end-btn" type="button">
+            <span id="sched-custom-end-label">Never</span>
+            <i data-lucide="chevron-down"></i>
+          </button>
+          <input type="hidden" id="sched-custom-end" value="never">
+          <div class="sched-custom-end-list hidden" id="sched-custom-end-list">
+            <button class="sched-custom-end-item active" data-value="never" type="button">Never</button>
+            <button class="sched-custom-end-item" data-value="until" type="button">Until</button>
+            <button class="sched-custom-end-item" data-value="after" type="button">After</button>
+          </div>
+        </div>
+        <button class="sched-custom-end-date-btn hidden" id="sched-custom-end-date-btn" type="button">
+          <span id="sched-custom-end-date-label">Pick date</span>
+        </button>
+        <div class="sched-custom-end-after hidden" id="sched-custom-end-after-wrap">
+          <input type="number" class="sched-custom-interval sched-custom-end-after-input" id="sched-custom-end-after" value="10" min="1" max="999">
+          <span class="sched-custom-end-after-suffix">times</span>
+        </div>
+      </div>
+      <!-- Inline calendar for "Until" date picking -->
+      <div class="sched-custom-end-calendar hidden" id="sched-custom-end-calendar">
+        <div class="sched-cal-header">
+          <span class="sched-cal-title" id="sched-cal-title">April 2026</span>
+          <div class="sched-cal-nav">
+            <button class="sched-cal-nav-btn" id="sched-cal-prev"><i data-lucide="chevron-left"></i></button>
+            <button class="sched-cal-nav-btn" id="sched-cal-next"><i data-lucide="chevron-right"></i></button>
+          </div>
+        </div>
+        <div class="sched-cal-weekdays">
+          <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
+        </div>
+        <div class="sched-cal-grid" id="sched-cal-grid"></div>
+      </div>
+      <div class="sched-custom-actions">
+        <button class="sched-btn sched-btn-cancel" id="sched-custom-cancel">Cancel</button>
+        <button class="sched-btn sched-btn-save" id="sched-custom-ok">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Schedule Popover -->
 <div id="schedule-popover" class="schedule-popover hidden"></div>
 

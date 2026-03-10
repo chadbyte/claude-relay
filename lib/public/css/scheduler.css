@@ -536,12 +536,18 @@
 /* ============================
    Week view
    ============================ */
-.scheduler-week-view {
-  display: grid;
-  grid-template-columns: 48px repeat(7, 1fr);
+/* --- Week view body wrapper --- */
+.scheduler-week-body {
+  position: relative;
   overflow-y: auto;
   flex: 1;
   min-height: 0;
+}
+
+.scheduler-week-view {
+  display: grid;
+  grid-template-columns: 48px repeat(7, 1fr);
+  position: relative;
 }
 
 .scheduler-week-header {
@@ -554,34 +560,53 @@
   z-index: 2;
 }
 
+.scheduler-week-tz-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-dimmer);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
 .scheduler-week-header-cell {
   text-align: center;
   padding: 8px 0;
-  font-size: 12px;
+  font-size: 13px;
+  color: var(--text-muted);
+  border-left: 1px solid var(--border-subtle, var(--border));
 }
 
 .scheduler-week-header-cell .wday {
-  font-weight: 700;
+  font-weight: 600;
   color: var(--text-muted);
-  text-transform: uppercase;
-  font-size: 10px;
 }
 
 .scheduler-week-header-cell .wdate {
   font-weight: 700;
-  font-size: 20px;
   color: var(--text-secondary);
+}
+
+.scheduler-week-header-cell.today {
+  color: var(--accent);
+}
+
+.scheduler-week-header-cell.today .wday {
+  color: var(--accent);
 }
 
 .scheduler-week-header-cell.today .wdate {
   color: #fff;
   background: var(--accent);
   border-radius: 50%;
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  font-size: 13px;
 }
 
 .scheduler-week-time-col {
@@ -589,7 +614,7 @@
 }
 
 .scheduler-week-time-label {
-  height: 48px;
+  height: calc(160vh / 24);
   display: flex;
   align-items: flex-start;
   justify-content: flex-end;
@@ -609,9 +634,22 @@
   border-right: none;
 }
 
-.scheduler-week-slot {
-  height: 48px;
+/* Hour block: contains 4 quarter slots — height is 160vh/24 ≈ 6.667vh */
+.scheduler-week-hour {
+  height: calc(160vh / 24);
   border-bottom: 1px solid var(--border-subtle, var(--border));
+  display: flex;
+  flex-direction: column;
+}
+
+/* 15-minute sub-slot (no visible borders) */
+.scheduler-week-slot {
+  flex: 1;
+  cursor: pointer;
+}
+
+.scheduler-week-slot:hover {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
 }
 
 .scheduler-week-event {
@@ -638,6 +676,81 @@
   background: var(--bg-alt);
   color: var(--text-muted);
   border: 1px solid var(--border);
+}
+
+/* --- Current time indicator --- */
+.scheduler-week-now-line {
+  position: absolute;
+  left: 48px;
+  right: 0;
+  height: 2px;
+  background: var(--accent);
+  z-index: 3;
+  pointer-events: none;
+}
+
+.scheduler-week-now-label {
+  position: absolute;
+  left: -48px;
+  top: -8px;
+  width: 48px;
+  text-align: right;
+  padding-right: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--accent);
+  box-sizing: border-box;
+}
+
+/* --- Hover tooltip --- */
+.scheduler-week-tooltip {
+  position: absolute;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text);
+  pointer-events: none;
+  z-index: 5;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  white-space: nowrap;
+}
+
+.scheduler-week-tooltip.hidden {
+  display: none;
+}
+
+/* --- Week footer: task counts --- */
+.scheduler-week-footer {
+  display: grid;
+  grid-template-columns: 48px repeat(7, 1fr);
+  border-top: 1px solid var(--border);
+  background: var(--bg-alt);
+  flex-shrink: 0;
+}
+
+.scheduler-week-footer-tz {
+  /* empty corner cell */
+}
+
+.scheduler-week-footer-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 0;
+  border-left: 1px solid var(--border-subtle, var(--border));
+}
+
+.scheduler-week-task-badge {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 8px;
 }
 
 /* ============================
