@@ -1,5 +1,27 @@
 # Changelog
 
+## v2.8.0
+
+- **Scheduled Tasks**: cron-based task scheduler with calendar view, sidebar list, and detail panel
+  - Project scope toggle (This Project / All Projects) in scheduler top bar
+  - Move tasks between projects via popover action
+  - Pre-removal check warns when a project has scheduled tasks, offers to migrate them
+  - Drag-and-drop tasks onto calendar dates
+  - Reset scheduler state on project switch
+- **User Profile**: Discord-style popover with DiceBear avatar, display name, language, and color
+  - 8 avatar styles with seed-based shuffle (preview-only until confirmed)
+  - 18 color swatches for banner/avatar accent
+  - Profile persisted server-side in `~/.clay/profile.json`
+  - Hover highlight on user island for click affordance
+- **Speech-to-Text**: switch from whisper WASM to Web Speech API (Chrome, Edge, Safari)
+  - Recording pill UI with stop button
+  - Language synced with user profile preference
+- **Home Hub**: Quick Start playbooks with guided onboarding steps
+  - Certificate trust playbook with OS-specific commands and Claude Code prompt
+- Move Clay version label from user island to top bar
+- Fix Ctrl+V paste in terminal on Firefox (#194)
+- Remove whisper WASM dead code
+
 ## v2.7.2
 
 - Fix encodeCwd to match Claude Code's path encoding (#182)

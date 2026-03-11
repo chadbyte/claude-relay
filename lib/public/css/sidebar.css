@@ -829,8 +829,24 @@
   background: var(--sidebar-bg);
 }
 
+.user-island-profile {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  padding: 6px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.user-island-profile:hover {
+  background: var(--sidebar-hover);
+}
+
 .user-island-avatar {
-  width: 72px;
+  width: 36px;
+  height: 36px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -862,11 +878,12 @@
   flex: 1;
   min-width: 0;
   overflow: hidden;
+  margin-left: 8px;
 }
 
 .user-island-name {
   font-family: "Pretendard", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--text);
   white-space: nowrap;

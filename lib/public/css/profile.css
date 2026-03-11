@@ -1,0 +1,268 @@
+/* --- Profile Popover (Discord-style, above user island) --- */
+.profile-popover {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  width: 280px;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+  z-index: 100;
+  overflow: visible;
+  animation: profile-popover-in 0.15s ease-out;
+}
+
+@keyframes profile-popover-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Banner */
+.profile-banner {
+  height: 52px;
+  position: relative;
+  transition: background 0.2s ease;
+  border-radius: 14px 14px 0 0;
+  z-index: 1;
+}
+
+.profile-close-btn {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: rgba(0, 0, 0, 0.3);
+  color: #fff;
+  border-radius: 50%;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.profile-close-btn:hover {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* Avatar row (overlaps banner) */
+.profile-avatar-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  padding: 0 14px;
+  margin-top: -28px;
+  margin-bottom: 12px;
+  position: relative;
+  z-index: 2;
+}
+
+.profile-popover-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 3px solid var(--bg-alt);
+  background: var(--bg);
+  position: relative;
+}
+
+.profile-popover-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* Shuffle button next to Avatar label */
+.profile-shuffle-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  margin-left: 4px;
+  cursor: pointer;
+  color: var(--text-muted);
+  vertical-align: middle;
+  transition: color 0.15s;
+  display: inline-flex;
+  align-items: center;
+}
+
+.profile-shuffle-btn .lucide {
+  width: 12px;
+  height: 12px;
+}
+
+.profile-shuffle-btn:hover {
+  color: var(--text);
+}
+
+.profile-name-display {
+  font-family: "Pretendard", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-bottom: 6px;
+}
+
+/* Body */
+.profile-popover-body {
+  padding: 0 14px 14px;
+}
+
+/* Fields */
+.profile-field {
+  margin-bottom: 12px;
+}
+
+.profile-field:last-child {
+  margin-bottom: 0;
+}
+
+.profile-field-label {
+  display: block;
+  font-family: "Pretendard", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-dimmer);
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.profile-field-hint {
+  font-size: 10px;
+  color: var(--text-dimmer);
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  font-style: italic;
+}
+
+/* Text input */
+.profile-field-input {
+  width: 100%;
+  padding: 7px 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: "Pretendard", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  outline: none;
+  transition: border-color 0.15s;
+  box-sizing: border-box;
+}
+
+.profile-field-input:focus {
+  border-color: var(--accent);
+}
+
+.profile-field-input::placeholder {
+  color: var(--text-dimmer);
+  font-style: italic;
+}
+
+/* Select dropdown */
+.profile-field-select {
+  width: 100%;
+  padding: 7px 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: "Pretendard", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 5l3 3 3-3'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 28px;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+
+.profile-field-select:focus {
+  border-color: var(--accent);
+}
+
+/* Avatar style grid */
+.profile-avatar-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.profile-avatar-option {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 10px;
+  border: 2px solid var(--border);
+  background: var(--bg);
+  cursor: pointer;
+  padding: 3px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s, transform 0.1s;
+}
+
+.profile-avatar-option img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+.profile-avatar-option:hover {
+  border-color: var(--text-muted);
+  transform: scale(1.05);
+}
+
+.profile-avatar-option.profile-avatar-option-active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+/* Color swatch grid */
+.profile-color-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.profile-color-swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s;
+  padding: 0;
+}
+
+.profile-color-swatch:hover {
+  transform: scale(1.15);
+}
+
+.profile-color-swatch.profile-color-active {
+  border-color: #fff;
+  box-shadow: 0 0 0 2px var(--accent);
+}

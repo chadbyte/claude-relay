@@ -23,7 +23,7 @@
 <div id="layout">
   <!-- === Top Bar (full width, forms reverse-ㄱ with icon strip) === -->
   <div id="top-bar">
-    <a href="https://github.com/chadbyte/clay" target="_blank" rel="noopener" class="top-bar-title"><img class="top-bar-icon" src="favicon-banded.png" width="16" height="16" alt="">Clay</a>
+    <a href="https://github.com/chadbyte/clay" target="_blank" rel="noopener" class="top-bar-title"><img class="top-bar-icon" src="favicon-banded.png" width="16" height="16" alt="">Clay <span id="footer-version" class="footer-version"></span></a>
     <div class="top-bar-actions">
       <!-- Pill badges (formerly banners) -->
       <div id="skip-perms-pill" class="top-bar-pill pill-error hidden"><i data-lucide="shield-off"></i> <span>Skip perms</span></div>
@@ -122,6 +122,7 @@
           </div>
           <div class="hub-playbooks-grid" id="hub-playbooks-grid"></div>
         </div>
+
 
         <div class="hub-tip">
           <div class="hub-tip-icon">💡</div>
@@ -316,6 +317,7 @@
             <div id="attach-wrap">
               <button id="attach-file-btn" type="button" aria-label="Attach file" title="Attach file"><i data-lucide="paperclip"></i></button>
               <button id="attach-image-btn" type="button" aria-label="Attach image" title="Attach image"><i data-lucide="image"></i></button>
+              <button id="stt-btn" type="button" aria-label="Voice input" title="Voice input"><i data-lucide="mic"></i></button>
             </div>
             <div id="input-bottom-right">
               <div id="config-chip-wrap" class="hidden">
@@ -558,9 +560,11 @@
 
   <!-- === User Island === -->
   <div id="user-island">
-    <div class="user-island-avatar"><span class="user-island-avatar-letter">C</span></div>
-    <div class="user-island-info">
-      <span class="user-island-name">Clay <span id="footer-version" class="footer-version"></span></span>
+    <div class="user-island-profile">
+      <div class="user-island-avatar"><span class="user-island-avatar-letter">?</span></div>
+      <div class="user-island-info">
+        <span class="user-island-name">Awesome Clay User</span>
+      </div>
     </div>
     <div class="user-island-actions">
     </div>
