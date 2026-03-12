@@ -605,6 +605,7 @@
   height: 22px;
 }
 
+/* --- Per-project presence avatars --- */
 /* --- Mobile: hide icon strip --- */
 @media (max-width: 768px) {
   #icon-strip {

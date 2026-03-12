@@ -182,13 +182,51 @@
   padding: 0 10px;
   background: var(--sidebar-bg);
   border-bottom: 1px solid var(--border-subtle);
+  gap: 6px;
+}
+
+.sidebar-presence {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.sidebar-presence-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--sidebar-bg);
+  background: var(--bg-alt);
+  margin-left: -6px;
+  cursor: default;
+}
+
+.sidebar-presence-avatar:first-child {
+  margin-left: 0;
+}
+
+.sidebar-presence-more {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--sidebar-bg);
+  background: var(--bg-alt);
+  margin-left: -6px;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 .title-bar-project-dropdown {
   display: flex;
   align-items: center;
   gap: 6px;
-  width: 100%;
+  flex: 1;
   min-width: 0;
   background: none;
   border: none;
