@@ -378,6 +378,163 @@
   border-color: var(--text-muted);
 }
 
+/* --- Admin header buttons row --- */
+.admin-header-btns {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.admin-action-btn-secondary {
+  background: var(--bg-alt);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.admin-action-btn-secondary:hover {
+  border-color: var(--text-muted);
+  opacity: 1;
+}
+
+.admin-action-btn-danger {
+  background: none;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.admin-action-btn-danger:hover {
+  color: #e5534b;
+  border-color: #e5534b;
+  opacity: 1;
+}
+
+/* --- Invite email label --- */
+.admin-invite-email {
+  font-size: 12px;
+  color: var(--accent);
+}
+
+/* --- SMTP Configuration Form --- */
+.admin-smtp-form {
+  padding: 4px 0;
+}
+
+.admin-smtp-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+.admin-smtp-status svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.admin-smtp-status-ok {
+  background: rgba(46, 160, 67, 0.1);
+  color: #2ea043;
+}
+
+.admin-smtp-status-off {
+  background: var(--accent-8);
+  color: var(--text-muted);
+}
+
+.admin-smtp-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 16px;
+  margin-bottom: 16px;
+}
+
+.admin-smtp-row label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.admin-smtp-row-half {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.admin-smtp-input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 13px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-family: inherit;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.admin-smtp-input:focus {
+  border-color: var(--accent);
+}
+
+.admin-smtp-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+  padding-top: 4px;
+}
+
+.admin-smtp-toggle input[type="checkbox"] {
+  accent-color: var(--accent);
+  width: 16px;
+  height: 16px;
+}
+
+.admin-smtp-actions {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px;
+  margin-bottom: 12px;
+}
+
+.admin-smtp-error {
+  font-size: 13px;
+  color: #e5534b;
+  padding: 0 16px;
+  min-height: 0;
+  overflow: hidden;
+  transition: all 0.15s;
+}
+
+.admin-smtp-error-visible {
+  margin-top: 8px;
+  min-height: 18px;
+}
+
+.admin-smtp-hint {
+  font-size: 12px;
+  color: var(--text-dimmer);
+  padding: 8px 16px 12px;
+  line-height: 1.5;
+}
+
+.admin-smtp-hint a {
+  color: var(--accent);
+}
+
 /* --- Session visibility indicator --- */
 .session-private-icon {
   display: inline-flex;

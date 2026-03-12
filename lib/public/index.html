@@ -626,6 +626,7 @@
           <button class="settings-nav-item settings-admin-only" data-section="admin-users"><span>Users</span></button>
           <button class="settings-nav-item settings-admin-only" data-section="admin-invites"><span>Invites</span></button>
           <button class="settings-nav-item settings-admin-only" data-section="admin-projects"><span>Projects</span></button>
+          <button class="settings-nav-item settings-admin-only" data-section="admin-smtp"><span>Email (SMTP)</span></button>
           <div class="settings-nav-separator"></div>
           <div class="settings-nav-category">Server</div>
           <button class="settings-nav-item" data-section="security"><span>Security</span></button>
@@ -885,6 +886,7 @@
               <div class="settings-hint settings-shutdown-error hidden" id="settings-shutdown-error"></div>
             </div>
           </div>
+        </div>
         <!-- Admin sections (multi-user, admin only) -->
         <div class="server-settings-section settings-admin-only" data-section="admin-users">
           <h2>Users</h2>
@@ -897,6 +899,10 @@
         <div class="server-settings-section settings-admin-only" data-section="admin-projects">
           <h2>Project Access</h2>
           <div class="settings-card" id="admin-projects-body"></div>
+        </div>
+        <div class="server-settings-section settings-admin-only" data-section="admin-smtp">
+          <h2>Email (SMTP)</h2>
+          <div class="settings-card" id="admin-smtp-body"></div>
         </div>
 
         </div>
