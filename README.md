@@ -276,6 +276,8 @@ If you are using claude-relay, let us know how you are using it in Discussions:
 
 This is an independent project and is not affiliated with Anthropic. Claude is a trademark of Anthropic.
 
+Clay is provided "as is" without warranty of any kind. Users are responsible for ensuring their use of this software complies with all applicable terms of service of the underlying AI providers (e.g., Anthropic, OpenAI) and any other third-party services. Features such as multi-user mode are experimental and may involve sharing access to API-backed services — please review your provider's usage policies regarding account sharing, acceptable use, and any applicable rate limits or restrictions before enabling such features. The authors assume no liability for any misuse or violations arising from the use of this software.
+
 ## License
 
 MIT

@@ -28,7 +28,7 @@ if (_isDev) process.env.CLAY_DEV = "1";
 var { loadConfig, saveConfig, configPath, socketPath, logPath, ensureConfigDir, isDaemonAlive, isDaemonAliveAsync, generateSlug, clearStaleConfig, loadClayrc, saveClayrc, readCrashInfo } = require("../lib/config");
 var { sendIPCCommand } = require("../lib/ipc");
 var { generateAuthToken } = require("../lib/server");
-var { enableMultiUser, hasAdmin } = require("../lib/users");
+var { enableMultiUser, hasAdmin, isMultiUser } = require("../lib/users");
 
 function openUrl(url) {
   try {
@@ -272,6 +272,13 @@ if (multiUserMode) {
     console.log("No changes made.");
     console.log("");
   } else if (muResult.setupCode) {
+    console.log("");
+    console.log("\x1b[33m⚠ Experimental Feature\x1b[0m");
+    console.log("");
+    console.log("  Multi-user mode is experimental and may change in future releases.");
+    console.log("  Sharing access to AI-powered tools may be subject to your provider's");
+    console.log("  terms of service. Please review the applicable usage policies before");
+    console.log("  granting access to other users.");
     console.log("");
     console.log("\x1b[32mMulti-user mode enabled.\x1b[0m");
     console.log("");
@@ -2248,7 +2255,13 @@ function showSettingsMenu(config, ip) {
     log(sym.bar + "  Tailscale    " + tsStatus);
     log(sym.bar + "  mkcert       " + mcStatus);
     log(sym.bar + "  HTTPS        " + tlsStatus);
+    var muEnabled = isMultiUser();
+    var muStatus = muEnabled
+      ? a.green + "Enabled" + a.reset
+      : a.dim + "Off" + a.reset;
+
     log(sym.bar + "  PIN          " + pinStatus);
+    log(sym.bar + "  Multi-user   " + muStatus);
     if (process.platform === "darwin") {
       log(sym.bar + "  Keep awake   " + awakeStatus);
     }
@@ -2264,6 +2277,11 @@ function showSettingsMenu(config, ip) {
       items.push({ label: "Remove PIN", value: "remove_pin" });
     } else {
       items.push({ label: "Set PIN", value: "pin" });
+    }
+    if (muEnabled) {
+      items.push({ label: "Multi-user mode (enabled)", value: "multi_user" });
+    } else {
+      items.push({ label: "Enable multi-user mode", value: "multi_user" });
     }
     if (process.platform === "darwin") {
       items.push({ label: isAwake ? "Disable keep awake" : "Enable keep awake", value: "awake" });
@@ -2304,6 +2322,42 @@ function showSettingsMenu(config, ip) {
           log("");
           showSettingsMenu(config, ip);
         });
+        break;
+
+      case "multi_user":
+        if (muEnabled && hasAdmin()) {
+          log(sym.bar);
+          log(sym.bar + "  " + a.dim + "Multi-user mode is already enabled and an admin account exists." + a.reset);
+          log(sym.bar + "  " + a.dim + "No changes made." + a.reset);
+          log(sym.bar);
+          promptSelect("Back?", [{ label: "Back", value: "back" }], function () {
+            showSettingsMenu(config, ip);
+          });
+        } else {
+          var muResult = enableMultiUser();
+          log(sym.bar);
+          log(sym.bar + "  " + a.yellow + sym.warn + " Experimental Feature" + a.reset);
+          log(sym.bar);
+          log(sym.bar + "  " + a.dim + "Multi-user mode is experimental and may change in future releases." + a.reset);
+          log(sym.bar + "  " + a.dim + "Sharing access to AI-powered tools may be subject to your provider's" + a.reset);
+          log(sym.bar + "  " + a.dim + "terms of service. Please review the applicable usage policies before" + a.reset);
+          log(sym.bar + "  " + a.dim + "granting access to other users." + a.reset);
+          log(sym.bar);
+          if (muResult.setupCode) {
+            log(sym.bar + "  " + a.green + "Multi-user mode enabled." + a.reset);
+            log(sym.bar);
+            log(sym.bar + "  Setup code:  " + a.bold + muResult.setupCode + a.reset);
+            log(sym.bar);
+            log(sym.bar + "  " + a.dim + "Open Clay in your browser and enter this code to create the admin account." + a.reset);
+            log(sym.bar + "  " + a.dim + "The code is single-use and will be cleared once the admin is set up." + a.reset);
+          } else {
+            log(sym.bar + "  " + a.dim + "Multi-user mode is already enabled." + a.reset);
+          }
+          log(sym.bar);
+          promptSelect("Back?", [{ label: "Back", value: "back" }], function () {
+            showSettingsMenu(config, ip);
+          });
+        }
         break;
 
       case "logs":
