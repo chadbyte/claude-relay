@@ -1,3 +1,11 @@
+## [2.9.3-beta.4](https://github.com/chadbyte/clay/compare/v2.9.3-beta.3...v2.9.3-beta.4) (2026-03-14)
+
+
+### Bug Fixes
+
+* **sdk-bridge:** handle agent task stop without process errors ([95c5b1b](https://github.com/chadbyte/clay/commit/95c5b1b6b2447acf286810a1e7f5ec9b46cca89a)), closes [#209](https://github.com/chadbyte/clay/issues/209)
+* **sdk-bridge:** resolve agent task stop and info message rendering ([ddb1184](https://github.com/chadbyte/clay/commit/ddb1184029e9bd521061d3b77a75844eb7f686c6)), closes [#209](https://github.com/chadbyte/clay/issues/209)
+
 ## [2.9.3-beta.3](https://github.com/chadbyte/clay/compare/v2.9.3-beta.2...v2.9.3-beta.3) (2026-03-14)
 
 
