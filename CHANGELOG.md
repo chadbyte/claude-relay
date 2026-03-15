@@ -1,3 +1,10 @@
+# [2.11.0-beta.1](https://github.com/chadbyte/clay/compare/v2.10.0...v2.11.0-beta.1) (2026-03-15)
+
+
+### Features
+
+* **dm:** add P2P direct messaging between users ([4071eef](https://github.com/chadbyte/clay/commit/4071eefe0597f112fe8d2966b24fe2cc8cadafe8))
+
 # [2.10.0](https://github.com/chadbyte/clay/compare/v2.9.3...v2.10.0) (2026-03-15)
 
 
