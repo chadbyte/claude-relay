@@ -1,3 +1,16 @@
+# [2.10.0](https://github.com/chadbyte/clay/compare/v2.9.3...v2.10.0) (2026-03-15)
+
+
+### Bug Fixes
+
+* **auth:** redirect to login on reconnect when auth token is expired ([d6476e4](https://github.com/chadbyte/clay/commit/d6476e4fa00245e1bd2670efce801636c31d9f79))
+* **session:** set active session on ws before broadcasting session list ([ca72260](https://github.com/chadbyte/clay/commit/ca7226046cf66a06033eaf63c194f73bcb0eaf01))
+
+
+### Features
+
+* **ui:** show images inline when Claude reads image files ([#217](https://github.com/chadbyte/clay/issues/217)) ([d9c1cd5](https://github.com/chadbyte/clay/commit/d9c1cd54a2dba09c0477b02373e26dad10935c97)), closes [#216](https://github.com/chadbyte/clay/issues/216)
+
 # [2.10.0-beta.1](https://github.com/chadbyte/clay/compare/v2.9.4-beta.1...v2.10.0-beta.1) (2026-03-15)
 
 
