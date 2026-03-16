@@ -69,25 +69,25 @@ Covers all unapplied changes from 0.2.38 through 0.2.76.
 - ~~**What:** Rename a session title via SDK.~~
 - ~~**Impact:** Session titles now sync to SDK on rename, auto-title, and via one-time migration of existing relay titles.~~
 
-### 3.2 `tagSession()` top-level function (since 0.2.76+)
-- **Status:** Not implemented
-- **What:** Attach/detach a tag string to a session.
-- **Impact:** Could enable session categorization/filtering in UI.
+### ~~3.2 `tagSession()` top-level function (since 0.2.76+) -- SKIP~~
+- ~~**Status:** Skipped~~
+- ~~**What:** Attach/detach a tag string to a session (single tag per session).~~
+- ~~**Why skipped:** SDK only supports 1 tag per session. Relay will implement its own multi-tag system (GitHub issue-style labels with colors) stored in relay metadata. SDK tagSession may be used as auxiliary sync for the primary tag.~~
 
-### 3.3 `supportedAgents()` query method (since 0.2.51+)
-- **Status:** Not implemented
-- **What:** Get list of available sub-agent types with names, descriptions, and models.
-- **Impact:** Could show agent capabilities in UI when Task tool is used.
+### ~~3.3 `supportedAgents()` query method (since 0.2.51+) -- SKIP~~
+- ~~**Status:** Skipped~~
+- ~~**What:** Get list of available sub-agent types with names, descriptions, and models.~~
+- ~~**Why skipped:** Sub-agent type is chosen by Claude, not by the user. Displaying the list in UI would be informational only with no actionable value.~~
 
 ### ~~3.4 `ThinkingConfig` types (since 0.2.51+)~~
 - ~~**Status:** Implemented~~
 - ~~**What:** `ThinkingAdaptive | ThinkingEnabled | ThinkingDisabled` config for controlling extended thinking.~~
 - ~~**Impact:** Fine-grained thinking control. Current code doesn't expose thinking settings.~~
 
-### 3.5 `ToolConfig` type (since 0.2.76+)
-- **Status:** Not implemented
-- **What:** Configure AskUserQuestion preview format (`'markdown'` vs `'html'`).
-- **Impact:** Relay is web-based, so `'html'` preview mode would render better than markdown in monospace boxes.
+### ~~3.5 `ToolConfig` type (since 0.2.76+) -- SKIP~~
+- ~~**Status:** Skipped~~
+- ~~**What:** Configure AskUserQuestion preview format (`'markdown'` vs `'html'`).~~
+- ~~**Why skipped:** Current monospace `<pre>` rendering is clean and appropriate for ASCII diagrams/code previews. HTML mode adds XSS risk and Claude compliance is not guaranteed.~~
 
 ### ~~3.6 New hook events (since 0.2.51+, 0.2.76+) -- N/A~~
 - ~~**Status:** Available (no code change needed, hooks not used)~~
