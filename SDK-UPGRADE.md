@@ -31,12 +31,12 @@ Covers all unapplied changes from 0.2.38 through 0.2.76.
 
 ## Priority 2 - Medium (Improved reliability, better UX)
 
-### 2.1 `listSessions()` top-level function (since 0.2.51+)
-- **Status:** Not implemented
-- **What:** SDK-level session listing with pagination support. Replaces manual file system reading of `~/.claude/projects/` directories.
-- **Impact:** More reliable session discovery, handles edge cases (worktrees, symlinks) that manual FS reading might miss.
-- **Where:** Session manager code that currently reads session files directly.
-- **Options:** `{ dir?: string, limit?: number }`
+### ~~2.1 `listSessions()` top-level function (since 0.2.51+)~~
+- ~~**Status:** Implemented~~
+- ~~**What:** SDK-level session listing with pagination support. Replaces manual file system reading of `~/.claude/projects/` directories.~~
+- ~~**Impact:** More reliable session discovery, handles edge cases (worktrees, symlinks) that manual FS reading might miss.~~
+- ~~**Where:** `project.js` `list_cli_sessions` handler now uses `sdk.listSessions()` with fallback to manual parsing.~~
+- ~~**Options:** `{ dir?: string, limit?: number }`~~
 
 ### 2.2 `getSessionMessages()` top-level function (since 0.2.51+)
 - **Status:** Not implemented
@@ -44,10 +44,10 @@ Covers all unapplied changes from 0.2.38 through 0.2.76.
 - **Impact:** Could replace or supplement current session history replay. Useful for session preview/search features.
 - **Options:** `{ dir?: string, limit?: number, offset?: number }`
 
-### 2.3 `getSessionInfo()` top-level function (since 0.2.74+)
-- **Status:** Not implemented
-- **What:** Lightweight single-session metadata lookup (vs listing all sessions).
-- **Impact:** Faster session info retrieval without scanning all sessions.
+### ~~2.3 `getSessionInfo()` top-level function (since 0.2.74+)~~
+- ~~**Status:** Implemented~~
+- ~~**What:** Lightweight single-session metadata lookup (vs listing all sessions).~~
+- ~~**Impact:** Used in `resume_session` handler to get SDK-resolved title (customTitle > aiTitle > firstPrompt).~~
 
 ### ~~2.4 `agentProgressSummaries` query option (since 0.2.72+)~~
 - ~~**Status:** Implemented~~
@@ -65,10 +65,10 @@ Covers all unapplied changes from 0.2.38 through 0.2.76.
 
 ## Priority 3 - Low (Nice-to-have, polish)
 
-### 3.1 `renameSession()` top-level function (since 0.2.74+)
-- **Status:** Not implemented
-- **What:** Rename a session title via SDK.
-- **Impact:** Currently session titles are managed locally. SDK rename keeps CLI and relay in sync.
+### ~~3.1 `renameSession()` top-level function (since 0.2.74+)~~
+- ~~**Status:** Implemented~~
+- ~~**What:** Rename a session title via SDK.~~
+- ~~**Impact:** Session titles now sync to SDK on rename, auto-title, and via one-time migration of existing relay titles.~~
 
 ### 3.2 `tagSession()` top-level function (since 0.2.76+)
 - **Status:** Not implemented
