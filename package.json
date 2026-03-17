@@ -1,6 +1,6 @@
 {
   "name": "clay-server",
-  "version": "2.11.0-beta.1",
+  "version": "2.11.0-beta.4",
   "description": "Web UI for Claude Code. Any device. Push notifications.",
   "bin": {
     "clay-server": "./bin/cli.js",
@@ -37,7 +37,7 @@
   "homepage": "https://github.com/chadbyte/claude-relay#readme",
   "author": "Chad",
   "dependencies": {
-    "@anthropic-ai/claude-agent-sdk": "^0.2.63",
+    "@anthropic-ai/claude-agent-sdk": "^0.2.76",
     "@lydell/node-pty": "^1.2.0-beta.3",
     "nodemailer": "^6.10.1",
     "qrcode-terminal": "^0.12.0",

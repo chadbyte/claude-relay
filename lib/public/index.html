@@ -33,6 +33,13 @@
     <button id="pwa-install-pill" class="top-bar-install-btn hidden" title="Install app"><i data-lucide="download"></i></button>
     <div class="top-bar-center">
       <a href="https://github.com/chadbyte/clay" target="_blank" rel="noopener" class="top-bar-title"><img class="top-bar-icon" src="favicon-banded.png" width="16" height="16" alt="">Clay <span id="footer-version" class="footer-version"></span></a>
+      <div id="update-pill-wrap" class="hidden">
+        <button id="update-pill" class="top-bar-pill pill-success"><i data-lucide="arrow-up-circle"></i> <span id="update-version"></span></button>
+        <div id="update-popover" class="top-bar-popover">
+          <div class="popover-row"><button id="update-now" class="popover-action popover-action-primary"><i data-lucide="download"></i> Update now</button></div>
+          <div class="popover-row"><div class="popover-label">Or run manually:</div><div class="popover-cmd"><code id="update-manual-cmd">npx clay-server@latest</code><button class="popover-copy" title="Copy"><i data-lucide="copy"></i></button></div></div>
+        </div>
+      </div>
     </div>
     <div class="top-bar-actions">
     </div>
@@ -327,6 +334,15 @@
                     <div class="config-section-label">EFFORT</div>
                     <div id="config-effort-bar" class="config-segmented"></div>
                   </div>
+                  <div id="config-thinking-section" class="config-section">
+                    <div class="config-section-label">THINKING</div>
+                    <div id="config-thinking-bar" class="config-segmented"></div>
+                    <div id="config-thinking-budget-row" class="config-budget-row" style="display:none">
+                      <label class="config-budget-label">Budget tokens</label>
+                      <input id="config-thinking-budget" type="number" class="config-budget-input"
+                             min="1024" max="128000" step="1024" value="10000">
+                    </div>
+                  </div>
                   <div id="config-beta-section" class="config-section" style="display:none">
                     <div class="config-section-label">BETA</div>
                     <div class="config-toggle-row">
@@ -385,13 +401,13 @@
         <div class="project-settings-nav-inner">
           <div class="server-settings-nav-header" id="ps-nav-title">-</div>
           <div class="server-settings-nav-items">
-            <div class="settings-nav-category">Project</div>
+            <div class="settings-nav-category">General</div>
             <button class="settings-nav-item active" data-section="profile"><span>Profile</span></button>
-            <button class="settings-nav-item" data-section="defaults"><span>Model &amp; Behavior</span></button>
+            <button class="settings-nav-item" data-section="defaults"><span>Model</span></button>
             <div class="settings-nav-separator"></div>
-            <div class="settings-nav-category">Configuration</div>
-            <button class="settings-nav-item" data-section="instructions"><span>CLAUDE.md</span></button>
-            <button class="settings-nav-item" data-section="environment"><span>Environment Variables</span></button>
+            <div class="settings-nav-category">Config</div>
+            <button class="settings-nav-item" data-section="instructions"><span>Instructions</span></button>
+            <button class="settings-nav-item" data-section="environment"><span>Environment</span></button>
           </div>
         </div>
       </div>
@@ -428,7 +444,7 @@
           </div>
           <!-- Defaults -->
           <div class="ps-section" data-section="defaults">
-            <h2>Model &amp; Behavior</h2>
+            <h2>Model</h2>
             <p class="ps-section-desc">Configure which model to use and how Claude behaves during sessions.</p>
             <div class="settings-card">
               <div class="settings-field">
@@ -464,6 +480,17 @@
                 <div class="settings-btn-group" id="ps-effort-bar"></div>
               </div>
             </div>
+            <div class="settings-card" id="ps-thinking-card">
+              <div class="settings-field">
+                <label class="settings-label">Thinking</label>
+                <div class="settings-hint">Controls whether Claude shows its reasoning process. Budget mode lets you set a token limit.</div>
+                <div class="settings-btn-group" id="ps-thinking-bar"></div>
+                <div id="ps-thinking-budget-row" class="settings-budget-row" style="display:none">
+                  <label class="settings-budget-label">Budget tokens</label>
+                  <input id="ps-thinking-budget" type="number" class="settings-budget-input" min="1024" max="128000" step="1024" value="10000">
+                </div>
+              </div>
+            </div>
           </div>
           <!-- Instructions -->
           <div class="ps-section" data-section="instructions">
@@ -482,7 +509,7 @@
           </div>
           <!-- Environment -->
           <div class="ps-section" data-section="environment">
-            <h2>Environment Variables</h2>
+            <h2>Environment</h2>
             <p class="ps-section-desc">Store API keys, tokens, and config for this project. Paste a <code>.env</code> file to import multiple variables at once.</p>
             <div class="settings-hint ps-env-notice hidden" id="ps-env-override-notice">
               <i data-lucide="info"></i> A <code>.envrc</code> file exists in the project directory and will take precedence over these settings.
@@ -616,22 +643,25 @@
             <option value="overview" selected>Status</option>
             <option value="appearance">Appearance</option>
             <option value="notifications">Notifications</option>
+            <option value="security">Security</option>
           </optgroup>
-          <optgroup label="Session">
-            <option value="models">Model &amp; Behavior</option>
-            <option value="claudemd">CLAUDE.md</option>
-            <option value="environment">Environment Variables</option>
+          <optgroup label="Defaults">
+            <option value="models">Model</option>
+          </optgroup>
+          <optgroup label="Config">
+            <option value="claudemd">Instructions</option>
+            <option value="environment">Environment</option>
           </optgroup>
           <optgroup label="Admin" class="settings-admin-only">
             <option value="admin-users">Users</option>
             <option value="admin-invites">Invites</option>
             <option value="admin-projects">Projects</option>
-            <option value="admin-smtp">Email (SMTP)</option>
+            <option value="admin-smtp">Email</option>
           </optgroup>
           <optgroup label="Server">
-            <option value="security">Security</option>
-            <option value="restart">Restart Server</option>
-            <option value="shutdown">Shutdown Server</option>
+            <option value="keep-awake" class="hidden" id="settings-keep-awake-opt">Keep Awake</option>
+            <option value="restart">Restart</option>
+            <option value="shutdown">Shutdown</option>
           </optgroup>
         </select>
         <div class="server-settings-nav-items">
@@ -639,23 +669,25 @@
           <button class="settings-nav-item active" data-section="overview"><span>Status</span></button>
           <button class="settings-nav-item" data-section="appearance"><span>Appearance</span></button>
           <button class="settings-nav-item" data-section="notifications"><span>Notifications</span></button>
+          <button class="settings-nav-item" data-section="security"><span>Security</span></button>
           <div class="settings-nav-separator"></div>
-          <div class="settings-nav-category">Session</div>
-          <button class="settings-nav-item" data-section="models"><span>Model &amp; Behavior</span></button>
-          <button class="settings-nav-item" data-section="claudemd"><span>CLAUDE.md</span></button>
-          <button class="settings-nav-item" data-section="environment"><span>Environment Variables</span></button>
+          <div class="settings-nav-category">Defaults</div>
+          <button class="settings-nav-item" data-section="models"><span>Model</span></button>
+          <div class="settings-nav-separator"></div>
+          <div class="settings-nav-category">Config</div>
+          <button class="settings-nav-item" data-section="claudemd"><span>Instructions</span></button>
+          <button class="settings-nav-item" data-section="environment"><span>Environment</span></button>
           <div class="settings-nav-separator settings-admin-only"></div>
           <div class="settings-nav-category settings-admin-only">Admin</div>
           <button class="settings-nav-item settings-admin-only" data-section="admin-users"><span>Users</span></button>
           <button class="settings-nav-item settings-admin-only" data-section="admin-invites"><span>Invites</span></button>
           <button class="settings-nav-item settings-admin-only" data-section="admin-projects"><span>Projects</span></button>
-          <button class="settings-nav-item settings-admin-only" data-section="admin-smtp"><span>Email (SMTP)</span></button>
+          <button class="settings-nav-item settings-admin-only" data-section="admin-smtp"><span>Email</span></button>
           <div class="settings-nav-separator"></div>
           <div class="settings-nav-category">Server</div>
-          <button class="settings-nav-item" data-section="security"><span>Security</span></button>
-          <div class="settings-nav-separator"></div>
-          <button class="settings-nav-item" data-section="restart"><span>Restart Server</span></button>
-          <button class="settings-nav-item settings-nav-danger" data-section="shutdown"><span>Shutdown Server</span></button>
+          <button class="settings-nav-item hidden" data-section="keep-awake" id="settings-keep-awake-nav"><span>Keep Awake</span></button>
+          <button class="settings-nav-item" data-section="restart"><span>Restart</span></button>
+          <button class="settings-nav-item settings-nav-danger" data-section="shutdown"><span>Shutdown</span></button>
         </div>
       </div>
     </div>
@@ -665,18 +697,23 @@
           <h2>Status</h2>
           <div class="settings-card">
             <div class="settings-field">
-              <label class="settings-label">Project Name</label>
-              <div class="settings-value" id="settings-project-name">-</div>
-            </div>
-            <div class="settings-field">
-              <label class="settings-label">Working Directory</label>
-              <div class="settings-value settings-mono" id="settings-project-cwd">-</div>
+              <label class="settings-label">Host</label>
+              <div class="settings-value" id="settings-hostname">-</div>
+              <div class="settings-value settings-mono" id="settings-lan-ip" style="font-size:12px;color:var(--text-muted)"></div>
             </div>
             <div class="settings-field">
               <label class="settings-label">Server Version</label>
               <div class="settings-value" id="settings-server-version">-</div>
               <button class="settings-btn-sm settings-btn-update" id="settings-update-check"><i data-lucide="refresh-cw"></i> Check for updates</button>
             </div>
+            <label class="settings-toggle-row">
+              <div>
+                <span class="settings-label">Early Access</span>
+                <div class="settings-hint">Receive pre-release updates before they reach the stable channel.</div>
+              </div>
+              <input type="checkbox" id="settings-update-channel">
+              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            </label>
             <div class="settings-field-row">
               <label class="settings-label">Port</label>
               <span class="settings-value settings-mono" id="settings-port">-</span>
@@ -686,7 +723,14 @@
               <span class="settings-value settings-badge" id="settings-tls">-</span>
             </div>
             <div class="settings-field-row">
-              <label class="settings-label">Debug Mode</label>
+              <div>
+                <label class="settings-label">Skip Permissions</label>
+                <div class="settings-hint">Auto-approves all tool executions. Restart with <code style="font-size:12px">--dangerously-skip-permissions</code> to enable.</div>
+              </div>
+              <span class="settings-value settings-badge" id="settings-skip-perms">Disabled</span>
+            </div>
+            <div class="settings-field-row">
+              <label class="settings-label">Debug</label>
               <span class="settings-value settings-badge" id="settings-debug">-</span>
             </div>
           </div>
@@ -723,16 +767,6 @@
               <span class="settings-value settings-mono" id="settings-project-slug">-</span>
             </div>
           </div>
-          <div class="settings-card hidden" id="settings-keep-awake-card">
-            <label class="settings-toggle-row">
-              <div>
-                <span class="settings-label">Keep Awake</span>
-                <div class="settings-hint">Prevent the system from sleeping while the server is running (macOS only).</div>
-              </div>
-              <input type="checkbox" id="settings-keep-awake">
-              <span class="toggle-track"><span class="toggle-thumb"></span></span>
-            </label>
-          </div>
         </div>
         <div class="server-settings-section" data-section="appearance">
           <h2>Appearance</h2>
@@ -742,13 +776,13 @@
           </div>
         </div>
         <div class="server-settings-section" data-section="models">
-          <h2>Model &amp; Behavior</h2>
+          <h2>Model</h2>
           <p class="settings-hint" style="margin-bottom: 20px;">Configure which model to use and how Claude behaves during sessions.</p>
           <div class="settings-card">
             <div class="settings-field">
               <label class="settings-label">Model</label>
               <div class="settings-hint">Choose the Claude model to use. Larger models are slower but more capable.</div>
-              <div id="settings-model-list" class="settings-model-list"></div>
+              <div id="ss-model-list" class="settings-model-list"></div>
             </div>
           </div>
           <div class="settings-card" id="ss-beta-card" style="display:none">
@@ -778,23 +812,20 @@
               <div class="settings-btn-group" id="ss-effort-bar"></div>
             </div>
           </div>
+          <div class="settings-card" id="ss-thinking-card">
+            <div class="settings-field">
+              <label class="settings-label">Thinking</label>
+              <div class="settings-hint">Controls whether Claude shows its reasoning process. Budget mode lets you set a token limit.</div>
+              <div class="settings-btn-group" id="ss-thinking-bar"></div>
+              <div id="ss-thinking-budget-row" class="settings-budget-row" style="display:none">
+                <label class="settings-budget-label">Budget tokens</label>
+                <input id="ss-thinking-budget" type="number" class="settings-budget-input" min="1024" max="128000" step="1024" value="10000">
+              </div>
+            </div>
+          </div>
         </div>
         <div class="server-settings-section" data-section="security">
           <h2>Security</h2>
-          <div class="settings-card">
-            <div class="settings-field-row">
-              <div>
-                <label class="settings-label">Skip Permissions</label>
-                <div class="settings-hint">When enabled, all tool executions are auto-approved without asking.</div>
-                <div class="settings-hint">This setting cannot be changed here. Stop the server and restart with the flag below.</div>
-                <div class="settings-hint settings-copyable-wrap">
-                  <span class="settings-copyable" id="skip-perms-cmd" data-copy="npx clay-server --dangerously-skip-permissions"><code>npx clay-server --dangerously-skip-permissions</code><button class="settings-copy-btn" type="button" title="Copy">⧉</button></span>
-                </div>
-              </div>
-              <span class="settings-value settings-badge" id="settings-skip-perms">Disabled</span>
-            </div>
-          </div>
-          <h3>PIN Protection</h3>
           <div class="settings-card">
             <div class="settings-field-row">
               <div>
@@ -872,7 +903,7 @@
           </div>
         </div>
         <div class="server-settings-section" data-section="environment">
-          <h2>Shared Environment Variables</h2>
+          <h2>Environment</h2>
           <p class="settings-hint" style="margin-bottom: 16px;">Define environment variables shared across all projects. Project-level variables take precedence over shared ones.</p>
           <div class="ps-env-header">
             <button class="settings-btn-sm" id="ss-env-add-btn"><i data-lucide="plus"></i> Add Variable</button>
@@ -882,22 +913,35 @@
             <!-- rows rendered by JS -->
           </div>
         </div>
+        <div class="server-settings-section hidden" data-section="keep-awake" id="settings-keep-awake-section">
+          <h2>Keep Awake</h2>
+          <div class="settings-card">
+            <label class="settings-toggle-row">
+              <div>
+                <span class="settings-label">Keep Awake</span>
+                <div class="settings-hint">Prevent the system from sleeping while the server is running (macOS only).</div>
+              </div>
+              <input type="checkbox" id="settings-keep-awake">
+              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            </label>
+          </div>
+        </div>
         <div class="server-settings-section" data-section="restart">
-          <h2>Restart Server</h2>
+          <h2>Restart</h2>
           <p class="settings-hint" style="margin-bottom: 16px;">Restart the Clay daemon process. All active sessions will be briefly interrupted and clients will automatically reconnect.</p>
           <div class="settings-card">
             <div class="settings-field">
               <label class="settings-label">Restart Daemon</label>
               <div class="settings-hint">Spawns a new daemon process and gracefully shuts down the current one.</div>
               <div style="margin-top: 12px;">
-                <button class="settings-btn-sm" id="settings-restart-btn"><i data-lucide="refresh-cw" style="width:14px;height:14px;vertical-align:-2px;margin-right:4px;"></i>Restart Server</button>
+                <button class="settings-btn-sm" id="settings-restart-btn"><i data-lucide="refresh-cw" style="width:14px;height:14px;vertical-align:-2px;margin-right:4px;"></i>Restart</button>
               </div>
               <div class="settings-hint settings-restart-error hidden" id="settings-restart-error" style="margin-top: 8px;"></div>
             </div>
           </div>
         </div>
         <div class="server-settings-section" data-section="shutdown">
-          <h2>Shutdown Server</h2>
+          <h2>Shutdown</h2>
           <div class="settings-danger-zone">
             <div class="settings-danger-icon"><i data-lucide="alert-triangle"></i></div>
             <div class="settings-danger-body">
@@ -931,7 +975,8 @@
           <div class="settings-card" id="admin-projects-body"></div>
         </div>
         <div class="server-settings-section settings-admin-only" data-section="admin-smtp">
-          <h2>Email (SMTP)</h2>
+          <h2>Email</h2>
+          <p class="settings-hint" style="margin-bottom: 20px;">Configure SMTP to send invite links and one-time login codes via email. Without SMTP, users log in with a PIN instead.</p>
           <div class="settings-card" id="admin-smtp-body"></div>
         </div>
 

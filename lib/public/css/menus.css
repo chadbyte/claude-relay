@@ -617,6 +617,29 @@
   background: var(--accent);
 }
 
+.config-budget-row {
+  padding: 4px 14px 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.config-budget-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.config-budget-input {
+  width: 80px;
+  padding: 4px 6px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 11px;
+}
+
 /* --- Info panels container --- */
 #info-panels {
   position: fixed;

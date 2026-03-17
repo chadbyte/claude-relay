@@ -984,6 +984,14 @@ pre.mermaid-error {
   color: var(--text-dimmer);
 }
 
+.subagent-summary {
+  margin: 2px 0 2px 24px;
+  padding: 2px 12px;
+  font-size: 12px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
 .subagent-stop-btn {
   margin-left: auto;
   padding: 2px 10px;

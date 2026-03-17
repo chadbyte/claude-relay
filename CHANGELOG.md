@@ -1,3 +1,33 @@
+# [2.11.0-beta.4](https://github.com/chadbyte/clay/compare/v2.11.0-beta.3...v2.11.0-beta.4) (2026-03-17)
+
+
+### Bug Fixes
+
+* **admin:** fix broken admin section UI ([9af9e93](https://github.com/chadbyte/clay/commit/9af9e9351de0d6b0c7b7136b69ce2c33215af9db))
+
+
+### Features
+
+* **update:** add beta update channel support ([afe552b](https://github.com/chadbyte/clay/commit/afe552b4682c8f12116dceb38efe7ba74d5fe3ed))
+
+# [2.11.0-beta.3](https://github.com/chadbyte/clay/compare/v2.11.0-beta.2...v2.11.0-beta.3) (2026-03-16)
+
+
+### Bug Fixes
+
+* **ui:** replace browser confirm with custom dialog for fork ([8c04ca3](https://github.com/chadbyte/clay/commit/8c04ca302546f87012812b57df594b707e2f1ac2))
+
+# [2.11.0-beta.2](https://github.com/chadbyte/clay/compare/v2.11.0-beta.1...v2.11.0-beta.2) (2026-03-16)
+
+
+### Features
+
+* **sdk:** add thinking config control to settings popover ([a0ef97a](https://github.com/chadbyte/clay/commit/a0ef97a5b76c7578d236037cb30945886b6306c4))
+* **sdk:** enable agent progress summaries for subagent UI ([0ac4644](https://github.com/chadbyte/clay/commit/0ac46447da5ed5ae3ed0ca4421c35c8a83d2e4bc))
+* **sdk:** upgrade agent SDK to 0.2.76 with elicitation and mid-query effort ([c21a201](https://github.com/chadbyte/clay/commit/c21a201080131e7099103cec16fcedabbcdc175e))
+* **session:** add fork session from message hover action ([c68ccd8](https://github.com/chadbyte/clay/commit/c68ccd87b522d63cfefe6f624296bcb1b6a9eb41))
+* **session:** unify session titles with SDK renameSession ([91278dd](https://github.com/chadbyte/clay/commit/91278dd2df9caf878e3f6e3b8af3dc95d8c02e3d))
+
 # [2.11.0-beta.1](https://github.com/chadbyte/clay/compare/v2.10.0...v2.11.0-beta.1) (2026-03-15)
 
 

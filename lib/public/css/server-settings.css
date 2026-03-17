@@ -79,8 +79,7 @@
   font-size: 12px;
   font-weight: 700;
   color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.02em;
   padding: 0 10px 10px;
   border-bottom: 1px solid var(--border-subtle);
   margin-bottom: 8px;
@@ -478,6 +477,35 @@
 .settings-btn-option.active {
   background: var(--accent);
   color: #fff;
+}
+
+.settings-budget-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.settings-budget-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.settings-budget-input {
+  width: 90px;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  font-family: inherit;
+}
+
+.settings-budget-input:focus {
+  border-color: var(--accent);
+  outline: none;
 }
 
 /* --- PIN input --- */
