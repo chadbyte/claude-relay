@@ -1,3 +1,10 @@
+# [2.11.0-beta.15](https://github.com/chadbyte/clay/compare/v2.11.0-beta.14...v2.11.0-beta.15) (2026-03-17)
+
+
+### Bug Fixes
+
+* **os-users:** harden project isolation and fix CLI provisioning ([ee6965f](https://github.com/chadbyte/clay/commit/ee6965f227fdde4fe7b08cd85910158894dbefe0))
+
 # [2.11.0-beta.14](https://github.com/chadbyte/clay/compare/v2.11.0-beta.13...v2.11.0-beta.14) (2026-03-17)
 
 
