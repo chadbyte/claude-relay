@@ -1,3 +1,11 @@
+# [2.11.0-beta.12](https://github.com/chadbyte/clay/compare/v2.11.0-beta.11...v2.11.0-beta.12) (2026-03-17)
+
+
+### Features
+
+* **cli,admin:** redesign setup flow and add admin PIN reset ([e57e383](https://github.com/chadbyte/clay/commit/e57e3830335c0edce3b09364ee6d8744756f74bc))
+* **os-users:** auto-install Claude CLI for newly provisioned users ([a05e9a6](https://github.com/chadbyte/clay/commit/a05e9a6d2c03eb2680bcba23deaf1a8d94529f33))
+
 # [2.11.0-beta.11](https://github.com/chadbyte/clay/compare/v2.11.0-beta.10...v2.11.0-beta.11) (2026-03-17)
 
 
