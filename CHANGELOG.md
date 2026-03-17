@@ -1,3 +1,10 @@
+# [2.11.0-beta.8](https://github.com/chadbyte/clay/compare/v2.11.0-beta.7...v2.11.0-beta.8) (2026-03-17)
+
+
+### Features
+
+* **admin:** add direct user creation with temporary PIN ([c9126e2](https://github.com/chadbyte/clay/commit/c9126e2336edc209ae1b80e53a6178189daac5d6))
+
 # [2.11.0-beta.7](https://github.com/chadbyte/clay/compare/v2.11.0-beta.6...v2.11.0-beta.7) (2026-03-17)
 
 
