@@ -1112,10 +1112,24 @@
   <div class="confirm-backdrop"></div>
   <div class="confirm-dialog add-project-dialog">
     <div class="add-project-title">Add project</div>
+    <div class="add-project-modes">
+      <button class="add-project-mode-btn active" data-mode="existing">Existing directory</button>
+      <button class="add-project-mode-btn" data-mode="create">New project</button>
+      <button class="add-project-mode-btn" data-mode="clone">Clone from GitHub</button>
+    </div>
     <div class="add-project-body">
-      <div class="add-project-input-wrap">
-        <input type="text" id="add-project-input" placeholder="/" autocomplete="off" spellcheck="false">
-        <div id="add-project-suggestions" class="hidden"></div>
+      <div class="add-project-panel active" data-panel="existing">
+        <div class="add-project-input-wrap">
+          <input type="text" id="add-project-input" placeholder="/" autocomplete="off" spellcheck="false">
+          <div id="add-project-suggestions" class="hidden"></div>
+        </div>
+      </div>
+      <div class="add-project-panel" data-panel="create">
+        <input type="text" id="add-project-create-input" placeholder="Project name" autocomplete="off" spellcheck="false">
+      </div>
+      <div class="add-project-panel" data-panel="clone">
+        <input type="text" id="add-project-clone-input" placeholder="https://github.com/user/repo" autocomplete="off" spellcheck="false">
+        <div id="add-project-clone-progress" class="hidden"><span class="clone-spinner"></span><span id="add-project-clone-text">Cloning...</span></div>
       </div>
       <div id="add-project-error" class="hidden"></div>
     </div>

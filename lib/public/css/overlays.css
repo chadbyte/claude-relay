@@ -860,6 +860,94 @@ button.top-bar-pill.pill-accent:hover { background: color-mix(in srgb, var(--acc
 
 #add-project-error.hidden { display: none; }
 
+/* --- Add project mode selector --- */
+.add-project-modes {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 14px;
+  background: var(--input-bg);
+  border-radius: 8px;
+  padding: 2px;
+  border: 1px solid var(--border);
+}
+
+.add-project-mode-btn {
+  flex: 1;
+  padding: 6px 4px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: none;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+
+.add-project-mode-btn:hover:not(:disabled) {
+  color: var(--text-secondary);
+}
+
+.add-project-mode-btn.active {
+  color: var(--accent);
+  background: var(--bg);
+  border-color: var(--border);
+  box-shadow: 0 1px 3px rgba(var(--shadow-rgb), 0.15);
+}
+
+.add-project-mode-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.add-project-panel { display: none; }
+.add-project-panel.active { display: block; }
+
+#add-project-create-input,
+#add-project-clone-input {
+  width: 100%;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 13px;
+  font-family: "Roboto Mono", monospace;
+  padding: 10px 12px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+#add-project-create-input:focus,
+#add-project-clone-input:focus { border-color: var(--text-dimmer); }
+
+#add-project-create-input::placeholder,
+#add-project-clone-input::placeholder {
+  color: var(--text-muted);
+  font-family: "Pretendard", system-ui, sans-serif;
+}
+
+#add-project-clone-progress {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#add-project-clone-progress.hidden { display: none; }
+
+.clone-spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
 /* --- Connect overlay --- */
 #connect-overlay {
   position: fixed;
