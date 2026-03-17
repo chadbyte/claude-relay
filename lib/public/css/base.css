@@ -158,6 +158,10 @@ img.emoji {
   --content-width: 760px;
 }
 
+:root.full-width-chat {
+  --content-width: 100%;
+}
+
 /* PWA standalone: home indicator safe area still applies on notched devices */
 
 ::selection {
@@ -209,6 +213,7 @@ html, body {
   min-height: 0;
   background: var(--sidebar-bg);
   position: relative;
+  padding-top: var(--safe-top);
 }
 
 #sidebar-column {

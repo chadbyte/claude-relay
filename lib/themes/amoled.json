@@ -1,0 +1,20 @@
+{
+  "name": "AMOLED Dark",
+  "variant": "dark",
+  "base00": "000000",
+  "base01": "0a0a0a",
+  "base02": "1a1a1a",
+  "base03": "555555",
+  "base04": "999999",
+  "base05": "e0e0e0",
+  "base06": "f5f5f5",
+  "base07": "ffffff",
+  "base08": "ff6b6b",
+  "base09": "ffa94d",
+  "base0A": "ffd93d",
+  "base0B": "6bcf7f",
+  "base0C": "4ecdc4",
+  "base0D": "74b7ff",
+  "base0E": "ff6ef7",
+  "base0F": "c8a2ff"
+}

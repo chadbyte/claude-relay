@@ -23,6 +23,7 @@
 (function(){try{var k="clay-theme-vars",v=localStorage.getItem(k),r=document.documentElement;if(v){var o=JSON.parse(v),p;for(p in o)r.style.setProperty(p,o[p]);var vt=localStorage.getItem(k.replace("-vars","-variant"));if(vt==="light"){r.classList.add("light-theme");r.classList.remove("dark-theme")}else{r.classList.add("dark-theme");r.classList.remove("light-theme")}var m=document.querySelector('meta[name="theme-color"]');if(m&&o["--bg"])m.setAttribute("content",o["--bg"])}else{var sl=window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches;if(sl){r.classList.add("light-theme");r.classList.remove("dark-theme")}}}catch(e){}})();
 </script>
 <script>if(window.navigator.standalone||window.matchMedia("(display-mode:standalone)").matches){document.documentElement.classList.add("pwa-standalone")}</script>
+<script>try{if(localStorage.getItem("clay-full-width")==="true")document.documentElement.classList.add("full-width-chat")}catch(e){}</script>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -32,27 +33,8 @@
     <button id="pwa-install-pill" class="top-bar-install-btn hidden" title="Install app"><i data-lucide="download"></i></button>
     <div class="top-bar-center">
       <a href="https://github.com/chadbyte/clay" target="_blank" rel="noopener" class="top-bar-title"><img class="top-bar-icon" src="favicon-banded.png" width="16" height="16" alt="">Clay <span id="footer-version" class="footer-version"></span></a>
-      <div id="update-pill-wrap" class="hidden">
-        <button id="update-pill" class="top-bar-pill pill-success"><i data-lucide="arrow-up-circle"></i> <span id="update-version"></span></button>
-        <div id="update-popover" class="top-bar-popover">
-          <div class="popover-row"><button id="update-now" class="popover-action popover-action-primary"><i data-lucide="download"></i> Update now</button></div>
-          <div class="popover-row"><div class="popover-label">Or run manually:</div><div class="popover-cmd"><code>npx clay-server@latest</code><button class="popover-copy" title="Copy"><i data-lucide="copy"></i></button></div></div>
-        </div>
-      </div>
     </div>
     <div class="top-bar-actions">
-      <!-- Pill badges -->
-      <div id="skip-perms-pill" class="top-bar-pill pill-error hidden"><i data-lucide="shield-off"></i> <span>Skip perms</span></div>
-      <div id="client-count" class="top-bar-pill pill-accent hidden"><i data-lucide="users"></i> <span id="client-count-text"></span></div>
-      <label id="theme-toggle-btn" class="theme-toggle" title="Toggle dark/light mode">
-        <input type="checkbox" id="theme-toggle-check">
-        <span class="theme-toggle-track">
-          <span class="theme-toggle-icon theme-toggle-moon"><i data-lucide="moon"></i></span>
-          <span class="theme-toggle-icon theme-toggle-sun"><i data-lucide="sun"></i></span>
-          <span class="theme-toggle-thumb"></span>
-        </span>
-      </label>
-      <button id="server-settings-btn" title="Server settings"><i data-lucide="settings"></i></button>
     </div>
   </div>
 
@@ -208,6 +190,15 @@
         <div id="todo-sticky" class="hidden"></div>
         <div id="ralph-sticky" class="hidden"></div>
         <div class="status">
+          <div id="update-pill-wrap" class="hidden">
+            <button id="update-pill" class="top-bar-pill pill-success"><i data-lucide="arrow-up-circle"></i> <span id="update-version"></span></button>
+            <div id="update-popover" class="top-bar-popover">
+              <div class="popover-row"><button id="update-now" class="popover-action popover-action-primary"><i data-lucide="download"></i> Update now</button></div>
+              <div class="popover-row"><div class="popover-label">Or run manually:</div><div class="popover-cmd"><code>npx clay-server@latest</code><button class="popover-copy" title="Copy"><i data-lucide="copy"></i></button></div></div>
+            </div>
+          </div>
+          <div id="skip-perms-pill" class="top-bar-pill pill-error hidden"><i data-lucide="shield-off"></i> <span>Skip perms</span></div>
+          <div id="client-count" class="top-bar-pill pill-accent hidden"><i data-lucide="users"></i> <span id="client-count-text"></span></div>
           <button id="sticky-notes-toggle-btn" title="Sticky notes"><i data-lucide="sticky-note"></i><span class="sticky-notes-count hidden"></span></button>
           <button id="terminal-toggle-btn" title="Terminal"><i data-lucide="square-terminal"></i><span id="terminal-count" class="hidden"></span></button>
         </div>
@@ -562,9 +553,21 @@
       <div class="user-island-info">
         <span class="user-island-name">Awesome Clay User</span>
         <span class="user-island-cta hidden">Personalize your name</span>
+        <span class="user-island-version" id="user-island-version"></span>
       </div>
     </div>
     <div class="user-island-actions">
+      <label class="theme-toggle user-island-theme-toggle" title="Toggle dark/light mode">
+        <input type="checkbox" id="user-island-theme-check">
+        <span class="theme-toggle-track">
+          <span class="theme-toggle-icon theme-toggle-moon"><i data-lucide="moon"></i></span>
+          <span class="theme-toggle-icon theme-toggle-sun"><i data-lucide="sun"></i></span>
+          <span class="theme-toggle-thumb"></span>
+        </span>
+      </label>
+      <button class="user-island-settings-btn" id="server-settings-btn" title="Server Settings">
+        <i data-lucide="settings"></i>
+      </button>
     </div>
   </div>
 
@@ -611,6 +614,7 @@
         <select id="settings-nav-dropdown" class="settings-nav-dropdown">
           <optgroup label="General">
             <option value="overview" selected>Status</option>
+            <option value="appearance">Appearance</option>
             <option value="notifications">Notifications</option>
           </optgroup>
           <optgroup label="Session">
@@ -633,6 +637,7 @@
         <div class="server-settings-nav-items">
           <div class="settings-nav-category">General</div>
           <button class="settings-nav-item active" data-section="overview"><span>Status</span></button>
+          <button class="settings-nav-item" data-section="appearance"><span>Appearance</span></button>
           <button class="settings-nav-item" data-section="notifications"><span>Notifications</span></button>
           <div class="settings-nav-separator"></div>
           <div class="settings-nav-category">Session</div>
@@ -727,6 +732,13 @@
               <input type="checkbox" id="settings-keep-awake">
               <span class="toggle-track"><span class="toggle-thumb"></span></span>
             </label>
+          </div>
+        </div>
+        <div class="server-settings-section" data-section="appearance">
+          <h2>Appearance</h2>
+          <p class="settings-hint" style="margin-bottom: 20px;">Choose a theme for the interface. The toggle in the sidebar switches between light and dark mode.</p>
+          <div class="settings-card">
+            <div id="settings-theme-picker-container"></div>
           </div>
         </div>
         <div class="server-settings-section" data-section="models">
@@ -995,6 +1007,11 @@
   <div class="confirm-dialog resume-picker-dialog">
     <div class="resume-modal-title">Resume CLI session</div>
     <div class="resume-picker-body">
+      <div class="resume-session-id-row">
+        <input type="text" id="resume-session-id-input" class="resume-session-id-input" placeholder="Paste session ID..." spellcheck="false" autocomplete="off">
+        <button id="resume-session-id-btn" class="confirm-btn confirm-ok" disabled>Import</button>
+      </div>
+      <div class="resume-picker-divider"></div>
       <div id="resume-picker-loading" class="resume-picker-loading">
         <div class="resume-picker-spinner"></div>
         <span>Loading sessions...</span>

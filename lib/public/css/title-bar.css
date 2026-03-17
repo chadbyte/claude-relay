@@ -3,14 +3,7 @@
    ========================================================================== */
 
 #top-bar {
-  flex-shrink: 0;
-  height: 32px;
-  background: var(--sidebar-bg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: calc(var(--safe-top) + 0px) 0 0;
-  position: relative;
+  display: none;
 }
 
 .top-bar-center {
@@ -328,18 +321,6 @@
 
 /* --- Mobile --- */
 @media (max-width: 768px) {
-  #top-bar {
-    padding-top: var(--safe-top);
-    height: calc(32px + var(--safe-top));
-  }
-
-  .top-bar-actions {
-    top: auto;
-    bottom: 0;
-    height: 32px;
-    transform: none;
-  }
-
   #sidebar-column {
     width: 0 !important;
     min-width: 0 !important;

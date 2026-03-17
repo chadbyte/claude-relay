@@ -266,3 +266,54 @@
   border-color: #fff;
   box-shadow: 0 0 0 2px var(--accent);
 }
+
+.profile-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  padding: 6px 0;
+}
+
+.profile-toggle-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.profile-toggle-check {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.profile-toggle-row .toggle-track {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  border-radius: 10px;
+  background: var(--border);
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.profile-toggle-row .toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  transition: left 0.2s, background 0.2s;
+}
+
+.profile-toggle-check:checked ~ .toggle-track {
+  background: var(--accent);
+}
+
+.profile-toggle-check:checked ~ .toggle-track .toggle-thumb {
+  left: 18px;
+  background: #fff;
+}

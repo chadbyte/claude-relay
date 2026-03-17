@@ -987,6 +987,25 @@
   font-weight: 400;
 }
 
+.user-island-version {
+  font-size: 10px;
+  color: var(--text-dimmer);
+  font-weight: 400;
+  font-family: "Roboto Mono", monospace;
+  display: block;
+  line-height: 1;
+  margin-top: 1px;
+}
+
+.user-island-theme-toggle {
+  margin-right: 2px;
+}
+
+.user-island-settings-btn .lucide {
+  width: 16px;
+  height: 16px;
+}
+
 
 .sidebar-menu-item.has-badge { position: relative; }
 .sidebar-menu-item .menu-badge {
@@ -1076,6 +1095,20 @@
   opacity: 1;
   transform: translateY(0);
   pointer-events: auto;
+}
+
+#settings-theme-picker-container .theme-picker {
+  position: static;
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+  box-shadow: none;
+  border: none;
+  background: transparent;
+  max-height: none;
+  z-index: auto;
+  min-width: auto;
+  border-radius: 0;
 }
 
 .theme-picker-header {

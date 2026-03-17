@@ -645,6 +645,39 @@ button.top-bar-pill.pill-accent:hover { background: color-mix(in srgb, var(--acc
 .resume-picker-dialog { min-width: 380px; max-width: 480px; }
 .resume-picker-body { margin-bottom: 12px; }
 
+.resume-session-id-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.resume-session-id-input {
+  flex: 1;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--input-bg);
+  color: var(--text);
+  font-size: 13px;
+  font-family: "Roboto Mono", monospace;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.resume-session-id-input:focus {
+  border-color: var(--accent);
+}
+
+.resume-session-id-input::placeholder {
+  color: var(--text-dimmer);
+}
+
+.resume-picker-divider {
+  height: 1px;
+  background: var(--border-subtle);
+  margin: 8px 0;
+}
+
 .resume-picker-loading {
   display: flex; align-items: center; gap: 10px;
   padding: 24px 0; justify-content: center;
