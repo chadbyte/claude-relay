@@ -616,9 +616,9 @@
     border-radius: 20px;
   }
 
-  /* Offset for mobile tab bar (56px) */
+  /* Offset for mobile tab bar (44px) */
   #input-area {
-    padding-bottom: calc(var(--safe-bottom) + 56px + 8px);
+    padding-bottom: calc(var(--safe-bottom) + 44px + 8px);
   }
 }
 
