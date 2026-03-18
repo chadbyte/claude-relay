@@ -1382,6 +1382,11 @@
   justify-content: space-between;
   padding: 10px 16px;
   flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
 }
 
 .file-history-view-toggle {
