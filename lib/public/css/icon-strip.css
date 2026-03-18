@@ -766,6 +766,102 @@
   object-fit: cover;
 }
 
+/* --- DM user picker popup --- */
+.dm-user-picker {
+  position: fixed;
+  background: var(--sidebar-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 8px;
+  width: 220px;
+  box-shadow: 0 8px 24px rgba(var(--shadow-rgb), 0.5);
+  z-index: 10001;
+  animation: ctxMenuAppear 0.15s ease-out;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dm-user-picker-search {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-alt);
+  color: var(--text);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.dm-user-picker-search:focus {
+  border-color: var(--accent);
+}
+
+.dm-user-picker-search::placeholder {
+  color: var(--text-dimmer);
+}
+
+.dm-user-picker-list {
+  max-height: 200px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.dm-user-picker-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.dm-user-picker-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dm-user-picker-list::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+
+.dm-user-picker-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.dm-user-picker-item:hover {
+  background: rgba(var(--overlay-rgb), 0.08);
+}
+
+.dm-user-picker-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.dm-user-picker-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dm-user-picker-empty {
+  padding: 12px 8px;
+  font-size: 13px;
+  color: var(--text-dimmer);
+  text-align: center;
+}
+
 /* --- Per-project presence avatars --- */
 /* --- Mobile: hide icon strip --- */
 @media (max-width: 768px) {
