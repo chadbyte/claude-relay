@@ -313,11 +313,14 @@
   min-width: unset;
   height: auto !important;
   width: auto !important;
+  max-width: 200px;
 }
 
 .sticky-note.minimized .sticky-note-spacer {
   color: inherit;
   opacity: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .sticky-note.minimized .sticky-note-header button {
