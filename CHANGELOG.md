@@ -1,3 +1,10 @@
+# [2.11.0-beta.26](https://github.com/chadbyte/clay/compare/v2.11.0-beta.25...v2.11.0-beta.26) (2026-03-18)
+
+
+### Bug Fixes
+
+* **os-users:** check for required system packages on startup ([903ee4d](https://github.com/chadbyte/clay/commit/903ee4db410f4859b0365a0c6c6d4e28b5d123e0))
+
 # [2.11.0-beta.25](https://github.com/chadbyte/clay/compare/v2.11.0-beta.24...v2.11.0-beta.25) (2026-03-18)
 
 
