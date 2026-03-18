@@ -1,3 +1,10 @@
+# [2.11.0-beta.21](https://github.com/chadbyte/clay/compare/v2.11.0-beta.20...v2.11.0-beta.21) (2026-03-18)
+
+
+### Bug Fixes
+
+* **auth:** disable input on auth-required sessions and skip terminal on replay ([5b70fb1](https://github.com/chadbyte/clay/commit/5b70fb152b79b3ab70b9428a90a2d6e91a04d417))
+
 # [2.11.0-beta.20](https://github.com/chadbyte/clay/compare/v2.11.0-beta.19...v2.11.0-beta.20) (2026-03-18)
 
 
