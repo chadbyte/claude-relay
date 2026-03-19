@@ -1,3 +1,10 @@
+# [2.13.0-beta.1](https://github.com/chadbyte/clay/compare/v2.12.0...v2.13.0-beta.1) (2026-03-19)
+
+
+### Features
+
+* **mates:** add Clay Mates system with creation wizard, DM interface, and SDK integration ([36f8735](https://github.com/chadbyte/clay/commit/36f873527adb90adf454557f42dc5f3c40e30df5))
+
 # [2.12.0](https://github.com/chadbyte/clay/compare/v2.11.0...v2.12.0) (2026-03-19)
 
 
