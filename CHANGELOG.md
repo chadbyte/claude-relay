@@ -1,3 +1,22 @@
+# [2.12.0](https://github.com/chadbyte/clay/compare/v2.11.0...v2.12.0) (2026-03-19)
+
+
+### Bug Fixes
+
+* **auth:** persist multi-user tokens to disk and revoke on user deletion ([f245939](https://github.com/chadbyte/clay/commit/f245939bb715cf3c0572822abcd7101aacb64cd0))
+* **cli:** sync multi-user mode with startup config and hide esc hint on disclaimer ([cbbd665](https://github.com/chadbyte/clay/commit/cbbd6652e56775b2fba897e400f2fc0d3f077cb8))
+* **presence:** only show cursor sharing toggle in multi-user mode ([a51bd6c](https://github.com/chadbyte/clay/commit/a51bd6ce0558843ee68474b256ececa1982009a4))
+* **search:** search timeline now shows matches from full session history ([a053d37](https://github.com/chadbyte/clay/commit/a053d37c1e5de391a782340e8d7516750fb47f94))
+
+
+### Features
+
+* **presence:** add offscreen indicator, cursor toggle, and avatar ([ab83bab](https://github.com/chadbyte/clay/commit/ab83bab319985b36292b7b869438d0435dde3239))
+* **presence:** add real-time cursor sharing between users ([12759b8](https://github.com/chadbyte/clay/commit/12759b85793ddc51706671f38043d399371796e3))
+* **presence:** add real-time text selection sharing between users ([6b0b0b2](https://github.com/chadbyte/clay/commit/6b0b0b2e8e1a12b219b24ed0e9e42f3ad1dd97f1))
+* **ui:** add in-session search and unify tooltip system ([56a6e4c](https://github.com/chadbyte/clay/commit/56a6e4c6d95c8310a02db1432ed800f4da94be93))
+* **worktree:** add git worktree support with sidebar UI and lifecycle management ([f3733c5](https://github.com/chadbyte/clay/commit/f3733c55df99bc3eb5b9d0c0b553984054fd4794)), closes [#218](https://github.com/chadbyte/clay/issues/218)
+
 # [2.12.0-beta.1](https://github.com/chadbyte/clay/compare/v2.11.0...v2.12.0-beta.1) (2026-03-19)
 
 
