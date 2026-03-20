@@ -1,3 +1,10 @@
+# [2.13.0-beta.6](https://github.com/chadbyte/clay/compare/v2.13.0-beta.5...v2.13.0-beta.6) (2026-03-20)
+
+
+### Bug Fixes
+
+* **deps:** regenerate package-lock.json to match package.json ([b85935a](https://github.com/chadbyte/clay/commit/b85935a78bba20a44d4e4bc779d691f2398fb70d))
+
 # [2.13.0-beta.5](https://github.com/chadbyte/clay/compare/v2.13.0-beta.4...v2.13.0-beta.5) (2026-03-20)
 
 
