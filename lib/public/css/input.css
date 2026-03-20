@@ -598,7 +598,8 @@
   #hamburger-btn,
   #sidebar-toggle-btn,
   #sidebar-expand-btn,
-  #layout.sidebar-collapsed #sidebar-expand-btn {
+  #layout.sidebar-collapsed #sidebar-expand-btn,
+  .sidebar-collapse-btn {
     display: none;
   }
 

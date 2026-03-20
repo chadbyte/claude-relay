@@ -787,12 +787,12 @@
 /* DM mode: keep same position (user-island gone but layout stays) */
 
 /* --- My avatar at bottom of icon strip (always present, behind user-island) --- */
-/* Positioned to align exactly with user-island avatar (left:8px + padding:6px + 18px center = 32px from left edge of layout-body) */
-/* icon-strip is 72px wide, so 32px from left = left offset within icon-strip */
+/* Positioned to align with icon-strip center (72px / 2 = 36px) */
+/* Matches user-island avatar center: left:8px + padding:10px + 18px = 36px */
 .icon-strip-me {
   position: absolute;
   bottom: 19px; /* vertically center with user-island (bottom:8px + height:58px/2 - 16px) */
-  left: 32px;
+  left: 36px;
   transform: translateX(-50%);
   display: flex;
   align-items: center;
