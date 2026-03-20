@@ -1,3 +1,17 @@
+# [2.13.0-beta.7](https://github.com/chadbyte/clay/compare/v2.13.0-beta.6...v2.13.0-beta.7) (2026-03-20)
+
+
+### Bug Fixes
+
+* **session:** restore active session when exiting mate DM ([b5e9c25](https://github.com/chadbyte/clay/commit/b5e9c2536c8695cf0b0c6e8257966a738231118f))
+* **ui:** add border-bottom to mate panel headers to match sidebar height ([51d642a](https://github.com/chadbyte/clay/commit/51d642a06dac713e362841ae2d52e8ed1f086807))
+
+
+### Features
+
+* **mates:** add scheduled tasks to mate sidebar and close panels on session switch ([169f473](https://github.com/chadbyte/clay/commit/169f4735ba84868b781fd11d50514c494e0dfddf))
+* **stt:** auto-scroll to bottom during voice input ([e9e3bc6](https://github.com/chadbyte/clay/commit/e9e3bc6a1d20f491f2732173c93f9419ba5b306d))
+
 # [2.13.0-beta.6](https://github.com/chadbyte/clay/compare/v2.13.0-beta.5...v2.13.0-beta.6) (2026-03-20)
 
 
