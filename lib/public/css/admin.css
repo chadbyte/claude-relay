@@ -663,3 +663,74 @@
   width: 12px;
   height: 12px;
 }
+
+/* --- Permissions modal --- */
+.admin-perms-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.admin-perm-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.admin-perm-row:hover {
+  background: rgba(var(--overlay-rgb), 0.06);
+}
+
+.admin-perm-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.admin-perm-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.admin-perm-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.admin-perm-toggle {
+  width: 36px;
+  height: 20px;
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--border);
+  border-radius: 10px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.admin-perm-toggle::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s;
+}
+
+.admin-perm-toggle:checked {
+  background: var(--accent);
+}
+
+.admin-perm-toggle:checked::before {
+  transform: translateX(16px);
+}
