@@ -1,3 +1,10 @@
+# [2.13.0-beta.8](https://github.com/chadbyte/clay/compare/v2.13.0-beta.7...v2.13.0-beta.8) (2026-03-20)
+
+
+### Features
+
+* **mates:** add Slack-style DM layout to mate chat messages ([e0fbb11](https://github.com/chadbyte/clay/commit/e0fbb11cc0ea3a99f152ceb02680bf5cb566ceb2))
+
 # [2.13.0-beta.7](https://github.com/chadbyte/clay/compare/v2.13.0-beta.6...v2.13.0-beta.7) (2026-03-20)
 
 
