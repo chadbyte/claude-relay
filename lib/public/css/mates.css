@@ -1141,6 +1141,7 @@ body.mate-dm-active .scheduler-top-bar,
 body.mate-dm-active .notes-archive-header {
   height: 48px;
   box-sizing: border-box;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 /* Knowledge header */
