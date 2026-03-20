@@ -1,3 +1,10 @@
+# [2.13.0-beta.3](https://github.com/chadbyte/clay/compare/v2.13.0-beta.2...v2.13.0-beta.3) (2026-03-20)
+
+
+### Bug Fixes
+
+* skip cert regeneration for externally-provided TLS certificates ([#232](https://github.com/chadbyte/clay/issues/232)) ([c7d9e09](https://github.com/chadbyte/clay/commit/c7d9e09c5219ba7381e475678aea568842613b98)), closes [#230](https://github.com/chadbyte/clay/issues/230)
+
 # [2.13.0-beta.2](https://github.com/chadbyte/clay/compare/v2.13.0-beta.1...v2.13.0-beta.2) (2026-03-19)
 
 
