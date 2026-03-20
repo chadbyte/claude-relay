@@ -1,3 +1,10 @@
+## [2.13.1-beta.1](https://github.com/chadbyte/clay/compare/v2.13.0...v2.13.1-beta.1) (2026-03-20)
+
+
+### Bug Fixes
+
+* **mates:** left-align thinking and tool badges in mate DM ([cca618d](https://github.com/chadbyte/clay/commit/cca618d41aa6ded8976c4e766e6028dcc324bdd8))
+
 # [2.13.0](https://github.com/chadbyte/clay/compare/v2.12.0...v2.13.0) (2026-03-20)
 
 
