@@ -1,3 +1,10 @@
+# [2.14.0-beta.10](https://github.com/chadbyte/clay/compare/v2.14.0-beta.9...v2.14.0-beta.10) (2026-03-21)
+
+
+### Bug Fixes
+
+* **mates:** align AskUserQuestion avatar layout with msg-assistant ([52d9522](https://github.com/chadbyte/clay/commit/52d9522783833bb20d0709324c5655b0d0befa2f))
+
 # [2.14.0-beta.9](https://github.com/chadbyte/clay/compare/v2.14.0-beta.8...v2.14.0-beta.9) (2026-03-21)
 
 
