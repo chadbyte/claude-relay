@@ -10,13 +10,6 @@
 
 Clay gives Claude Code a browser UI that runs on any device. Use it from your phone, run it on macOS, Windows, or Linux. Invite teammates, manage multiple projects from one sidebar, and get push notifications when Claude needs you. Built on the official Claude Agent SDK, not a terminal parser. Your machine is the server. No cloud relay in between, no extra network surface.
 
-One command to start:
-
-```bash
-npx clay-server
-# Scan the QR code to connect from any device
-```
-
 ---
 
 ## Getting Started
