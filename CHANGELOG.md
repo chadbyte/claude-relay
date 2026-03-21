@@ -1,3 +1,10 @@
+# [2.14.0-beta.4](https://github.com/chadbyte/clay/compare/v2.14.0-beta.3...v2.14.0-beta.4) (2026-03-21)
+
+
+### Bug Fixes
+
+* **mates:** show mate display name in title bar instead of session title ([df9428e](https://github.com/chadbyte/clay/commit/df9428e66cb501014e680a74f339d25ccadcfeeb))
+
 # [2.14.0-beta.3](https://github.com/chadbyte/clay/compare/v2.14.0-beta.2...v2.14.0-beta.3) (2026-03-21)
 
 
