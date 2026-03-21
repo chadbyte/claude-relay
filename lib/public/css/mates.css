@@ -1327,31 +1327,39 @@ body.mate-dm-active .turn-meta {
    Mate DM: Humanized thinking / tools / permissions
    ========================================================================== */
 
-/* --- Mate Thinking: avatar + name + bouncing dots --- */
+/* --- Mate Thinking: flex layout matching msg-assistant --- */
+body.mate-dm-active .mate-thinking {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 4px 16px;
+  margin: 0;
+  max-width: 100%;
+}
+body.mate-dm-active .mate-thinking:hover {
+  background: var(--bg-alt);
+}
+body.mate-dm-active .mate-thinking > .dm-bubble-avatar {
+  display: block;
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+body.mate-dm-active .mate-thinking > .dm-bubble-content {
+  flex: 1;
+  min-width: 0;
+}
 .mate-thinking-row {
   display: none;
   align-items: center;
-  gap: 10px;
-  padding: 6px 0;
+  gap: 8px;
+  padding: 4px 0;
 }
 body.mate-dm-active .mate-thinking:not(.done) .mate-thinking-row {
   display: flex;
-}
-.mate-thinking-avatar {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  flex-shrink: 0;
-}
-.mate-thinking-body {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.mate-thinking-name {
-  font-weight: 700;
-  font-size: 14px;
-  color: var(--text);
 }
 .mate-thinking-dots {
   display: inline-flex;
@@ -1402,9 +1410,31 @@ body.mate-dm-active .mate-thinking.expanded .thinking-content {
   max-height: 2000px;
 }
 
-/* --- Mate Tool Group: compact, always collapsed with summary header --- */
+/* --- Mate Tool Group: flex layout matching msg-assistant --- */
 body.mate-dm-active .mate-tool-group {
-  margin: 2px 0;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 4px 16px;
+  margin: 0;
+  max-width: 100%;
+}
+body.mate-dm-active .mate-tool-group:hover {
+  background: var(--bg-alt);
+}
+body.mate-dm-active .mate-tool-group > .dm-bubble-avatar {
+  display: block;
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+body.mate-dm-active .mate-tool-group > .dm-bubble-content {
+  flex: 1;
+  min-width: 0;
+  padding-top: 6px;
 }
 body.mate-dm-active .mate-tool-group .tool-group-header {
   font-size: 12px;
@@ -1431,35 +1461,53 @@ body.mate-dm-active .mate-tool-group .tool-name {
   color: var(--text-muted);
 }
 
-/* --- Mate Permission: conversational chat bubble --- */
+/* --- Mate Permission: flex layout matching msg-assistant --- */
 body.mate-dm-active .mate-permission {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 8px;
   border: none;
   border-radius: 0;
   background: none;
   box-shadow: none;
   padding: 4px 16px;
+  margin: 0;
+  max-width: 100%;
 }
 body.mate-dm-active .mate-permission:hover {
   background: var(--bg-alt);
 }
-.mate-permission-ask {
+body.mate-dm-active .mate-permission > .dm-bubble-avatar {
+  display: block;
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+body.mate-dm-active .mate-permission > .dm-bubble-content {
+  flex: 1;
+  min-width: 0;
+}
+/* Permission ask text */
+.mate-perm-ask {
   font-size: 15px;
   line-height: 1.46;
   color: var(--text);
-  padding-left: 36px; /* align with name (avatar 28px + gap 8px) */
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
-.mate-permission-details {
-  padding-left: 36px;
+/* Details toggle */
+.mate-perm-details {
   margin-bottom: 8px;
   font-size: 12px;
   color: var(--text-muted);
 }
-.mate-permission-details summary {
+.mate-perm-details summary {
   cursor: pointer;
   user-select: none;
 }
-.mate-permission-details pre {
+.mate-perm-details pre {
   font-size: 11px;
   margin: 4px 0 0;
   padding: 8px;
@@ -1468,11 +1516,14 @@ body.mate-dm-active .mate-permission:hover {
   overflow-x: auto;
   max-height: 200px;
 }
+/* Reply buttons (override rewind.css .permission-actions) */
 .mate-permission-actions {
   display: flex;
   gap: 6px;
-  padding-left: 36px;
-  padding-bottom: 4px;
+  border: none;
+  border-radius: 0;
+  background: none;
+  padding: 0;
 }
 .mate-permission-reply {
   padding: 5px 14px;
@@ -1513,7 +1564,6 @@ body.mate-dm-active .mate-permission.resolved .mate-permission-reply {
 body.mate-dm-active .mate-permission.resolved .permission-decision-label {
   font-size: 12px;
   color: var(--text-dimmer);
-  padding-left: 36px;
 }
 
 /* --- Mate Activity: avatar + text (hidden, dots row is enough) --- */
@@ -1548,12 +1598,12 @@ body.mate-dm-active .mate-ask-user > .dm-bubble-content {
 }
 
 /* --- Interstitial elements: indent to align with message content (16px pad + 36px avatar + 8px gap = 60px) --- */
-body.mate-dm-active .thinking-item,
+body.mate-dm-active .thinking-item:not(.mate-thinking),
 body.mate-dm-active .tool-item,
-body.mate-dm-active .tool-group,
+body.mate-dm-active .tool-group:not(.mate-tool-group),
 body.mate-dm-active .plan-card,
-body.mate-dm-active .permission-container,
-body.mate-dm-active .ask-user-container,
+body.mate-dm-active .permission-container:not(.mate-permission),
+body.mate-dm-active .ask-user-container:not(.mate-ask-user),
 body.mate-dm-active .subagent-log,
 body.mate-dm-active .conflict-msg,
 body.mate-dm-active .context-overflow-msg,
