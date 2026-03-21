@@ -1,3 +1,10 @@
+# [2.14.0-beta.8](https://github.com/chadbyte/clay/compare/v2.14.0-beta.7...v2.14.0-beta.8) (2026-03-21)
+
+
+### Features
+
+* **mates:** inject mate avatar and name into AskUserQuestion cards ([91666f2](https://github.com/chadbyte/clay/commit/91666f24d528cdc368aa5967614bacd90c153ee0))
+
 # [2.14.0-beta.7](https://github.com/chadbyte/clay/compare/v2.14.0-beta.6...v2.14.0-beta.7) (2026-03-21)
 
 
