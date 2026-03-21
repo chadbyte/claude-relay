@@ -1,3 +1,10 @@
+# [2.14.0-beta.7](https://github.com/chadbyte/clay/compare/v2.14.0-beta.6...v2.14.0-beta.7) (2026-03-21)
+
+
+### Bug Fixes
+
+* **mates:** show disconnect screen when server shuts down during mate DM ([f477a80](https://github.com/chadbyte/clay/commit/f477a80551c99d71e1c89b8e1e116a8d417e8542))
+
 # [2.14.0-beta.6](https://github.com/chadbyte/clay/compare/v2.14.0-beta.5...v2.14.0-beta.6) (2026-03-21)
 
 
