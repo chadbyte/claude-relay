@@ -127,6 +127,15 @@ mark.session-search-highlight-active {
   pointer-events: none;
 }
 
+.search-blink {
+  animation: searchBlink 0.4s ease-in-out 3;
+}
+
+@keyframes searchBlink {
+  0%, 100% { box-shadow: none; }
+  50% { box-shadow: 0 0 0 2px var(--accent); border-radius: 12px; }
+}
+
 /* Mobile */
 @media (max-width: 768px) {
   #find-in-session-btn {
