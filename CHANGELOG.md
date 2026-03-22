@@ -1,3 +1,10 @@
+## [2.15.1-beta.1](https://github.com/chadbyte/clay/compare/v2.15.0...v2.15.1-beta.1) (2026-03-22)
+
+
+### Bug Fixes
+
+* **scheduler:** pass maxIterations from registry to startLoop on trigger ([55591a8](https://github.com/chadbyte/clay/commit/55591a8d41fcd0721a77633235bfbcc29041963d))
+
 # [2.15.0](https://github.com/chadbyte/clay/compare/v2.14.0...v2.15.0) (2026-03-22)
 
 
