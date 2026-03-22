@@ -1,3 +1,10 @@
+# [2.15.0-beta.2](https://github.com/chadbyte/clay/compare/v2.15.0-beta.1...v2.15.0-beta.2) (2026-03-22)
+
+
+### Bug Fixes
+
+* **scheduler:** update existing event instead of creating duplicate on edit ([ac4cd63](https://github.com/chadbyte/clay/commit/ac4cd63efce68caef9ffbe9b2187f98407173899))
+
 # [2.15.0-beta.1](https://github.com/chadbyte/clay/compare/v2.14.0...v2.15.0-beta.1) (2026-03-22)
 
 
