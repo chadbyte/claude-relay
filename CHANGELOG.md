@@ -1,3 +1,20 @@
+# [2.15.0-beta.1](https://github.com/chadbyte/clay/compare/v2.14.0...v2.15.0-beta.1) (2026-03-22)
+
+
+### Bug Fixes
+
+* **mates:** close sticky notes when switching sessions in mate sidebar ([3cb9fe7](https://github.com/chadbyte/clay/commit/3cb9fe779be6666aefa2b415e95b8a889ed0eb7f))
+* **mates:** preserve search state when clicking session in mate sidebar ([a33865f](https://github.com/chadbyte/clay/commit/a33865f3f7ac9909f9e50f1587557e157ad45acb))
+* **sessions:** guard against undefined history entries in findTurnBoundary ([a586151](https://github.com/chadbyte/clay/commit/a586151e1d501f8630f65105675efedbb120dbc2))
+* **ui:** prevent suggestion chips from hiding last chat message ([978c844](https://github.com/chadbyte/clay/commit/978c84468707534448cd51641725a76b515590d8))
+
+
+### Features
+
+* **mates:** add common knowledge system and redesign knowledge UI ([3c18368](https://github.com/chadbyte/clay/commit/3c183683cde384ca89207630bfe3844852527dbc))
+* **mates:** add team awareness so mates know about each other ([cb8da28](https://github.com/chadbyte/clay/commit/cb8da2821457a3f61cb5447a153b4f36df5e8389))
+* **palette:** inline cross-project session search in command palette ([a9bea18](https://github.com/chadbyte/clay/commit/a9bea18610c441875e69212701090292011090a0))
+
 # [2.14.0](https://github.com/chadbyte/clay/compare/v2.13.0...v2.14.0) (2026-03-21)
 
 
