@@ -1,3 +1,10 @@
+# [2.17.0-beta.7](https://github.com/chadbyte/clay/compare/v2.17.0-beta.6...v2.17.0-beta.7) (2026-03-23)
+
+
+### Bug Fixes
+
+* **ui:** prevent command palette from hiding behind iPad keyboard ([3008138](https://github.com/chadbyte/clay/commit/3008138a133fa2989a669843f4108e6c01ac38f4))
+
 # [2.17.0-beta.6](https://github.com/chadbyte/clay/compare/v2.17.0-beta.5...v2.17.0-beta.6) (2026-03-23)
 
 
