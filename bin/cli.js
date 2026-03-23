@@ -52,6 +52,7 @@ function openUrl(url) {
 var args = process.argv.slice(2);
 var port = _isDev ? 2635 : 2633;
 var useHttps = true;
+var forceMkcert = false;
 var skipUpdate = false;
 var debugMode = false;
 var autoYes = false;
@@ -81,6 +82,8 @@ for (var i = 0; i < args.length; i++) {
     i++;
   } else if (args[i] === "--no-https") {
     useHttps = false;
+  } else if (args[i] === "--local-cert") {
+    forceMkcert = true;
   } else if (args[i] === "--no-update" || args[i] === "--skip-update") {
     skipUpdate = true;
   } else if (args[i] === "--dev") {
@@ -124,7 +127,8 @@ for (var i = 0; i < args.length; i++) {
     console.log("Options:");
     console.log("  -p, --port <port>  Port to listen on (default: 2633)");
     console.log("  --host <address>   Address to bind to (default: 0.0.0.0)");
-    console.log("  --no-https         Disable HTTPS (enabled by default via mkcert)");
+    console.log("  --no-https         Disable HTTPS (enabled by default)");
+    console.log("  --local-cert       Use local certificate (mkcert) instead of builtin");
     console.log("  --no-update        Skip auto-update check on startup");
     console.log("  --debug            Enable debug panel in the web UI");
     console.log("  -y, --yes          Skip interactive prompts (accept defaults)");
@@ -564,7 +568,43 @@ function getAllIPs() {
   return ips;
 }
 
+function getBuiltinCert() {
+  try {
+    var certDir = path.join(__dirname, "..", "lib", "certs");
+    var keyPath = path.join(certDir, "privkey.pem");
+    var certPath = path.join(certDir, "fullchain.pem");
+    if (!fs.existsSync(keyPath) || !fs.existsSync(certPath)) return null;
+
+    // Check expiry
+    var certText = execFileSync("openssl", [
+      "x509", "-in", certPath, "-noout", "-enddate"
+    ], { encoding: "utf8" });
+    var m = certText.match(/notAfter=(.+)/);
+    if (m) {
+      var expiry = new Date(m[1]);
+      var now = new Date();
+      // Skip if expiring within 7 days
+      if (expiry.getTime() - now.getTime() < 7 * 24 * 60 * 60 * 1000) return null;
+    }
+
+    return { key: keyPath, cert: certPath, caRoot: null, builtin: true };
+  } catch (e) {
+    return null;
+  }
+}
+
+function toClayStudioUrl(ip, port, protocol) {
+  var dashed = ip.replace(/\./g, "-");
+  return protocol + "://" + dashed + ".d.clay.studio:" + port;
+}
+
 function ensureCerts(ip) {
+  // Check builtin cert first (unless --local-cert flag is set)
+  if (!forceMkcert) {
+    var builtin = getBuiltinCert();
+    if (builtin) return builtin;
+  }
+
   var homeDir = os.homedir();
   var certDir = path.join(process.env.CLAY_HOME || path.join(homeDir, ".clay"), "certs");
   var keyPath = path.join(certDir, "key.pem");
@@ -1395,11 +1435,13 @@ function setup(callback) {
 async function forkDaemon(mode, keepAwake, extraProjects, addCwd, wantOsUsers) {
   var ip = getLocalIP();
   var hasTls = false;
+  var hasBuiltinCert = false;
 
   if (useHttps) {
     var certPaths = ensureCerts(ip);
     if (certPaths) {
       hasTls = true;
+      if (certPaths.builtin) hasBuiltinCert = true;
     } else {
       log(sym.warn + "  " + a.yellow + "HTTPS unavailable" + a.reset + a.dim + " · mkcert not installed" + a.reset);
     }
@@ -1473,6 +1515,7 @@ async function forkDaemon(mode, keepAwake, extraProjects, addCwd, wantOsUsers) {
     host: host,
     pinHash: mode === "multi" && cliPin ? generateAuthToken(cliPin) : null,
     tls: hasTls,
+    builtinCert: hasBuiltinCert,
     debug: debugMode,
     keepAwake: keepAwake,
     dangerouslySkipPermissions: dangerouslySkipPermissions,
@@ -1547,7 +1590,9 @@ async function forkDaemon(mode, keepAwake, extraProjects, addCwd, wantOsUsers) {
   // Headless mode — print status and exit immediately
   if (headlessMode) {
     var protocol = config.tls ? "https" : "http";
-    var url = protocol + "://" + ip + ":" + config.port;
+    var url = config.builtinCert
+      ? toClayStudioUrl(ip, config.port, protocol)
+      : protocol + "://" + ip + ":" + config.port;
     console.log("  " + sym.done + "  Daemon started (PID " + config.pid + ")");
     console.log("  " + sym.done + "  " + url);
     console.log("  " + sym.done + "  Headless mode — exiting CLI");
@@ -1565,10 +1610,14 @@ async function forkDaemon(mode, keepAwake, extraProjects, addCwd, wantOsUsers) {
 async function devMode(mode, keepAwake, existingPinHash) {
   var ip = getLocalIP();
   var hasTls = false;
+  var hasBuiltinCert = false;
 
   if (useHttps) {
     var certPaths = ensureCerts(ip);
-    if (certPaths) hasTls = true;
+    if (certPaths) {
+      hasTls = true;
+      if (certPaths.builtin) hasBuiltinCert = true;
+    }
   }
 
   var portFree = await isPortFree(port);
@@ -1630,6 +1679,7 @@ async function devMode(mode, keepAwake, existingPinHash) {
     host: host,
     pinHash: existingPinHash || null,
     tls: hasTls,
+    builtinCert: hasBuiltinCert,
     debug: true,
     keepAwake: keepAwake || false,
     dangerouslySkipPermissions: dangerouslySkipPermissions,
@@ -1778,6 +1828,7 @@ async function restartDaemonWithTLS(config, callback) {
     callback(config);
     return;
   }
+  var hasBuiltinCert = !!(certPaths && certPaths.builtin);
 
   // Shut down old daemon
   stopDaemonWatcher();
@@ -1801,6 +1852,7 @@ async function restartDaemonWithTLS(config, callback) {
     port: config.port,
     pinHash: config.pinHash || null,
     tls: true,
+    builtinCert: hasBuiltinCert,
     debug: config.debug || false,
     keepAwake: config.keepAwake || false,
     dangerouslySkipPermissions: config.dangerouslySkipPermissions || false,
@@ -1879,7 +1931,9 @@ function showServerStarted(config, ip) {
 function showMainMenu(config, ip) {
   startDaemonWatcher();
   var protocol = config.tls ? "https" : "http";
-  var url = protocol + "://" + ip + ":" + config.port;
+  var url = config.builtinCert
+    ? toClayStudioUrl(ip, config.port, protocol)
+    : protocol + "://" + ip + ":" + config.port;
 
   sendIPCCommand(socketPath(), { cmd: "get_status" }).then(function (status) {
     var projs = (status && status.projects) || [];
@@ -1925,7 +1979,6 @@ function showMainMenu(config, ip) {
     function showMenuItems() {
       var items = [
         { label: "Setup notifications", value: "notifications" },
-        { label: "Projects", value: "projects" },
         { label: "Settings", value: "settings" },
         { label: "Shut down server", value: "shutdown" },
         { label: "Keep server alive & exit", value: "exit" },
@@ -1938,10 +1991,6 @@ function showMainMenu(config, ip) {
               config = loadConfig() || config;
               showMainMenu(config, ip);
             });
-            break;
-
-          case "projects":
-            showProjectsMenu(config, ip);
             break;
 
           case "settings":
@@ -2001,203 +2050,6 @@ function showMainMenu(config, ip) {
 }
 
 // ==============================
-// Projects sub-menu
-// ==============================
-function showProjectsMenu(config, ip) {
-  sendIPCCommand(socketPath(), { cmd: "get_status" }).then(function (status) {
-    if (!status.ok) {
-      log(a.red + "Failed to get status" + a.reset);
-      showMainMenu(config, ip);
-      return;
-    }
-
-    console.clear();
-    printLogo();
-    log("");
-    log(sym.pointer + "  " + a.bold + "Projects" + a.reset);
-    log(sym.bar);
-
-    var projs = status.projects || [];
-    for (var i = 0; i < projs.length; i++) {
-      var p = projs[i];
-      var statusIcon = p.isProcessing ? "⚡" : (p.clients > 0 ? "🟢" : "⏸");
-      var sessionLabel = p.sessions === 1 ? "1 session" : p.sessions + " sessions";
-      var projName = p.title || p.project;
-      log(sym.bar + "  " + a.bold + projName + a.reset + "    " + sessionLabel + "    " + statusIcon);
-      log(sym.bar + "  " + a.dim + p.path + a.reset);
-      if (i < projs.length - 1) log(sym.bar);
-    }
-    log(sym.bar);
-
-    // Build menu items
-    var items = [];
-
-    // Check if cwd is already registered
-    var cwdRegistered = false;
-    for (var j = 0; j < projs.length; j++) {
-      if (projs[j].path === cwd) {
-        cwdRegistered = true;
-        break;
-      }
-    }
-    if (!cwdRegistered) {
-      items.push({ label: "+ Add " + a.bold + path.basename(cwd) + a.reset + " " + a.dim + "(" + cwd + ")" + a.reset, value: "add_cwd" });
-    }
-    items.push({ label: "+ Add project...", value: "add_other" });
-
-    for (var k = 0; k < projs.length; k++) {
-      var itemLabel = projs[k].title || projs[k].project;
-      items.push({ label: itemLabel, value: "detail:" + projs[k].slug });
-    }
-    items.push({ label: "Back", value: "back" });
-
-    promptSelect("Select", items, function (choice) {
-      if (choice === "back") {
-        console.clear();
-        printLogo();
-        log("");
-        showMainMenu(config, ip);
-      } else if (choice === "add_cwd") {
-        sendIPCCommand(socketPath(), { cmd: "add_project", path: cwd }).then(function (res) {
-          if (res.ok) {
-            log(sym.done + "  " + a.green + "Added: " + res.slug + a.reset);
-            config = loadConfig() || config;
-          } else {
-            log(sym.warn + "  " + a.yellow + (res.error || "Failed") + a.reset);
-          }
-          log("");
-          showProjectsMenu(config, ip);
-        });
-      } else if (choice === "add_other") {
-        log(sym.bar);
-        promptText("Directory path", cwd, function (dirPath) {
-          if (dirPath === null) {
-            showProjectsMenu(config, ip);
-            return;
-          }
-          var absPath = path.resolve(dirPath);
-          try {
-            var stat = fs.statSync(absPath);
-            if (!stat.isDirectory()) {
-              log(sym.warn + "  " + a.red + "Not a directory: " + absPath + a.reset);
-              setTimeout(function () { showProjectsMenu(config, ip); }, 2000);
-              return;
-            }
-          } catch (e) {
-            log(sym.warn + "  " + a.red + "Directory not found: " + absPath + a.reset);
-            setTimeout(function () { showProjectsMenu(config, ip); }, 2000);
-            return;
-          }
-          var alreadyExists = false;
-          for (var pi = 0; pi < projs.length; pi++) {
-            if (projs[pi].path === absPath) {
-              alreadyExists = true;
-              break;
-            }
-          }
-          if (alreadyExists) {
-            log(sym.done + "  " + a.yellow + "Already added: " + path.basename(absPath) + a.reset + " " + a.dim + "(" + absPath + ")" + a.reset);
-            setTimeout(function () { showProjectsMenu(config, ip); }, 2000);
-            return;
-          }
-          sendIPCCommand(socketPath(), { cmd: "add_project", path: absPath }).then(function (res) {
-            if (res.ok) {
-              log(sym.done + "  " + a.green + "Added: " + res.slug + a.reset + " " + a.dim + "(" + absPath + ")" + a.reset);
-              config = loadConfig() || config;
-            } else {
-              log(sym.warn + "  " + a.yellow + (res.error || "Failed") + a.reset);
-            }
-            setTimeout(function () { showProjectsMenu(config, ip); }, 2000);
-          });
-        });
-      } else if (choice.startsWith("detail:")) {
-        var detailSlug = choice.substring(7);
-        showProjectDetail(config, ip, detailSlug, projs);
-      }
-    });
-  });
-}
-
-// ==============================
-// Project detail
-// ==============================
-function showProjectDetail(config, ip, slug, projects) {
-  var proj = null;
-  for (var i = 0; i < projects.length; i++) {
-    if (projects[i].slug === slug) {
-      proj = projects[i];
-      break;
-    }
-  }
-  if (!proj) {
-    showProjectsMenu(config, ip);
-    return;
-  }
-
-  var displayName = proj.title || proj.project;
-
-  console.clear();
-  printLogo();
-  log("");
-  log(sym.pointer + "  " + a.bold + displayName + a.reset + "  " + a.dim + proj.slug + " · " + proj.path + a.reset);
-  log(sym.bar);
-  var sessionLabel = proj.sessions === 1 ? "1 session" : proj.sessions + " sessions";
-  var clientLabel = proj.clients === 1 ? "1 client" : proj.clients + " clients";
-  log(sym.bar + "  " + sessionLabel + " · " + clientLabel);
-  if (proj.title) {
-    log(sym.bar + "  " + a.dim + "Title: " + a.reset + proj.title);
-  }
-  log(sym.bar);
-
-  var items = [
-    { label: proj.title ? "Change title" : "Set title", value: "title" },
-    { label: "Remove project", value: "remove" },
-    { label: "Back", value: "back" },
-  ];
-
-  promptSelect("What would you like to do?", items, function (choice) {
-    if (choice === "title") {
-      log(sym.bar);
-      promptText("Project title", proj.title || proj.project, function (newTitle) {
-        if (newTitle === null) {
-          showProjectDetail(config, ip, slug, projects);
-          return;
-        }
-        var titleVal = newTitle.trim();
-        // If same as directory name, clear custom title
-        if (titleVal === proj.project || titleVal === "") {
-          titleVal = null;
-        }
-        sendIPCCommand(socketPath(), { cmd: "set_project_title", slug: slug, title: titleVal }).then(function (res) {
-          if (res.ok) {
-            proj.title = titleVal;
-            config = loadConfig() || config;
-            log(sym.done + "  " + a.green + "Title updated" + a.reset);
-          } else {
-            log(sym.warn + "  " + a.yellow + (res.error || "Failed") + a.reset);
-          }
-          log("");
-          showProjectDetail(config, ip, slug, projects);
-        });
-      });
-    } else if (choice === "remove") {
-      sendIPCCommand(socketPath(), { cmd: "remove_project", slug: slug }).then(function (res) {
-        if (res.ok) {
-          log(sym.done + "  " + a.green + "Removed: " + slug + a.reset);
-          config = loadConfig() || config;
-        } else {
-          log(sym.warn + "  " + a.yellow + (res.error || "Failed") + a.reset);
-        }
-        log("");
-        showProjectsMenu(config, ip);
-      });
-    } else {
-      showProjectsMenu(config, ip);
-    }
-  });
-}
-
-// ==============================
 // Setup guide (2x2 toggle flow)
 // ==============================
 function showSetupGuide(config, ip, goBack) {
@@ -2229,7 +2081,7 @@ function showSetupGuide(config, ip, goBack) {
   promptToggle("Access from outside your network?", "Requires Tailscale on both devices", false, function (remote) {
     wantRemote = remote;
     log(sym.bar);
-    promptToggle("Want push notifications?", "Requires HTTPS (mkcert certificate)", false, function (push) {
+    promptToggle("Want push notifications?", "Requires HTTPS", false, function (push) {
       wantPush = push;
       log(sym.bar);
       afterToggles();
@@ -2293,6 +2145,15 @@ function showSetupGuide(config, ip, goBack) {
       return;
     }
 
+    // Builtin cert: HTTPS already active, skip mkcert flow entirely
+    if (config.builtinCert) {
+      log(sym.pointer + "  " + a.bold + "HTTPS" + a.reset + a.dim + " · Enabled (builtin certificate)" + a.reset);
+      log(sym.bar);
+      showSetupQR();
+      return;
+    }
+
+    // mkcert flow (--mkcert or fallback)
     var mcReady = hasMkcert();
     log(sym.pointer + "  " + a.bold + "HTTPS Setup (for push notifications)" + a.reset);
     if (mcReady) {
@@ -2341,10 +2202,16 @@ function showSetupGuide(config, ip, goBack) {
     }
     var setupIP = wantRemote ? (tsIP || ip) : (lanIP || ip);
     var setupQuery = wantRemote ? "" : "?mode=lan";
-    // Always use HTTP onboarding URL for QR/setup when TLS is active
-    var setupUrl = config.tls
-      ? "http://" + setupIP + ":" + (config.port + 1) + "/setup" + setupQuery
-      : "http://" + setupIP + ":" + config.port + "/setup" + setupQuery;
+    // Builtin cert: link directly to the app with push notification guide
+    // mkcert: use HTTP onboarding server for CA install flow
+    var setupUrl;
+    if (config.builtinCert) {
+      setupUrl = toClayStudioUrl(setupIP, config.port, "https") + "?playbook=push-notifications";
+    } else if (config.tls) {
+      setupUrl = "http://" + setupIP + ":" + (config.port + 1) + "/setup" + setupQuery;
+    } else {
+      setupUrl = "http://" + setupIP + ":" + config.port + "/setup" + setupQuery;
+    }
     log(sym.pointer + "  " + a.bold + "Continue on your device" + a.reset);
     log(sym.bar + "  " + a.dim + "Scan the QR code or open:" + a.reset);
     log(sym.bar + "  " + a.bold + setupUrl + a.reset);
@@ -2435,11 +2302,13 @@ function showSettingsMenu(config, ip) {
       { label: "Setup notifications", value: "guide" },
     ];
 
-    if (config.pinHash) {
-      items.push({ label: "Change PIN", value: "pin" });
-      items.push({ label: "Remove PIN", value: "remove_pin" });
-    } else {
-      items.push({ label: "Set PIN", value: "pin" });
+    if (!muEnabled) {
+      if (config.pinHash) {
+        items.push({ label: "Change PIN", value: "pin" });
+        items.push({ label: "Remove PIN", value: "remove_pin" });
+      } else {
+        items.push({ label: "Set PIN", value: "pin" });
+      }
     }
     if (muEnabled) {
       items.push({ label: "Disable multi-user mode", value: "disable_multi_user" });
@@ -2759,7 +2628,9 @@ function showSettingsMenu(config, ip) {
             return;
           }
           var protocol = config.tls ? "https" : "http";
-          var recoveryUrl = protocol + "://" + ip + ":" + config.port + "/recover/" + recoveryUrlPath;
+          var recoveryUrl = config.builtinCert
+            ? toClayStudioUrl(ip, config.port, protocol) + "/recover/" + recoveryUrlPath
+            : protocol + "://" + ip + ":" + config.port + "/recover/" + recoveryUrlPath;
           log(sym.bar);
           log(sym.bar + "  " + a.yellow + sym.warn + " Admin Password Recovery" + a.reset);
           log(sym.bar);
@@ -2849,7 +2720,9 @@ var currentVersion = require("../package.json").version;
     if (headlessMode) {
       var protocol = config.tls ? "https" : "http";
       var ip = getLocalIP();
-      var url = protocol + "://" + ip + ":" + config.port;
+      var url = config.builtinCert
+        ? toClayStudioUrl(ip, config.port, protocol)
+        : protocol + "://" + ip + ":" + config.port;
       console.log("  " + sym.done + "  Daemon already running (PID " + config.pid + ")");
       console.log("  " + sym.done + "  " + url);
       process.exit(0);
