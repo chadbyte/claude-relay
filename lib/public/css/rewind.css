@@ -526,3 +526,16 @@
 
 .bubble-img:hover { opacity: 0.85; }
 
+.bubble-img-expired {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 160px;
+  height: 100px;
+  border-radius: 12px;
+  background: var(--bg-alt, #2a2a2e);
+  color: var(--text-dimmer, #666);
+  font-size: 12px;
+  border: 1px dashed var(--border, #444);
+}
+
