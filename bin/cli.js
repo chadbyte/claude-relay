@@ -643,29 +643,12 @@ function ensureCerts(ip) {
       }
     } catch (e) { needRegen = true; }
     if (!needRegen) {
-      if (mkcertInstalled && !forceMkcert) {
-        log("");
-        log(sym.warn + "  " + a.yellow + "mkcert detected." + a.reset + " Clay now ships with a builtin HTTPS certificate.");
-        log("   " + a.dim + "Uninstall mkcert to use it. No more CA setup on each device." + a.reset);
-        log("   " + a.dim + "  brew uninstall mkcert  (macOS)" + a.reset);
-        log("   " + a.dim + "  sudo apt remove mkcert  (Linux)" + a.reset);
-        log("   " + a.dim + "Or pass --local-cert to keep using mkcert without this warning." + a.reset);
-        log("");
-      }
-      return { key: keyPath, cert: certPath, caRoot: caRoot };
+      return { key: keyPath, cert: certPath, caRoot: caRoot, mkcertDetected: mkcertInstalled && !forceMkcert };
     }
   }
 
   // mkcert installed: generate local cert (legacy behavior)
   if (mkcertInstalled) {
-    if (!forceMkcert) {
-      log("");
-      log(sym.warn + "  " + a.yellow + "mkcert detected." + a.reset + " Clay now ships with a builtin HTTPS certificate.");
-      log("   " + a.dim + "Uninstall mkcert to use it. No more CA setup on each device." + a.reset);
-      log("   " + a.dim + "Or pass --local-cert to keep using mkcert without this warning." + a.reset);
-      log("");
-    }
-
     fs.mkdirSync(certDir, { recursive: true });
 
     var domains = ["localhost", "127.0.0.1", "::1"];
@@ -681,7 +664,7 @@ function ensureCerts(ip) {
     }
 
     if (fs.existsSync(keyPath) && fs.existsSync(certPath)) {
-      return { key: keyPath, cert: certPath, caRoot: caRoot };
+      return { key: keyPath, cert: certPath, caRoot: caRoot, mkcertDetected: !forceMkcert };
     }
   }
 
@@ -1466,12 +1449,14 @@ async function forkDaemon(mode, keepAwake, extraProjects, addCwd, wantOsUsers) {
   var ip = getLocalIP();
   var hasTls = false;
   var hasBuiltinCert = false;
+  var mkcertDetected = false;
 
   if (useHttps) {
     var certPaths = ensureCerts(ip);
     if (certPaths) {
       hasTls = true;
       if (certPaths.builtin) hasBuiltinCert = true;
+      if (certPaths.mkcertDetected) mkcertDetected = true;
     } else {
       log(sym.warn + "  " + a.yellow + "HTTPS unavailable" + a.reset + a.dim + " · mkcert not installed" + a.reset);
     }
@@ -1546,6 +1531,7 @@ async function forkDaemon(mode, keepAwake, extraProjects, addCwd, wantOsUsers) {
     pinHash: mode === "multi" && cliPin ? generateAuthToken(cliPin) : null,
     tls: hasTls,
     builtinCert: hasBuiltinCert,
+    mkcertDetected: mkcertDetected,
     debug: debugMode,
     keepAwake: keepAwake,
     dangerouslySkipPermissions: dangerouslySkipPermissions,
@@ -1626,6 +1612,7 @@ async function forkDaemon(mode, keepAwake, extraProjects, addCwd, wantOsUsers) {
     console.log("  " + sym.done + "  Daemon started (PID " + config.pid + ")");
     console.log("  " + sym.done + "  " + url);
     if (config.builtinCert) console.log("  " + sym.done + "  d.clay.studio is only used for HTTPS certificates. All traffic stays on your local network. https://github.com/chadbyte/clay/tree/main/clay-dns");
+    if (config.mkcertDetected) console.log("  " + sym.warn + "  mkcert detected. Uninstall mkcert to use builtin cert, or pass --local-cert to suppress this warning.");
     console.log("  " + sym.done + "  Headless mode — exiting CLI");
     process.exit(0);
     return;
@@ -1642,12 +1629,14 @@ async function devMode(mode, keepAwake, existingPinHash) {
   var ip = getLocalIP();
   var hasTls = false;
   var hasBuiltinCert = false;
+  var mkcertDetected = false;
 
   if (useHttps) {
     var certPaths = ensureCerts(ip);
     if (certPaths) {
       hasTls = true;
       if (certPaths.builtin) hasBuiltinCert = true;
+      if (certPaths.mkcertDetected) mkcertDetected = true;
     }
   }
 
@@ -1711,6 +1700,7 @@ async function devMode(mode, keepAwake, existingPinHash) {
     pinHash: existingPinHash || null,
     tls: hasTls,
     builtinCert: hasBuiltinCert,
+    mkcertDetected: mkcertDetected,
     debug: true,
     keepAwake: keepAwake || false,
     dangerouslySkipPermissions: dangerouslySkipPermissions,
@@ -1860,6 +1850,7 @@ async function restartDaemonWithTLS(config, callback) {
     return;
   }
   var hasBuiltinCert = !!(certPaths && certPaths.builtin);
+  var mkcertDetected = !!(certPaths && certPaths.mkcertDetected);
 
   // Shut down old daemon
   stopDaemonWatcher();
@@ -1884,6 +1875,7 @@ async function restartDaemonWithTLS(config, callback) {
     pinHash: config.pinHash || null,
     tls: true,
     builtinCert: hasBuiltinCert,
+    mkcertDetected: mkcertDetected,
     debug: config.debug || false,
     keepAwake: config.keepAwake || false,
     dangerouslySkipPermissions: config.dangerouslySkipPermissions || false,
@@ -1992,6 +1984,15 @@ function showMainMenu(config, ip) {
       log("  " + a.dim + parts.join(a.reset + a.dim + " · ") + a.reset);
       log("  Press " + a.bold + "o" + a.reset + " to open in browser");
       log("");
+
+      if (config.mkcertDetected) {
+        log("  " + sym.warn + "  " + a.yellow + "mkcert detected." + a.reset + " Clay now ships with a builtin HTTPS certificate.");
+        log("     " + a.dim + "Uninstall mkcert to use it. No more CA setup on each device." + a.reset);
+        log("     " + a.dim + "  brew uninstall mkcert  (macOS)" + a.reset);
+        log("     " + a.dim + "  sudo apt remove mkcert  (Linux)" + a.reset);
+        log("     " + a.dim + "Or pass --local-cert to keep using mkcert without this warning." + a.reset);
+        log("");
+      }
 
       showMenuItems();
     }
