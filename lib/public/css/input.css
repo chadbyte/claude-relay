@@ -629,6 +629,11 @@
   #input-area {
     padding-bottom: calc(var(--safe-bottom) + 56px + 8px);
   }
+
+  /* When keyboard is open, tab bar is hidden behind keyboard — remove the offset */
+  body.keyboard-open #input-area {
+    padding-bottom: 8px;
+  }
 }
 
 /* ==========================================================================
