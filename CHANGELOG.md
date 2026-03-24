@@ -1,3 +1,15 @@
+# [2.18.0-beta.4](https://github.com/chadbyte/clay/compare/v2.18.0-beta.3...v2.18.0-beta.4) (2026-03-24)
+
+
+### Bug Fixes
+
+* **dm:** show sparkle activity indicator in mate DM mode ([78a4ad9](https://github.com/chadbyte/clay/commit/78a4ad9c1a0e16a7236f2ac97054f376a873c8f8))
+
+
+### Features
+
+* **mention:** inject recent session digests into mention context ([ed3718b](https://github.com/chadbyte/clay/commit/ed3718beeb9d60ff9212087a1765d07b34538866))
+
 # [2.18.0-beta.3](https://github.com/chadbyte/clay/compare/v2.18.0-beta.2...v2.18.0-beta.3) (2026-03-24)
 
 
