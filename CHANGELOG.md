@@ -1,3 +1,10 @@
+# [2.18.0-beta.7](https://github.com/chadbyte/clay/compare/v2.18.0-beta.6...v2.18.0-beta.7) (2026-03-26)
+
+
+### Bug Fixes
+
+* **dm:** suppress regular project history during mate DM restore ([39ae3d2](https://github.com/chadbyte/clay/commit/39ae3d2456558f21de9b1e49213233b44e694493))
+
 # [2.18.0-beta.6](https://github.com/chadbyte/clay/compare/v2.18.0-beta.5...v2.18.0-beta.6) (2026-03-26)
 
 
