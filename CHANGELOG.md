@@ -1,3 +1,10 @@
+# [2.18.0-beta.8](https://github.com/chadbyte/clay/compare/v2.18.0-beta.7...v2.18.0-beta.8) (2026-03-26)
+
+
+### Bug Fixes
+
+* **mate:** auto-approve WebFetch for mates and fix DM restore on server restart ([59a78c5](https://github.com/chadbyte/clay/commit/59a78c5f302f9acaf57043d0fe89bf6b97591414))
+
 # [2.18.0-beta.7](https://github.com/chadbyte/clay/compare/v2.18.0-beta.6...v2.18.0-beta.7) (2026-03-26)
 
 
