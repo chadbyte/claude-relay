@@ -1,3 +1,20 @@
+# [2.19.0](https://github.com/chadbyte/clay/compare/v2.18.0...v2.19.0) (2026-03-29)
+
+
+### Bug Fixes
+
+* **auth:** separate auth token files and cookies for dev and prod servers ([f722f90](https://github.com/chadbyte/clay/commit/f722f90256ae601edd93d5cababfc31717a47d41))
+* **scheduler:** fix ReferenceError in scheduled loop trigger ([8017366](https://github.com/chadbyte/clay/commit/80173663547fba82b0b270b7be1ec790c5e05edf))
+* **scheduler:** reset loopFilesId in clearLoopState and loop_rerun ([bccac5b](https://github.com/chadbyte/clay/commit/bccac5bd77ae666fe06f3d5597fad42d6432157f))
+* **scheduler:** use linked task dir for loop files in scheduled triggers ([ad194ef](https://github.com/chadbyte/clay/commit/ad194ef3490028aea7cf48036e8eba67f39f214e))
+* **session:** skip title migration for already-migrated sessions ([1b69a1c](https://github.com/chadbyte/clay/commit/1b69a1c42d20b7d7e60f164c6b8727925fcea917))
+
+
+### Features
+
+* **session:** auto-continue after rate limit reset ([#244](https://github.com/chadbyte/clay/issues/244)) ([b6ae7d9](https://github.com/chadbyte/clay/commit/b6ae7d96c3bb9e1326e63153156a3059ec7b5204))
+* **ui:** add user settings modal with account management and logout ([fa6e1f5](https://github.com/chadbyte/clay/commit/fa6e1f5347e4848b25d3aadc2a9a071e576ea427))
+
 # [2.19.0-beta.2](https://github.com/chadbyte/clay/compare/v2.19.0-beta.1...v2.19.0-beta.2) (2026-03-29)
 
 
