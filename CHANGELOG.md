@@ -1,3 +1,12 @@
+## [2.18.1-beta.1](https://github.com/chadbyte/clay/compare/v2.18.0...v2.18.1-beta.1) (2026-03-29)
+
+
+### Bug Fixes
+
+* **scheduler:** fix ReferenceError in scheduled loop trigger ([8017366](https://github.com/chadbyte/clay/commit/80173663547fba82b0b270b7be1ec790c5e05edf))
+* **scheduler:** reset loopFilesId in clearLoopState and loop_rerun ([bccac5b](https://github.com/chadbyte/clay/commit/bccac5bd77ae666fe06f3d5597fad42d6432157f))
+* **scheduler:** use linked task dir for loop files in scheduled triggers ([ad194ef](https://github.com/chadbyte/clay/commit/ad194ef3490028aea7cf48036e8eba67f39f214e))
+
 # [2.18.0](https://github.com/chadbyte/clay/compare/v2.17.0...v2.18.0) (2026-03-28)
 
 
