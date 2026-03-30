@@ -2319,10 +2319,16 @@ body.mate-dm-active .context-overflow-msg,
 body.mate-dm-active .sys-msg {
   display: none;
 }
-body.mate-dm-active .activity-inline:not(.mention-activity-bar):not(.mate-pre-activity) {
+body.mate-dm-active .activity-inline:not(.mention-activity-bar):not(.mate-pre-activity):not(.mate-thinking-activity) {
   padding-left: 60px;
   margin-left: 0;
   margin-right: 0;
+}
+.mate-thinking > .dm-bubble-content > .mate-thinking-activity,
+.mate-thinking > .dm-bubble-content > .mate-pre-activity {
+  margin: 4px 0 0;
+  padding: 0;
+  max-width: none;
 }
 
 /* ==========================================================================
