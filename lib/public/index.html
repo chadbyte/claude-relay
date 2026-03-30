@@ -227,15 +227,7 @@
         </div>
         <div id="mate-session-list" class="mate-session-list"></div>
       </div>
-      <div id="mate-sidebar-memory" class="hidden">
-        <div class="mate-sidebar-sessions-header">
-          <span>Memory</span>
-          <div class="mate-sidebar-actions">
-            <button id="mate-memory-back-btn" type="button" title="Back to conversations"><i data-lucide="x"></i></button>
-          </div>
-        </div>
-        <div id="mate-memory-entries" class="mate-memory-entry-list"></div>
-      </div>
+      <div id="mate-sidebar-memory" class="hidden"></div>
       <div id="mate-sidebar-knowledge" class="hidden">
         <div class="mate-sidebar-sessions-header">
           <span>Knowledge</span>
@@ -513,13 +505,20 @@
   <div id="mate-memory-viewer" class="hidden">
     <div class="mate-memory-viewer-header">
       <i data-lucide="brain" class="mate-knowledge-header-icon"></i>
-      <span id="mate-memory-viewer-topic" class="mate-knowledge-active-name">Memory</span>
+      <span class="mate-knowledge-active-name">Memory</span>
       <div class="mate-knowledge-toolbar-spacer"></div>
-      <button id="mate-memory-viewer-delete-btn" class="file-viewer-btn mate-memory-danger-btn" title="Delete"><i data-lucide="trash-2"></i></button>
       <button id="mate-memory-viewer-close-btn" class="file-viewer-btn" title="Close"><i data-lucide="x"></i></button>
     </div>
-    <div class="mate-knowledge-viewer-body">
-      <div id="mate-memory-viewer-content" class="mate-knowledge-preview-content md-content"></div>
+    <div class="mate-memory-viewer-tabs">
+      <button class="mate-memory-tab active" data-tab="summary">Summary</button>
+      <button class="mate-memory-tab" data-tab="digests">Session Logs</button>
+    </div>
+    <div id="mate-memory-tab-summary" class="mate-memory-tab-body">
+      <div id="mate-memory-summary-content" class="mate-knowledge-preview-content md-content"></div>
+    </div>
+    <div id="mate-memory-tab-digests" class="mate-memory-tab-body hidden">
+      <div id="mate-memory-digest-list" class="mate-memory-digest-list"></div>
+      <div id="mate-memory-digest-detail" class="mate-memory-digest-detail hidden"></div>
     </div>
   </div>
   <div id="project-settings" class="hidden panel-fullscreen">

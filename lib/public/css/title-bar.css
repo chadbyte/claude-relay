@@ -295,6 +295,7 @@
   padding: 0 16px;
   min-width: 0;
   border-bottom: 1px solid var(--border-subtle);
+  overflow: visible;
 }
 
 .title-bar-content #header-left {
@@ -314,6 +315,7 @@
   color: var(--text-muted);
   flex: 1;
   flex-shrink: 0;
+  overflow: visible;
 }
 
 /* --- Mobile --- */
@@ -396,6 +398,7 @@
 .header-rate-limit-wrap {
   position: relative;
   display: inline-flex;
+  overflow: visible;
 }
 
 /* Rate limit states */
