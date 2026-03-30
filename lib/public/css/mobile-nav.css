@@ -543,6 +543,204 @@
     letter-spacing: 0.3px;
   }
 
+  /* --- Loop session grouping (scheduled tasks / Ralph) --- */
+  .mobile-loop-wrapper {
+    margin-top: 2px;
+  }
+
+  .mobile-loop-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 48px;
+    padding: 10px 12px;
+    background: none;
+    border: none;
+    border-radius: 10px;
+    color: var(--text-secondary);
+    font-family: "Pretendard", system-ui, sans-serif;
+    font-size: 15px;
+    cursor: pointer;
+    text-align: left;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.15s;
+  }
+
+  .mobile-loop-group:active {
+    background: rgba(var(--overlay-rgb), 0.06);
+  }
+
+  .mobile-loop-group.active {
+    color: var(--text);
+    background: rgba(var(--overlay-rgb), 0.06);
+  }
+
+  .mobile-loop-chevron {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    transition: transform 0.15s ease;
+    color: var(--text-dimmer);
+  }
+
+  .mobile-loop-chevron svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .mobile-loop-group.expanded > .mobile-loop-chevron,
+  .mobile-loop-run.expanded > .mobile-loop-chevron {
+    transform: rotate(90deg);
+  }
+
+  .mobile-loop-icon {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    color: var(--text-dimmer);
+  }
+
+  .mobile-loop-icon.scheduled {
+    color: var(--success);
+  }
+
+  .mobile-loop-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .mobile-loop-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 500;
+  }
+
+  .mobile-loop-count {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 10px;
+    background: rgba(var(--overlay-rgb), 0.1);
+    color: var(--text-dimmer);
+    flex-shrink: 0;
+  }
+
+  .mobile-loop-count.scheduled {
+    background: rgba(var(--success-rgb, 34, 197, 94), 0.15);
+    color: var(--success);
+  }
+
+  .mobile-loop-badge.crafting {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 10px;
+    background: rgba(var(--warning-rgb, 234, 179, 8), 0.15);
+    color: var(--warning, #eab308);
+    flex-shrink: 0;
+  }
+
+  .mobile-loop-children {
+    padding-left: 20px;
+    border-left: 2px solid rgba(var(--overlay-rgb), 0.08);
+    margin-left: 20px;
+  }
+
+  .mobile-loop-child {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 42px;
+    padding: 8px 12px;
+    background: none;
+    border: none;
+    border-radius: 8px;
+    color: var(--text-secondary);
+    font-family: "Pretendard", system-ui, sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    text-align: left;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.15s;
+  }
+
+  .mobile-loop-child:active {
+    background: rgba(var(--overlay-rgb), 0.06);
+  }
+
+  .mobile-loop-child.active {
+    color: var(--text);
+    background: rgba(var(--overlay-rgb), 0.06);
+    font-weight: 600;
+  }
+
+  .mobile-loop-role-badge {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: rgba(var(--overlay-rgb), 0.08);
+    color: var(--text-muted);
+  }
+
+  .mobile-loop-role-badge.scheduled {
+    background: rgba(var(--success-rgb, 34, 197, 94), 0.12);
+    color: var(--success);
+  }
+
+  .mobile-loop-role-badge.crafting {
+    background: rgba(var(--warning-rgb, 234, 179, 8), 0.12);
+    color: var(--warning, #eab308);
+  }
+
+  /* Loop run sub-group (time-based grouping within a loop group) */
+  .mobile-loop-run-wrapper {
+    margin-top: 2px;
+  }
+
+  .mobile-loop-run {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 40px;
+    padding: 8px 12px;
+    background: none;
+    border: none;
+    border-radius: 8px;
+    color: var(--text-secondary);
+    font-family: "Pretendard", system-ui, sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    text-align: left;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.15s;
+  }
+
+  .mobile-loop-run:active {
+    background: rgba(var(--overlay-rgb), 0.06);
+  }
+
+  .mobile-loop-run.active {
+    color: var(--text);
+    background: rgba(var(--overlay-rgb), 0.06);
+  }
+
+  .mobile-loop-run-time {
+    flex: 1;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
   /* --- Mate profile sheet --- */
   .mate-profile-header {
     display: flex;
