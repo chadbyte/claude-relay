@@ -33,7 +33,7 @@ if (_isDev || process.argv.includes("--debug")) {
 }
 
 var crypto = require("crypto");
-var { loadConfig, saveConfig, configPath, socketPath, logPath, ensureConfigDir, isDaemonAlive, isDaemonAliveAsync, generateSlug, clearStaleConfig, loadClayrc, saveClayrc, readCrashInfo } = require("../lib/config");
+var { loadConfig, saveConfig, configPath, socketPath, logPath, ensureConfigDir, isDaemonAlive, isDaemonAliveAsync, generateSlug, clearStaleConfig, loadClayrc, saveClayrc, readCrashInfo, REAL_HOME } = require("../lib/config");
 var { sendIPCCommand } = require("../lib/ipc");
 var { generateAuthToken } = require("../lib/server");
 var { enableMultiUser, disableMultiUser, hasAdmin, isMultiUser } = require("../lib/users");
@@ -610,8 +610,7 @@ function ensureCerts(ip) {
     return null;
   }
 
-  var homeDir = os.homedir();
-  var certDir = path.join(process.env.CLAY_HOME || path.join(homeDir, ".clay"), "certs");
+  var certDir = path.join(process.env.CLAY_HOME || path.join(REAL_HOME, ".clay"), "certs");
   var keyPath = path.join(certDir, "key.pem");
   var certPath = path.join(certDir, "cert.pem");
 
@@ -891,7 +890,7 @@ function promptText(title, placeholder, callback, opts) {
 
     // Resolve ~ to home
     if (current.charAt(0) === "~") {
-      current = os.homedir() + current.substring(1);
+      current = REAL_HOME + current.substring(1);
     }
 
     var resolved = path.resolve(current);
