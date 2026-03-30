@@ -2319,7 +2319,7 @@ body.mate-dm-active .context-overflow-msg,
 body.mate-dm-active .sys-msg {
   display: none;
 }
-body.mate-dm-active .activity-inline:not(.mention-activity-bar) {
+body.mate-dm-active .activity-inline:not(.mention-activity-bar):not(.mate-pre-activity) {
   padding-left: 60px;
   margin-left: 0;
   margin-right: 0;
