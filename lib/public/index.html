@@ -206,6 +206,7 @@
         <button id="mate-sidebar-toggle-btn" class="sidebar-collapse-btn" title="Collapse sidebar"><i data-lucide="panel-left-close"></i></button>
       </div>
       <div id="mate-sidebar-tools">
+        <button id="mate-memory-btn"><i data-lucide="brain"></i> <span>Memory</span><span id="mate-memory-count" class="sidebar-badge hidden"></span></button>
         <button id="mate-knowledge-btn"><i data-lucide="book-open"></i> <span>Knowledge</span><span id="mate-knowledge-count" class="sidebar-badge hidden"></span></button>
         <button id="mate-sticky-notes-btn"><i data-lucide="sticky-note"></i> <span>Sticky Notes</span></button>
         <button id="mate-skills-btn"><i data-lucide="puzzle"></i> <span>Skills</span></button>
@@ -225,6 +226,15 @@
           <button id="mate-session-search-clear" type="button" aria-label="Clear search"><i data-lucide="x"></i></button>
         </div>
         <div id="mate-session-list" class="mate-session-list"></div>
+      </div>
+      <div id="mate-sidebar-memory" class="hidden">
+        <div class="mate-sidebar-sessions-header">
+          <span>Memory</span>
+          <div class="mate-sidebar-actions">
+            <button id="mate-memory-back-btn" type="button" title="Back to conversations"><i data-lucide="x"></i></button>
+          </div>
+        </div>
+        <div id="mate-memory-entries" class="mate-memory-entry-list"></div>
       </div>
       <div id="mate-sidebar-knowledge" class="hidden">
         <div class="mate-sidebar-sessions-header">
@@ -497,6 +507,19 @@
     </div>
     <div class="mate-knowledge-viewer-body">
       <div id="mate-knowledge-viewer-content" class="mate-knowledge-preview-content md-content"></div>
+    </div>
+  </div>
+  <!-- Memory viewer (side panel) -->
+  <div id="mate-memory-viewer" class="hidden">
+    <div class="mate-memory-viewer-header">
+      <i data-lucide="brain" class="mate-knowledge-header-icon"></i>
+      <span id="mate-memory-viewer-topic" class="mate-knowledge-active-name">Memory</span>
+      <div class="mate-knowledge-toolbar-spacer"></div>
+      <button id="mate-memory-viewer-delete-btn" class="file-viewer-btn mate-memory-danger-btn" title="Delete"><i data-lucide="trash-2"></i></button>
+      <button id="mate-memory-viewer-close-btn" class="file-viewer-btn" title="Close"><i data-lucide="x"></i></button>
+    </div>
+    <div class="mate-knowledge-viewer-body">
+      <div id="mate-memory-viewer-content" class="mate-knowledge-preview-content md-content"></div>
     </div>
   </div>
   <div id="project-settings" class="hidden panel-fullscreen">

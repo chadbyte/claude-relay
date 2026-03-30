@@ -966,6 +966,7 @@ body.mate-dm-active #layout.sidebar-collapsed .mate-collapsed-info {
 
 /* Sidebar file list */
 #mate-sidebar-knowledge.hidden,
+#mate-sidebar-memory.hidden,
 #mate-sidebar-conversations.hidden {
   display: none;
 }
@@ -1137,6 +1138,193 @@ body.mate-dm-active #layout.sidebar-collapsed .mate-collapsed-info {
   text-align: center;
   font-size: 12px;
   color: var(--text-dimmer);
+}
+
+/* --- Memory panel --- */
+.mate-memory-entry-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 6px;
+}
+.mate-memory-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.mate-memory-item:hover {
+  background: var(--sidebar-hover);
+}
+.mate-memory-item.active {
+  background: var(--sidebar-active);
+}
+.mate-memory-item-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.mate-memory-date {
+  font-size: 11px;
+  color: var(--text-dimmer);
+}
+.mate-memory-type-badge {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: var(--bg-alt, #2a2a3a);
+  color: var(--text-dimmer);
+}
+.mate-memory-delete-btn {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--text-dimmer);
+  cursor: pointer;
+  padding: 2px;
+  display: none;
+  align-items: center;
+}
+.mate-memory-delete-btn svg { width: 13px; height: 13px; }
+.mate-memory-item:hover .mate-memory-delete-btn { display: flex; }
+.mate-memory-delete-btn:hover { color: var(--error, #ff5555); }
+.mate-memory-topic {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mate-memory-position {
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mate-memory-empty {
+  padding: 20px 12px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-dimmer);
+}
+
+/* Memory viewer */
+@media (min-width: 1024px) {
+  #mate-memory-viewer {
+    width: 50%;
+    max-width: 720px;
+    min-width: 360px;
+    border-left: 1px solid var(--border-subtle);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  #mate-memory-viewer.hidden { display: none; }
+}
+@media (max-width: 1023px) {
+  #mate-memory-viewer {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 1100;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  #mate-memory-viewer.hidden { display: none; }
+}
+.mate-memory-viewer-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+  min-height: 44px;
+}
+.mate-memory-danger-btn:hover {
+  color: var(--error, #ff5555) !important;
+}
+
+/* Memory detail fields */
+.mate-memory-detail {
+  margin-bottom: 16px;
+}
+.mate-memory-detail-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-dimmer);
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+.mate-memory-detail-value {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+/* Memory delete confirmation */
+.mate-memory-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.mate-memory-confirm-dialog {
+  background: var(--bg);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 20px 24px;
+  min-width: 260px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+.mate-memory-confirm-msg {
+  font-size: 14px;
+  color: var(--text);
+  margin-bottom: 16px;
+  text-align: center;
+}
+.mate-memory-confirm-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+.mate-memory-confirm-cancel {
+  padding: 6px 16px;
+  border-radius: 6px;
+  border: 1px solid var(--border-subtle);
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 13px;
+}
+.mate-memory-confirm-cancel:hover {
+  background: var(--sidebar-hover);
+}
+.mate-memory-confirm-delete {
+  padding: 6px 16px;
+  border-radius: 6px;
+  border: none;
+  background: var(--error, #ff5555);
+  color: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+}
+.mate-memory-confirm-delete:hover {
+  opacity: 0.85;
 }
 
 /* Active file name in editor toolbar */
@@ -1633,6 +1821,7 @@ body.mate-dm-active #layout.sidebar-collapsed .mate-collapsed-info {
 /* Match panel header heights to sidebar header (48px) */
 body.mate-dm-active .mate-knowledge-header-bar,
 body.mate-dm-active .mate-knowledge-viewer-header,
+body.mate-dm-active .mate-memory-viewer-header,
 body.mate-dm-active .scheduler-top-bar,
 body.mate-dm-active .notes-archive-header {
   height: 48px;
