@@ -4,10 +4,7 @@
 
 [![npm version](https://img.shields.io/npm/v/clay-server)](https://www.npmjs.com/package/clay-server) [![npm downloads](https://img.shields.io/npm/dw/clay-server)](https://www.npmjs.com/package/clay-server) [![GitHub stars](https://img.shields.io/github/stars/chadbyte/clay)](https://github.com/chadbyte/clay) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/chadbyte/clay/blob/main/LICENSE)
 
-Run Claude Code as a team. Add people, add AI teammates, work from anywhere.
-
-Built on Claude Code. Same SDK, same CLAUDE.md, same MCP. Nothing changes.
-AI teammates that remember your decisions, challenge your thinking, and grow with your project.
+A local server that turns Claude Code into a shared workspace with AI teammates who remember, challenge, and grow.
 
 ```bash
 npx clay-server
@@ -16,33 +13,19 @@ npx clay-server
 
 ---
 
-## Why I built Clay
-
-Claude Code is not just a coding tool. It's the best foundation for a personal AI agent I've found. I wanted to turn it into my own AI assistant, one that knows my context, remembers my decisions, and works the way I work.
-
-That started as a browser interface so I could access it from anywhere. Then I added multi-user so my team could use it too. Then I started building the AI teammates themselves.
-
-Most AI agent projects go for full autonomy. Let the AI loose, give it all the permissions, let it run. I wanted the opposite: **AI that works as part of a team.** Visible, controllable, accountable. Your teammates can see what the agent is doing, jump in when it needs help, and set the rules it operates under.
-
-That's Clay now. A workspace where AI teammates have names, persistent memory, and their own perspective. Not "act like an expert" prompting. Actual teammates that push back, remember last week, and sit in your sidebar next to your human colleagues.
-
 ## What you get
 
-### Drop-in replacement for the CLI
-
-Your CLI sessions, your CLAUDE.md rules, your MCP servers. **All of it works in Clay as-is.** Pick up a CLI session in the browser, or continue a browser session in the CLI.
-
-### Bring your whole team
-
-**One API key runs the whole workspace.** Invite teammates, set permissions per person, per project, per session. If someone gets stuck, **jump into their session** to help in real time.
-
 ### Build your team with Mates
+
+<!-- TODO: mates.gif -->
 
 Mates are AI teammates shaped through real conversation, built to hold their own perspective. Give them a name, avatar, expertise, and working style. **They don't flatter you. They push back.**
 
 @mention them in any project session, DM them directly, or bring multiple into the same conversation. Each Mate builds persistent knowledge over time, remembering past decisions, project context, and how you work together.
 
-#### Debate before you decide
+### Debate before you decide
+
+<!-- TODO: debate.gif -->
 
 Let your Mates challenge each other. Set up a debate. Pick a moderator and panelists, give them a topic, and let them go. You can raise your hand to interject.
 
@@ -51,6 +34,14 @@ Let your Mates challenge each other. Set up a debate. Pick a moderator and panel
 ### Your machine, your server
 
 Clay runs as a daemon on your machine. **No cloud relay, no intermediary service.** Schedule agents with cron, get push notifications on your phone, close your laptop. Sessions keep running.
+
+### Drop-in replacement for the CLI
+
+Your CLI sessions, your CLAUDE.md rules, your MCP servers. **All of it works in Clay as-is.** Pick up a CLI session in the browser, or continue a browser session in the CLI.
+
+### Bring your whole team
+
+**One API key runs the whole workspace.** Invite teammates, set permissions per person, per project, per session. If someone gets stuck, **jump into their session** to help in real time.
 
 ### Before vs Clay
 
@@ -66,6 +57,16 @@ Clay runs as a daemon on your machine. **No cloud relay, no intermediary service
 - **Solo dev juggling multiple roles.** You need a code reviewer, a marketing lead, a writing partner, but it's just you. Build them as Mates.
 - **Small team sharing one AI workflow.** One API key, everyone in the browser, no terminal knowledge required.
 - **Founder doing dev + product + ops.** Run agents overnight, get notified on your phone, review in the morning.
+
+## Why I built Clay
+
+Claude Code is not just a coding tool. It's the best foundation for a personal AI agent I've found. I wanted to turn it into my own AI assistant, one that knows my context, remembers my decisions, and works the way I work.
+
+That started as a browser interface so I could access it from anywhere. Then I added multi-user so my team could use it too. Then I started building the AI teammates themselves.
+
+Most AI agent projects go for full autonomy. Let the AI loose, give it all the permissions, let it run. I wanted the opposite: **AI that works as part of a team.** Visible, controllable, accountable. Your teammates can see what the agent is doing, jump in when it needs help, and set the rules it operates under.
+
+That's Clay now. A workspace where AI teammates have names, persistent memory, and their own perspective. Not "act like an expert" prompting. Actual teammates that push back, remember last week, and sit in your sidebar next to your human colleagues.
 
 ## Getting Started
 
