@@ -6,6 +6,8 @@
 
 [![npm version](https://img.shields.io/npm/v/clay-server)](https://www.npmjs.com/package/clay-server) [![npm downloads](https://img.shields.io/npm/dw/clay-server)](https://www.npmjs.com/package/clay-server) [![GitHub stars](https://img.shields.io/github/stars/chadbyte/clay)](https://github.com/chadbyte/clay) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/chadbyte/clay/blob/main/LICENSE)
 
+<p align="center"><img src="media/hero.png" alt="Clay workspace" /></p>
+
 AI teammates who remember your decisions, challenge your thinking, and grow with your codebase. Runs on your machine.
 
 ```bash
