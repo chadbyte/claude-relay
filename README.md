@@ -8,7 +8,7 @@
 
 <p align="center"><img src="media/hero.png" alt="Clay workspace" /></p>
 
-AI teammates who remember your decisions, challenge your thinking, and grow with your codebase. Runs on your machine.
+A team workspace built on Claude Code. AI teammates who remember your decisions, challenge your thinking, and grow with your codebase. Runs on your machine.
 
 ```bash
 npx clay-server
