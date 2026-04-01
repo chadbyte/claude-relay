@@ -1,3 +1,51 @@
+# [2.20.0](https://github.com/chadbyte/clay/compare/v2.19.0...v2.20.0) (2026-04-01)
+
+
+### Bug Fixes
+
+* **auth:** fix PIN digit input not displaying on force-change overlay ([5f432c0](https://github.com/chadbyte/clay/commit/5f432c07b856fa1125c7571685365273dfbae9de))
+* **cli:** show setup code on main menu instead of pre-clear output ([4119465](https://github.com/chadbyte/clay/commit/41194651dd43953ec3c6def03b94dc11a24f01cf))
+* **debate:** robust mention detection against markdown and all scripts ([3752027](https://github.com/chadbyte/clay/commit/3752027b12ec63f52aa7fe8b1fad5518768ccf69))
+* **debate:** skip memory gate for digests and persist conclude state ([d38cbaf](https://github.com/chadbyte/clay/commit/d38cbafc9eb0a4794adf3953b8cd3454710ca90a))
+* **input:** allow paste in debate modal and user settings ([b922771](https://github.com/chadbyte/clay/commit/b922771682945d9ddf848505e107ac8b93c71759)), closes [#debate-modal](https://github.com/chadbyte/clay/issues/debate-modal)
+* **mate:** align sparkle activity inside thinking bubble consistently ([d5f3115](https://github.com/chadbyte/clay/commit/d5f311589434354b5f9a0d2da108ab2a07d00e2d))
+* **mate:** mark debate memories as role-played positions ([2658de4](https://github.com/chadbyte/clay/commit/2658de4423d74e7b39a063d83c3611b957fb316c))
+* **mate:** remove script runners from safe Bash whitelist ([0e7b85f](https://github.com/chadbyte/clay/commit/0e7b85f1b1051df8ec4c16721db49ded1f8b5de5))
+* **mate:** replace three dots with sparkle activity inside thinking bubble ([654d2c4](https://github.com/chadbyte/clay/commit/654d2c49e391690363b0a0b09314539e6b29144a))
+* **mates:** add first session detection to builtin mate prompts ([285dc4d](https://github.com/chadbyte/clay/commit/285dc4d8f29c7a2c6b3d2f079ef318fb2e506e02))
+* **mates:** serve nested static files and include avatarCustom in mate DM ([c2741dd](https://github.com/chadbyte/clay/commit/c2741dd251d6c1588a1ba9976a8b0e2422e4e330))
+* **memory:** use responsePreview for DM digest instead of delta fragments ([eb8ff60](https://github.com/chadbyte/clay/commit/eb8ff601992fed45f190d96cdf5b755d2c113d65))
+* **mobile:** add scheduled task session grouping to mobile bottom sheet ([d8440ec](https://github.com/chadbyte/clay/commit/d8440ec2b4e1c0d31068f08a95179810af9f10ce)), closes [#252](https://github.com/chadbyte/clay/issues/252)
+* **os-users:** check for ACL package before enabling OS user isolation ([8fdf2ba](https://github.com/chadbyte/clay/commit/8fdf2ba29356d44446b8242ccff5fa9c8f153f63))
+* **palette:** render mate sessions with avatar and open DM on click ([1b32741](https://github.com/chadbyte/clay/commit/1b32741ce7e188932947fb7d7fab861e25dbba1c))
+* **search:** include mention and debate entries in Cmd+K search ([fd28e8a](https://github.com/chadbyte/clay/commit/fd28e8a7d3529689ce7c873905c2ba7356c62e83))
+* **status:** show server version and add update check feedback ([8c3743a](https://github.com/chadbyte/clay/commit/8c3743ae8ac63de408e4b33c9d13f30cd9d45cc5)), closes [#footer-version](https://github.com/chadbyte/clay/issues/footer-version) [#257](https://github.com/chadbyte/clay/issues/257)
+* **ui:** close memory panel when switching projects or exiting DM mode ([9fc4333](https://github.com/chadbyte/clay/commit/9fc433396e137d7199fbea03853d05b0d2543260))
+* **ui:** close terminal when file viewer opens ([248a8a7](https://github.com/chadbyte/clay/commit/248a8a71e59f0202ff6fa887b6400f358a5e84d8))
+* **ui:** persist AskUserQuestion responses in session history ([fcbc999](https://github.com/chadbyte/clay/commit/fcbc999795847e86668f0ea9b772527798f58f8f))
+* **ui:** use theme-aware background for PIN input boxes ([234ed6e](https://github.com/chadbyte/clay/commit/234ed6e4056523e8f3d0bee0045bd3486839b92c))
+* **user-settings:** PIN validation on keyup and fix save field name ([4679320](https://github.com/chadbyte/clay/commit/46793200c9cc9a5075e81b86e0c92012d309d8e8))
+* **user-settings:** swap sidebar and content background colors ([cc9f282](https://github.com/chadbyte/clay/commit/cc9f28248e7ee9a4ff1f6c1ec6d5b47472d85c31))
+
+
+### Features
+
+* **dm:** add memory extraction for mate DM conversations ([2304bad](https://github.com/chadbyte/clay/commit/2304bade15acfd1726db0c5c47eaeb526c96c787))
+* **mate:** add Memory panel with read and delete for session digests ([560796a](https://github.com/chadbyte/clay/commit/560796acba8651687c28b6944406908498bd3d2c))
+* **mate:** auto-approve safe Bash commands in mate sessions ([6c3e193](https://github.com/chadbyte/clay/commit/6c3e19300d6ae8f61bcabbbc858fd8eefe9a66eb))
+* **mates:** add built-in mates Ally, Scout, Sage ([8d08c94](https://github.com/chadbyte/clay/commit/8d08c947bf54282189610c1fd03cd7879b1e5143))
+* **mates:** add favorites system and builtin mate re-add flow ([c01e42a](https://github.com/chadbyte/clay/commit/c01e42a8c0abf3dc0931d96c83c0286655d0e638))
+* **memory:** add memory summary system with Haiku gate and tab UI ([e418507](https://github.com/chadbyte/clay/commit/e4185074f36e8707920f9620c7839fc03e34e3f2))
+* **mention:** add stop button to abort active mentions ([f524cf8](https://github.com/chadbyte/clay/commit/f524cf86bb7d7e4ad11153edbf246fd2100b2e7d))
+* **mention:** support images, files, and pastes in [@mentions](https://github.com/mentions) ([cfd1caa](https://github.com/chadbyte/clay/commit/cfd1caa8240f9bebdd10931e1236d3063822d9d1))
+* **notes:** add mate-specific sticky notes with read-only access for Claude ([5c23aee](https://github.com/chadbyte/clay/commit/5c23aeeb6c1910589c54869a57541ed313cab782))
+* **permissions:** allow mode switching when --dangerously-skip-permissions is active ([f11ebd4](https://github.com/chadbyte/clay/commit/f11ebd4e96b0be3bef9804f576ea589c30288c8b)), closes [#256](https://github.com/chadbyte/clay/issues/256)
+* **schedule:** add message scheduling with timer picker ([195d29d](https://github.com/chadbyte/clay/commit/195d29dcabba0c470aab10776f89edfb82257ae9))
+* **upload:** include saved image file paths in SDK message context ([32dc3c3](https://github.com/chadbyte/clay/commit/32dc3c3b420400f71718607823100161b53d9cde))
+* **usage:** add rate limit reset display and auto-continue setting ([8823ec3](https://github.com/chadbyte/clay/commit/8823ec38c29798ec776a848ff3551a24714029cf))
+* **usage:** live countdown for rate limit reset in top bar ([6ca02c0](https://github.com/chadbyte/clay/commit/6ca02c028c52d58f9db940956dce219587737fd4))
+* **usage:** show rate limit reset time and usage check link in top bar ([6609275](https://github.com/chadbyte/clay/commit/660927524bdee808603d3480090072553af85e6c)), closes [anthropics/claude-code#41185](https://github.com/anthropics/claude-code/issues/41185)
+
 # [2.20.0-beta.4](https://github.com/chadbyte/clay/compare/v2.20.0-beta.3...v2.20.0-beta.4) (2026-04-01)
 
 
