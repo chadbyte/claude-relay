@@ -2534,6 +2534,10 @@ function showSettingsMenu(config, ip) {
                 log(sym.bar);
                 log(sym.bar + "  " + a.dim + "Then try enabling OS user isolation again." + a.reset);
                 log(sym.bar);
+              } else if (res.error) {
+                log(sym.bar);
+                log(sym.bar + "  " + a.red + sym.warn + " Failed to enable OS users: " + res.error + a.reset);
+                log(sym.bar);
               } else if (res.ok) {
                 config.osUsers = true;
                 log(sym.bar);
@@ -2558,9 +2562,18 @@ function showSettingsMenu(config, ip) {
                     }
                   }
                 }
-                log(sym.bar + "  " + a.dim + "Restart the daemon for changes to take full effect." + a.reset);
+                log(sym.bar);
+              } else {
+                log(sym.bar);
+                log(sym.bar + "  " + a.red + sym.warn + " Unexpected response from daemon." + a.reset);
+                log(sym.bar + "  " + a.dim + JSON.stringify(res) + a.reset);
                 log(sym.bar);
               }
+              showSettingsMenu(config, ip);
+            }).catch(function (err) {
+              log(sym.bar);
+              log(sym.bar + "  " + a.red + sym.warn + " IPC error: " + (err.message || err) + a.reset);
+              log(sym.bar);
               showSettingsMenu(config, ip);
             });
           } else {
