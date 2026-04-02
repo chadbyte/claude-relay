@@ -2594,6 +2594,10 @@ function showSettingsMenu(config, ip) {
                 log(sym.bar + "  " + a.dim + "Setting ACLs for " + cfgProjects.length + " project(s)..." + a.reset);
                 for (var pi = 0; pi < cfgProjects.length; pi++) {
                   var proj = cfgProjects[pi];
+                  if (osUsersLib.isHomeDirectory(proj.path)) {
+                    log(sym.bar + "    " + a.dim + "~ " + (proj.slug || proj.path) + " (home dir, skipped)" + a.reset);
+                    continue;
+                  }
                   try {
                     if (proj.visibility === "public") {
                       osUsersLib.grantAllUsersAccess(proj.path, usersLib);
