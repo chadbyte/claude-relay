@@ -1,3 +1,10 @@
+## [2.20.1-beta.17](https://github.com/chadbyte/clay/compare/v2.20.1-beta.16...v2.20.1-beta.17) (2026-04-02)
+
+
+### Bug Fixes
+
+* **os-users:** add keepalive interval to prevent premature worker exit ([e38d492](https://github.com/chadbyte/clay/commit/e38d492c6915cef65029466e96461f60869e4613))
+
 ## [2.20.1-beta.16](https://github.com/chadbyte/clay/compare/v2.20.1-beta.15...v2.20.1-beta.16) (2026-04-02)
 
 
