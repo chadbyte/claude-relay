@@ -1,3 +1,10 @@
+## [2.20.1-beta.1](https://github.com/chadbyte/clay/compare/v2.20.0...v2.20.1-beta.1) (2026-04-02)
+
+
+### Bug Fixes
+
+* **cli:** resolve multi-user OS isolation setup workflow bugs ([52e52da](https://github.com/chadbyte/clay/commit/52e52da33fe75841c0a5884f60261e47b7767d49))
+
 # [2.20.0](https://github.com/chadbyte/clay/compare/v2.19.0...v2.20.0) (2026-04-01)
 
 
