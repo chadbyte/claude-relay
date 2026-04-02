@@ -1,3 +1,40 @@
+# [2.21.0](https://github.com/chadbyte/clay/compare/v2.20.0...v2.21.0) (2026-04-02)
+
+
+### Bug Fixes
+
+* add missing path require in os-users and handle EIO in shutdown ([40aa14e](https://github.com/chadbyte/clay/commit/40aa14e47ba6ce69494cb509d5505106052ea4d4))
+* **cli:** add error handling for OS users toggle IPC ([92ba05d](https://github.com/chadbyte/clay/commit/92ba05ddf1a7a63347e5c5f9c11ecc5866b3cb2b))
+* **cli:** auto-regenerate setup code and add daemon startup diagnostics ([b0e8987](https://github.com/chadbyte/clay/commit/b0e89873f707ff0a2f7d65fd07fe08e051a33d04))
+* **cli:** resolve multi-user OS isolation setup workflow bugs ([52e52da](https://github.com/chadbyte/clay/commit/52e52da33fe75841c0a5884f60261e47b7767d49))
+* **cli:** run OS user provisioning from CLI with live progress ([6773da9](https://github.com/chadbyte/clay/commit/6773da99d3d6f8a9d1f0428fb05dac568d34f555))
+* **cli:** show config path in main menu and always expose setup code ([f1e6f99](https://github.com/chadbyte/clay/commit/f1e6f99fa3e0d3cbf10798ae0f91e83a99f5d4c5))
+* **config:** add fallbacks for getRealHome under sudo on GCE ([483e35b](https://github.com/chadbyte/clay/commit/483e35b863e8be80d95c39457e6cf82506981ad7))
+* **config:** derive CLAY_HOME from CLAY_CONFIG in daemon mode ([40906b5](https://github.com/chadbyte/clay/commit/40906b5b46995aa04482ba726f51dc1ef1945ff4))
+* **daemon:** add version and IPC debug logging at startup ([e3d2e79](https://github.com/chadbyte/clay/commit/e3d2e79d74837397341382e0c25c98bd57740c50))
+* **daemon:** defer startup ACL provisioning to unblock IPC ([39743bd](https://github.com/chadbyte/clay/commit/39743bdda435785de515886b3f7b55f156d4dee0))
+* **mates:** check all segments of compound bash commands for safe whitelist ([3a278b4](https://github.com/chadbyte/clay/commit/3a278b4c7043b1fd88a68addee80fd9b339d1a66))
+* **os-users:** add early boot diagnostics to SDK worker ([a2b0724](https://github.com/chadbyte/clay/commit/a2b07245b0af9e9d64bf16509ca319cc1605983a))
+* **os-users:** add exit reason diagnostics to SDK worker ([a631f3a](https://github.com/chadbyte/clay/commit/a631f3a02da9c12fbec30ad92eba11cd632ee60e))
+* **os-users:** add keepalive interval to prevent premature worker exit ([e38d492](https://github.com/chadbyte/clay/commit/e38d492c6915cef65029466e96461f60869e4613))
+* **os-users:** add spawn diagnostics and handle premature worker exit ([8c402f6](https://github.com/chadbyte/clay/commit/8c402f6e552133cbfc950e153402b44d0e3c1240))
+* **os-users:** chmod entire node_modules for hoisted SDK deps ([9ce3c7e](https://github.com/chadbyte/clay/commit/9ce3c7e15622649ed5b9825ef2ce1047ca20e88b))
+* **os-users:** grant traverse permission on ancestor dirs for SDK worker ([c02de47](https://github.com/chadbyte/clay/commit/c02de470d190ea481fbc7d314f0c3c9a7cce8fe2))
+* **os-users:** inherit full env for SDK worker spawn ([2f079b9](https://github.com/chadbyte/clay/commit/2f079b974dccc69cd6a5757753bfd1e622166fa0))
+* **os-users:** pre-copy CLI sessions before worker spawn and fix race conditions ([d6cd8c2](https://github.com/chadbyte/clay/commit/d6cd8c2e7080a9d51887b353b4cf0c2566bab49e))
+* **os-users:** skip recursive ACL on home directories ([e95ec4c](https://github.com/chadbyte/clay/commit/e95ec4c9b9d8f717d3ca7ac6d66e1bf554e34bff))
+* **sessions:** suppress noisy migration failed logs on startup ([ecc05d0](https://github.com/chadbyte/clay/commit/ecc05d0319c2e1233d180f487323064e771481cb))
+
+
+### Features
+
+* **os-users:** auto-migrate CLI sessions and fix devMode OS users support ([cbbca7c](https://github.com/chadbyte/clay/commit/cbbca7ccf3169682c1be9dbf2552d5155e14c95e))
+
+
+### Performance Improvements
+
+* **os-users:** skip full ACL re-application on every startup ([e0a0f6a](https://github.com/chadbyte/clay/commit/e0a0f6a16c5ff8989284e0de4e5ba0e6d76b6a72))
+
 # [2.21.0-beta.4](https://github.com/chadbyte/clay/compare/v2.21.0-beta.3...v2.21.0-beta.4) (2026-04-02)
 
 
