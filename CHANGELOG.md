@@ -1,3 +1,10 @@
+## [2.20.1-beta.6](https://github.com/chadbyte/clay/compare/v2.20.1-beta.5...v2.20.1-beta.6) (2026-04-02)
+
+
+### Bug Fixes
+
+* **daemon:** add version and IPC debug logging at startup ([e3d2e79](https://github.com/chadbyte/clay/commit/e3d2e79d74837397341382e0c25c98bd57740c50))
+
 ## [2.20.1-beta.5](https://github.com/chadbyte/clay/compare/v2.20.1-beta.4...v2.20.1-beta.5) (2026-04-02)
 
 
