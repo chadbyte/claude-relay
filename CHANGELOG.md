@@ -1,3 +1,10 @@
+## [2.20.1-beta.12](https://github.com/chadbyte/clay/compare/v2.20.1-beta.11...v2.20.1-beta.12) (2026-04-02)
+
+
+### Bug Fixes
+
+* **os-users:** chmod entire node_modules for hoisted SDK deps ([9ce3c7e](https://github.com/chadbyte/clay/commit/9ce3c7e15622649ed5b9825ef2ce1047ca20e88b))
+
 ## [2.20.1-beta.11](https://github.com/chadbyte/clay/compare/v2.20.1-beta.10...v2.20.1-beta.11) (2026-04-02)
 
 
