@@ -1,3 +1,10 @@
+## [2.20.1-beta.8](https://github.com/chadbyte/clay/compare/v2.20.1-beta.7...v2.20.1-beta.8) (2026-04-02)
+
+
+### Bug Fixes
+
+* **config:** derive CLAY_HOME from CLAY_CONFIG in daemon mode ([40906b5](https://github.com/chadbyte/clay/commit/40906b5b46995aa04482ba726f51dc1ef1945ff4))
+
 ## [2.20.1-beta.7](https://github.com/chadbyte/clay/compare/v2.20.1-beta.6...v2.20.1-beta.7) (2026-04-02)
 
 
