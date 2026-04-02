@@ -1,3 +1,10 @@
+# [2.21.0-beta.1](https://github.com/chadbyte/clay/compare/v2.20.1-beta.17...v2.21.0-beta.1) (2026-04-02)
+
+
+### Features
+
+* **os-users:** auto-migrate CLI sessions and fix devMode OS users support ([cbbca7c](https://github.com/chadbyte/clay/commit/cbbca7ccf3169682c1be9dbf2552d5155e14c95e))
+
 ## [2.20.1-beta.17](https://github.com/chadbyte/clay/compare/v2.20.1-beta.16...v2.20.1-beta.17) (2026-04-02)
 
 
