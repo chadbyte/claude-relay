@@ -1,3 +1,10 @@
+# [2.23.0-beta.5](https://github.com/chadbyte/clay/compare/v2.23.0-beta.4...v2.23.0-beta.5) (2026-04-03)
+
+
+### Bug Fixes
+
+* **mates:** stabilize mate DM UI during project switching ([dffead0](https://github.com/chadbyte/clay/commit/dffead01b210d737aa5382d7848526653a0d65c2))
+
 # [2.23.0-beta.4](https://github.com/chadbyte/clay/compare/v2.23.0-beta.3...v2.23.0-beta.4) (2026-04-03)
 
 
