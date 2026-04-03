@@ -14,6 +14,7 @@
 
 .title-bar-content.mate-dm-active {
   border-bottom: none;
+  background: var(--mate-color);
 }
 
 .title-bar-content.mate-dm-active #header-left,
