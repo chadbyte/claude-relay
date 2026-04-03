@@ -1,3 +1,10 @@
+## [2.22.2-beta.1](https://github.com/chadbyte/clay/compare/v2.22.1...v2.22.2-beta.1) (2026-04-03)
+
+
+### Bug Fixes
+
+* close server port before spawning new daemon on restart ([c058c86](https://github.com/chadbyte/clay/commit/c058c86ce51fe37ef4a466def9a5b8267024ebff))
+
 ## [2.22.1](https://github.com/chadbyte/clay/compare/v2.22.0...v2.22.1) (2026-04-03)
 
 
