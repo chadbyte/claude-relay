@@ -1,3 +1,10 @@
+## [2.21.1-beta.1](https://github.com/chadbyte/clay/compare/v2.21.0...v2.21.1-beta.1) (2026-04-03)
+
+
+### Bug Fixes
+
+* **input:** enable send button when attachments are added during processing ([8b0e09f](https://github.com/chadbyte/clay/commit/8b0e09f2e8429a53e97292711bc5b8169bde35dc))
+
 # [2.21.0](https://github.com/chadbyte/clay/compare/v2.20.0...v2.21.0) (2026-04-02)
 
 
