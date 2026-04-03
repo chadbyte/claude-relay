@@ -1,3 +1,10 @@
+# [2.22.0-beta.2](https://github.com/chadbyte/clay/compare/v2.22.0-beta.1...v2.22.0-beta.2) (2026-04-03)
+
+
+### Features
+
+* **mates:** improve memory digestion with richer context and lower gate threshold ([c4dad96](https://github.com/chadbyte/clay/commit/c4dad96a4c7b3c0be807286a1ef9889877d9c060))
+
 # [2.22.0-beta.1](https://github.com/chadbyte/clay/compare/v2.21.1-beta.1...v2.22.0-beta.1) (2026-04-03)
 
 
