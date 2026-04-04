@@ -1,3 +1,11 @@
+## [2.23.1-beta.2](https://github.com/chadbyte/clay/compare/v2.23.1-beta.1...v2.23.1-beta.2) (2026-04-04)
+
+
+### Bug Fixes
+
+* **debate:** only show preparing indicator for quick debate, not standard setup ([41cc0fd](https://github.com/chadbyte/clay/commit/41cc0fdfec41b6eeeb1964f03f39460070554cb7))
+* **os-user:** fix session loss on stop by fixing dir ownership and reusing workers ([19057ff](https://github.com/chadbyte/clay/commit/19057ff6051ff826a44b716fe6b372c4d3491fbd))
+
 ## [2.23.1-beta.1](https://github.com/chadbyte/clay/compare/v2.23.0...v2.23.1-beta.1) (2026-04-04)
 
 
