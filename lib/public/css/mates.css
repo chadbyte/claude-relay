@@ -787,6 +787,33 @@ body.mate-dm-active #layout.sidebar-collapsed .mate-collapsed-info {
   color: var(--text-secondary);
 }
 
+/* Primary mate (System Agent) badge */
+.mate-sidebar-primary-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  margin-bottom: 4px;
+  background: linear-gradient(135deg, rgba(0, 184, 148, 0.08), rgba(9, 132, 227, 0.08));
+  border: 1px solid rgba(0, 184, 148, 0.25);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #00b894;
+  letter-spacing: 0.02em;
+}
+.mate-sidebar-primary-badge svg {
+  flex-shrink: 0;
+  color: #00b894;
+}
+.mate-sidebar-primary-desc {
+  display: block;
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--text-muted);
+  margin-left: auto;
+}
+
 .mate-sidebar-avatar {
   width: 28px;
   height: 28px;
