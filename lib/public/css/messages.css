@@ -1800,6 +1800,11 @@ body.wide-view .msg-user .bubble {
   word-wrap: break-word;
 }
 body.wide-view .msg-user .msg-actions {
+  align-self: flex-start;
+  margin-left: auto;
+  padding-top: 0;
+}
+body.wide-view .msg-user .msg-actions .msg-action-time {
   display: none;
 }
 
@@ -1846,7 +1851,8 @@ body.wide-view .turn-meta {
     white-space: revert;
     word-wrap: revert;
   }
-  body.wide-view .msg-user .msg-actions { display: revert; }
+  body.wide-view .msg-user .msg-actions { align-self: revert; margin-left: revert; padding-top: revert; }
+  body.wide-view .msg-user .msg-actions .msg-action-time { display: revert; }
   body.wide-view .msg-assistant .md-content {
     background: revert;
     border-radius: revert;

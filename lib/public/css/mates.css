@@ -2249,6 +2249,15 @@ body.wide-view .dm-bubble-avatar {
 .dm-bubble-content {
   width: 100%;
 }
+.msg-user .dm-bubble-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+body.mate-dm-active .msg-user .dm-bubble-content,
+body.wide-view .msg-user .dm-bubble-content {
+  align-items: flex-start;
+}
 .dm-bubble-header {
   display: none;
   align-items: baseline;
