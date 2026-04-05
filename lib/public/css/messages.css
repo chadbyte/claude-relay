@@ -1817,3 +1817,43 @@ body.wide-view .tool-group {
 body.wide-view .turn-meta {
   max-width: 100%;
 }
+
+/* Mobile: force bubble layout regardless of user setting */
+@media (max-width: 768px) {
+  body.wide-view { --content-width: var(--content-width, 720px); }
+  body.wide-view .msg-user,
+  body.wide-view .msg-assistant {
+    display: revert;
+    flex-direction: revert;
+    align-items: revert;
+    gap: revert;
+    max-width: revert;
+    padding: revert;
+    margin: revert;
+    border-radius: revert;
+  }
+  body.wide-view .msg-user:hover,
+  body.wide-view .msg-assistant:hover { background: revert; }
+  body.wide-view .msg-user { justify-content: revert; }
+  body.wide-view .msg-user .dm-bubble-avatar-me { order: revert; }
+  body.wide-view .msg-user .bubble {
+    background: revert;
+    border-radius: revert;
+    padding: revert;
+    max-width: revert;
+    font-size: revert;
+    line-height: revert;
+    white-space: revert;
+    word-wrap: revert;
+  }
+  body.wide-view .msg-user .msg-actions { display: revert; }
+  body.wide-view .msg-assistant .md-content {
+    background: revert;
+    border-radius: revert;
+    padding: revert;
+  }
+  body.wide-view .thinking-item,
+  body.wide-view .tool-item,
+  body.wide-view .tool-group { max-width: revert; }
+  body.wide-view .turn-meta { max-width: revert; }
+}
