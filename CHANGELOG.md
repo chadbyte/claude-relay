@@ -1,3 +1,10 @@
+## [2.24.2](https://github.com/chadbyte/clay/compare/v2.24.1...v2.24.2) (2026-04-06)
+
+
+### Bug Fixes
+
+* close SDK query instance to reap orphaned claude child processes ([#269](https://github.com/chadbyte/clay/issues/269)) ([56abc1b](https://github.com/chadbyte/clay/commit/56abc1bfa6afb58c80edf30424b8fae976c96ee1))
+
 ## [2.24.2-beta.1](https://github.com/chadbyte/clay/compare/v2.24.1...v2.24.2-beta.1) (2026-04-06)
 
 
