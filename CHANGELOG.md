@@ -1,3 +1,12 @@
+## [2.24.3-beta.2](https://github.com/chadbyte/clay/compare/v2.24.3-beta.1...v2.24.3-beta.2) (2026-04-07)
+
+
+### Bug Fixes
+
+* **config:** initialize currentModel from savedDefaultModel on connect ([25dce40](https://github.com/chadbyte/clay/commit/25dce4098757685ade3ad7278a7dcae1c58bd027)), closes [#271](https://github.com/chadbyte/clay/issues/271)
+* **ui:** clear icon strip skeleton loaders in single-user mode ([59ec81d](https://github.com/chadbyte/clay/commit/59ec81d7fd3ba74005465e737a797bccf474c4e7)), closes [#272](https://github.com/chadbyte/clay/issues/272)
+* **ui:** move unread badge to rightmost position in session list ([0e96888](https://github.com/chadbyte/clay/commit/0e9688891b5b312dfd00f257f0a412a3b94f3ab2))
+
 ## [2.24.3-beta.1](https://github.com/chadbyte/clay/compare/v2.24.2...v2.24.3-beta.1) (2026-04-07)
 
 
