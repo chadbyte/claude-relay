@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <script>
 (function(){
   var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
-  if(!isIOS){var l=document.createElement("link");l.rel="manifest";l.href="manifest.json";document.head.appendChild(l)}
+  if(!isIOS){var l=document.createElement("link");l.rel="manifest";l.href="/manifest.json";document.head.appendChild(l)}
 })();
 </script>
 <meta name="theme-color" content="#282a36">
