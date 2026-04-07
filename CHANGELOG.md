@@ -1,3 +1,10 @@
+# [2.26.0-beta.1](https://github.com/chadbyte/clay/compare/v2.25.1-beta.1...v2.26.0-beta.1) (2026-04-07)
+
+
+### Features
+
+* **mobile:** add all mate tools to mobile tools sheet ([bab0295](https://github.com/chadbyte/clay/commit/bab0295f909e312aeefa435da3a95ad3f5f50b48))
+
 ## [2.25.1-beta.1](https://github.com/chadbyte/clay/compare/v2.25.0...v2.25.1-beta.1) (2026-04-07)
 
 
