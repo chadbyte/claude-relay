@@ -1,3 +1,10 @@
+## [2.24.3-beta.3](https://github.com/chadbyte/clay/compare/v2.24.3-beta.2...v2.24.3-beta.3) (2026-04-07)
+
+
+### Bug Fixes
+
+* remove skeleton placeholders from icon-strip-users at startup ([1773bd5](https://github.com/chadbyte/clay/commit/1773bd591e99114992de44038c3a9d5072c4d02a)), closes [#272](https://github.com/chadbyte/clay/issues/272)
+
 ## [2.24.3-beta.2](https://github.com/chadbyte/clay/compare/v2.24.3-beta.1...v2.24.3-beta.2) (2026-04-07)
 
 
