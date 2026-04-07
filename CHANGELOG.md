@@ -1,3 +1,10 @@
+## [2.24.3-beta.1](https://github.com/chadbyte/clay/compare/v2.24.2...v2.24.3-beta.1) (2026-04-07)
+
+
+### Bug Fixes
+
+* **hooks:** surface hook failure errors in UI instead of silent blank ([c5ea03c](https://github.com/chadbyte/clay/commit/c5ea03cd8b37796a8700ea865757d994446b3b52)), closes [#270](https://github.com/chadbyte/clay/issues/270)
+
 ## [2.24.2](https://github.com/chadbyte/clay/compare/v2.24.1...v2.24.2) (2026-04-06)
 
 
