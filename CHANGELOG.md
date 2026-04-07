@@ -1,3 +1,10 @@
+## [2.24.3-beta.5](https://github.com/chadbyte/clay/compare/v2.24.3-beta.4...v2.24.3-beta.5) (2026-04-07)
+
+
+### Bug Fixes
+
+* use /bin/sh as POSIX fallback shell instead of /bin/zsh ([95a25a0](https://github.com/chadbyte/clay/commit/95a25a04c13f097070cf98f81e7e46fd0c6772d5))
+
 ## [2.24.3-beta.4](https://github.com/chadbyte/clay/compare/v2.24.3-beta.3...v2.24.3-beta.4) (2026-04-07)
 
 
