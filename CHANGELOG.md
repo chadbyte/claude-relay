@@ -1,3 +1,10 @@
+## [2.24.4](https://github.com/chadbyte/clay/compare/v2.24.3...v2.24.4) (2026-04-07)
+
+
+### Bug Fixes
+
+* **home-hub:** exclude mate projects from projects list ([b47b256](https://github.com/chadbyte/clay/commit/b47b25667e2bb1c5f24360c664b09e8512d29ce2))
+
 ## [2.24.4-beta.1](https://github.com/chadbyte/clay/compare/v2.24.3...v2.24.4-beta.1) (2026-04-07)
 
 
