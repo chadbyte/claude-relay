@@ -1,3 +1,11 @@
+# [2.26.0-beta.8](https://github.com/chadbyte/clay/compare/v2.26.0-beta.7...v2.26.0-beta.8) (2026-04-08)
+
+
+### Bug Fixes
+
+* **sidebar:** render mates in user strip when no other human users exist ([#277](https://github.com/chadbyte/clay/issues/277)) ([b7a8980](https://github.com/chadbyte/clay/commit/b7a8980d4f67ac8e7478bb148bf75e57cdc71f90))
+* **upload:** preserve Unicode/CJK characters in uploaded filenames ([#286](https://github.com/chadbyte/clay/issues/286)) ([b316b48](https://github.com/chadbyte/clay/commit/b316b48453725ab92756cca0fb9e5757f1d333cf))
+
 # [2.26.0-beta.7](https://github.com/chadbyte/clay/compare/v2.26.0-beta.6...v2.26.0-beta.7) (2026-04-08)
 
 
