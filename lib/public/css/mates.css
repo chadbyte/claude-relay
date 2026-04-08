@@ -2476,8 +2476,10 @@ body.mate-dm-active .mate-tool-group .tool-name {
   color: var(--text-muted);
 }
 
-/* --- Mate Permission: flex layout matching msg-assistant --- */
-body.mate-dm-active .mate-permission {
+/* --- Conversational Permission: flex layout matching msg-assistant --- */
+/* Applies in both Mate DM and channel project chat */
+body.mate-dm-active .mate-permission,
+body.wide-view .mate-permission {
   display: flex;
   flex-direction: row;
   align-items: flex-start;
@@ -2490,10 +2492,12 @@ body.mate-dm-active .mate-permission {
   margin: 0;
   max-width: 100%;
 }
-body.mate-dm-active .mate-permission:hover {
+body.mate-dm-active .mate-permission:hover,
+body.wide-view .mate-permission:hover {
   background: var(--bg-alt);
 }
-body.mate-dm-active .mate-permission > .dm-bubble-avatar {
+body.mate-dm-active .mate-permission > .dm-bubble-avatar,
+body.wide-view .mate-permission > .dm-bubble-avatar {
   display: block;
   width: 36px;
   height: 36px;
@@ -2501,7 +2505,8 @@ body.mate-dm-active .mate-permission > .dm-bubble-avatar {
   flex-shrink: 0;
   margin-top: 2px;
 }
-body.mate-dm-active .mate-permission > .dm-bubble-content {
+body.mate-dm-active .mate-permission > .dm-bubble-content,
+body.wide-view .mate-permission > .dm-bubble-content {
   flex: 1;
   min-width: 0;
 }
@@ -2569,14 +2574,14 @@ body.mate-dm-active .mate-permission > .dm-bubble-content {
 .mate-permission-deny {
   color: var(--text-muted);
 }
-/* Resolved state */
-body.mate-dm-active .mate-permission.resolved .mate-permission-actions {
+/* Resolved state (works in both Mate DM and channel project chat) */
+.mate-permission.resolved .mate-permission-actions {
   pointer-events: none;
 }
-body.mate-dm-active .mate-permission.resolved .mate-permission-reply {
+.mate-permission.resolved .mate-permission-reply {
   display: none;
 }
-body.mate-dm-active .mate-permission.resolved .permission-decision-label {
+.mate-permission.resolved .permission-decision-label {
   font-size: 12px;
   color: var(--text-dimmer);
 }

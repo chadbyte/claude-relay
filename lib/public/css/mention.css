@@ -107,8 +107,8 @@
   padding: 3px 6px 3px 4px;
   margin: 0 0 4px 0;
   border-radius: 6px;
-  background: color-mix(in srgb, var(--chip-color, #6c5ce7) 12%, transparent);
-  border: 1px solid color-mix(in srgb, var(--chip-color, #6c5ce7) 25%, transparent);
+  background: color-mix(in srgb, var(--chip-color, #6c5ce7) 15%, var(--bg-alt));
+  border: 1px solid color-mix(in srgb, var(--chip-color, #6c5ce7) 30%, var(--border));
   cursor: default;
   flex-shrink: 0;
   width: fit-content;
@@ -131,19 +131,22 @@
   font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
+  line-height: 18px;
 }
 
 .input-mention-chip-remove {
   background: none;
   border: none;
-  padding: 0 2px;
+  padding: 0;
   margin: 0;
   cursor: pointer;
   font-size: 15px;
-  line-height: 1;
+  line-height: 18px;
   color: var(--text-dimmer);
   opacity: 0.6;
   transition: opacity 0.1s;
+  display: flex;
+  align-items: center;
 }
 
 .input-mention-chip-remove:hover {
