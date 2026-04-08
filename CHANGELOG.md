@@ -1,3 +1,20 @@
+# [2.26.0-beta.3](https://github.com/chadbyte/clay/compare/v2.26.0-beta.2...v2.26.0-beta.3) (2026-04-08)
+
+
+### Bug Fixes
+
+* **mate:** sync avatar and profile in chat on mate_updated ([3335e72](https://github.com/chadbyte/clay/commit/3335e7210308e7006e65d10499b3da952ae67173))
+* **rewind:** harden rewind against race conditions ([502e904](https://github.com/chadbyte/clay/commit/502e904ae709babfce9a582c73bd4b5c74253df8))
+* **sessions:** use atomic writes for session files ([30ea57c](https://github.com/chadbyte/clay/commit/30ea57c394c015bfd50b5ffa05e494f796238090))
+* **usage:** handle SDK restart causing negative cost delta ([15e5553](https://github.com/chadbyte/clay/commit/15e5553692998ff118d27b2d122abd9f5301ca15))
+* **usage:** stop overcounting session cost by 15x ([1b733f5](https://github.com/chadbyte/clay/commit/1b733f546ba172ca1ab1cec27b8429969cc87718))
+* **usage:** stop resetting cumulative cost tracker between turns ([2c5ea11](https://github.com/chadbyte/clay/commit/2c5ea117e7cbdd685da3ded3b599eeb16e322261))
+
+
+### Features
+
+* **usage:** show per-turn cost delta alongside cumulative total ([e638891](https://github.com/chadbyte/clay/commit/e6388912096cf446322c143e601c0cdafa7fb4ba))
+
 # [2.26.0-beta.2](https://github.com/chadbyte/clay/compare/v2.26.0-beta.1...v2.26.0-beta.2) (2026-04-07)
 
 
