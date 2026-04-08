@@ -272,6 +272,165 @@
 }
 
 /* ==========================================================================
+   Context Sources — chips above input
+   ========================================================================== */
+
+#context-sources-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 0 8px 4px;
+  position: relative;
+}
+
+#context-sources-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px dashed var(--border);
+  background: transparent;
+  color: var(--text-dimmer);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+#context-sources-add .lucide { width: 12px; height: 12px; }
+
+#context-sources-add:hover {
+  color: var(--text-secondary);
+  border-color: var(--text-dimmer);
+  background: var(--sidebar-hover);
+}
+
+#context-sources-chips {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.context-chip {
+  display: inline-flex;
+  align-items: stretch;
+  padding: 0;
+  border-radius: 8px;
+  background: var(--bg-alt);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  border: 1px solid var(--border);
+  transition: border-color 0.15s;
+}
+
+.context-chip-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px 6px 12px;
+}
+
+.context-chip-label .lucide { width: 14px; height: 14px; flex-shrink: 0; color: var(--accent); }
+
+.context-chip-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  border: none;
+  border-left: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0;
+  border-radius: 0 8px 8px 0;
+  transition: color 0.15s, background 0.15s;
+}
+
+.context-chip-remove:hover {
+  color: var(--text);
+  background: rgba(var(--overlay-rgb), 0.08);
+}
+
+.context-chip-remove .lucide { width: 14px; height: 14px; }
+
+#context-sources-picker.hidden { display: none; }
+
+#context-sources-picker {
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 0;
+  min-width: 200px;
+  background: var(--sidebar-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 4px 0;
+  box-shadow: 0 4px 12px rgba(var(--shadow-rgb), 0.15);
+  z-index: 200;
+  animation: ctxPickerAppear 0.12s ease-out;
+}
+
+@keyframes ctxPickerAppear {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.context-picker-section-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-dimmer);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 8px 12px 4px;
+}
+
+.context-picker-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.context-picker-item:hover {
+  background: rgba(var(--overlay-rgb), 0.05);
+}
+
+.context-picker-item .lucide { width: 14px; height: 14px; flex-shrink: 0; }
+
+.context-picker-check {
+  margin-left: auto;
+  width: 14px;
+  height: 14px;
+  color: var(--accent);
+  display: none;
+}
+
+.context-picker-item.active .context-picker-check {
+  display: block;
+}
+
+.context-picker-empty {
+  padding: 12px;
+  color: var(--text-dimmer);
+  font-size: 13px;
+  text-align: center;
+}
+
+/* ==========================================================================
    Input Area — Claude-style unified container
    ========================================================================== */
 
@@ -521,96 +680,51 @@
 #suggestion-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  padding: 8px 6px;
+  gap: 4px;
+  padding: 4px 6px;
   position: absolute;
   bottom: 100%;
   left: 0;
   right: 0;
   z-index: 5;
-  background: transparent;
 }
 
 #suggestion-chips.hidden { display: none; }
 
 .suggestion-chip {
   display: inline-flex;
-  align-items: stretch;
-  padding: 0;
-  border-radius: 16px;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px 4px 8px;
+  border-radius: 6px;
   border: 1px solid var(--border);
-  background: var(--bg-alt);
+  background: rgba(var(--overlay-rgb), 0.08);
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: 12px;
   font-family: inherit;
   cursor: pointer;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
   text-align: left;
   max-width: 100%;
-  line-height: 1.3;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  line-height: 1.2;
 }
 
 .suggestion-chip:hover {
   border-color: var(--accent);
-}
-
-.suggestion-chip .lucide {
-  width: 14px;
-  height: 14px;
-  flex-shrink: 0;
+  background: var(--accent-bg);
   color: var(--accent);
 }
 
-.suggestion-chip-send {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  flex: 1;
-  min-width: 0;
-  padding: 8px 10px 8px 14px;
-  border-radius: 16px 0 0 16px;
-  transition: background 0.15s, color 0.15s;
-}
-
-.suggestion-chip-send:hover {
-  background: var(--accent-bg);
+.suggestion-chip .lucide {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
   color: var(--accent);
 }
 
 .suggestion-chip-text {
   flex: 1;
   min-width: 0;
-}
-
-.suggestion-chip-edit {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 12px;
-  border-left: 1px solid var(--border);
-  border-radius: 0 16px 16px 0;
-  background: rgba(128, 128, 128, 0.07);
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
-}
-
-.suggestion-chip:hover .suggestion-chip-edit {
-  border-left-color: var(--accent);
-}
-
-.suggestion-chip-edit:hover {
-  background: var(--accent-bg);
-}
-
-.suggestion-chip-edit .lucide {
-  width: 14px;
-  height: 14px;
-  color: var(--text-secondary);
-}
-
-.suggestion-chip-edit:hover .lucide {
-  color: var(--accent);
 }
 
 /* ==========================================================================

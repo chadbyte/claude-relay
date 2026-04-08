@@ -474,6 +474,13 @@
 
 #config-chip .lucide { width: 10px; height: 10px; }
 #config-chip .config-chip-icon { display: none; }
+
+@media (max-width: 1000px) {
+  #config-chip .config-chip-icon { display: inline-flex; width: 16px; height: 16px; }
+  #config-chip-label { display: none; }
+  #config-chip .lucide:last-child { display: none; }
+  #config-chip { padding: 0 6px; }
+}
 #config-chip:hover { color: var(--text-secondary); background: rgba(var(--overlay-rgb),0.06); }
 #config-chip.active { color: var(--text-secondary); background: rgba(var(--overlay-rgb),0.06); }
 
