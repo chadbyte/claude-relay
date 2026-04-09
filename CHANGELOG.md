@@ -1,3 +1,10 @@
+# [2.26.0-beta.14](https://github.com/chadbyte/clay/compare/v2.26.0-beta.13...v2.26.0-beta.14) (2026-04-09)
+
+
+### Bug Fixes
+
+* **sdk-bridge:** preserve rateLimitResetsAt for auto-continue scheduling ([7fe1b6a](https://github.com/chadbyte/clay/commit/7fe1b6a9fcf03c8787236af9b32c8eacfe4d0a41))
+
 # [2.26.0-beta.13](https://github.com/chadbyte/clay/compare/v2.26.0-beta.12...v2.26.0-beta.13) (2026-04-09)
 
 
