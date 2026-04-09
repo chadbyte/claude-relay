@@ -1,3 +1,16 @@
+# [2.26.0-beta.11](https://github.com/chadbyte/clay/compare/v2.26.0-beta.10...v2.26.0-beta.11) (2026-04-09)
+
+
+### Bug Fixes
+
+* **debate:** broadcast correct mate processing indicator during debate turns ([6d875f4](https://github.com/chadbyte/clay/commit/6d875f4be8a68c91a3e493c3533ce1f9ccf51f14))
+* **debate:** propagate ownerId to debate sessions and restore with correct userId ([fb85137](https://github.com/chadbyte/clay/commit/fb85137a8178759aa13d266714f928cecc11aae3))
+
+
+### Features
+
+* **context-sources:** show extension setup prompt in browser tabs section ([2dee8c5](https://github.com/chadbyte/clay/commit/2dee8c51fae7fff2d83f1824baace7bf0ddee5df))
+
 # [2.26.0-beta.10](https://github.com/chadbyte/clay/compare/v2.26.0-beta.9...v2.26.0-beta.10) (2026-04-09)
 
 
