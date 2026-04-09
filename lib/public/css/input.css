@@ -437,6 +437,39 @@
   font-size: 13px;
   text-align: center;
 }
+.context-picker-ext-notice {
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.context-picker-ext-notice-text {
+  font-size: 12px;
+  color: var(--text-dimmer);
+  line-height: 1.4;
+}
+.context-picker-ext-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+  background: var(--bg-hover, rgba(255,255,255,0.06));
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+  width: fit-content;
+}
+.context-picker-ext-btn:hover {
+  background: var(--bg-active, rgba(255,255,255,0.1));
+}
+.context-picker-ext-btn .lucide {
+  width: 13px;
+  height: 13px;
+}
 
 .context-picker-favicon {
   width: 14px;
