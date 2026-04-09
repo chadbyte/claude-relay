@@ -1,3 +1,11 @@
+# [2.26.0-beta.13](https://github.com/chadbyte/clay/compare/v2.26.0-beta.12...v2.26.0-beta.13) (2026-04-09)
+
+
+### Bug Fixes
+
+* **debate:** restore self-contained conclude bar to prevent normal chat routing ([ce24dbc](https://github.com/chadbyte/clay/commit/ce24dbc7d17650256e4733e5a2ecada2a80f2397))
+* **session:** revert auto-generated cliSessionId that broke new session queries ([4cb949e](https://github.com/chadbyte/clay/commit/4cb949eba1ecd3aa4045adc86853386fe68f4eed))
+
 # [2.26.0-beta.12](https://github.com/chadbyte/clay/compare/v2.26.0-beta.11...v2.26.0-beta.12) (2026-04-09)
 
 
