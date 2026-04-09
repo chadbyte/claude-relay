@@ -1,3 +1,24 @@
+# [2.26.0-beta.10](https://github.com/chadbyte/clay/compare/v2.26.0-beta.9...v2.26.0-beta.10) (2026-04-09)
+
+
+### Bug Fixes
+
+* **debate:** hide export PDF button when debate is not active ([ffa28ca](https://github.com/chadbyte/clay/commit/ffa28caf4011e2d1bb7efd1b033b4c6404cb171f)), closes [#debate-pdf-btn](https://github.com/chadbyte/clay/issues/debate-pdf-btn)
+* **debate:** hide internal setup prompt from chat display ([c40e8d7](https://github.com/chadbyte/clay/commit/c40e8d706bd4778fc49527af9b1dfc5a7c821db5))
+* **mobile:** refresh mobile chat sheet when mate session list updates ([5530f0b](https://github.com/chadbyte/clay/commit/5530f0bba99e048a0cc4dbf24e050e038cc2748d))
+* **sdk-bridge:** harden auto-continue against rate limit event timing ([651019b](https://github.com/chadbyte/clay/commit/651019b34b90860996944e2d34a02ec66e59b942))
+* **session:** persist all sessions and show debates in conversation list ([cf0a935](https://github.com/chadbyte/clay/commit/cf0a9351427f1ede853e5881f337a3a5fc6570df))
+* **ui:** resolve identity reference error in AskUserQuestion rendering ([ef8b915](https://github.com/chadbyte/clay/commit/ef8b915bd249c5bea383ab113686427d7cc22265))
+
+
+### Features
+
+* **debate:** convert debate modal to wizard with quick start flow ([e4dfa8b](https://github.com/chadbyte/clay/commit/e4dfa8b127b3722e35e6f57566ae0ba3c81bd924))
+* **debate:** rework hand raise, conclude, and floor modes ([4d10bf3](https://github.com/chadbyte/clay/commit/4d10bf38795263ba08beae77057461eb377e2f2d))
+* **mates:** broadcast mention processing indicator and redesign mate avatars ([2f41e49](https://github.com/chadbyte/clay/commit/2f41e49fd06c7a55a6b0ccb82c6b4c8ed5b2be92)), closes [#283](https://github.com/chadbyte/clay/issues/283)
+* **ui:** group consecutive messages by minute and preserve timestamps ([2cf9a69](https://github.com/chadbyte/clay/commit/2cf9a694d5b8bff3432f0fb6a1038bf7e5f91f47))
+* **ui:** move debate to conversations and fix mobile chat sheet ([189562f](https://github.com/chadbyte/clay/commit/189562f03ea2efe60bde9f1d9daf4f720fc223ad))
+
 # [2.26.0-beta.9](https://github.com/chadbyte/clay/compare/v2.26.0-beta.8...v2.26.0-beta.9) (2026-04-08)
 
 
