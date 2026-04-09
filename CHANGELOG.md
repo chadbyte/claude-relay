@@ -1,3 +1,11 @@
+## [2.26.1-beta.1](https://github.com/chadbyte/clay/compare/v2.26.0...v2.26.1-beta.1) (2026-04-09)
+
+
+### Bug Fixes
+
+* **debate:** prevent floor and conclude messages from routing to normal chat ([a49747d](https://github.com/chadbyte/clay/commit/a49747dbd1ef936bb49009e792bda4eb0bab60de))
+* **debate:** suppress interactive debate UI during history replay ([cd60178](https://github.com/chadbyte/clay/commit/cd601789d44243358d8d60b55102c66b2e289440))
+
 # [2.26.0](https://github.com/chadbyte/clay/compare/v2.25.0...v2.26.0) (2026-04-09)
 
 
