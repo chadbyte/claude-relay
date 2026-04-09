@@ -13,8 +13,8 @@
 | **next** | **The next PR to work on** |
 | pending | Not started |
 
-**Last completed**: PR-07 (2026-04-10)
-**Next up**: PR-08
+**Last completed**: PR-14 (2026-04-10)
+**Next up**: PR-15
 
 | PR | Status | Description | Date |
 |----|--------|-------------|------|
@@ -25,47 +25,53 @@
 | PR-05 | done | Extract `project-file-watch.js` from `project.js` | 2026-04-10 |
 | PR-06 | done | Extract `project-http.js` from `project.js` | 2026-04-10 |
 | PR-07 | done | Extract `project-image.js` from `project.js` | 2026-04-10 |
-| PR-08 | **next** | Reduce `project.js` to thin coordinator | |
-| PR-09 | pending | Extract `server-auth.js` from `server.js` | |
-| PR-10 | pending | Extract `server-admin.js` from `server.js` | |
-| PR-11 | pending | Extract `server-skills.js` from `server.js` | |
-| PR-12 | pending | Extract `server-settings.js` from `server.js` | |
-| PR-13 | pending | Reduce `server.js` to thin router | |
-| PR-14 | pending | Extract `app-connection.js` from `app.js` | |
-| PR-15 | pending | Extract `app-messages.js` from `app.js` | |
-| PR-16 | pending | Extract `app-dm.js` from `app.js` | |
-| PR-17 | pending | Extract `app-home-hub.js` from `app.js` | |
-| PR-18 | pending | Extract `app-rate-limit.js` from `app.js` | |
-| PR-19 | pending | Extract `app-cursors.js` from `app.js` | |
-| PR-20 | pending | Reduce `app.js` to bootstrap | |
-| PR-21 | pending | Extract `sidebar-sessions.js` from `sidebar.js` | |
-| PR-22 | pending | Extract `sidebar-projects.js` from `sidebar.js` | |
-| PR-23 | pending | Extract `sidebar-mates.js` from `sidebar.js` | |
-| PR-24 | pending | Extract `sidebar-mobile.js` from `sidebar.js` | |
-| PR-25 | pending | Reduce `sidebar.js` to coordinator | |
-| PR-26 | pending | Extract `scheduler-config.js` from `scheduler.js` | |
-| PR-27 | pending | Extract `scheduler-history.js` from `scheduler.js` | |
-| PR-28 | pending | Reduce `scheduler.js` to coordinator | |
-| PR-29 | pending | Extract `sdk-skill-discovery.js` from `sdk-bridge.js` | |
-| PR-30 | pending | Extract `sdk-message-queue.js` from `sdk-bridge.js` | |
-| PR-31 | pending | Extract `sdk-message-processor.js` from `sdk-bridge.js` | |
-| PR-32 | pending | Reduce `sdk-bridge.js` to connection manager | |
-| PR-33 | pending | Extract `mates-prompts.js` from `mates.js` | |
-| PR-34 | pending | Extract `mates-knowledge.js` from `mates.js` | |
-| PR-35 | pending | Extract `mates-identity.js` from `mates.js` | |
-| PR-36 | pending | Reduce `mates.js` to CRUD + builtins | |
-| PR-37 | pending | Extract `users-auth.js` from `users.js` | |
-| PR-38 | pending | Extract `users-permissions.js` from `users.js` | |
-| PR-39 | pending | Extract `users-preferences.js` from `users.js` | |
-| PR-40 | pending | Reduce `users.js` to CRUD + invites | |
-| PR-41 | pending | Extract `daemon-projects.js` from `daemon.js` | |
-| PR-42 | pending | Define `ws-schema.js` | |
+| PR-08 | done | Clean up dead code after Phase 1 extractions | 2026-04-10 |
+| PR-09 | done | Extract `project-knowledge.js` from `project.js` | 2026-04-10 |
+| PR-10 | done | Extract `project-filesystem.js` from `project.js` | 2026-04-10 |
+| PR-11 | done | Extract `project-sessions.js` from `project.js` | 2026-04-10 |
+| PR-12 | done | Extract `project-user-message.js` from `project.js` | 2026-04-10 |
+| PR-13 | done | Extract `project-connection.js` from `project.js` | 2026-04-10 |
+| PR-14 | done | Reduce `project.js` to thin coordinator (1,191 lines) | 2026-04-10 |
+| PR-15 | **next** | Extract `server-auth.js` from `server.js` | |
+| PR-16 | pending | Extract `server-admin.js` from `server.js` | |
+| PR-17 | pending | Extract `server-skills.js` from `server.js` | |
+| PR-18 | pending | Extract `server-settings.js` from `server.js` | |
+| PR-19 | pending | Reduce `server.js` to thin router | |
+| PR-20 | pending | Extract `app-connection.js` from `app.js` | |
+| PR-21 | pending | Extract `app-messages.js` from `app.js` | |
+| PR-22 | pending | Extract `app-dm.js` from `app.js` | |
+| PR-23 | pending | Extract `app-home-hub.js` from `app.js` | |
+| PR-24 | pending | Extract `app-rate-limit.js` from `app.js` | |
+| PR-25 | pending | Extract `app-cursors.js` from `app.js` | |
+| PR-26 | pending | Reduce `app.js` to bootstrap | |
+| PR-27 | pending | Extract `sidebar-sessions.js` from `sidebar.js` | |
+| PR-28 | pending | Extract `sidebar-projects.js` from `sidebar.js` | |
+| PR-29 | pending | Extract `sidebar-mates.js` from `sidebar.js` | |
+| PR-30 | pending | Extract `sidebar-mobile.js` from `sidebar.js` | |
+| PR-31 | pending | Reduce `sidebar.js` to coordinator | |
+| PR-32 | pending | Extract `scheduler-config.js` from `scheduler.js` | |
+| PR-33 | pending | Extract `scheduler-history.js` from `scheduler.js` | |
+| PR-34 | pending | Reduce `scheduler.js` to coordinator | |
+| PR-35 | pending | Extract `sdk-skill-discovery.js` from `sdk-bridge.js` | |
+| PR-36 | pending | Extract `sdk-message-queue.js` from `sdk-bridge.js` | |
+| PR-37 | pending | Extract `sdk-message-processor.js` from `sdk-bridge.js` | |
+| PR-38 | pending | Reduce `sdk-bridge.js` to connection manager | |
+| PR-39 | pending | Extract `mates-prompts.js` from `mates.js` | |
+| PR-40 | pending | Extract `mates-knowledge.js` from `mates.js` | |
+| PR-41 | pending | Extract `mates-identity.js` from `mates.js` | |
+| PR-42 | pending | Reduce `mates.js` to CRUD + builtins | |
+| PR-43 | pending | Extract `users-auth.js` from `users.js` | |
+| PR-44 | pending | Extract `users-permissions.js` from `users.js` | |
+| PR-45 | pending | Extract `users-preferences.js` from `users.js` | |
+| PR-46 | pending | Reduce `users.js` to CRUD + invites | |
+| PR-47 | pending | Extract `daemon-projects.js` from `daemon.js` | |
+| PR-48 | pending | Define `ws-schema.js` | |
 
 ### Current file sizes after completed PRs
 
 | File | Original | Current | Target |
 |------|----------|---------|--------|
-| `lib/project.js` | 7,222 | 3,428 | ~800 |
+| `lib/project.js` | 7,222 | 1,191 | ~800 |
 | `lib/server.js` | 3,599 | 3,702 | ~500 |
 | `lib/public/app.js` | 8,010 | 8,066 | ~1,500 |
 | `lib/public/modules/sidebar.js` | 4,541 | 4,583 | ~400 |
