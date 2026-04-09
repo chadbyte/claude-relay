@@ -971,6 +971,7 @@
 
 .terminal-tab-body .xterm {
   height: 100%;
+  overflow: hidden;
 }
 
 /* --- Terminal key toolbar (mobile) --- */
