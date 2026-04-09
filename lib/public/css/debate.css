@@ -590,6 +590,7 @@
   transition: color 0.15s, background 0.15s, border-color 0.15s;
 }
 
+#debate-pdf-btn.hidden { display: none; }
 #debate-pdf-btn .lucide { width: 15px; height: 15px; }
 #debate-pdf-btn:hover { color: var(--text-secondary); background: rgba(var(--overlay-rgb),0.04); border-color: var(--border); }
 #debate-pdf-btn:disabled { opacity: 0.5; cursor: default; }
