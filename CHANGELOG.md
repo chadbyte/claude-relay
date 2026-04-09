@@ -1,3 +1,16 @@
+# [2.26.0-beta.16](https://github.com/chadbyte/clay/compare/v2.26.0-beta.15...v2.26.0-beta.16) (2026-04-09)
+
+
+### Bug Fixes
+
+* reduce auto-continue buffer from 3min to 1min after rate limit reset ([b48053b](https://github.com/chadbyte/clay/commit/b48053b8115cf21f19a1a4933ec45e0b191425b4))
+* **sdk-bridge:** schedule auto-continue immediately on rate limit rejection ([a55055c](https://github.com/chadbyte/clay/commit/a55055c7492408863977f9a07faec154d717858f))
+
+
+### Features
+
+* **sdk-bridge:** immediate continue on overage, scheduled on normal limit ([12fef73](https://github.com/chadbyte/clay/commit/12fef73d8b3d3b0b8830686708537057d83f12c1))
+
 # [2.26.0-beta.15](https://github.com/chadbyte/clay/compare/v2.26.0-beta.14...v2.26.0-beta.15) (2026-04-09)
 
 
