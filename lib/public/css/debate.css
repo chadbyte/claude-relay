@@ -1302,6 +1302,12 @@
   padding: 12px 16px;
 }
 
+@media (max-width: 768px) {
+  #debate-bottom-bar {
+    padding-bottom: calc(12px + 56px + var(--safe-bottom, 0px));
+  }
+}
+
 .debate-bottom-inner {
   max-width: var(--content-width);
   margin: 0 auto;
