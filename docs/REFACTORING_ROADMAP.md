@@ -13,8 +13,8 @@
 | **next** | **The next PR to work on** |
 | pending | Not started |
 
-**Last completed**: PR-31 (2026-04-10)
-**Next up**: PR-32
+**Last completed**: PR-32 (2026-04-10)
+**Next up**: PR-33
 
 | PR | Status | Description | Date |
 |----|--------|-------------|------|
@@ -49,7 +49,7 @@
 | PR-29 | done | Extract `app-projects.js` from `app.js` | 2026-04-10 |
 | PR-30 | done | Extract `app-panels.js` from `app.js` | 2026-04-10 |
 | PR-31 | done | Extract `app-loop-ui.js` from `app.js` | 2026-04-10 |
-| PR-32 | pending | Extract `app-debate-ui.js` from `app.js` | |
+| PR-32 | done | Extract `app-debate-ui.js` from `app.js` | 2026-04-10 |
 | PR-33 | pending | Extract `app-skills.js` from `app.js` | |
 | PR-34 | pending | Reduce `app.js` to bootstrap | |
 | PR-35 | pending | Extract `sidebar-sessions.js` from `sidebar.js` | |
@@ -81,7 +81,7 @@
 |------|----------|---------|--------|
 | `lib/project.js` | 7,222 | 1,191 | ~800 |
 | `lib/server.js` | 3,599 | 1,259 | ~1,200 |
-| `lib/public/app.js` | 8,010 | 2,881 | ~1,500 |
+| `lib/public/app.js` | 8,010 | 2,519 | ~1,500 |
 | `lib/public/modules/sidebar.js` | 4,541 | 4,583 | ~400 |
 | `lib/public/modules/scheduler.js` | 3,166 | 3,166 | ~1,200 |
 | `lib/sdk-bridge.js` | 2,232 | 2,424 | ~800 |
@@ -1183,7 +1183,7 @@ module.exports = { schema }
 | PR-29 | done | `lib/public/modules/app-projects.js` | app.js | 782 |
 | PR-30 | done | `lib/public/modules/app-panels.js` | app.js | 907 |
 | PR-31 | done | `lib/public/modules/app-loop-ui.js` | app.js | 865 |
-| PR-32 | pending | `lib/public/modules/app-debate-ui.js` | app.js | ~400 |
+| PR-32 | done | `lib/public/modules/app-debate-ui.js` | app.js | 399 |
 | PR-33 | pending | `lib/public/modules/app-skills.js` | app.js | ~200 |
 | PR-34 | pending | (cleanup) | app.js | 0 (reduce to ~1,000) |
 | **Phase 4: sidebar.js** | | | | |
