@@ -13,8 +13,8 @@
 | **next** | **The next PR to work on** |
 | pending | Not started |
 
-**Last completed**: PR-18 (2026-04-10)
-**Next up**: PR-19
+**Last completed**: PR-20 (2026-04-10)
+**Next up**: PR-21
 
 | PR | Status | Description | Date |
 |----|--------|-------------|------|
@@ -36,36 +36,38 @@
 | PR-16 | done | Extract `server-admin.js` from `server.js` | 2026-04-10 |
 | PR-17 | done | Extract `server-skills.js` from `server.js` | 2026-04-10 |
 | PR-18 | done | Extract `server-settings.js` from `server.js` | 2026-04-10 |
-| PR-19 | **next** | Reduce `server.js` to thin router | |
-| PR-20 | pending | Extract `app-connection.js` from `app.js` | |
-| PR-21 | pending | Extract `app-messages.js` from `app.js` | |
-| PR-22 | pending | Extract `app-dm.js` from `app.js` | |
-| PR-23 | pending | Extract `app-home-hub.js` from `app.js` | |
-| PR-24 | pending | Extract `app-rate-limit.js` from `app.js` | |
-| PR-25 | pending | Extract `app-cursors.js` from `app.js` | |
-| PR-26 | pending | Reduce `app.js` to bootstrap | |
-| PR-27 | pending | Extract `sidebar-sessions.js` from `sidebar.js` | |
-| PR-28 | pending | Extract `sidebar-projects.js` from `sidebar.js` | |
-| PR-29 | pending | Extract `sidebar-mates.js` from `sidebar.js` | |
-| PR-30 | pending | Extract `sidebar-mobile.js` from `sidebar.js` | |
-| PR-31 | pending | Reduce `sidebar.js` to coordinator | |
-| PR-32 | pending | Extract `scheduler-config.js` from `scheduler.js` | |
-| PR-33 | pending | Extract `scheduler-history.js` from `scheduler.js` | |
-| PR-34 | pending | Reduce `scheduler.js` to coordinator | |
-| PR-35 | pending | Extract `sdk-skill-discovery.js` from `sdk-bridge.js` | |
-| PR-36 | pending | Extract `sdk-message-queue.js` from `sdk-bridge.js` | |
-| PR-37 | pending | Extract `sdk-message-processor.js` from `sdk-bridge.js` | |
-| PR-38 | pending | Reduce `sdk-bridge.js` to connection manager | |
-| PR-39 | pending | Extract `mates-prompts.js` from `mates.js` | |
-| PR-40 | pending | Extract `mates-knowledge.js` from `mates.js` | |
-| PR-41 | pending | Extract `mates-identity.js` from `mates.js` | |
-| PR-42 | pending | Reduce `mates.js` to CRUD + builtins | |
-| PR-43 | pending | Extract `users-auth.js` from `users.js` | |
-| PR-44 | pending | Extract `users-permissions.js` from `users.js` | |
-| PR-45 | pending | Extract `users-preferences.js` from `users.js` | |
-| PR-46 | pending | Reduce `users.js` to CRUD + invites | |
-| PR-47 | pending | Extract `daemon-projects.js` from `daemon.js` | |
-| PR-48 | pending | Define `ws-schema.js` | |
+| PR-19 | done | Extract `server-dm.js` from `server.js` | 2026-04-10 |
+| PR-20 | done | Extract `server-mates.js` from `server.js` | 2026-04-10 |
+| PR-21 | **next** | Reduce `server.js` to thin router | |
+| PR-22 | pending | Extract `app-connection.js` from `app.js` | |
+| PR-23 | pending | Extract `app-messages.js` from `app.js` | |
+| PR-24 | pending | Extract `app-dm.js` from `app.js` | |
+| PR-25 | pending | Extract `app-home-hub.js` from `app.js` | |
+| PR-26 | pending | Extract `app-rate-limit.js` from `app.js` | |
+| PR-27 | pending | Extract `app-cursors.js` from `app.js` | |
+| PR-28 | pending | Reduce `app.js` to bootstrap | |
+| PR-29 | pending | Extract `sidebar-sessions.js` from `sidebar.js` | |
+| PR-30 | pending | Extract `sidebar-projects.js` from `sidebar.js` | |
+| PR-31 | pending | Extract `sidebar-mates.js` from `sidebar.js` | |
+| PR-32 | pending | Extract `sidebar-mobile.js` from `sidebar.js` | |
+| PR-33 | pending | Reduce `sidebar.js` to coordinator | |
+| PR-34 | pending | Extract `scheduler-config.js` from `scheduler.js` | |
+| PR-35 | pending | Extract `scheduler-history.js` from `scheduler.js` | |
+| PR-36 | pending | Reduce `scheduler.js` to coordinator | |
+| PR-37 | pending | Extract `sdk-skill-discovery.js` from `sdk-bridge.js` | |
+| PR-38 | pending | Extract `sdk-message-queue.js` from `sdk-bridge.js` | |
+| PR-39 | pending | Extract `sdk-message-processor.js` from `sdk-bridge.js` | |
+| PR-40 | pending | Reduce `sdk-bridge.js` to connection manager | |
+| PR-41 | pending | Extract `mates-prompts.js` from `mates.js` | |
+| PR-42 | pending | Extract `mates-knowledge.js` from `mates.js` | |
+| PR-43 | pending | Extract `mates-identity.js` from `mates.js` | |
+| PR-44 | pending | Reduce `mates.js` to CRUD + builtins | |
+| PR-45 | pending | Extract `users-auth.js` from `users.js` | |
+| PR-46 | pending | Extract `users-permissions.js` from `users.js` | |
+| PR-47 | pending | Extract `users-preferences.js` from `users.js` | |
+| PR-48 | pending | Reduce `users.js` to CRUD + invites | |
+| PR-49 | pending | Extract `daemon-projects.js` from `daemon.js` | |
+| PR-50 | pending | Define `ws-schema.js` | |
 
 ### Current file sizes after completed PRs
 
