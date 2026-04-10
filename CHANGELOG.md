@@ -1,3 +1,10 @@
+# [2.27.0-beta.6](https://github.com/chadbyte/clay/compare/v2.27.0-beta.5...v2.27.0-beta.6) (2026-04-10)
+
+
+### Bug Fixes
+
+* use shared checkToolWhitelist in mention session canUseTool ([594c277](https://github.com/chadbyte/clay/commit/594c277d4479ba3dcd9e252c0009ded65b0bfe9b))
+
 # [2.27.0-beta.5](https://github.com/chadbyte/clay/compare/v2.27.0-beta.4...v2.27.0-beta.5) (2026-04-10)
 
 
