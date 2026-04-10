@@ -87,6 +87,7 @@ Bootstraps UI, wires modules, dispatches WebSocket messages via `processMessage`
 | Module | Concern |
 |--------|---------|
 | `app-connection.js` | WebSocket creation, reconnect with exponential backoff, connection status UI, disconnect/restore notifications |
+| `app-messages.js` | WebSocket message router (`processMessage`). Dispatches all incoming message types to appropriate handlers |
 
 ---
 

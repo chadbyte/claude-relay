@@ -13,8 +13,8 @@
 | **next** | **The next PR to work on** |
 | pending | Not started |
 
-**Last completed**: PR-22 (2026-04-10)
-**Next up**: PR-23
+**Last completed**: PR-23 (2026-04-10)
+**Next up**: PR-24
 
 | PR | Status | Description | Date |
 |----|--------|-------------|------|
@@ -40,7 +40,7 @@
 | PR-20 | done | Extract `server-mates.js` from `server.js` | 2026-04-10 |
 | PR-21 | done | Reduce `server.js` to thin router (1,259 lines) | 2026-04-10 |
 | PR-22 | done | Extract `app-connection.js` from `app.js` | 2026-04-10 |
-| PR-23 | pending | Extract `app-messages.js` from `app.js` | |
+| PR-23 | done | Extract `app-messages.js` from `app.js` | 2026-04-10 |
 | PR-24 | pending | Extract `app-dm.js` from `app.js` | |
 | PR-25 | pending | Extract `app-home-hub.js` from `app.js` | |
 | PR-26 | pending | Extract `app-rate-limit.js` from `app.js` | |
@@ -75,7 +75,7 @@
 |------|----------|---------|--------|
 | `lib/project.js` | 7,222 | 1,191 | ~800 |
 | `lib/server.js` | 3,599 | 1,259 | ~1,200 |
-| `lib/public/app.js` | 8,010 | 8,622 | ~1,500 |
+| `lib/public/app.js` | 8,010 | 7,492 | ~1,500 |
 | `lib/public/modules/sidebar.js` | 4,541 | 4,583 | ~400 |
 | `lib/public/modules/scheduler.js` | 3,166 | 3,166 | ~1,200 |
 | `lib/sdk-bridge.js` | 2,232 | 2,424 | ~800 |
@@ -1063,7 +1063,7 @@ module.exports = { schema }
 | PR-21 | done | (cleanup + server-palette.js) | server.js | 0 (reduce to 1,259) |
 | **Phase 3: app.js** | | | | |
 | PR-22 | done | `lib/public/modules/app-connection.js` | app.js | 160 |
-| PR-23 | pending | `lib/public/modules/app-messages.js` | app.js | ~1,300 |
+| PR-23 | done | `lib/public/modules/app-messages.js` | app.js | 1,478 |
 | PR-24 | pending | `lib/public/modules/app-dm.js` | app.js | ~800 |
 | PR-25 | pending | `lib/public/modules/app-home-hub.js` | app.js | ~500 |
 | PR-26 | pending | `lib/public/modules/app-rate-limit.js` | app.js | ~400 |
