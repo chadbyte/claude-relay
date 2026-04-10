@@ -1,3 +1,13 @@
+# [2.27.0-beta.12](https://github.com/chadbyte/clay/compare/v2.27.0-beta.11...v2.27.0-beta.12) (2026-04-10)
+
+
+### Bug Fixes
+
+* **app:** add missing DM delegation stubs ([2f0a041](https://github.com/chadbyte/clay/commit/2f0a0412e05ed6b417fc4d97053f6fbeed8139cd))
+* **app:** add missing headerInfoBtn to initHeader context ([8d0a092](https://github.com/chadbyte/clay/commit/8d0a0926233ebf411266e5cc74ff7514302ec91f))
+* **app:** correct DM delegation stub signatures ([4fdf4e4](https://github.com/chadbyte/clay/commit/4fdf4e4fc9d2eab478dbd04d70008bfe629219c1))
+* **app:** inline requireClayRalph for scheduler context ([fd2c804](https://github.com/chadbyte/clay/commit/fd2c804622673a5ef61ca3bf47609b51e7e71059))
+
 # [2.27.0-beta.11](https://github.com/chadbyte/clay/compare/v2.27.0-beta.10...v2.27.0-beta.11) (2026-04-10)
 
 
