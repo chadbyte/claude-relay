@@ -597,7 +597,7 @@ app.js is 8,066 lines with 90+ WebSocket message types in a single `processMessa
 - `handleMateCreatedInApp`, `renderAvailableBuiltins`, `buildMateInterviewPrompt`
 - `updateMateIconStatus`, `connectMateProject`, `disconnectMateProject`
 - DM state: `dmMode`, `dmKey`, `dmTargetUser`, `dmMessageCache`, `dmUnread`, `cachedAllUsers`, `cachedOnlineIds`, `cachedDmFavorites`, `cachedDmConversations`, `cachedMatesList`
-- Mate project state: `mateProjectSlug`, `savedMainSlug`, `returningFromMateDm`
+- Mate project state: `mateProjectSlug`, `savedMainSlug`, `pendingMateDmClears`
 
 **Interface**: `initDm(ctx)` returns `{ openDm, exitDmMode, isDmMode, ... }`.
 
