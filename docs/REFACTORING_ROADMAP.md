@@ -13,8 +13,8 @@
 | **next** | **The next PR to work on** |
 | pending | Not started |
 
-**Last completed**: PR-36 (2026-04-11)
-**Next up**: PR-37
+**Last completed**: PR-37 (2026-04-11)
+**Next up**: PR-38
 
 | PR | Status | Description | Date |
 |----|--------|-------------|------|
@@ -54,7 +54,7 @@
 | PR-34 | done | Reduce `app.js` to bootstrap (1,680 lines) | 2026-04-10 |
 | PR-35 | done | Extract `sidebar-sessions.js` from `sidebar.js` | 2026-04-11 |
 | PR-36 | done | Extract `sidebar-projects.js` from `sidebar.js` | 2026-04-11 |
-| PR-37 | pending | Extract `sidebar-mates.js` from `sidebar.js` | |
+| PR-37 | done | Extract `sidebar-mates.js` from `sidebar.js` | 2026-04-11 |
 | PR-38 | pending | Extract `sidebar-mobile.js` from `sidebar.js` | |
 | PR-39 | pending | Reduce `sidebar.js` to coordinator | |
 | PR-40 | pending | Extract `scheduler-config.js` from `scheduler.js` | |
@@ -82,7 +82,7 @@
 | `lib/project.js` | 7,222 | 1,191 | ~800 |
 | `lib/server.js` | 3,599 | 1,259 | ~1,200 |
 | `lib/public/app.js` | 8,010 | 1,680 | ~1,500 |
-| `lib/public/modules/sidebar.js` | 4,541 | 2,324 | ~400 |
+| `lib/public/modules/sidebar.js` | 4,541 | 1,586 | ~400 |
 | `lib/public/modules/scheduler.js` | 3,166 | 3,166 | ~1,200 |
 | `lib/sdk-bridge.js` | 2,232 | 2,424 | ~800 |
 | `lib/mates.js` | 1,318 | 1,318 | ~500 |
