@@ -13,8 +13,8 @@
 | **next** | **The next PR to work on** |
 | pending | Not started |
 
-**Last completed**: PR-14 (2026-04-10)
-**Next up**: PR-15
+**Last completed**: PR-18 (2026-04-10)
+**Next up**: PR-19
 
 | PR | Status | Description | Date |
 |----|--------|-------------|------|
@@ -32,11 +32,11 @@
 | PR-12 | done | Extract `project-user-message.js` from `project.js` | 2026-04-10 |
 | PR-13 | done | Extract `project-connection.js` from `project.js` | 2026-04-10 |
 | PR-14 | done | Reduce `project.js` to thin coordinator (1,191 lines) | 2026-04-10 |
-| PR-15 | **next** | Extract `server-auth.js` from `server.js` | |
-| PR-16 | pending | Extract `server-admin.js` from `server.js` | |
-| PR-17 | pending | Extract `server-skills.js` from `server.js` | |
-| PR-18 | pending | Extract `server-settings.js` from `server.js` | |
-| PR-19 | pending | Reduce `server.js` to thin router | |
+| PR-15 | done | Extract `server-auth.js` from `server.js` | 2026-04-10 |
+| PR-16 | done | Extract `server-admin.js` from `server.js` | 2026-04-10 |
+| PR-17 | done | Extract `server-skills.js` from `server.js` | 2026-04-10 |
+| PR-18 | done | Extract `server-settings.js` from `server.js` | 2026-04-10 |
+| PR-19 | **next** | Reduce `server.js` to thin router | |
 | PR-20 | pending | Extract `app-connection.js` from `app.js` | |
 | PR-21 | pending | Extract `app-messages.js` from `app.js` | |
 | PR-22 | pending | Extract `app-dm.js` from `app.js` | |
@@ -72,7 +72,7 @@
 | File | Original | Current | Target |
 |------|----------|---------|--------|
 | `lib/project.js` | 7,222 | 1,191 | ~800 |
-| `lib/server.js` | 3,599 | 3,702 | ~500 |
+| `lib/server.js` | 3,599 | 1,343 | ~500 |
 | `lib/public/app.js` | 8,010 | 8,066 | ~1,500 |
 | `lib/public/modules/sidebar.js` | 4,541 | 4,583 | ~400 |
 | `lib/public/modules/scheduler.js` | 3,166 | 3,166 | ~1,200 |
