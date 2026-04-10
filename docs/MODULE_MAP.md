@@ -101,6 +101,7 @@ Bootstraps UI, wires modules, dispatches WebSocket messages via `processMessage`
 | `app-favicon.js` | Dynamic favicon, IO blink, urgent blink, send button mode, activity indicator |
 | `app-header.js` | Session rename, session info popover, progressive history loading |
 | `app-misc.js` | Image/paste/confirm modals, force PIN overlay, PWA install, Chrome extension bridge |
+| `sidebar-sessions.js` | Session list rendering, search/filter, loop groups, inline rename, context menus, presence avatars, countdown timers, CLI session picker, unread badges |
 
 ---
 
