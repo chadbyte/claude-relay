@@ -95,6 +95,7 @@ Bootstraps UI, wires modules, dispatches WebSocket messages via `processMessage`
 | `app-rendering.js` | Message rendering, streaming, scroll management, pre-thinking dots, suggestion chips, system messages |
 | `app-projects.js` | Project list, switching, add/remove project modals, update available pill, topbar presence |
 | `app-panels.js` | Config chip (model/mode/effort/thinking/beta), usage panel, status panel, context panel, context popover |
+| `app-loop-ui.js` | Ralph Loop UI, wizard, crafting/approval bars, preview modal, loop banner |
 
 ---
 
