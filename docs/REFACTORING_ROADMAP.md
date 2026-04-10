@@ -13,8 +13,8 @@
 | **next** | **The next PR to work on** |
 | pending | Not started |
 
-**Last completed**: PR-20 (2026-04-10)
-**Next up**: PR-21
+**Last completed**: PR-21 (2026-04-10)
+**Next up**: PR-22
 
 | PR | Status | Description | Date |
 |----|--------|-------------|------|
@@ -38,7 +38,7 @@
 | PR-18 | done | Extract `server-settings.js` from `server.js` | 2026-04-10 |
 | PR-19 | done | Extract `server-dm.js` from `server.js` | 2026-04-10 |
 | PR-20 | done | Extract `server-mates.js` from `server.js` | 2026-04-10 |
-| PR-21 | **next** | Reduce `server.js` to thin router | |
+| PR-21 | done | Reduce `server.js` to thin router (1,259 lines) | 2026-04-10 |
 | PR-22 | pending | Extract `app-connection.js` from `app.js` | |
 | PR-23 | pending | Extract `app-messages.js` from `app.js` | |
 | PR-24 | pending | Extract `app-dm.js` from `app.js` | |
@@ -74,7 +74,7 @@
 | File | Original | Current | Target |
 |------|----------|---------|--------|
 | `lib/project.js` | 7,222 | 1,191 | ~800 |
-| `lib/server.js` | 3,599 | 1,343 | ~500 |
+| `lib/server.js` | 3,599 | 1,259 | ~1,200 |
 | `lib/public/app.js` | 8,010 | 8,066 | ~1,500 |
 | `lib/public/modules/sidebar.js` | 4,541 | 4,583 | ~400 |
 | `lib/public/modules/scheduler.js` | 3,166 | 3,166 | ~1,200 |
