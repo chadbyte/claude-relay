@@ -97,6 +97,7 @@ Bootstraps UI, wires modules, dispatches WebSocket messages via `processMessage`
 | `app-panels.js` | Config chip (model/mode/effort/thinking/beta), usage panel, status panel, context panel, context popover |
 | `app-loop-ui.js` | Ralph Loop UI, wizard, crafting/approval bars, preview modal, loop banner |
 | `app-debate-ui.js` | Debate sticky banner, floor/conclude/ended modes, bottom bar, hand raise |
+| `app-skills-install.js` | Skill install dialog, requireSkills, requireClayMateInterview |
 
 ---
 
