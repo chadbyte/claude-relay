@@ -1,3 +1,10 @@
+# [2.27.0-beta.11](https://github.com/chadbyte/clay/compare/v2.27.0-beta.10...v2.27.0-beta.11) (2026-04-10)
+
+
+### Bug Fixes
+
+* pass ownerId on project create/add, filter mate project list by access ([397525d](https://github.com/chadbyte/clay/commit/397525d8b33a9ce95601f37c86cb41cc5405e8ca))
+
 # [2.27.0-beta.10](https://github.com/chadbyte/clay/compare/v2.27.0-beta.9...v2.27.0-beta.10) (2026-04-10)
 
 
