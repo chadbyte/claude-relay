@@ -108,11 +108,11 @@ Track which module owns which session properties. Update this table as modules a
 
 | Namespace | Owner module | Properties | Status |
 |-----------|-------------|------------|--------|
-| `session.sdk` | sdk-bridge (PR-31) | `queryStartTs`, `blocks`, `firstTextLogged`, `lastStreamInputTokens`, `responsePreview`, `sentToolResults`, `streamedText` | pending |
-| `session.mentions` | sdk-bridge (PR-31) | `sessions` (Map), `inProgress` | pending |
-| `session.permissions` | sdk-bridge (PR-31) | `pending` | pending |
-| `session.worker` | sdk-bridge (PR-32) | `process`, `exitPromise`, `cliSessionId` | pending |
-| `session.queue` | sdk-message-queue (PR-30) | `messages`, `abortController` | pending |
+| `session.sdk` | sdk-bridge (PR-43) | `queryStartTs`, `blocks`, `firstTextLogged`, `lastStreamInputTokens`, `responsePreview`, `sentToolResults`, `streamedText` | pending |
+| `session.mentions` | sdk-bridge (PR-43) | `sessions` (Map), `inProgress` | pending |
+| `session.permissions` | sdk-bridge (PR-43) | `pending` | pending |
+| `session.worker` | sdk-bridge (PR-44) | `process`, `exitPromise`, `cliSessionId` | pending |
+| `session.queue` | sdk-message-queue (PR-44) | `messages`, `abortController` | pending |
 | `session.dm` | sdk-bridge | `responseText` | pending |
 | `session.loop` | project-loop (PR-04) | (existing `session.loop` object) | pending |
 

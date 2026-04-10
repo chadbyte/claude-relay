@@ -45,29 +45,35 @@
 | PR-25 | done | Extract `app-home-hub.js` from `app.js` | 2026-04-10 |
 | PR-26 | done | Extract `app-rate-limit.js` from `app.js` | 2026-04-10 |
 | PR-27 | done | Extract `app-cursors.js` from `app.js` | 2026-04-10 |
-| PR-28 | pending | Reduce `app.js` to bootstrap | |
-| PR-29 | pending | Extract `sidebar-sessions.js` from `sidebar.js` | |
-| PR-30 | pending | Extract `sidebar-projects.js` from `sidebar.js` | |
-| PR-31 | pending | Extract `sidebar-mates.js` from `sidebar.js` | |
-| PR-32 | pending | Extract `sidebar-mobile.js` from `sidebar.js` | |
-| PR-33 | pending | Reduce `sidebar.js` to coordinator | |
-| PR-34 | pending | Extract `scheduler-config.js` from `scheduler.js` | |
-| PR-35 | pending | Extract `scheduler-history.js` from `scheduler.js` | |
-| PR-36 | pending | Reduce `scheduler.js` to coordinator | |
-| PR-37 | pending | Extract `sdk-skill-discovery.js` from `sdk-bridge.js` | |
-| PR-38 | pending | Extract `sdk-message-queue.js` from `sdk-bridge.js` | |
-| PR-39 | pending | Extract `sdk-message-processor.js` from `sdk-bridge.js` | |
-| PR-40 | pending | Reduce `sdk-bridge.js` to connection manager | |
-| PR-41 | pending | Extract `mates-prompts.js` from `mates.js` | |
-| PR-42 | pending | Extract `mates-knowledge.js` from `mates.js` | |
-| PR-43 | pending | Extract `mates-identity.js` from `mates.js` | |
-| PR-44 | pending | Reduce `mates.js` to CRUD + builtins | |
-| PR-45 | pending | Extract `users-auth.js` from `users.js` | |
-| PR-46 | pending | Extract `users-permissions.js` from `users.js` | |
-| PR-47 | pending | Extract `users-preferences.js` from `users.js` | |
-| PR-48 | pending | Reduce `users.js` to CRUD + invites | |
-| PR-49 | pending | Extract `daemon-projects.js` from `daemon.js` | |
-| PR-50 | pending | Define `ws-schema.js` | |
+| PR-28 | pending | Extract `app-rendering.js` from `app.js` | |
+| PR-29 | pending | Extract `app-projects.js` from `app.js` | |
+| PR-30 | pending | Extract `app-panels.js` from `app.js` | |
+| PR-31 | pending | Extract `app-loop-ui.js` from `app.js` | |
+| PR-32 | pending | Extract `app-debate-ui.js` from `app.js` | |
+| PR-33 | pending | Extract `app-skills.js` from `app.js` | |
+| PR-34 | pending | Reduce `app.js` to bootstrap | |
+| PR-35 | pending | Extract `sidebar-sessions.js` from `sidebar.js` | |
+| PR-36 | pending | Extract `sidebar-projects.js` from `sidebar.js` | |
+| PR-37 | pending | Extract `sidebar-mates.js` from `sidebar.js` | |
+| PR-38 | pending | Extract `sidebar-mobile.js` from `sidebar.js` | |
+| PR-39 | pending | Reduce `sidebar.js` to coordinator | |
+| PR-40 | pending | Extract `scheduler-config.js` from `scheduler.js` | |
+| PR-41 | pending | Extract `scheduler-history.js` from `scheduler.js` | |
+| PR-42 | pending | Reduce `scheduler.js` to coordinator | |
+| PR-43 | pending | Extract `sdk-skill-discovery.js` from `sdk-bridge.js` | |
+| PR-44 | pending | Extract `sdk-message-queue.js` from `sdk-bridge.js` | |
+| PR-45 | pending | Extract `sdk-message-processor.js` from `sdk-bridge.js` | |
+| PR-46 | pending | Reduce `sdk-bridge.js` to connection manager | |
+| PR-47 | pending | Extract `mates-prompts.js` from `mates.js` | |
+| PR-48 | pending | Extract `mates-knowledge.js` from `mates.js` | |
+| PR-49 | pending | Extract `mates-identity.js` from `mates.js` | |
+| PR-50 | pending | Reduce `mates.js` to CRUD + builtins | |
+| PR-51 | pending | Extract `users-auth.js` from `users.js` | |
+| PR-52 | pending | Extract `users-permissions.js` from `users.js` | |
+| PR-53 | pending | Extract `users-preferences.js` from `users.js` | |
+| PR-54 | pending | Reduce `users.js` to CRUD + invites | |
+| PR-55 | pending | Extract `daemon-projects.js` from `daemon.js` | |
+| PR-56 | pending | Define `ws-schema.js` | |
 
 ### Current file sizes after completed PRs
 
@@ -651,32 +657,137 @@ app.js is 8,066 lines with 90+ WebSocket message types in a single `processMessa
 
 ---
 
-### PR-28: Reduce `app.js` to bootstrap
+### PR-28: Extract `lib/public/modules/app-rendering.js`
 
-**What remains in app.js** (~1,500 lines):
-- Module imports and initialization sequence
-- DOM element references and top-level state
-- Theme initialization (initTheme, favicon, status indicators)
-- Message rendering pipeline (addUserMessage, ensureAssistantBlock, appendDelta, drainStreamTick, flushStreamBuffer, finalizeAssistantBlock, addSystemMessage)
-- Project management UI (switchProject, resetClientState, add/remove project modals)
-- Config/usage/context panels (updateConfigChip, rebuildModelList, etc.)
-- Scroll management (addToMessages, scrollToBottom)
-- Suggestion chips (showSuggestionChips, hideSuggestionChips)
-- Loop/Ralph wizard UI (this is tightly coupled to the app UI, keep here for now)
-- Debate UI helpers (showDebateSticky, showDebateBottomBar, etc., thin UI wrappers)
-- Final init: `lucide.createIcons()`, `connect()`, `showHomeHub()`
+**Create**: `lib/public/modules/app-rendering.js`
+
+**Functions to move**:
+- `addToMessages`, `scrollToBottom`, `forceScrollToBottom`
+- `addUserMessage`, `getMsgTime`, `shouldGroupMessage`, `ensureAssistantBlock`
+- `addCopyHandler`, `appendDelta`, `drainStreamTick`, `flushStreamBuffer`, `finalizeAssistantBlock`
+- `addSystemMessage`, `addConflictMessage`, `addContextOverflowMessage`, `addAuthRequiredMessage`
+- `showClaudePreThinking`, `showMatePreThinking`, `doShowMatePreThinking`, `removeMatePreThinking`
+- `showSuggestionChips`, `hideSuggestionChips`
+- Rendering state: `currentMsgEl`, `currentFullText`, `turnCounter`, `prependAnchor`, `activityEl`, `matePreThinkingEl`, `matePreThinkingTimer`, `highlightTimer`, `streamBuffer`, `streamTimer`, `STREAM_INTERVAL`, `isUserScrolledUp`
+
+**Interface**: `initRendering(ctx)` returns `{ addUserMessage, addSystemMessage, appendDelta, finalizeAssistantBlock, ensureAssistantBlock, scrollToBottom, addToMessages, addCopyHandler, ... }`.
+
+**Verify**: Send a message, confirm response streams character by character. Check history replay renders correctly.
+
+---
+
+### PR-29: Extract `lib/public/modules/app-projects.js`
+
+**Create**: `lib/public/modules/app-projects.js`
+
+**Functions to move**:
+- `updateProjectList`, `renderProjectList`, `renderTopbarPresence`
+- `switchProject`, `resetClientState`
+- `confirmRemoveProject`, `handleRemoveProjectCheckResult`, `showRemoveProjectTaskDialog`, `handleRemoveProjectResult`
+- `switchAddProjectMode`, `openAddProjectModal`, `renderRemovedProjectsList`, `closeAddProjectModal`
+- `requestBrowseDir`, `handleBrowseDirResult`, `handleAddProjectResult`, `handleCloneProgress`
+- `setActiveIdx`, `submitAddProject`
+- `showUpdateAvailable`
+- Project state: `cachedProjects`, `cachedProjectCount`, `cachedRemovedProjects`, `currentProjectOwnerId`
+
+**Interface**: `initProjects(ctx)` returns `{ updateProjectList, switchProject, resetClientState, renderProjectList, ... }`.
+
+**Verify**: Switch between projects. Add a new project. Remove a project.
+
+---
+
+### PR-30: Extract `lib/public/modules/app-panels.js`
+
+**Create**: `lib/public/modules/app-panels.js`
+
+**Functions to move**:
+- Config chip: `modelDisplayName`, `modeDisplayName`, `effortDisplayName`, `thinkingDisplayName`, `isSonnetModel`, `hasBeta`, `updateConfigChip`, `getModelSupportsEffort`, `getModelEffortLevels`, `rebuildModelList`, `rebuildModeList`, `rebuildEffortBar`, `rebuildBetaSection`, `rebuildThinkingSection`
+- Usage panel: `formatTokens`, `updateUsagePanel`, `accumulateUsage`, `resetUsage`, `toggleUsagePanel`
+- Status panel: `formatBytes`, `formatUptime`, `updateStatusPanel`, `requestProcessStats`, `toggleStatusPanel`
+- Context panel: `resolveContextWindow`, `contextPctClass`, `updateContextPanel`, `accumulateContext`, `getContextView`, `setContextView`, `applyContextView`, `resetContextData`, `ensureCtxPopover`, `showCtxPopover`, `hideCtxPopover`, `renderCtxPopover`, `resetContext`, `minimizeContext`, `expandContext`, `toggleContextPanel`
+- Panel state: `currentModel`, `currentModels`, `currentMode`, `currentEffort`, `currentBetas`, `currentThinking`, `currentThinkingBudget`, `sessionUsage`, `contextData`, `richContextUsage`, `ctxPopoverVisible`, `headerContextEl`
+
+**Interface**: `initPanels(ctx)` returns `{ updateConfigChip, getModelEffortLevels, accumulateUsage, accumulateContext, updateContextPanel, updateUsagePanel, ... }`.
+
+**Verify**: Open config popover, switch model. Check usage and context panels update during streaming.
+
+---
+
+### PR-31: Extract `lib/public/modules/app-loop-ui.js`
+
+**Create**: `lib/public/modules/app-loop-ui.js`
+
+**Functions to move**:
+- Loop UI: `updateLoopInputVisibility`, `updateLoopButton`, `toggleLoopPopover`, `showLoopBanner`, `updateLoopBanner`, `updateRalphBars`
+- Ralph wizard: `openRalphWizard`, `updateWizardModeTabs`, `closeRalphWizard`, `updateWizardStep`, `collectWizardData`, `buildWizardCron`, `cronToHumanText`, `wizardNext`, `wizardBack`, `wizardSkip`, `wizardSubmit`, `updateRepeatUI`
+- Crafting/approval: `showRalphCraftingBar`, `showRalphApprovalBar`, `updateRalphApprovalStatus`
+- Preview: `openRalphPreviewModal`, `closeRalphPreviewModal`, `showRalphPreviewTab`
+- Loop state: `loopActive`, `loopAvailable`, `loopIteration`, `loopMaxIterations`, `loopBannerName`, `ralphPhase`, `ralphCraftingSessionId`, `ralphCraftingSource`, `ralphFilesReady`, `ralphPreviewContent`
+
+**Interface**: `initLoopUi(ctx)` returns `{ updateLoopButton, showLoopBanner, updateLoopBanner, updateRalphBars, ... }`.
+
+**Verify**: Open loop popover. Start a Ralph wizard. Check crafting and approval bars appear.
+
+---
+
+### PR-32: Extract `lib/public/modules/app-debate-ui.js`
+
+**Create**: `lib/public/modules/app-debate-ui.js`
+
+**Functions to move**:
+- Debate modes: `showDebateConcludeConfirm`, `showDebateConcludeMode`, `exitDebateConcludeMode`, `handleDebateConcludeSend`
+- `showDebateEndedMode`, `exitDebateEndedMode`, `handleDebateEndedSend`
+- `showDebateUserFloor`, `exitDebateFloorMode`, `handleDebateFloorSend`, `renderDebateUserFloorDone`
+- Debate chrome: `showDebateSticky`, `showDebateBottomBar`, `debateAutoResize`, `removeDebateBottomBar`
+- `toggleDebateHandRaise`, `sendDebateStickyComment`, `updateDebateRound`
+- Debate state: `debateFloorMode`, `debateConcludeMode`, `debateEndedMode`
+
+**Interface**: `initDebateUi(ctx)` returns `{ showDebateSticky, showDebateConcludeConfirm, showDebateUserFloor, exitDebateFloorMode, exitDebateConcludeMode, exitDebateEndedMode, updateDebateRound, ... }`.
+
+**Verify**: Start a debate. Check sticky banner, hand raise, floor mode, conclude mode all work.
+
+---
+
+### PR-33: Extract `lib/public/modules/app-skills.js`
+
+**Create**: `lib/public/modules/app-skills.js`
+
+**Functions to move**:
+- `renderSkillInstallDialog`, `hideSkillInstallModal`, `updateSkillInstallProgress`, `updateSkillListItems`, `handleSkillInstallWs`
+- `requireSkills`, `requireClayRalph`, `requireClayMateInterview`
+- Skills state: `knownInstalledSkills`, `pendingSkillInstall`
+
+**Interface**: `initSkillInstall(ctx)` returns `{ requireSkills, requireClayRalph, requireClayMateInterview, handleSkillInstallWs }`.
+
+**Verify**: Trigger a feature that needs a skill (e.g. Ralph). Confirm install dialog appears.
+
+---
+
+### PR-34: Reduce `app.js` to bootstrap
+
+**What remains in app.js** (~1,000 lines):
+- Module imports and initialization sequence (~350 lines with ctx objects)
+- DOM element references and top-level state (~80 lines)
+- Thin delegation functions (~80 lines)
+- Favicon/animation: `updateFavicon`, `drawFaviconAnimFrame` (~50 lines)
+- Status indicators: `setSendBtnMode`, `blinkIO`, `blinkSessionDot`, `startUrgentBlink`, `stopUrgentBlink` (~80 lines)
+- UI modals: `showImageModal`, `closeImageModal`, `showPasteModal`, `closePasteModal`, `showConfirm`, `hideConfirm` (~80 lines)
+- History: `updateHistorySentinel`, `requestMoreHistory`, `prependOlderHistory` (~120 lines)
+- Extension: `sendExtensionCommand`, `handleExtensionResult` (~80 lines)
+- Auth/PIN: `showForceChangePinOverlay` (~50 lines)
+- Final init: `lucide.createIcons()`, `connect()`, `showHomeHub()` (~10 lines)
 
 **Verify**: Full integration. Every feature accessible from the UI works.
 
 ---
 
-## Phase 4: Decompose `sidebar.js` (PR-29 through PR-33)
+## Phase 4: Decompose `sidebar.js` (PR-35 through PR-39)
 
 sidebar.js is 4,583 lines rendering three completely independent UI sections: sessions, projects, and mates/users. Plus a full mobile sheet system (now includes mate tools in mobile sheets).
 
 ---
 
-### PR-29: Extract `lib/public/modules/sidebar-sessions.js`
+### PR-35: Extract `lib/public/modules/sidebar-sessions.js`
 
 **Create**: `lib/public/modules/sidebar-sessions.js`
 
@@ -695,7 +806,7 @@ sidebar.js is 4,583 lines rendering three completely independent UI sections: se
 
 ---
 
-### PR-30: Extract `lib/public/modules/sidebar-projects.js`
+### PR-36: Extract `lib/public/modules/sidebar-projects.js`
 
 **Create**: `lib/public/modules/sidebar-projects.js`
 
@@ -716,7 +827,7 @@ sidebar.js is 4,583 lines rendering three completely independent UI sections: se
 
 ---
 
-### PR-31: Extract `lib/public/modules/sidebar-mates.js`
+### PR-37: Extract `lib/public/modules/sidebar-mates.js`
 
 **Create**: `lib/public/modules/sidebar-mates.js`
 
@@ -734,7 +845,7 @@ sidebar.js is 4,583 lines rendering three completely independent UI sections: se
 
 ---
 
-### PR-32: Extract `lib/public/modules/sidebar-mobile.js`
+### PR-38: Extract `lib/public/modules/sidebar-mobile.js`
 
 **Create**: `lib/public/modules/sidebar-mobile.js`
 
@@ -752,7 +863,7 @@ sidebar.js is 4,583 lines rendering three completely independent UI sections: se
 
 ---
 
-### PR-33: Reduce `sidebar.js` to coordinator
+### PR-39: Reduce `sidebar.js` to coordinator
 
 **What remains in sidebar.js** (~400 lines):
 - `initSidebar(_ctx)` calling all sub-module inits
@@ -768,11 +879,11 @@ sidebar.js is 4,583 lines rendering three completely independent UI sections: se
 
 ---
 
-## Phase 5: Decompose `scheduler.js` (PR-34 through PR-36)
+## Phase 5: Decompose `scheduler.js` (PR-40 through PR-42)
 
 ---
 
-### PR-34: Extract `lib/public/modules/scheduler-config.js`
+### PR-40: Extract `lib/public/modules/scheduler-config.js`
 
 **Create**: `lib/public/modules/scheduler-config.js`
 
@@ -788,7 +899,7 @@ sidebar.js is 4,583 lines rendering three completely independent UI sections: se
 
 ---
 
-### PR-35: Extract `lib/public/modules/scheduler-history.js`
+### PR-41: Extract `lib/public/modules/scheduler-history.js`
 
 **Create**: `lib/public/modules/scheduler-history.js`
 
@@ -800,7 +911,7 @@ sidebar.js is 4,583 lines rendering three completely independent UI sections: se
 
 ---
 
-### PR-36: Reduce `scheduler.js` to coordinator
+### PR-42: Reduce `scheduler.js` to coordinator
 
 **What remains** (~1,200 lines):
 - `initScheduler`, `openScheduler`, `closeScheduler`, `resetScheduler`, `isSchedulerOpen`
@@ -814,11 +925,11 @@ sidebar.js is 4,583 lines rendering three completely independent UI sections: se
 
 ---
 
-## Phase 6: Decompose `sdk-bridge.js` (PR-37 through PR-40)
+## Phase 6: Decompose `sdk-bridge.js` (PR-43 through PR-46)
 
 ---
 
-### PR-37: Extract `lib/sdk-skill-discovery.js`
+### PR-43: Extract `lib/sdk-skill-discovery.js`
 
 **From**: `lib/sdk-bridge.js`
 
@@ -830,7 +941,7 @@ sidebar.js is 4,583 lines rendering three completely independent UI sections: se
 
 ---
 
-### PR-38: Extract `lib/sdk-message-queue.js`
+### PR-44: Extract `lib/sdk-message-queue.js`
 
 **From**: `lib/sdk-bridge.js`
 
@@ -842,7 +953,7 @@ sidebar.js is 4,583 lines rendering three completely independent UI sections: se
 
 ---
 
-### PR-39: Extract `lib/sdk-message-processor.js`
+### PR-45: Extract `lib/sdk-message-processor.js`
 
 **From**: `lib/sdk-bridge.js`
 
@@ -854,11 +965,11 @@ sidebar.js is 4,583 lines rendering three completely independent UI sections: se
 
 ---
 
-### PR-40: Reduce `sdk-bridge.js` to connection manager (~800 lines)
+### PR-46: Reduce `sdk-bridge.js` to connection manager (~800 lines)
 
 **What remains**: `createSDKBridge(opts)` factory, connection state, module wiring, worker lifecycle management (`spawnWorker`, `killSessionWorker`, `startQueryViaWorker`, worker reuse logic). `sendPush` for AskUserQuestion.
 
-> sdk-bridge.js grew from 2,232 to 2,424 lines post-roadmap due to worker lifecycle improvements and perf logging. The extraction targets remain the same but PR-39 scope is larger.
+> sdk-bridge.js grew from 2,232 to 2,424 lines post-roadmap due to worker lifecycle improvements and perf logging. The extraction targets remain the same but PR-45 scope is larger.
 
 **Verify**: Full SDK interaction works end-to-end.
 
@@ -866,11 +977,11 @@ sidebar.js is 4,583 lines rendering three completely independent UI sections: se
 
 ---
 
-## Phase 7: Decompose `mates.js` (PR-41 through PR-44)
+## Phase 7: Decompose `mates.js` (PR-47 through PR-50)
 
 ---
 
-### PR-41: Extract `lib/mates-prompts.js`
+### PR-47: Extract `lib/mates-prompts.js`
 
 **From**: `lib/mates.js`
 
@@ -887,7 +998,7 @@ sidebar.js is 4,583 lines rendering three completely independent UI sections: se
 
 ---
 
-### PR-42: Extract `lib/mates-knowledge.js`
+### PR-48: Extract `lib/mates-knowledge.js`
 
 **From**: `lib/mates.js`
 
@@ -900,7 +1011,7 @@ sidebar.js is 4,583 lines rendering three completely independent UI sections: se
 
 ---
 
-### PR-43: Extract `lib/mates-identity.js`
+### PR-49: Extract `lib/mates-identity.js`
 
 **From**: `lib/mates.js`
 
@@ -913,7 +1024,7 @@ sidebar.js is 4,583 lines rendering three completely independent UI sections: se
 
 ---
 
-### PR-44: Reduce `mates.js` to CRUD + builtins (~500 lines)
+### PR-50: Reduce `mates.js` to CRUD + builtins (~500 lines)
 
 **What remains**: `createMate`, `getMate`, `updateMate`, `deleteMate`, `getAllMates`, `isMate`, storage functions, builtin mate functions, migration.
 
@@ -921,11 +1032,11 @@ sidebar.js is 4,583 lines rendering three completely independent UI sections: se
 
 ---
 
-## Phase 8: Decompose `users.js` (PR-45 through PR-48)
+## Phase 8: Decompose `users.js` (PR-51 through PR-54)
 
 ---
 
-### PR-45: Extract `lib/users-auth.js`
+### PR-51: Extract `lib/users-auth.js`
 
 **From**: `lib/users.js`
 
@@ -939,7 +1050,7 @@ sidebar.js is 4,583 lines rendering three completely independent UI sections: se
 
 ---
 
-### PR-46: Extract `lib/users-permissions.js`
+### PR-52: Extract `lib/users-permissions.js`
 
 **From**: `lib/users.js`
 
@@ -952,7 +1063,7 @@ sidebar.js is 4,583 lines rendering three completely independent UI sections: se
 
 ---
 
-### PR-47: Extract `lib/users-preferences.js`
+### PR-53: Extract `lib/users-preferences.js`
 
 **From**: `lib/users.js`
 
@@ -968,7 +1079,7 @@ sidebar.js is 4,583 lines rendering three completely independent UI sections: se
 
 ---
 
-### PR-48: Reduce `users.js` to CRUD + invites (~300 lines)
+### PR-54: Reduce `users.js` to CRUD + invites (~300 lines)
 
 **What remains**: User CRUD (`createUser`, `findUserById`, `getAllUsers`, `removeUser`, etc.), invite functions, profile/PIN update, storage, Linux user integration.
 
@@ -976,11 +1087,11 @@ sidebar.js is 4,583 lines rendering three completely independent UI sections: se
 
 ---
 
-## Phase 9: Decompose `daemon.js` (PR-49)
+## Phase 9: Decompose `daemon.js` (PR-55)
 
 ---
 
-### PR-49: Extract `lib/daemon-projects.js`
+### PR-55: Extract `lib/daemon-projects.js`
 
 **From**: `lib/daemon.js`
 
@@ -994,11 +1105,11 @@ sidebar.js is 4,583 lines rendering three completely independent UI sections: se
 
 ---
 
-## Phase 10: WebSocket Schema (PR-50)
+## Phase 10: WebSocket Schema (PR-56)
 
 ---
 
-### PR-50: Define `lib/ws-schema.js`
+### PR-56: Define `lib/ws-schema.js`
 
 **Create**: `lib/ws-schema.js`
 
@@ -1068,38 +1179,44 @@ module.exports = { schema }
 | PR-25 | done | `lib/public/modules/app-home-hub.js` | app.js | 600 |
 | PR-26 | done | `lib/public/modules/app-rate-limit.js` | app.js | 448 |
 | PR-27 | done | `lib/public/modules/app-cursors.js` | app.js | 473 |
-| PR-28 | pending | (cleanup) | app.js | 0 (reduce to ~1,500) |
+| PR-28 | pending | `lib/public/modules/app-rendering.js` | app.js | ~500 |
+| PR-29 | pending | `lib/public/modules/app-projects.js` | app.js | ~500 |
+| PR-30 | pending | `lib/public/modules/app-panels.js` | app.js | ~500 |
+| PR-31 | pending | `lib/public/modules/app-loop-ui.js` | app.js | ~700 |
+| PR-32 | pending | `lib/public/modules/app-debate-ui.js` | app.js | ~400 |
+| PR-33 | pending | `lib/public/modules/app-skills.js` | app.js | ~200 |
+| PR-34 | pending | (cleanup) | app.js | 0 (reduce to ~1,000) |
 | **Phase 4: sidebar.js** | | | | |
-| PR-29 | pending | `lib/public/modules/sidebar-sessions.js` | sidebar.js | ~1,200 |
-| PR-30 | pending | `lib/public/modules/sidebar-projects.js` | sidebar.js | ~1,200 |
-| PR-31 | pending | `lib/public/modules/sidebar-mates.js` | sidebar.js | ~700 |
-| PR-32 | pending | `lib/public/modules/sidebar-mobile.js` | sidebar.js | ~800 |
-| PR-33 | pending | (cleanup) | sidebar.js | 0 (reduce to ~400) |
+| PR-35 | pending | `lib/public/modules/sidebar-sessions.js` | sidebar.js | ~1,200 |
+| PR-36 | pending | `lib/public/modules/sidebar-projects.js` | sidebar.js | ~1,200 |
+| PR-37 | pending | `lib/public/modules/sidebar-mates.js` | sidebar.js | ~700 |
+| PR-38 | pending | `lib/public/modules/sidebar-mobile.js` | sidebar.js | ~800 |
+| PR-39 | pending | (cleanup) | sidebar.js | 0 (reduce to ~400) |
 | **Phase 5: scheduler.js** | | | | |
-| PR-34 | pending | `lib/public/modules/scheduler-config.js` | scheduler.js | ~600 |
-| PR-35 | pending | `lib/public/modules/scheduler-history.js` | scheduler.js | ~200 |
-| PR-36 | pending | (cleanup) | scheduler.js | 0 (reduce to ~1,200) |
+| PR-40 | pending | `lib/public/modules/scheduler-config.js` | scheduler.js | ~600 |
+| PR-41 | pending | `lib/public/modules/scheduler-history.js` | scheduler.js | ~200 |
+| PR-42 | pending | (cleanup) | scheduler.js | 0 (reduce to ~1,200) |
 | **Phase 6: sdk-bridge.js** | | | | |
-| PR-37 | pending | `lib/sdk-skill-discovery.js` | sdk-bridge.js | ~200 |
-| PR-38 | pending | `lib/sdk-message-queue.js` | sdk-bridge.js | ~100 |
-| PR-39 | pending | `lib/sdk-message-processor.js` | sdk-bridge.js | ~1,000 |
-| PR-40 | pending | (cleanup) | sdk-bridge.js | 0 (reduce to ~900) |
+| PR-43 | pending | `lib/sdk-skill-discovery.js` | sdk-bridge.js | ~200 |
+| PR-44 | pending | `lib/sdk-message-queue.js` | sdk-bridge.js | ~100 |
+| PR-45 | pending | `lib/sdk-message-processor.js` | sdk-bridge.js | ~1,000 |
+| PR-46 | pending | (cleanup) | sdk-bridge.js | 0 (reduce to ~900) |
 | **Phase 7: mates.js** | | | | |
-| PR-41 | pending | `lib/mates-prompts.js` | mates.js | ~400 |
-| PR-42 | pending | `lib/mates-knowledge.js` | mates.js | ~200 |
-| PR-43 | pending | `lib/mates-identity.js` | mates.js | ~150 |
-| PR-44 | pending | (cleanup) | mates.js | 0 (reduce to ~500) |
+| PR-47 | pending | `lib/mates-prompts.js` | mates.js | ~400 |
+| PR-48 | pending | `lib/mates-knowledge.js` | mates.js | ~200 |
+| PR-49 | pending | `lib/mates-identity.js` | mates.js | ~150 |
+| PR-50 | pending | (cleanup) | mates.js | 0 (reduce to ~500) |
 | **Phase 8: users.js** | | | | |
-| PR-45 | pending | `lib/users-auth.js` | users.js | ~200 |
-| PR-46 | pending | `lib/users-permissions.js` | users.js | ~100 |
-| PR-47 | pending | `lib/users-preferences.js` | users.js | ~150 |
-| PR-48 | pending | (cleanup) | users.js | 0 (reduce to ~300) |
+| PR-51 | pending | `lib/users-auth.js` | users.js | ~200 |
+| PR-52 | pending | `lib/users-permissions.js` | users.js | ~100 |
+| PR-53 | pending | `lib/users-preferences.js` | users.js | ~150 |
+| PR-54 | pending | (cleanup) | users.js | 0 (reduce to ~300) |
 | **Phase 9: daemon.js** | | | | |
-| PR-49 | pending | `lib/daemon-projects.js` | daemon.js | ~200 |
+| PR-55 | pending | `lib/daemon-projects.js` | daemon.js | ~200 |
 | **Phase 10: ws-schema** | | | | |
-| PR-50 | pending | `lib/ws-schema.js` | (new) | ~300 |
+| PR-56 | pending | `lib/ws-schema.js` | (new) | ~300 |
 
-**Total: 50 PRs, ~35 new files created.**
+**Total: 56 PRs, ~41 new files created.**
 
 ---
 
@@ -1129,14 +1246,14 @@ module.exports = { schema }
 
 ### Background
 
-SDK-dependent code spans 8 files with 54+ direct calls. The sdk-bridge.js monolith (2,424 lines) mixes connection management, message processing, skill discovery, and queue logic. Drawing abstraction interfaces over this tangled state would produce a bad public API. PR-37~40 decomposes sdk-bridge first, making the correct abstraction boundaries visible.
+SDK-dependent code spans 8 files with 54+ direct calls. The sdk-bridge.js monolith (2,424 lines) mixes connection management, message processing, skill discovery, and queue logic. Drawing abstraction interfaces over this tangled state would produce a bad public API. PR-43~46 decomposes sdk-bridge first, making the correct abstraction boundaries visible.
 
 ### Phases
 
 | Phase | Action | When |
 |-------|--------|------|
-| 1 | Decompose sdk-bridge.js (PR-37~40) | Phase 6 of this roadmap |
-| 2 | Wrap direct SDK calls in intermediate functions | During PR-37~40 |
+| 1 | Decompose sdk-bridge.js (PR-43~46) | Phase 6 of this roadmap |
+| 2 | Wrap direct SDK calls in intermediate functions | During PR-43~46 |
 | 3 | Document sdk-worker.js message protocol | PR-40 |
 | 4 | Define interfaces + extract to separate repo | When adding second runtime (outside this roadmap) |
 
@@ -1157,7 +1274,7 @@ ctx.sdk.startMentionTurn({ cwd, sessionId, model, ... })
 
 **Rule 2: Document sdk-worker.js message protocol**
 
-The Unix domain socket + JSON-line protocol between sdk-bridge and sdk-worker carries structured messages. During PR-40, enumerate all message types as constants or a schema comment. This protocol may become the foundation for YOKE's cross-runtime message spec.
+The Unix domain socket + JSON-line protocol between sdk-bridge and sdk-worker carries structured messages. During PR-46, enumerate all message types as constants or a schema comment. This protocol may become the foundation for YOKE's cross-runtime message spec.
 
 **Rule 3: Preserve the getSDK() factory pattern**
 
