@@ -98,6 +98,9 @@ Bootstraps UI, wires modules, dispatches WebSocket messages via `processMessage`
 | `app-loop-ui.js` | Ralph Loop UI, wizard, crafting/approval bars, preview modal, loop banner |
 | `app-debate-ui.js` | Debate sticky banner, floor/conclude/ended modes, bottom bar, hand raise |
 | `app-skills-install.js` | Skill install dialog, requireSkills, requireClayMateInterview |
+| `app-favicon.js` | Dynamic favicon, IO blink, urgent blink, send button mode, activity indicator |
+| `app-header.js` | Session rename, session info popover, progressive history loading |
+| `app-misc.js` | Image/paste/confirm modals, force PIN overlay, PWA install, Chrome extension bridge |
 
 ---
 
