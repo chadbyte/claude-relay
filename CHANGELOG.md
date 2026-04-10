@@ -1,3 +1,10 @@
+# [2.27.0-beta.4](https://github.com/chadbyte/clay/compare/v2.27.0-beta.3...v2.27.0-beta.4) (2026-04-10)
+
+
+### Bug Fixes
+
+* pass mcpServers to createMentionSession query options ([6c6ad09](https://github.com/chadbyte/clay/commit/6c6ad096cfd80d49662267d9d3374324c2326855))
+
 # [2.27.0-beta.3](https://github.com/chadbyte/clay/compare/v2.27.0-beta.2...v2.27.0-beta.3) (2026-04-10)
 
 
