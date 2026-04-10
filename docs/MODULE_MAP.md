@@ -93,6 +93,7 @@ Bootstraps UI, wires modules, dispatches WebSocket messages via `processMessage`
 | `app-rate-limit.js` | Rate limit UI, countdown timers, scheduled message bubbles, fast mode indicator |
 | `app-cursors.js` | Remote cursor presence, text selection sharing, cursor toggle UI |
 | `app-rendering.js` | Message rendering, streaming, scroll management, pre-thinking dots, suggestion chips, system messages |
+| `app-projects.js` | Project list, switching, add/remove project modals, update available pill, topbar presence |
 
 ---
 
