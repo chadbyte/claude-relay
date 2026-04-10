@@ -165,6 +165,13 @@ handleDebateStop: debate.handleDebateStop,
 - Start the server, open a project, trigger the feature, confirm it works.
 - No other file was modified except the original and the new module.
 
+### Stage 5: Update MODULE_MAP.md
+
+- Add the new module to the appropriate table in [MODULE_MAP.md](./MODULE_MAP.md).
+- List all message types the module handles.
+- If message types moved between modules, update the old module's entry too.
+- This keeps the map accurate so future contributors know where to add code.
+
 ---
 
 ## Current State
