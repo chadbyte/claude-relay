@@ -214,7 +214,16 @@ Rules:
 When done, append verification results to this file under "## Phase 3 Verification".
 ```
 
-**Status**: Not started
+**Status**: In progress. Step 3a (scaffold + rewire) complete. Steps 3b/3c/3d remaining. See [PHASE3_IMPLEMENTATION.md](./PHASE3_IMPLEMENTATION.md).
+
+### Phase 3 sub-steps
+
+| Step | Description | Status |
+|------|-------------|--------|
+| 3a | Scaffold `lib/yoke/`, create adapter shell, rewire all `getSDK` call sites | Complete |
+| 3b | Move worker management code (~530 lines) from sdk-bridge.js into adapter. `createQuery()` owns both in-process and worker paths. Clay does not know which path runs. | Not started |
+| 3c | Make QueryHandle the real abstraction. Remove `_rawQuery`/`_messageQueue`/`_pushRaw`. `processQueryStream` iterates QueryHandle, not raw SDK query. Worker and in-process yield the same event shape. | Not started |
+| 3d | Event normalization. Adapter translates raw SDK events to Phase 2's 20 normalized event types. `processSDKMessage` rewritten to consume normalized events. Gradual approach: `{ yokeType, raw }` envelope first, then migrate field by field. | Not started |
 
 ---
 
@@ -282,6 +291,8 @@ Record agent hand-offs here. Each entry: date, agent/mate, what was done, what's
 | 2026-04-11 | Claude | Phase 2 revised: all 9 changes applied. adapterOptions.CLAUDE passthrough, vendor constants, lifecycle diagram, turn_start event, runtime_specific event, supportedModels moved to adapter level. | Final CLAY review requested. |
 | 2026-04-11 | Claude | Final CLAY classification review: found 3 missing data flows (message_uuid, early session_id, fast_mode_state) that reach UI but weren't documented. Added as runtime_specific passthrough examples. Total changes: 10. | Phase 2 classification done. |
 | 2026-04-11 | Claude | DEVELOPER_GUIDE.md created. 4 strategies (MAP/POLYFILL/DEGRADE/HIDE), capability-based UI, adapterOptions usage rules, user-supplied polyfill registry pattern. init() capabilities added to Phase 2 interface. | Phase 2 fully complete. Ready for Phase 3. |
+| 2026-04-11 | Claude | Phase 3a complete: scaffold + rewire. Created lib/yoke/ (4 new files), rewired 9 existing files. SDK imports isolated to lib/yoke/adapters/. | Review identified 3 gaps: worker code not moved, QueryHandle is a shallow wrapper (_rawQuery leak), event normalization skipped. |
+| 2026-04-11 | Chad | Review: 3a is only 70%. Worker code in sdk-bridge (#2), _rawQuery hack (#3), no event normalization (#1) are all real problems. Core issue: QueryHandle is not a real abstraction. OK with deprecated sdk-worker.js (#4) and Zod inputSchema (#5). | Steps 3b, 3c, 3d defined. Order: worker move -> QueryHandle real abstraction -> event normalization (gradual). |
 
 ---
 
@@ -308,9 +319,48 @@ Full audit in [PHASE1_SDK_AUDIT.md](./PHASE1_SDK_AUDIT.md). Key findings:
 
 ## Phase 3 Verification
 
-(Agent appends verification results here)
+### Step 3a checks (2026-04-11)
 
-- [ ] No direct SDK import in any file outside yoke-harness.js
-- [ ] All yoke-harness.js exports are actually called (no dead functions)
-- [ ] No Clay business logic inside yoke-harness.js
-- [ ] Manual test: Mate session create, message exchange, skill execution all work
+- [x] No direct SDK import/require in any file outside `lib/yoke/adapters/` (grep verified, except deprecated sdk-worker.js)
+- [x] No `getSDK()` references in project.js, sdk-bridge.js, project-sessions.js, project-user-message.js, sessions.js
+- [x] All 9 modified files pass `node -c` syntax check
+- [x] MCP servers (browser-mcp-server.js, debate-mcp-server.js) export tool definitions without SDK dependency
+- [x] Claude adapter implements all required interface methods: init, supportedModels, createToolServer, createQuery + session management (getSessionInfo, listSessions, renameSession, forkSession)
+
+### Step 3a gaps (identified in review)
+
+- [ ] **QueryHandle is a shell**: exposes `_rawQuery`, processQueryStream bypasses the handle -> Step 3c
+- [ ] **Worker code in sdk-bridge.js**: ~530 lines of adapter-internal code still in Clay -> Step 3b
+- [ ] **No event normalization**: processSDKMessage consumes raw Claude SDK events -> Step 3d
+
+### Step 3b checks (pending)
+
+- [ ] No worker-related code in sdk-bridge.js (spawnWorker, startQueryViaWorker, warmupViaWorker, cleanupWorker, killSessionWorker all moved)
+- [ ] `adapter.createQuery()` handles linuxUser internally
+- [ ] `adapter.init()` handles linuxUser warmup internally
+- [ ] Worker IPC permission/elicitation routed through createQuery callbacks
+
+### Step 3c checks (pending)
+
+- [ ] No `_rawQuery`, `_messageQueue`, `_pushRaw` on QueryHandle
+- [ ] `processQueryStream` iterates QueryHandle (not raw SDK query)
+- [ ] `session.queryInstance` IS the QueryHandle
+- [ ] Worker and in-process paths produce same event shape through iterator
+
+### Step 3d checks (pending)
+
+- [ ] Adapter yields `{ yokeType, raw }` envelope for every event
+- [ ] processSDKMessage routes on `yokeType` (not raw SDK event type)
+- [ ] All 20 Phase 2 normalized event types mapped
+- [ ] `raw` field removed after all event types migrated
+
+### Manual tests (pending, after all steps)
+
+- [ ] Mate session create, message exchange, skill execution
+- [ ] @mention flow (createMentionSession via adapter)
+- [ ] Session rewind (getOrCreateRewindQuery via adapter)
+- [ ] Worker mode (OS multi-user)
+- [ ] MCP tools (browser automation, debate proposal)
+- [ ] Session resume, rename, fork via adapter
+- [ ] Rate limit auto-continue
+- [ ] Warmup (model list, skill discovery)
