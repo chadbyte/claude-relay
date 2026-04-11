@@ -52,6 +52,10 @@ Wires all modules, sets up session manager and SDK bridge, dispatches messages.
 | `mates-prompts.js` | System section enforcers (team, session memory, sticky notes, project registry, debate), marker constants |
 | `mates-knowledge.js` | Common knowledge registry (promote/depromote, cross-mate file sharing) |
 | `mates-identity.js` | Identity extraction, backup/restore, change tracking, primary capabilities |
+| `users.js` | User CRUD, invites, profile/PIN update, storage, Linux user integration |
+| `users-auth.js` | Authentication, PIN hashing, auth tokens, multi-user mode, setup codes |
+| `users-permissions.js` | RBAC permissions, project/session access control |
+| `users-preferences.js` | DM favorites/hidden, auto-continue, chat layout, deleted builtin keys, mate onboarding |
 
 ### Server Modules (lib/server-*.js)
 

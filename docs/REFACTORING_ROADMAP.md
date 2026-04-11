@@ -68,11 +68,11 @@
 | PR-48 | done | Extract `mates-knowledge.js` from `mates.js` | 2026-04-11 |
 | PR-49 | done | Extract `mates-identity.js` from `mates.js` | 2026-04-11 |
 | PR-50 | done | Reduce `mates.js` to CRUD + builtins | 2026-04-11 |
-| PR-51 | **next** | Extract `users-auth.js` from `users.js` | |
-| PR-52 | pending | Extract `users-permissions.js` from `users.js` | |
-| PR-53 | pending | Extract `users-preferences.js` from `users.js` | |
-| PR-54 | pending | Reduce `users.js` to CRUD + invites | |
-| PR-55 | pending | Extract `daemon-projects.js` from `daemon.js` | |
+| PR-51 | done | Extract `users-auth.js` from `users.js` | 2026-04-11 |
+| PR-52 | done | Extract `users-permissions.js` from `users.js` | 2026-04-11 |
+| PR-53 | done | Extract `users-preferences.js` from `users.js` | 2026-04-11 |
+| PR-54 | done | Reduce `users.js` to CRUD + invites | 2026-04-11 |
+| PR-55 | **next** | Extract `daemon-projects.js` from `daemon.js` | |
 | PR-56 | pending | Define `ws-schema.js` | |
 
 ### Current file sizes after completed PRs
@@ -86,7 +86,7 @@
 | `lib/public/modules/scheduler.js` | 3,166 | 1,645 | ~1,200 |
 | `lib/sdk-bridge.js` | 2,232 | 1,892 | ~800 |
 | `lib/mates.js` | 1,318 | 747 | ~500 |
-| `lib/users.js` | 791 | 829 | ~300 |
+| `lib/users.js` | 791 | 479 | ~300 |
 | `lib/daemon.js` | 1,490 | 1,503 | ~1,100 |
 
 > Updated 2026-04-11. Files grew due to feature additions (OS user mode, chat layout, push notifications, sender attribution, worker lifecycle improvements). Refactoring scope increased accordingly.
@@ -1207,10 +1207,10 @@ module.exports = { schema }
 | PR-49 | done | `lib/mates-identity.js` | mates.js | 132 |
 | PR-50 | done | (cleanup) | mates.js | 0 (reduced to 747) |
 | **Phase 8: users.js** | | | | |
-| PR-51 | pending | `lib/users-auth.js` | users.js | ~200 |
-| PR-52 | pending | `lib/users-permissions.js` | users.js | ~100 |
-| PR-53 | pending | `lib/users-preferences.js` | users.js | ~150 |
-| PR-54 | pending | (cleanup) | users.js | 0 (reduce to ~300) |
+| PR-51 | done | `lib/users-auth.js` | users.js | 146 |
+| PR-52 | done | `lib/users-permissions.js` | users.js | 118 |
+| PR-53 | done | `lib/users-preferences.js` | users.js | 210 |
+| PR-54 | done | (cleanup) | users.js | 0 (reduced to 479) |
 | **Phase 9: daemon.js** | | | | |
 | PR-55 | pending | `lib/daemon-projects.js` | daemon.js | ~200 |
 | **Phase 10: ws-schema** | | | | |
