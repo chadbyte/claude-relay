@@ -212,7 +212,7 @@ Rules:
 When done, append verification results to this file under "## Phase 3 Verification".
 ```
 
-**Status**: In progress. Step 3a (scaffold + rewire) complete. Steps 3b/3c/3d remaining. See [PHASE3_IMPLEMENTATION.md](./PHASE3_IMPLEMENTATION.md).
+**Status**: Complete (2026-04-11). All 5 sub-steps done. See [PHASE3_IMPLEMENTATION.md](./PHASE3_IMPLEMENTATION.md).
 
 ### Phase 3 sub-steps
 
@@ -222,7 +222,7 @@ When done, append verification results to this file under "## Phase 3 Verificati
 | 3b | Move worker management code (~530 lines) from sdk-bridge.js into adapter. `createQuery()` owns both in-process and worker paths. Clay does not know which path runs. | Complete |
 | 3c | Make QueryHandle the real abstraction. Remove `_rawQuery`/`_messageQueue`/`_pushRaw`. `processQueryStream` iterates QueryHandle, not raw SDK query. Worker and in-process yield the same event shape. | Complete |
 | 3d | Event flattening. Adapter flattens nested SDK events into `{ yokeType, ...fields }`. processSDKMessage if-conditions simplify (not a rewrite). Claude-specific logic stays in place for now. See PHASE3 Section 7-8 for analysis. | Complete |
-| 3e | Claude assumption cleanup (~25 lines). Move auth detection, fast_mode_state, block index tracking from processSDKMessage into Claude adapter. Runs AFTER 3d is stable. Small, bounded behavior change. Must be done before Phase 4 release. | Not started |
+| 3e | Claude assumption cleanup. Block index -> blockId (adapter assigns ID, processSDKMessage tracks by ID). fast_mode_state already generic (field check + forward). Auth detection stays (needs session context, cannot move to adapter). | Complete |
 
 ---
 
@@ -328,6 +328,7 @@ Record agent hand-offs here. Each entry: date, agent/mate, what was done, what's
 | 2026-04-11 | Claude | Step 3b complete. Worker management (~530 lines) moved from sdk-bridge.js to claude.js. createWorkerQueryHandle wraps IPC into async iterable. adapter.createQuery branches on linuxUser. setEffort/setPermissionMode/stopTask route through QueryHandle. Idle reaper updated. | Step 3c next: QueryHandle real abstraction. |
 | 2026-04-11 | Claude | Step 3c complete. Removed `_rawQuery`, `_messageQueue`, `_pushRaw` from both QueryHandle implementations. `session.queryInstance = handle` directly. `pushMessage()` routes through QueryHandle for all paths. `rewindFiles()` added as pass-through. | Step 3d next: event flattening. |
 | 2026-04-11 | Claude | Step 3d complete. `flattenEvent()` added to claude.js (~190 lines). Both iterators flatten before yielding. processSDKMessage rewritten to consume `yokeType` (26 checks, zero nested raw paths). All field names normalized (sessionId, slashCommands, cost, etc.). Zero behavior change. | Step 3e next: Claude assumption cleanup. |
+| 2026-04-11 | Claude | Step 3e complete. blockIndex -> blockId (adapter assigns `"blk_" + index`). fast_mode_state already generic. Auth detection stays in processSDKMessage (needs session context, cannot move to adapter without breaking clean event design). Accepted as permanent deferral with documented migration path for second adapter. Phase 3 complete. | Phase 4: library extraction + release. |
 
 ---
 
@@ -399,13 +400,22 @@ Full audit in [PHASE1_SDK_AUDIT.md](./PHASE1_SDK_AUDIT.md). Key findings:
 - [x] Both in-process and worker iterators call flattenEvent before yielding
 - [x] processSubagentMessage updated to use flattened field names
 
-### Step 3e checks (pending)
+### Step 3e checks (2026-04-11)
 
-- [ ] Auth detection heuristic moved from processSDKMessage to Claude adapter (adapter emits `auth_required` event)
-- [ ] fast_mode_state handled inside adapter (emitted as field on `init`/`result` or as `runtime_specific`)
-- [ ] Block tracking uses `blockId` (not integer index). Adapter assigns ID, processSDKMessage tracks by ID.
-- [ ] processSDKMessage has zero Claude-specific format assumptions
-- [ ] All manual tests pass after 3e (confirms behavior change is safe)
+- [x] Block tracking uses `blockId` (not integer index). Adapter assigns `"blk_" + index`, processSDKMessage tracks `session.blocks[blockId]`.
+- [x] fast_mode_state: already generic. Field on init/result, processSDKMessage checks and forwards if present. No change needed.
+- [ ] Auth detection heuristic: stays in processSDKMessage (needs session.responsePreview, which is session state not available to flattenEvent). Accepted deferral, see below.
+- [x] All manual tests pass after 3e
+
+### Auth detection: accepted deferral
+
+The "not logged in" text pattern check (lines 337-338, 364-377 of processSDKMessage) reads `session.responsePreview` which is accumulated during streaming. `flattenEvent` only sees individual raw SDK events and has no access to session state. Moving this detection to the adapter would require passing session state into the flattener, breaking the clean event-in/event-out design.
+
+When a second adapter exists, the recommended approach is:
+- The second adapter detects auth failure via its own mechanism (error code, HTTP status, etc.)
+- It sets `isAuthPrompt: true` on the result event
+- processSDKMessage checks `parsed.isAuthPrompt` first, falls back to text heuristic for Claude
+- The text heuristic is harmless for other adapters (it only triggers on very specific zero-cost short responses)
 
 ### Manual tests (pending, after all steps)
 

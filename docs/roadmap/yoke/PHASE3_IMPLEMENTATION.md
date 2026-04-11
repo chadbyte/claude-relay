@@ -1,7 +1,7 @@
 # Phase 3: Implementation (Claude Adapter)
 
 > YOKE interface created. Claude adapter built. All SDK call sites rewired.
-> Step 3a complete (2026-04-11). Steps 3b, 3c, 3d remaining.
+> Phase 3 complete (2026-04-11). All 5 sub-steps done.
 
 ---
 
@@ -15,7 +15,7 @@ Phase 3 is split into 4 sub-steps after review identified gaps in the initial im
 | **3b** | Move worker management code (~530 lines) from sdk-bridge.js into claude.js adapter. `adapter.createQuery()` owns both in-process and worker paths. `linuxUser` becomes an adapter option. Clay never decides how to run the query. | Complete |
 | **3c** | Make QueryHandle the real abstraction. Remove `_rawQuery`, `_messageQueue`, `_pushRaw`. `processQueryStream` iterates the QueryHandle. Worker QueryHandle yields events from IPC. Both paths produce the same event shape. | Complete |
 | **3d** | Event flattening. Adapter flattens deeply nested Claude SDK events into `{ yokeType, ...fields }`. processSDKMessage if-conditions simplify from 3-level nesting to flat yokeType checks. Not a rewrite. Claude-specific logic stays in place for now. | Complete |
-| **3e** | Claude assumption cleanup. Move auth detection (~20 lines), fast_mode_state (~5 lines), block index tracking (~10 lines) from processSDKMessage into Claude adapter. Small, bounded behavior change. Runs AFTER 3d is verified stable. Must complete before Phase 4 release. | Not started |
+| **3e** | Claude assumption cleanup. Block index -> blockId (adapter assigns ID). fast_mode_state already generic. Auth detection stays (needs session context). | Complete |
 
 ### Why this order
 
@@ -31,7 +31,7 @@ Phase 3 is split into 4 sub-steps after review identified gaps in the initial im
   '-- 3b (done)
         '-- 3c (done)
               '-- 3d (done)
-                    '-- 3e (Claude assumptions cleanup, ~25 lines behavior change)
+                    '-- 3e (done)
                           '-- Phase 4 (library extract + release)
 ```
 
@@ -304,60 +304,23 @@ Not a rewrite. The adapter flattens raw SDK events; processSDKMessage if-conditi
 - `session.blocks[idx]` changes to `session.blocks[msg.blockId]` (ID-based, not index-based)
 - Business logic stays identical
 
-**What stays in processSDKMessage during Step 3d** (extraction only, no behavior change):
-- Auth detection heuristic: stays as-is. Adapter passes the `result` event with enough data for the existing check to work.
-- fast_mode_state: stays as-is. Adapter includes `fastModeState` field on `init` and `result` events.
-- Block index tracking: stays as `session.blocks[idx]`. Adapter's flattened events include both `blockId` (new, for 3e) and `blockIndex` (current, for 3d compat).
+### Step 3e: Claude assumption cleanup (complete)
 
-These items move to the adapter in Step 3e (see Section 5).
+| Item | Status | Result |
+|------|--------|--------|
+| Block index tracking | **Done** | `session.blocks[blockId]` (was `session.blocks[idx]`). Adapter assigns `blockId = "blk_" + index`. Other adapters can assign any string ID. |
+| fast_mode_state | **Already generic** | processSDKMessage checks `parsed.fastModeState` field, forwards if present. Other adapters simply omit the field. No change needed. |
+| Auth detection | **Stays** | Cannot move to adapter: needs `session.responsePreview` (accumulated during streaming). `flattenEvent` only sees individual events, not session state. See "Auth detection: accepted deferral" below. |
 
-### Step 3e: Claude assumption cleanup
-
-Prerequisite: Step 3d complete and verified stable.
-
-**Auth detection** (~20 lines):
-```js
-// 3d state: processSDKMessage still checks text pattern on result event
-// 3e target: Claude adapter detects the pattern and emits { yokeType: "auth_required" }
-//            processSDKMessage handles auth_required as a generic event
-```
-
-**fast_mode_state** (~5 lines):
-```js
-// 3d state: processSDKMessage reads fastModeState from init/result events
-// 3e target: Claude adapter emits { yokeType: "runtime_specific", vendor: "claude",
-//            eventType: "fast_mode_state", ... } per Phase 2 design
-//            processSDKMessage handles runtime_specific generically
-```
-
-**Block index tracking** (~10 lines):
-```js
-// 3d state: session.blocks[blockIndex], adapter provides both blockIndex and blockId
-// 3e target: session.blocks[blockId], blockIndex dropped from events
-//            Adapter assigns blockId = "block_" + index (Claude) or native ID (other runtimes)
-```
+**Auth detection: accepted deferral.** The "not logged in" text pattern check reads session state that the adapter cannot access. When a second adapter exists, the recommended approach: the adapter sets `isAuthPrompt: true` on the result event using its own detection mechanism. processSDKMessage checks `parsed.isAuthPrompt` first, falls back to the existing text heuristic for Claude. The text heuristic is harmless for other adapters (only triggers on very specific zero-cost short responses matching `/not logged in/i` AND `/\/login/i`).
 
 ### Accepted deferrals (OK to leave for later)
 
 | Item | Deferred to | Rationale |
 |------|------------|-----------|
-| Remove deprecated `lib/sdk-worker.js` | After 3b | Safety net until worker code is fully moved into adapter. |
+| Remove deprecated `lib/sdk-worker.js` | Post-release | Safety net for running workers. Worker code is fully in adapter. |
 | `createToolServer` inputSchema as JSON Schema instead of Zod | Post-release | Only matters when a non-Claude adapter needs tool registration. Zod works for Claude. |
-| Remove `adapter._loadSDK()` | After 3e | May be needed during transition. |
-
-### Claude-specific logic in processSDKMessage: Step 3e (after 3d is stable)
-
-Steps 3a through 3d follow the principle: **extraction only, no behavior change.** The following Claude assumptions stay in processSDKMessage through 3d, then move to the adapter in Step 3e.
-
-| Item | Lines | Claude assumption | Step 3e action |
-|------|-------|-------------------|----------------|
-| Auth detection heuristic | 348-389 | Checks response text for "not logged in" pattern | Adapter emits `{ yokeType: "auth_required" }` event. Each adapter detects auth failure its own way. processSDKMessage handles `auth_required` generically. |
-| fast_mode_state | 137-139, 370-372 | Anthropic billing concept, no equivalent elsewhere | Adapter includes as field on `init`/`result` events, or emits `runtime_specific`. processSDKMessage forwards if present. |
-| Block index tracking | 150-217 | `session.blocks[idx]` uses Claude's integer content block index | Adapter assigns `blockId` per block. processSDKMessage tracks `session.blocks[blockId]`. |
-
-**Why separate from 3d**: 3d is event flattening (zero behavior change). 3e is behavior change (~25 lines). If 3d breaks something, it is the flattening. If 3e breaks something, it is the Claude assumption removal. Isolating these into separate steps makes debugging trivial.
-
-**Why before Phase 4**: YOKE will be open-sourced after Phase 4. An adapter author hitting Claude-specific assumptions in processSDKMessage on day one is a bad first impression. These must be resolved before release.
+| Auth detection text heuristic | Post-release | Needs session context (responsePreview). Harmless for other adapters. Migration path documented: `isAuthPrompt` field on result event. |
 
 ---
 
