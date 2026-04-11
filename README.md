@@ -169,6 +169,16 @@ graph LR
 
 For detailed sequence diagrams, daemon architecture, and design decisions, see [docs/architecture.md](docs/architecture.md).
 
+## Community Projects
+
+Projects built by the community on top of Clay.
+
+| Project | Description |
+|---------|-------------|
+| [clay-streamdeck-plugin](https://github.com/egns-ai/clay-streamdeck-plugin) | Stream Deck plugin that turns physical buttons into a live dashboard for managing Clay sessions, worktrees, and permission requests. |
+
+Building something with Clay? Share it in [Discussions](https://github.com/chadbyte/clay/discussions).
+
 ## Contributors
 
 <a href="https://github.com/chadbyte/clay/graphs/contributors">
