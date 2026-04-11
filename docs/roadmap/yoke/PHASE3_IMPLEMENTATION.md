@@ -14,7 +14,7 @@ Phase 3 is split into 4 sub-steps after review identified gaps in the initial im
 | **3a** | Scaffold `lib/yoke/`, create adapter shell, rewire all `getSDK` call sites, isolate SDK imports | Complete |
 | **3b** | Move worker management code (~530 lines) from sdk-bridge.js into claude.js adapter. `adapter.createQuery()` owns both in-process and worker paths. `linuxUser` becomes an adapter option. Clay never decides how to run the query. | Complete |
 | **3c** | Make QueryHandle the real abstraction. Remove `_rawQuery`, `_messageQueue`, `_pushRaw`. `processQueryStream` iterates the QueryHandle. Worker QueryHandle yields events from IPC. Both paths produce the same event shape. | Complete |
-| **3d** | Event flattening. Adapter flattens deeply nested Claude SDK events into `{ yokeType, ...fields }`. processSDKMessage if-conditions simplify from 3-level nesting to flat yokeType checks. Not a rewrite. Claude-specific logic stays in place for now. | Not started |
+| **3d** | Event flattening. Adapter flattens deeply nested Claude SDK events into `{ yokeType, ...fields }`. processSDKMessage if-conditions simplify from 3-level nesting to flat yokeType checks. Not a rewrite. Claude-specific logic stays in place for now. | Complete |
 | **3e** | Claude assumption cleanup. Move auth detection (~20 lines), fast_mode_state (~5 lines), block index tracking (~10 lines) from processSDKMessage into Claude adapter. Small, bounded behavior change. Runs AFTER 3d is verified stable. Must complete before Phase 4 release. | Not started |
 
 ### Why this order
@@ -30,7 +30,7 @@ Phase 3 is split into 4 sub-steps after review identified gaps in the initial im
 3a (done)
   '-- 3b (done)
         '-- 3c (done)
-              '-- 3d (event flattening, no behavior change)
+              '-- 3d (done)
                     '-- 3e (Claude assumptions cleanup, ~25 lines behavior change)
                           '-- Phase 4 (library extract + release)
 ```

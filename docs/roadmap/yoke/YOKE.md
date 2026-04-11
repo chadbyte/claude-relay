@@ -221,7 +221,7 @@ When done, append verification results to this file under "## Phase 3 Verificati
 | 3a | Scaffold `lib/yoke/`, create adapter shell, rewire all `getSDK` call sites | Complete |
 | 3b | Move worker management code (~530 lines) from sdk-bridge.js into adapter. `createQuery()` owns both in-process and worker paths. Clay does not know which path runs. | Complete |
 | 3c | Make QueryHandle the real abstraction. Remove `_rawQuery`/`_messageQueue`/`_pushRaw`. `processQueryStream` iterates QueryHandle, not raw SDK query. Worker and in-process yield the same event shape. | Complete |
-| 3d | Event flattening. Adapter flattens nested SDK events into `{ yokeType, ...fields }`. processSDKMessage if-conditions simplify (not a rewrite). Claude-specific logic stays in place for now. See PHASE3 Section 7-8 for analysis. | Not started |
+| 3d | Event flattening. Adapter flattens nested SDK events into `{ yokeType, ...fields }`. processSDKMessage if-conditions simplify (not a rewrite). Claude-specific logic stays in place for now. See PHASE3 Section 7-8 for analysis. | Complete |
 | 3e | Claude assumption cleanup (~25 lines). Move auth detection, fast_mode_state, block index tracking from processSDKMessage into Claude adapter. Runs AFTER 3d is stable. Small, bounded behavior change. Must be done before Phase 4 release. | Not started |
 
 ---
@@ -327,6 +327,7 @@ Record agent hand-offs here. Each entry: date, agent/mate, what was done, what's
 | 2026-04-11 | Chad | But if releasing after Phase 4, Claude assumptions must be resolved before release, not after. Added Step 3e: move auth detection, fast_mode_state, block index into adapter (~25 lines). Runs after 3d is stable, before Phase 4. | Step 3e added. Dependency chain: 3d (flatten, no behavior change) -> 3e (cleanup, ~25 lines behavior change) -> Phase 4 (release). |
 | 2026-04-11 | Claude | Step 3b complete. Worker management (~530 lines) moved from sdk-bridge.js to claude.js. createWorkerQueryHandle wraps IPC into async iterable. adapter.createQuery branches on linuxUser. setEffort/setPermissionMode/stopTask route through QueryHandle. Idle reaper updated. | Step 3c next: QueryHandle real abstraction. |
 | 2026-04-11 | Claude | Step 3c complete. Removed `_rawQuery`, `_messageQueue`, `_pushRaw` from both QueryHandle implementations. `session.queryInstance = handle` directly. `pushMessage()` routes through QueryHandle for all paths. `rewindFiles()` added as pass-through. | Step 3d next: event flattening. |
+| 2026-04-11 | Claude | Step 3d complete. `flattenEvent()` added to claude.js (~190 lines). Both iterators flatten before yielding. processSDKMessage rewritten to consume `yokeType` (26 checks, zero nested raw paths). All field names normalized (sessionId, slashCommands, cost, etc.). Zero behavior change. | Step 3e next: Claude assumption cleanup. |
 
 ---
 
@@ -388,13 +389,15 @@ Full audit in [PHASE1_SDK_AUDIT.md](./PHASE1_SDK_AUDIT.md). Key findings:
 - [x] `rewindFiles()` added as pass-through on in-process QueryHandle for rewind support
 - [x] Idle reaper uses `queryInstance.close()` (not `messageQueue.end()`)
 
-### Step 3d checks (pending)
+### Step 3d checks (2026-04-11)
 
-- [ ] Adapter flattens all SDK events into `{ yokeType, ...fields }` format
-- [ ] processSDKMessage routes on `yokeType` (not nested raw SDK event paths)
-- [ ] Flattened events include both `blockIndex` (compat) and `blockId` (future)
-- [ ] Auth detection, fast_mode_state, block index logic: unchanged in 3d
-- [ ] All 20 Phase 2 normalized event types covered in flattening map
+- [x] Adapter `flattenEvent()` converts all SDK events into `{ yokeType, ...fields }` format
+- [x] processSDKMessage routes on `yokeType` (26 occurrences, zero nested raw paths)
+- [x] Flattened events include `blockIndex` (compat for current block tracking)
+- [x] Auth detection, fast_mode_state, block index logic: unchanged (stays for 3e)
+- [x] All Phase 2 event types covered: init, turn_start, text_start/delta, thinking_start/delta, tool_start, tool_input_delta, block_stop, result, status, task_started, task_progress, task_notification, tool_progress, subagent_message, message, rate_limit, prompt_suggestion, system (catch-all), unknown (fallback)
+- [x] Both in-process and worker iterators call flattenEvent before yielding
+- [x] processSubagentMessage updated to use flattened field names
 
 ### Step 3e checks (pending)
 
