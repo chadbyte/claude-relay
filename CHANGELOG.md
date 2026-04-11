@@ -1,3 +1,10 @@
+# [2.27.0-beta.13](https://github.com/chadbyte/clay/compare/v2.27.0-beta.12...v2.27.0-beta.13) (2026-04-11)
+
+
+### Bug Fixes
+
+* reap idle in-process sessions to prevent Claude child process accumulation ([8090251](https://github.com/chadbyte/clay/commit/8090251fe0d2c12b39f0a20b9278ed7f32b7b097))
+
 # [2.27.0-beta.12](https://github.com/chadbyte/clay/compare/v2.27.0-beta.11...v2.27.0-beta.12) (2026-04-10)
 
 
