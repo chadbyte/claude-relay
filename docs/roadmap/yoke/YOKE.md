@@ -219,7 +219,7 @@ When done, append verification results to this file under "## Phase 3 Verificati
 | Step | Description | Status |
 |------|-------------|--------|
 | 3a | Scaffold `lib/yoke/`, create adapter shell, rewire all `getSDK` call sites | Complete |
-| 3b | Move worker management code (~530 lines) from sdk-bridge.js into adapter. `createQuery()` owns both in-process and worker paths. Clay does not know which path runs. | Not started |
+| 3b | Move worker management code (~530 lines) from sdk-bridge.js into adapter. `createQuery()` owns both in-process and worker paths. Clay does not know which path runs. | Complete |
 | 3c | Make QueryHandle the real abstraction. Remove `_rawQuery`/`_messageQueue`/`_pushRaw`. `processQueryStream` iterates QueryHandle, not raw SDK query. Worker and in-process yield the same event shape. | Not started |
 | 3d | Event flattening. Adapter flattens nested SDK events into `{ yokeType, ...fields }`. processSDKMessage if-conditions simplify (not a rewrite). Claude-specific logic stays in place for now. See PHASE3 Section 7-8 for analysis. | Not started |
 | 3e | Claude assumption cleanup (~25 lines). Move auth detection, fast_mode_state, block index tracking from processSDKMessage into Claude adapter. Runs AFTER 3d is stable. Small, bounded behavior change. Must be done before Phase 4 release. | Not started |
@@ -325,6 +325,7 @@ Record agent hand-offs here. Each entry: date, agent/mate, what was done, what's
 | 2026-04-11 | Claude | processSDKMessage analysis (568 lines): 99% Clay business logic, ~0% translation. Adapter job is event flattening (nested -> flat), not logic rewrite. 3 Claude-specific items identified (auth, fast_mode, block index), deferred to post-release. | Step 3d scope reduced: flattening only, no behavior change. |
 | 2026-04-11 | Chad | Phase 3 principle: extraction only, no behavior change. Also: open-source after Phase 4, not after Phase 6. Separate YOKE as library early, Clay depends via npm link. | Roadmap restructured: Phase 4 = extract + doc + release. Phase 5/6 collapsed to post-release community work. |
 | 2026-04-11 | Chad | But if releasing after Phase 4, Claude assumptions must be resolved before release, not after. Added Step 3e: move auth detection, fast_mode_state, block index into adapter (~25 lines). Runs after 3d is stable, before Phase 4. | Step 3e added. Dependency chain: 3d (flatten, no behavior change) -> 3e (cleanup, ~25 lines behavior change) -> Phase 4 (release). |
+| 2026-04-11 | Claude | Step 3b complete. Worker management (~530 lines) moved from sdk-bridge.js to claude.js. createWorkerQueryHandle wraps IPC into async iterable. adapter.createQuery branches on linuxUser. setEffort/setPermissionMode/stopTask route through QueryHandle. Idle reaper updated. | Step 3c next: QueryHandle real abstraction. |
 
 ---
 
@@ -365,12 +366,16 @@ Full audit in [PHASE1_SDK_AUDIT.md](./PHASE1_SDK_AUDIT.md). Key findings:
 - [ ] **Worker code in sdk-bridge.js**: ~530 lines of adapter-internal code still in Clay -> Step 3b
 - [ ] **No event normalization**: processSDKMessage consumes raw Claude SDK events -> Step 3d
 
-### Step 3b checks (pending)
+### Step 3b checks (2026-04-11)
 
-- [ ] No worker-related code in sdk-bridge.js (spawnWorker, startQueryViaWorker, warmupViaWorker, cleanupWorker, killSessionWorker all moved)
-- [ ] `adapter.createQuery()` handles linuxUser internally
-- [ ] `adapter.init()` handles linuxUser warmup internally
-- [ ] Worker IPC permission/elicitation routed through createQuery callbacks
+- [x] No worker-related code in sdk-bridge.js (spawnWorker, startQueryViaWorker, warmupViaWorker, cleanupWorker, killSessionWorker all moved)
+- [x] `adapter.createQuery()` handles linuxUser internally via `adapterOptions.CLAUDE.linuxUser`
+- [x] `adapter.init()` handles linuxUser warmup internally
+- [x] Worker IPC permission/elicitation routed through createQuery callbacks (canUseTool, onElicitation)
+- [x] setEffort, setPermissionMode, stopTask route through QueryHandle (no session.worker.send)
+- [x] Idle reaper uses queryInstance.close() for worker path
+- [x] processQueryStream handles _worker_meta events (context_usage, model_changed, effort_changed, permission_mode_changed, worker_error)
+- [x] Worker reuse via _adapterState pattern
 
 ### Step 3c checks (pending)
 

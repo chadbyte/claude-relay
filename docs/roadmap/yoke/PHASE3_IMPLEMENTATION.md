@@ -12,7 +12,7 @@ Phase 3 is split into 4 sub-steps after review identified gaps in the initial im
 | Step | Description | Status |
 |------|-------------|--------|
 | **3a** | Scaffold `lib/yoke/`, create adapter shell, rewire all `getSDK` call sites, isolate SDK imports | Complete |
-| **3b** | Move worker management code (~530 lines) from sdk-bridge.js into claude.js adapter. `adapter.createQuery()` owns both in-process and worker paths. `linuxUser` becomes an adapter option. Clay never decides how to run the query. | Not started |
+| **3b** | Move worker management code (~530 lines) from sdk-bridge.js into claude.js adapter. `adapter.createQuery()` owns both in-process and worker paths. `linuxUser` becomes an adapter option. Clay never decides how to run the query. | Complete |
 | **3c** | Make QueryHandle the real abstraction. Remove `_rawQuery`, `_messageQueue`, `_pushRaw`. `processQueryStream` iterates the QueryHandle. Worker QueryHandle yields events from IPC. Both paths produce the same event shape. | Not started |
 | **3d** | Event flattening. Adapter flattens deeply nested Claude SDK events into `{ yokeType, ...fields }`. processSDKMessage if-conditions simplify from 3-level nesting to flat yokeType checks. Not a rewrite. Claude-specific logic stays in place for now. | Not started |
 | **3e** | Claude assumption cleanup. Move auth detection (~20 lines), fast_mode_state (~5 lines), block index tracking (~10 lines) from processSDKMessage into Claude adapter. Small, bounded behavior change. Runs AFTER 3d is verified stable. Must complete before Phase 4 release. | Not started |
@@ -28,7 +28,7 @@ Phase 3 is split into 4 sub-steps after review identified gaps in the initial im
 
 ```
 3a (done)
-  '-- 3b (worker into adapter)
+  '-- 3b (done)
         '-- 3c (QueryHandle real abstraction)
               '-- 3d (event flattening, no behavior change)
                     '-- 3e (Claude assumptions cleanup, ~25 lines behavior change)
@@ -181,7 +181,7 @@ Phase 2's 11 interface methods did not include `getSessionInfo`, `listSessions`,
 | `lib/yoke/package.json` | 7 | None |
 | `lib/yoke/index.js` | 33 | Low |
 | `lib/yoke/interface.js` | 88 | Low |
-| `lib/yoke/adapters/claude.js` | ~280 | Medium |
+| `lib/yoke/adapters/claude.js` | ~1222 (280 from 3a + ~820 worker code from 3b) | Medium |
 | `lib/yoke/adapters/claude-worker.js` | 559 (copy) | None |
 
 ### Modified files
@@ -189,7 +189,7 @@ Phase 2's 11 interface methods did not include `getSessionInfo`, `listSessions`,
 | File | Change summary |
 |------|---------------|
 | `lib/project.js` | Removed `getSDK()` function. Added `yoke.createAdapter()`. MCP servers created via `adapter.createToolServer()`. Passes `adapter` instead of `getSDK` to sdk-bridge, sessions, user-message modules. |
-| `lib/sdk-bridge.js` | Replaced `getSDK` with `adapter`. `startQuery` uses `adapter.createQuery()`. `warmup` uses `adapter.init()`. `createMentionSession` uses `adapter.createQuery()` with `systemPrompt`. `getOrCreateRewindQuery` uses `adapter.createQuery()`. WORKER_SCRIPT path updated to `adapter.workerScriptPath`. |
+| `lib/sdk-bridge.js` | (3a) Replaced `getSDK` with `adapter`. `startQuery`/`warmup`/`createMentionSession`/`getOrCreateRewindQuery` use adapter. (3b) Worker code removed (~530 lines). `startQuery` unified, `setEffort`/`setPermissionMode`/`stopTask` route through QueryHandle, idle reaper updated, `_worker_meta` handling added to `processQueryStream`. |
 | `lib/browser-mcp-server.js` | Removed SDK `require()`. Renamed `create()` to `getToolDefs()`. Returns tool definition array instead of MCP server. Added `def()` helper for positional-to-object conversion. |
 | `lib/debate-mcp-server.js` | Same treatment as browser-mcp-server.js. |
 | `lib/project-sessions.js` | `getSDK().then(sdk => sdk.method())` replaced with `adapter.method()` for getSessionInfo, listSessions, renameSession, forkSession. |
