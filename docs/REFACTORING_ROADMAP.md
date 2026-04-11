@@ -64,11 +64,11 @@
 | PR-44 | done | Extract `sdk-message-queue.js` from `sdk-bridge.js` | 2026-04-11 |
 | PR-45 | done | Extract `sdk-message-processor.js` from `sdk-bridge.js` | 2026-04-11 |
 | PR-46 | done | Reduce `sdk-bridge.js` to connection manager | 2026-04-11 |
-| PR-47 | **next** | Extract `mates-prompts.js` from `mates.js` | |
-| PR-48 | pending | Extract `mates-knowledge.js` from `mates.js` | |
-| PR-49 | pending | Extract `mates-identity.js` from `mates.js` | |
-| PR-50 | pending | Reduce `mates.js` to CRUD + builtins | |
-| PR-51 | pending | Extract `users-auth.js` from `users.js` | |
+| PR-47 | done | Extract `mates-prompts.js` from `mates.js` | 2026-04-11 |
+| PR-48 | done | Extract `mates-knowledge.js` from `mates.js` | 2026-04-11 |
+| PR-49 | done | Extract `mates-identity.js` from `mates.js` | 2026-04-11 |
+| PR-50 | done | Reduce `mates.js` to CRUD + builtins | 2026-04-11 |
+| PR-51 | **next** | Extract `users-auth.js` from `users.js` | |
 | PR-52 | pending | Extract `users-permissions.js` from `users.js` | |
 | PR-53 | pending | Extract `users-preferences.js` from `users.js` | |
 | PR-54 | pending | Reduce `users.js` to CRUD + invites | |
@@ -85,7 +85,7 @@
 | `lib/public/modules/sidebar.js` | 4,541 | 303 | ~400 |
 | `lib/public/modules/scheduler.js` | 3,166 | 1,645 | ~1,200 |
 | `lib/sdk-bridge.js` | 2,232 | 1,892 | ~800 |
-| `lib/mates.js` | 1,318 | 1,318 | ~500 |
+| `lib/mates.js` | 1,318 | 747 | ~500 |
 | `lib/users.js` | 791 | 829 | ~300 |
 | `lib/daemon.js` | 1,490 | 1,503 | ~1,100 |
 
@@ -1202,10 +1202,10 @@ module.exports = { schema }
 | PR-45 | done | `lib/sdk-message-processor.js` | sdk-bridge.js | 567 |
 | PR-46 | done | (cleanup) | sdk-bridge.js | 0 (reduced to 1,892) |
 | **Phase 7: mates.js** | | | | |
-| PR-47 | pending | `lib/mates-prompts.js` | mates.js | ~400 |
-| PR-48 | pending | `lib/mates-knowledge.js` | mates.js | ~200 |
-| PR-49 | pending | `lib/mates-identity.js` | mates.js | ~150 |
-| PR-50 | pending | (cleanup) | mates.js | 0 (reduce to ~500) |
+| PR-47 | done | `lib/mates-prompts.js` | mates.js | 398 |
+| PR-48 | done | `lib/mates-knowledge.js` | mates.js | 113 |
+| PR-49 | done | `lib/mates-identity.js` | mates.js | 132 |
+| PR-50 | done | (cleanup) | mates.js | 0 (reduced to 747) |
 | **Phase 8: users.js** | | | | |
 | PR-51 | pending | `lib/users-auth.js` | users.js | ~200 |
 | PR-52 | pending | `lib/users-permissions.js` | users.js | ~100 |

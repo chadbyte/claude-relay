@@ -48,6 +48,10 @@ Wires all modules, sets up session manager and SDK bridge, dispatches messages.
 | `sdk-skill-discovery.js` | Skill directory scanning, shell segment splitting, SDK/filesystem skill merging |
 | `sdk-message-queue.js` | Async iterable message queue for streaming input to SDK |
 | `sdk-message-processor.js` | SDK stream event processing (message_start, content_block_*), sub-agent message routing |
+| `mates.js` | Mate CRUD, builtin mate management, atomic section enforcement, migration |
+| `mates-prompts.js` | System section enforcers (team, session memory, sticky notes, project registry, debate), marker constants |
+| `mates-knowledge.js` | Common knowledge registry (promote/depromote, cross-mate file sharing) |
+| `mates-identity.js` | Identity extraction, backup/restore, change tracking, primary capabilities |
 
 ### Server Modules (lib/server-*.js)
 
