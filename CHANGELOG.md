@@ -1,3 +1,10 @@
+# [2.27.0-beta.15](https://github.com/chadbyte/clay/compare/v2.27.0-beta.14...v2.27.0-beta.15) (2026-04-12)
+
+
+### Bug Fixes
+
+* honor bypassPermissions mode in Clay canUseTool handlers ([c933ee7](https://github.com/chadbyte/clay/commit/c933ee7de67e87dd78dd1659356d31a9aa89e8d3))
+
 # [2.27.0-beta.14](https://github.com/chadbyte/clay/compare/v2.27.0-beta.13...v2.27.0-beta.14) (2026-04-12)
 
 
