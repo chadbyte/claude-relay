@@ -226,11 +226,28 @@ When done, append verification results to this file under "## Phase 3 Verificati
 
 ---
 
-## Phase 4: Extract, Document, Release
+## Phase 4a: Gemini Adapter (second runtime proof)
+
+**Goal**: Build the Gemini adapter to prove the YOKE interface works across runtimes. Two adapters before open-source release.
+
+See [PHASE4A_GEMINI_ADAPTER.md](./PHASE4A_GEMINI_ADAPTER.md) for full plan.
+
+**Key points**:
+- SDK: `@google/genai` (v1.49.0). Mature, well-documented.
+- Biggest difference: tool calling loop. Claude SDK handles tools internally, Gemini adapter must run the loop.
+- Estimated ~500-600 lines (less than half of claude.js, no worker/IPC needed).
+- Expected: zero changes to interface.js and processSDKMessage.
+- Show HN headline: "Claude + Gemini, swap with one config change."
+
+**Status**: Not started
+
+---
+
+## Phase 5: Extract, Document, Release
 
 **Goal**: Separate YOKE from Clay as a standalone package. Document the protocol. Open-source.
 
-### 4a. Library separation
+### 5a. Library separation
 
 Extract `lib/yoke/` to its own repo. Clay replaces the directory with an npm dependency.
 
@@ -254,22 +271,22 @@ After:
 
 Clay develops against a local link (`npm link yoke` or `file:` dependency). This validates that YOKE is truly decoupled before publishing. If Clay needs to reach into YOKE internals, the boundary is wrong and must be fixed before release.
 
-### 4b. Protocol documentation
+### 5b. Protocol documentation
 
 Document the worker IPC protocol (Unix domain socket + JSON lines). This is the candidate foundation for YOKE's cross-runtime message spec.
 
 Enumerate all message types, payloads, and response formats currently used between the adapter and claude-worker.js.
 
-### 4c. Adapter author documentation
+### 5c. Adapter author documentation
 
 README and DEVELOPER_GUIDE for adapter authors:
 - How to implement a new adapter (the 11 interface methods)
 - Event flattening map (yokeType reference)
 - Capability declaration
 - adapterOptions vendor namespace
-- Known Claude-specific assumptions in processSDKMessage (Phase 5 cleanup backlog)
+- Known Claude-specific assumptions in processSDKMessage
 
-### 4d. Publish
+### 5d. Publish
 
 Create standalone repo. npm publish. Clay switches to npm dependency.
 
@@ -329,6 +346,8 @@ Record agent hand-offs here. Each entry: date, agent/mate, what was done, what's
 | 2026-04-11 | Claude | Step 3c complete. Removed `_rawQuery`, `_messageQueue`, `_pushRaw` from both QueryHandle implementations. `session.queryInstance = handle` directly. `pushMessage()` routes through QueryHandle for all paths. `rewindFiles()` added as pass-through. | Step 3d next: event flattening. |
 | 2026-04-11 | Claude | Step 3d complete. `flattenEvent()` added to claude.js (~190 lines). Both iterators flatten before yielding. processSDKMessage rewritten to consume `yokeType` (26 checks, zero nested raw paths). All field names normalized (sessionId, slashCommands, cost, etc.). Zero behavior change. | Step 3e next: Claude assumption cleanup. |
 | 2026-04-11 | Claude | Step 3e complete. blockIndex -> blockId (adapter assigns `"blk_" + index`). fast_mode_state already generic. Auth detection stays in processSDKMessage (needs session context, cannot move to adapter without breaking clean event design). Accepted as permanent deferral with documented migration path for second adapter. Phase 3 complete. | Phase 4: library extraction + release. |
+| 2026-04-12 | Chad | Revised phase order: Gemini adapter before open-source release. Gemini chosen over OpenCode for Show HN impact (name recognition, generous tokens, strong model). npm package name `open-bridge` confirmed, `@open-bridge` org secured. | Phase 4a: Gemini adapter. |
+| 2026-04-12 | Claude | Phase 4a plan written. Gemini SDK (`@google/genai`) audited: Chat-based API, FunctionDeclaration tools, streaming via sendMessageStream. 11 YOKE methods mapped. Biggest work: tool calling loop (adapter runs it, not SDK). Estimated ~500-600 lines. Expected zero interface changes. | Implementation next. |
 
 ---
 
