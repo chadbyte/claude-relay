@@ -1,3 +1,18 @@
+# [2.27.0-beta.14](https://github.com/chadbyte/clay/compare/v2.27.0-beta.13...v2.27.0-beta.14) (2026-04-12)
+
+
+### Bug Fixes
+
+* **client:** guard notification permission and fix loadingMore accessor ([6ce2f06](https://github.com/chadbyte/clay/commit/6ce2f06ae3350df1dbf22a6b91c793a07447b780))
+* **dm:** route same-mate mention as regular message in mate DM ([776468f](https://github.com/chadbyte/clay/commit/776468f6902bb1fd4ce0fbefce704d3595a03625))
+* **header:** use property setter for historyFrom instead of missing function ([a68575e](https://github.com/chadbyte/clay/commit/a68575e1075ea3893b806b7b3ab1c76ec2d544a6))
+* **sdk-bridge:** handle api_retry system events instead of showing red "unknown" text ([ade5385](https://github.com/chadbyte/clay/commit/ade5385ff0484796b5965ff7ed41ffbe14b0bcd5)), closes [#311](https://github.com/chadbyte/clay/issues/311)
+
+
+### Features
+
+* **projects:** allow admin to add existing directory in multi-user mode ([7b31633](https://github.com/chadbyte/clay/commit/7b3163325b87e3a68233a6990d50cb427eaa35f4))
+
 # [2.27.0-beta.13](https://github.com/chadbyte/clay/compare/v2.27.0-beta.12...v2.27.0-beta.13) (2026-04-11)
 
 
