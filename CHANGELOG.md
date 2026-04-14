@@ -1,3 +1,48 @@
+# [2.27.0](https://github.com/chadbyte/clay/compare/v2.26.0...v2.27.0) (2026-04-14)
+
+
+### Bug Fixes
+
+* **api:** restrict health endpoint details to authenticated requests ([08aa2b3](https://github.com/chadbyte/clay/commit/08aa2b39c7590d1d01212ea69a8761f36cdceab8))
+* **app:** add missing DM delegation stubs ([2f0a041](https://github.com/chadbyte/clay/commit/2f0a0412e05ed6b417fc4d97053f6fbeed8139cd))
+* **app:** add missing headerInfoBtn to initHeader context ([8d0a092](https://github.com/chadbyte/clay/commit/8d0a0926233ebf411266e5cc74ff7514302ec91f))
+* **app:** correct DM delegation stub signatures ([4fdf4e4](https://github.com/chadbyte/clay/commit/4fdf4e4fc9d2eab478dbd04d70008bfe629219c1))
+* **app:** inline requireClayRalph for scheduler context ([fd2c804](https://github.com/chadbyte/clay/commit/fd2c804622673a5ef61ca3bf47609b51e7e71059))
+* **chat:** add missing _ts to user messages and show dates in command palette ([0350110](https://github.com/chadbyte/clay/commit/0350110fb2ff0bad2f8b1a3043e2fd5235583273))
+* **client:** guard notification permission and fix loadingMore accessor ([6ce2f06](https://github.com/chadbyte/clay/commit/6ce2f06ae3350df1dbf22a6b91c793a07447b780))
+* **debate:** add mate avatars to brief review card ([3170394](https://github.com/chadbyte/clay/commit/3170394cfbf30ef4e6a5deebabcc0157fdad673a))
+* **debate:** persist debate_turn and debate_stream to session history ([2e323e8](https://github.com/chadbyte/clay/commit/2e323e84a6c1860f62b44ba299f72d4fb6d9bba2))
+* **debate:** prevent floor and conclude messages from routing to normal chat ([a49747d](https://github.com/chadbyte/clay/commit/a49747dbd1ef936bb49009e792bda4eb0bab60de))
+* **debate:** send brief_ready to setup session in quickStart flow ([9b93e5a](https://github.com/chadbyte/clay/commit/9b93e5ae4f747e83dc717ce8ce64783c60dfdeb4))
+* **debate:** share debate state with setup session in quickStart ([e142a77](https://github.com/chadbyte/clay/commit/e142a778fb6576344b9bcd332b3e1316f99382ec))
+* **debate:** show visual feedback when stop button is clicked ([75d91a1](https://github.com/chadbyte/clay/commit/75d91a1ef6354bbe7f1e727f37ac6f94c66cf43a))
+* **debate:** suppress interactive debate UI during history replay ([cd60178](https://github.com/chadbyte/clay/commit/cd601789d44243358d8d60b55102c66b2e289440))
+* **dm:** route same-mate mention as regular message in mate DM ([776468f](https://github.com/chadbyte/clay/commit/776468f6902bb1fd4ce0fbefce704d3595a03625))
+* **header:** use property setter for historyFrom instead of missing function ([a68575e](https://github.com/chadbyte/clay/commit/a68575e1075ea3893b806b7b3ab1c76ec2d544a6))
+* honor bypassPermissions mode in Clay canUseTool handlers ([c933ee7](https://github.com/chadbyte/clay/commit/c933ee7de67e87dd78dd1659356d31a9aa89e8d3))
+* **mobile:** add import session button to mobile chat sheet ([406f40d](https://github.com/chadbyte/clay/commit/406f40dfd87c2398c1bcdaf9480c1bff6f2dd081)), closes [#312](https://github.com/chadbyte/clay/issues/312)
+* pass getOsUserInfoForWs to project-user-message ctx ([ea2fc66](https://github.com/chadbyte/clay/commit/ea2fc66fed07d215212b79b233763764be13e876))
+* pass mcpServers to createMentionSession query options ([6c6ad09](https://github.com/chadbyte/clay/commit/6c6ad096cfd80d49662267d9d3374324c2326855))
+* pass ownerId on project create/add, filter mate project list by access ([397525d](https://github.com/chadbyte/clay/commit/397525d8b33a9ce95601f37c86cb41cc5405e8ca))
+* pass requestTabContext to project-user-message ctx ([c845ed8](https://github.com/chadbyte/clay/commit/c845ed896d410b84bf32325fb8eaedb2aa224c00))
+* reap idle in-process sessions to prevent Claude child process accumulation ([8090251](https://github.com/chadbyte/clay/commit/8090251fe0d2c12b39f0a20b9278ed7f32b7b097))
+* **sdk-bridge:** handle api_retry system events instead of showing red "unknown" text ([ade5385](https://github.com/chadbyte/clay/commit/ade5385ff0484796b5965ff7ed41ffbe14b0bcd5)), closes [#311](https://github.com/chadbyte/clay/issues/311)
+* use shared checkToolWhitelist in mention session canUseTool ([594c277](https://github.com/chadbyte/clay/commit/594c277d4479ba3dcd9e252c0009ded65b0bfe9b))
+
+
+### Features
+
+* **api:** add GET /api/health endpoint for monitoring ([103513d](https://github.com/chadbyte/clay/commit/103513d4ce9f127ce834ba374e59d99441cf7d96))
+* **loop:** redesign wizard with explicit mode selection and authorship toggles ([ccd9084](https://github.com/chadbyte/clay/commit/ccd9084b673a9015068bdd55657bbd14a0b1075b))
+* **notifications:** add notification center with banner system ([09b40cb](https://github.com/chadbyte/clay/commit/09b40cb2aa5b930f0c23f309ceafae0867ff2d6d))
+* **projects:** allow admin to add existing directory in multi-user mode ([7b31633](https://github.com/chadbyte/clay/commit/7b3163325b87e3a68233a6990d50cb427eaa35f4))
+* **ui:** show dates on chat messages and search results ([70bbeb2](https://github.com/chadbyte/clay/commit/70bbeb2c61fc9320b5560d6a648193a3fb9d71ae))
+
+
+### Performance Improvements
+
+* **ui:** skip redundant re-renders of mate icon strip and presence bars ([dd0cd2f](https://github.com/chadbyte/clay/commit/dd0cd2f2cab5517098f9b5cb70835dadbda410e7))
+
 # [2.27.0-beta.18](https://github.com/chadbyte/clay/compare/v2.27.0-beta.17...v2.27.0-beta.18) (2026-04-14)
 
 
