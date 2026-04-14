@@ -598,19 +598,16 @@
   text-align: center;
 }
 
-.sched-create-task-add {
+#sched-create-desc-row.hidden { display: none; }
+
+.sched-create-iter-row {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: var(--accent);
-  border-top: 1px solid var(--border);
-  margin-top: 4px;
-  padding-top: 8px;
-}
-
-.sched-create-task-add .lucide {
-  width: 14px;
-  height: 14px;
+  font-size: 12px;
+  color: var(--text-dimmer);
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 /* --- Bottom bar --- */

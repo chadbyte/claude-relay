@@ -1925,7 +1925,7 @@
     </div>
     <input type="text" class="sched-create-title-input" id="sched-create-title" placeholder="Schedule Title" maxlength="80" spellcheck="false" autocomplete="off">
   </div>
-  <!-- Task (JS dropdown) -->
+  <!-- Task + rounds -->
   <div class="sched-create-row">
     <i data-lucide="list-todo" class="sched-create-row-icon"></i>
     <div class="sched-create-task-dropdown" id="sched-create-task-wrap">
@@ -1936,17 +1936,10 @@
       <input type="hidden" id="sched-create-task" value="">
       <div class="sched-create-task-list hidden" id="sched-create-task-list"></div>
     </div>
-  </div>
-  <!-- Run mode (below task) -->
-  <div class="sched-create-row">
-    <div class="sched-create-run-mode">
-      <button type="button" class="sched-run-mode-btn active" data-mode="single" title="Run once without iteration"><i data-lucide="play"></i> Single run</button>
-      <button type="button" class="sched-run-mode-btn" data-mode="multi" title="Run multiple iterations with a judge reviewing each round"><i data-lucide="repeat"></i> Multi-round</button>
-      <label class="sched-create-iter-label hidden" id="sched-create-iter-group">
-        <input type="number" id="sched-create-iterations" min="2" max="100" value="3" class="sched-create-iter-input">
-        <span class="sched-create-iter-hint">rounds</span>
-      </label>
-    </div>
+    <label class="sched-create-iter-row">
+      <input type="number" id="sched-create-iterations" min="1" max="100" value="1" class="sched-create-iter-input">
+      <span class="sched-create-iter-hint">rounds</span>
+    </label>
   </div>
   <!-- Description (hidden by default, shown only when editing a record that has one) -->
   <div class="sched-create-row hidden" id="sched-create-desc-row">
