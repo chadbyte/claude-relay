@@ -1,3 +1,10 @@
+## [2.27.1-beta.1](https://github.com/chadbyte/clay/compare/v2.27.0...v2.27.1-beta.1) (2026-04-14)
+
+
+### Bug Fixes
+
+* **auth:** prevent PIN input clearing on re-entrant input events ([0392518](https://github.com/chadbyte/clay/commit/0392518a9bdf75696ba03d3b250a896717e11e40))
+
 # [2.27.0](https://github.com/chadbyte/clay/compare/v2.26.0...v2.27.0) (2026-04-14)
 
 
