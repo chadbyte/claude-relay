@@ -109,7 +109,8 @@ Bootstraps UI, wires modules, dispatches WebSocket messages via `processMessage`
 | `app-rendering.js` | Message rendering, streaming, scroll management, pre-thinking dots, suggestion chips, system messages |
 | `app-projects.js` | Project list, switching, add/remove project modals, update available pill, topbar presence |
 | `app-panels.js` | Config chip (model/mode/effort/thinking/beta), usage panel, status panel, context panel, context popover |
-| `app-loop-ui.js` | Ralph Loop UI, wizard, crafting/approval bars, preview modal, loop banner |
+| `app-loop-ui.js` | Ralph Loop UI: bars, banners, preview modal, execution modal |
+| `app-loop-wizard.js` | Ralph Loop wizard: step navigation, mode/authorship selection, data collection |
 | `app-debate-ui.js` | Debate sticky banner, floor/conclude/ended modes, bottom bar, hand raise |
 | `app-skills-install.js` | Skill install dialog, requireSkills, requireClayMateInterview |
 | `app-favicon.js` | Dynamic favicon, IO blink, urgent blink, send button mode, activity indicator |
