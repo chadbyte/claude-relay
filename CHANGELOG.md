@@ -1,3 +1,17 @@
+# [2.27.0-beta.17](https://github.com/chadbyte/clay/compare/v2.27.0-beta.16...v2.27.0-beta.17) (2026-04-14)
+
+
+### Bug Fixes
+
+* **chat:** add missing _ts to user messages and show dates in command palette ([0350110](https://github.com/chadbyte/clay/commit/0350110fb2ff0bad2f8b1a3043e2fd5235583273))
+
+
+### Features
+
+* **loop:** redesign wizard with explicit mode selection and authorship toggles ([ccd9084](https://github.com/chadbyte/clay/commit/ccd9084b673a9015068bdd55657bbd14a0b1075b))
+* **notifications:** add notification center with banner system ([09b40cb](https://github.com/chadbyte/clay/commit/09b40cb2aa5b930f0c23f309ceafae0867ff2d6d))
+* **ui:** show dates on chat messages and search results ([70bbeb2](https://github.com/chadbyte/clay/commit/70bbeb2c61fc9320b5560d6a648193a3fb9d71ae))
+
 # [2.27.0-beta.16](https://github.com/chadbyte/clay/compare/v2.27.0-beta.15...v2.27.0-beta.16) (2026-04-13)
 
 
