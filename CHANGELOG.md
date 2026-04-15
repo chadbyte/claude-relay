@@ -1,3 +1,15 @@
+# [2.29.0](https://github.com/chadbyte/clay/compare/v2.28.0...v2.29.0) (2026-04-15)
+
+
+### Bug Fixes
+
+* **clone:** pre-create target directory with user ownership before git clone in multi-user mode ([89d51a0](https://github.com/chadbyte/clay/commit/89d51a0ead71146044a6af4f28c3e5ccbee7963a))
+
+
+### Features
+
+* **multi-user:** add path restrictions and ownership lock for home directory projects ([34e2607](https://github.com/chadbyte/clay/commit/34e260726208eb221d9e735ddacd09a702016fc7))
+
 # [2.29.0-beta.1](https://github.com/chadbyte/clay/compare/v2.28.0...v2.29.0-beta.1) (2026-04-15)
 
 
