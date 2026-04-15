@@ -1012,22 +1012,41 @@ button.top-bar-pill.pill-accent:hover { background: color-mix(in srgb, var(--acc
 
 .add-project-body { margin-bottom: 16px; }
 
-.add-project-input-wrap { position: relative; }
+.add-project-input-wrap { position: relative; display: flex; align-items: center; background: var(--input-bg); border: 1px solid var(--border); border-radius: 8px; transition: border-color 0.2s; }
+.add-project-input-wrap:focus-within { border-color: var(--text-dimmer); }
+
+.add-project-prefix {
+  flex-shrink: 0;
+  padding: 5px 0 5px 8px;
+  font-size: 12px;
+  font-family: "Roboto Mono", monospace;
+  color: var(--accent);
+  background: var(--bg-alt);
+  border-radius: 5px 0 0 5px;
+  white-space: nowrap;
+  user-select: none;
+  pointer-events: none;
+  margin: 4px 0 4px 4px;
+  padding: 3px 6px;
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  border-radius: 4px;
+}
+.add-project-prefix.hidden { display: none; }
 
 #add-project-input {
-  width: 100%;
-  background: var(--input-bg);
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: none;
   color: var(--text);
   font-size: 13px;
   font-family: "Roboto Mono", monospace;
-  padding: 10px 12px;
+  padding: 10px 12px 10px 6px;
   outline: none;
-  transition: border-color 0.2s;
 }
+.add-project-prefix.hidden + #add-project-input { padding-left: 12px; }
 
-#add-project-input:focus { border-color: var(--text-dimmer); }
+#add-project-input:focus { border-color: transparent; }
 #add-project-input::placeholder { color: var(--text-muted); font-family: "Pretendard", system-ui, sans-serif; }
 
 #add-project-suggestions {

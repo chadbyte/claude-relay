@@ -639,6 +639,7 @@
                 <div class="ps-owner-row">
                   <span class="settings-value" id="ps-owner-name">-</span>
                   <button class="settings-btn-sm" id="ps-transfer-btn">Transfer</button>
+                  <span class="ps-owner-locked-hint hidden" id="ps-owner-locked-hint">Ownership of home directory projects cannot be transferred.</span>
                 </div>
                 <div class="ps-transfer-form hidden" id="ps-transfer-form">
                   <select class="ps-select" id="ps-transfer-select"></select>
@@ -1459,6 +1460,7 @@
     <div class="add-project-body">
       <div class="add-project-panel active" data-panel="existing">
         <div class="add-project-input-wrap">
+          <span id="add-project-prefix" class="add-project-prefix hidden"></span>
           <input type="text" id="add-project-input" placeholder="/" autocomplete="off" spellcheck="false">
           <div id="add-project-suggestions" class="hidden"></div>
         </div>
