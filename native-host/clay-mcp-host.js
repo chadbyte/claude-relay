@@ -342,6 +342,7 @@ function addServer(name, command, args, env) {
   // Also update in-memory cache
   _configCache = _configCache || {};
   _configCache[name] = config.mcpServers[name];
+  spawnServer(name);
   return { ok: true };
 }
 
