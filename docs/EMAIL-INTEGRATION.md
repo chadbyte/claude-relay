@@ -1,6 +1,6 @@
 # Email Integration Design
 
-> Clay built-in email module. Users connect their email accounts, Mates read/send/search emails as a context source and via SDK tools.
+> Clay built-in email module. Two modes: server SMTP (admin-managed, auditable) and personal email accounts (user-managed, private). Mates read/send/search emails as a context source and via SDK tools.
 
 **Created**: 2026-04-16
 **Status**: Planning
@@ -9,7 +9,11 @@
 
 ## Vision
 
-Every user can connect one or more email accounts (Gmail, Outlook, etc.) to Clay. Mates access these accounts through context sources and SDK tools. Users control which accounts are available to which projects/Mates.
+Email in Clay operates in two modes:
+
+1. **Server SMTP** (admin-managed): Admin configures a shared SMTP server. All outbound emails are logged and auditable. For system notifications, reports, and compliance-sensitive communication.
+
+2. **Personal Email** (user-managed): Users connect their own email accounts (Gmail, Outlook, etc.) via App Password. Mates read/send/search as context sources. Admin cannot access personal credentials or mail content.
 
 Use cases:
 - Morning news clipping: Mate reads newsletters, summarizes, sends digest
@@ -19,11 +23,68 @@ Use cases:
 
 ---
 
+## Two Email Modes
+
+### Server SMTP (Admin-managed)
+
+| | |
+|---|---|
+| **Configured by** | Server admin (in daemon settings) |
+| **Sender address** | Shared (e.g. `noreply@company-clay.com`) |
+| **SMTP provider** | SendGrid, AWS SES, custom SMTP |
+| **Audit logging** | All outbound emails logged with sender user, recipient, subject, timestamp |
+| **Admin visibility** | Full. Admin can view all send logs |
+| **IMAP (read)** | No. Send-only |
+| **Use cases** | System alerts, scheduled reports, compliance-tracked communications |
+| **SDK tool** | `clay_send_email` with `{ via: "server" }` |
+| **Already exists** | Partially. `lib/smtp.js` handles OTP emails via nodemailer |
+
+### Personal Email (User-managed)
+
+| | |
+|---|---|
+| **Configured by** | Each user (in User Settings) |
+| **Sender address** | User's own (e.g. `chad@gmail.com`) |
+| **Auth method** | App Password (Gmail, Outlook, Yahoo, custom IMAP/SMTP) |
+| **Audit logging** | None. Private to the user |
+| **Admin visibility** | None. Cannot see credentials, content, or logs |
+| **IMAP (read)** | Yes. Full inbox access |
+| **Use cases** | Personal assistant, inbox triage, news clipping, drafting replies |
+| **SDK tools** | `clay_send_email`, `clay_read_email`, `clay_search_email`, etc. |
+| **Context Source** | Yes. Appears in Context Sources picker |
+
+### Mate Tool Behavior
+
+When a Mate calls `clay_send_email`, the `via` parameter determines the mode:
+
+```
+clay_send_email(to, subject, body, { via: "server" })   -> Server SMTP (logged, auditable)
+clay_send_email(to, subject, body, { via: "personal" })  -> User's own account (private)
+clay_send_email(to, subject, body)                        -> Default: personal if available, otherwise server
+```
+
+### Audit Log (Server SMTP only)
+
+Stored at `~/.clay/email-audit.jsonl`. Append-only log.
+
+```json
+{"ts":1712700000,"userId":"067d...","to":["recipient@example.com"],"subject":"Weekly Report","mateId":"mate_abc","projectSlug":"clay","status":"sent"}
+{"ts":1712700060,"userId":"067d...","to":["team@company.com"],"subject":"Alert: Build Failed","mateId":null,"projectSlug":"argo","status":"sent"}
+```
+
+Admin can view audit log via admin panel or CLI.
+
+---
+
 ## Architecture
 
 ```
-User Profile
-  └── Email Accounts
+Server SMTP (admin)
+  └── nodemailer transport (shared)
+        └── Audit log (~/.clay/email-audit.jsonl)
+
+User Profile (per user)
+  └── Personal Email Accounts
         ├── chad@gmail.com     (IMAP + SMTP via App Password)
         ├── chad@company.com   (IMAP + SMTP via App Password)
         └── ...
@@ -483,6 +544,9 @@ No external feature dependencies. Can start immediately.
 - Mate can only access accounts checked by the user for that project
 - Rate limiting on send operations (prevent spam)
 - No email forwarding to external services (all processing server-side)
+- **Server SMTP**: all sends logged to audit trail. Admin can review all outbound emails
+- **Personal email**: credentials and mail content are private to the user. Admin cannot access. No server-side logging of personal email content
+- Clear separation: server SMTP audit data and personal email data never mix
 
 ---
 
