@@ -96,7 +96,25 @@ function spawnServer(name) {
     return { error: "No command configured for: " + name };
   }
 
-  var env = Object.assign({}, process.env, cfg.env || {});
+  // Ensure PATH includes common Node.js binary locations
+  // (Chrome launches native hosts with a minimal PATH)
+  var nodeBinDir = path.dirname(process.execPath);
+  var extraPaths = [
+    nodeBinDir,
+    "/opt/homebrew/bin",
+    "/usr/local/bin",
+    "/usr/bin",
+    path.join(os.homedir(), ".nvm/versions/node", process.version, "bin"),
+  ];
+  var currentPath = process.env.PATH || "";
+  var fullPath = extraPaths.concat(currentPath.split(path.delimiter)).filter(Boolean);
+  var seen = {};
+  var dedupedPath = [];
+  for (var pi = 0; pi < fullPath.length; pi++) {
+    if (!seen[fullPath[pi]]) { seen[fullPath[pi]] = true; dedupedPath.push(fullPath[pi]); }
+  }
+
+  var env = Object.assign({}, process.env, cfg.env || {}, { PATH: dedupedPath.join(path.delimiter) });
   var proc;
   try {
     proc = child_process.spawn(cfg.command, cfg.args || [], {
