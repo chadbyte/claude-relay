@@ -228,12 +228,16 @@
 }
 
 /* MCP Servers Modal */
+#mcp-modal { position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; }
 #mcp-modal.hidden { display: none; }
 .mcp-dialog {
   width: 480px;
+  max-width: 94vw;
   max-height: 70vh;
   display: flex;
   flex-direction: column;
+  padding: 0;
+  overflow: hidden;
 }
 .mcp-header {
   display: flex;
