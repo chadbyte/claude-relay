@@ -284,6 +284,28 @@
   margin: 0;
   line-height: 1.5;
 }
+.mcp-ext-setup-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  margin-top: 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  background: var(--bg-hover, rgba(255,255,255,0.06));
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.mcp-ext-setup-btn:hover {
+  background: var(--bg-active, rgba(255,255,255,0.1));
+}
+.mcp-ext-setup-btn .lucide {
+  width: 14px;
+  height: 14px;
+}
 .mcp-server-row {
   display: flex;
   align-items: center;
