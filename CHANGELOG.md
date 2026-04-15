@@ -1,3 +1,37 @@
+# [2.28.0](https://github.com/chadbyte/clay/compare/v2.27.1...v2.28.0) (2026-04-15)
+
+
+### Bug Fixes
+
+* **browser:** use shared mutable browserState object ([9520f7b](https://github.com/chadbyte/clay/commit/9520f7b983e09ac3cc926ff81ff6bf14b2edc2b9))
+* **mates:** support single-user mode by synthesizing default userId ([66d3759](https://github.com/chadbyte/clay/commit/66d37596fede13f914ce616bca6e88e2c78a75be)), closes [#315](https://github.com/chadbyte/clay/issues/315)
+* **mcp-ui:** minor wording tweak in setup wizard step 2 ([240e285](https://github.com/chadbyte/clay/commit/240e285c19b9f9b8136bc7f45701aa0efaaa712a))
+* **mcp-ui:** optimistic toggle with cooldown to prevent revert ([5a3729e](https://github.com/chadbyte/clay/commit/5a3729ed4eeac39a22f967901fb11d6ab329b9f5))
+* **mcp-ui:** update step 3 guide to point to extension popup ([a97d1e2](https://github.com/chadbyte/clay/commit/a97d1e23ccb16b9f0216bb5dee7ec36db84ade44))
+* **mcp:** add display:none rule for hidden MCP modal ([e5b1066](https://github.com/chadbyte/clay/commit/e5b10663b57e7a8b49ba7f6684201c2cb2d5bafa))
+* **mcp:** add fixed positioning and z-index to MCP modal container ([afe8f8f](https://github.com/chadbyte/clay/commit/afe8f8f6251d7f70c465f03e3e9a88a6c9bff346)), closes [#mcp-modal](https://github.com/chadbyte/clay/issues/mcp-modal)
+* **mcp:** match extension message type and relay hostConnected ([937b87c](https://github.com/chadbyte/clay/commit/937b87c6d254232ca20769a67435c13df0c98edc))
+* **mcp:** match tool result type from extension relay ([6f8c2a3](https://github.com/chadbyte/clay/commit/6f8c2a367980be2b2bee97050e505ff2924ef804))
+* **mcp:** wire onGetProjectMcpServers and onSetProjectMcpServers ([f2678da](https://github.com/chadbyte/clay/commit/f2678da663bb89591dc441f23b0a254878b85181))
+* **native-host:** inject full PATH when spawning MCP processes ([eb6ca46](https://github.com/chadbyte/clay/commit/eb6ca466193a5c62d402e6c67693136dbe41a1d3))
+* **native-host:** spawn server process after adding to config ([e22f088](https://github.com/chadbyte/clay/commit/e22f088b12254c6958536680c9d58a5758241407))
+* **scheduler:** queue deferred triggers instead of dropping them ([a383926](https://github.com/chadbyte/clay/commit/a38392673b871d63d2649858badaed8db6f64029)), closes [#254](https://github.com/chadbyte/clay/issues/254)
+* **sdk:** disable hooks during warmup queries ([d2f6c7e](https://github.com/chadbyte/clay/commit/d2f6c7ecf0eac585346ebd5c9276606407181a9a)), closes [#316](https://github.com/chadbyte/clay/issues/316)
+
+
+### Features
+
+* **loop:** add Model tab to preview modal for pre-launch settings ([81089d8](https://github.com/chadbyte/clay/commit/81089d8229a0592e32597d190c120dfaae02cd66))
+* **loop:** support per-loop SDK settings overrides via LOOP.json ([159196a](https://github.com/chadbyte/clay/commit/159196a4cd6aa4356a46db51a9026a2687161a0a)), closes [#248](https://github.com/chadbyte/clay/issues/248)
+* **loop:** unlock coder session for interaction after loop finishes ([184a7a3](https://github.com/chadbyte/clay/commit/184a7a3fe8e8f3febffcad24a4ed33f0838d584c)), closes [#314](https://github.com/chadbyte/clay/issues/314)
+* **mcp-ui:** show extension install CTA when not connected ([c961c56](https://github.com/chadbyte/clay/commit/c961c561129e9d83be30d19c97379c4fa851d97e))
+* **mcp:** add local MCP process management for localhost clients ([43a0f1a](https://github.com/chadbyte/clay/commit/43a0f1a7583fb884bc19321406ab21382454929e))
+* **mcp:** add setup wizard and install-mcp endpoint ([60a1449](https://github.com/chadbyte/clay/commit/60a1449d9282d22e2bb6f950bf7597c6da78d779))
+* **mcp:** implement MCP bridge for remote MCP servers via Chrome Extension ([e6349f2](https://github.com/chadbyte/clay/commit/e6349f217608e7868ef7a6cf2e255947faf9fbe0))
+* **native-host:** add config CRUD and external config import ([e8a1537](https://github.com/chadbyte/clay/commit/e8a1537dc570b4935968c54de7b7844b0be0cbf2))
+* **native-host:** auto-start servers on startup ([5518c4e](https://github.com/chadbyte/clay/commit/5518c4e46a2b1ca6f5ebbd56695ee947b5284b2d))
+* **scheduler:** add inline editing for PROMPT.md and JUDGE.md ([261a955](https://github.com/chadbyte/clay/commit/261a955cb165cedb4cf8d864efa98f1f6ea47a4e)), closes [#313](https://github.com/chadbyte/clay/issues/313)
+
 # [2.28.0-beta.3](https://github.com/chadbyte/clay/compare/v2.28.0-beta.2...v2.28.0-beta.3) (2026-04-15)
 
 
