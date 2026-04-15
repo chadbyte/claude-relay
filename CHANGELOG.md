@@ -1,3 +1,10 @@
+# [2.28.0-beta.3](https://github.com/chadbyte/clay/compare/v2.28.0-beta.2...v2.28.0-beta.3) (2026-04-15)
+
+
+### Bug Fixes
+
+* **sdk:** disable hooks during warmup queries ([d2f6c7e](https://github.com/chadbyte/clay/commit/d2f6c7ecf0eac585346ebd5c9276606407181a9a)), closes [#316](https://github.com/chadbyte/clay/issues/316)
+
 # [2.28.0-beta.2](https://github.com/chadbyte/clay/compare/v2.28.0-beta.1...v2.28.0-beta.2) (2026-04-15)
 
 
