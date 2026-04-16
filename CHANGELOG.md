@@ -1,3 +1,10 @@
+## [2.29.5-beta.2](https://github.com/chadbyte/clay/compare/v2.29.5-beta.1...v2.29.5-beta.2) (2026-04-16)
+
+
+### Performance Improvements
+
+* **ui:** add fingerprint guard to renderUserStrip ([808bf65](https://github.com/chadbyte/clay/commit/808bf656b53d72ec6cd0b1a1a5a8cab0bcf7bbee))
+
 ## [2.29.5-beta.1](https://github.com/chadbyte/clay/compare/v2.29.4...v2.29.5-beta.1) (2026-04-16)
 
 
