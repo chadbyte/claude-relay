@@ -1,3 +1,10 @@
+## [2.29.4-beta.2](https://github.com/chadbyte/clay/compare/v2.29.4-beta.1...v2.29.4-beta.2) (2026-04-16)
+
+
+### Bug Fixes
+
+* **ui:** clear stale connected/processing dots from inactive project icons ([32e8215](https://github.com/chadbyte/clay/commit/32e8215cf2c8f815a7ee7382437f57ef06368134))
+
 ## [2.29.4-beta.1](https://github.com/chadbyte/clay/compare/v2.29.3...v2.29.4-beta.1) (2026-04-16)
 
 
