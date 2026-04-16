@@ -1,3 +1,10 @@
+# [2.30.0-beta.2](https://github.com/chadbyte/clay/compare/v2.30.0-beta.1...v2.30.0-beta.2) (2026-04-16)
+
+
+### Bug Fixes
+
+* **projects:** pass IGNORED_DIRS and onCreateWorktree to attachSessions ([3aaa062](https://github.com/chadbyte/clay/commit/3aaa0625d34d9c0e1dfa406005a3e07903034000))
+
 # [2.30.0-beta.1](https://github.com/chadbyte/clay/compare/v2.29.6-beta.1...v2.30.0-beta.1) (2026-04-16)
 
 
