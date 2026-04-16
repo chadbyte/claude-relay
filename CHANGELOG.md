@@ -1,3 +1,10 @@
+## [2.29.3](https://github.com/chadbyte/clay/compare/v2.29.2...v2.29.3) (2026-04-16)
+
+
+### Performance Improvements
+
+* **ui:** avoid full icon strip DOM rebuild on project switch and DM messages ([7b9fd37](https://github.com/chadbyte/clay/commit/7b9fd3719a8460cc28f1a7ad4ecef54d929b4741))
+
 ## [2.29.3-beta.1](https://github.com/chadbyte/clay/compare/v2.29.2...v2.29.3-beta.1) (2026-04-15)
 
 
