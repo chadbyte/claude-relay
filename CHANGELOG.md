@@ -1,3 +1,10 @@
+## [2.29.6-beta.1](https://github.com/chadbyte/clay/compare/v2.29.5...v2.29.6-beta.1) (2026-04-16)
+
+
+### Bug Fixes
+
+* **dm:** allow DM and mate chat in single-user mode ([75c34e6](https://github.com/chadbyte/clay/commit/75c34e655b9bd79d020fc19b9741910e210f39c8))
+
 ## [2.29.5](https://github.com/chadbyte/clay/compare/v2.29.4...v2.29.5) (2026-04-16)
 
 
