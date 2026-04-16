@@ -1,3 +1,10 @@
+## [2.29.5-beta.1](https://github.com/chadbyte/clay/compare/v2.29.4...v2.29.5-beta.1) (2026-04-16)
+
+
+### Bug Fixes
+
+* **mcp:** queue extension messages until WS is ready and clean up on disconnect ([f150f78](https://github.com/chadbyte/clay/commit/f150f7840624adfaba30af0960d07088130c4e44)), closes [hi#latency](https://github.com/hi/issues/latency)
+
 ## [2.29.4](https://github.com/chadbyte/clay/compare/v2.29.3...v2.29.4) (2026-04-16)
 
 
