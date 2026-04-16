@@ -1,3 +1,10 @@
+# [2.30.0-beta.1](https://github.com/chadbyte/clay/compare/v2.29.6-beta.1...v2.30.0-beta.1) (2026-04-16)
+
+
+### Features
+
+* **ui:** allow icon change for worktree projects in icon strip ([46a8f00](https://github.com/chadbyte/clay/commit/46a8f00ee5c351cb44354ac21db42258ac48d48b))
+
 ## [2.29.6-beta.1](https://github.com/chadbyte/clay/compare/v2.29.5...v2.29.6-beta.1) (2026-04-16)
 
 
