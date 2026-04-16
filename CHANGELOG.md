@@ -1,3 +1,10 @@
+## [2.29.5-beta.3](https://github.com/chadbyte/clay/compare/v2.29.5-beta.2...v2.29.5-beta.3) (2026-04-16)
+
+
+### Bug Fixes
+
+* **ui:** show all mates in strip for single-user mode ([71c5978](https://github.com/chadbyte/clay/commit/71c5978589c982cd2952c788d3787bcf6449a55b))
+
 ## [2.29.5-beta.2](https://github.com/chadbyte/clay/compare/v2.29.5-beta.1...v2.29.5-beta.2) (2026-04-16)
 
 
