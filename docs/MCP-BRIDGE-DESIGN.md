@@ -1,4 +1,6 @@
-# MCP Bridge Design
+# MCP Bridge Design (Original)
+
+> **Note**: This is the original design document from before implementation. For the current architecture and implementation details, see [MCP-IMPLEMENTATION.md](MCP-IMPLEMENTATION.md).
 
 ## Problem
 

@@ -18,6 +18,16 @@ REMOTE USER (browser on different machine):
 
 ---
 
+## Repositories
+
+| Repo | Purpose | URL |
+|------|---------|-----|
+| `clay` (this repo) | Server-side MCP: `lib/mcp-local.js`, `lib/project-mcp.js`, `native-host/` | github.com/chadbyte/clay |
+| `clay-chrome` | Chrome Extension: popup UI, background.js relay, content.js bridge | github.com/chadbyte/clay-chrome |
+| `clay-mcp-bridge` | npm package: Native Messaging Host for remote users | github.com/chadbyte/clay-mcp-bridge |
+
+---
+
 ## Connection Path: Local
 
 When `ws._clayLocal` is true (client IP is 127.0.0.1 / ::1), Clay server manages MCP processes directly via `lib/mcp-local.js`.
@@ -231,3 +241,26 @@ State tracked by: `_extensionConnected`, `_nativeHostConnected` (from hostConnec
 - **Tool call timeout**: Check message type alignment (clay_mcp_tool_call vs mcp_tool_call)
 - **Toggle not persisting**: Verify onSetProjectMcpServers is wired through server.js to project context
 - **Service worker state lost**: MV3 SWs lose memory on sleep. Use URL pattern matching for tab detection, not in-memory Sets
+- **Multi-server setup**: Each Clay tab needs its own port in background.js `clayPorts`. Check `Object.keys(clayPorts)` in SW console
+
+---
+
+## Installation (Remote Users)
+
+```bash
+npx clay-mcp-bridge install <extension-id>
+```
+
+Find extension ID at `chrome://extensions` (look for "Clay").
+
+Installs to:
+- `~/.clay/mcp-bridge/host.js` - permanent copy of Native Host
+- `~/.clay/mcp-bridge/clay-mcp-host` - bash wrapper with absolute node path
+- `~/Library/Application Support/Google/Chrome/NativeMessagingHosts/com.clay.mcp_bridge.json` (macOS Chrome)
+- `~/Library/Application Support/Arc/User Data/NativeMessagingHosts/com.clay.mcp_bridge.json` (macOS Arc)
+- `~/Library/Application Support/Chromium/NativeMessagingHosts/com.clay.mcp_bridge.json` (macOS Chromium)
+- `~/.config/google-chrome/NativeMessagingHosts/com.clay.mcp_bridge.json` (Linux Chrome)
+
+**Requires browser restart** after install. No sudo needed.
+
+Uninstall: `npx clay-mcp-bridge uninstall`
