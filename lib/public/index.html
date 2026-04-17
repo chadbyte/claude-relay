@@ -40,10 +40,6 @@
   body.wide-view:not(.mate-dm-active) .tool-group{max-width:100%!important}
   body.wide-view:not(.mate-dm-active) .turn-meta{max-width:100%!important}
 }
-#ask-mate-btn::before{content:""!important;position:absolute!important;inset:0!important;background:linear-gradient(135deg,#4ecdc4 0%,#556bf7 33%,#a855f7 55%,#f857a6 78%,#ff6b6b 100%)!important;border-radius:inherit!important;opacity:0;transform:scale(0.3);transition:opacity 0.3s ease,transform 0.35s cubic-bezier(0.34,1.56,0.64,1);z-index:-1}
-#ask-mate-btn:hover::before{opacity:1!important;transform:scale(1)!important}
-#ask-mate-btn:hover{border-color:transparent!important;background:transparent!important;transform:translateY(-1px);box-shadow:0 2px 12px rgba(148,130,247,0.4)}
-#ask-mate-btn:hover .ask-mate-label{background:none!important;-webkit-text-fill-color:#fff!important}
 </style>
 </head>
 <body>
@@ -520,6 +516,18 @@
                         <span class="config-toggle-knob"></span>
                       </button>
                     </div>
+                  </div>
+                  <div id="config-approval-section" class="config-section" style="display:none">
+                    <div class="config-section-label">APPROVAL</div>
+                    <div id="config-approval-bar" class="config-segmented"></div>
+                  </div>
+                  <div id="config-sandbox-section" class="config-section" style="display:none">
+                    <div class="config-section-label">SANDBOX</div>
+                    <div id="config-sandbox-bar" class="config-segmented"></div>
+                  </div>
+                  <div id="config-websearch-section" class="config-section" style="display:none">
+                    <div class="config-section-label">WEB SEARCH</div>
+                    <div id="config-websearch-bar" class="config-segmented"></div>
                   </div>
                 </div>
               </div>
