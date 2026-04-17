@@ -1,196 +1,301 @@
 # Claude Agent SDK Upgrade Tracker
 
-Installed: `@anthropic-ai/claude-agent-sdk@0.2.80` (Claude Code 2.1.80)
-Latest: `@anthropic-ai/claude-agent-sdk@0.2.92` (Claude Code 2.1.92, 2026-04-07)
-Updated: 2026-04-07
+Installed: `@anthropic-ai/claude-agent-sdk@0.2.92` (Claude Code 2.1.92)
+Latest: `@anthropic-ai/claude-agent-sdk@0.2.112` (Claude Code 2.1.112, 2026-04-17)
+Updated: 2026-04-17
 
-Covers all unapplied changes from 0.2.80 through 0.2.92.
-Previous round (0.2.38 through 0.2.76) is archived at the bottom.
+Covers all unapplied changes from 0.2.80 through 0.2.112 (two rounds merged).
+Codex multi-provider expansion planned. Items marked with Codex support are worth building as platform-common features.
 
 
 ---
 
-## New in 0.2.81-0.2.92
 
-### Priority 1 - High (Functional gaps, user-facing impact)
+## Master Item Table
 
-#### 1.1 npm upgrade to 0.2.92
-- **Status:** Not started
-- **What:** `npm install @anthropic-ai/claude-agent-sdk@0.2.92`
-- **Impact:** Required for all new APIs below. No peer dependency changes (still `zod ^4.0.0`). New runtime dependencies added: `@anthropic-ai/sdk` (^0.80.0), `@modelcontextprotocol/sdk` (^1.27.1).
-- **Breaking (all verified safe, no code impact):**
-  - `SubscribeMcpResource*` and `SubscribePolling*` tool types removed (0.2.85). No code references them.
-  - Grep `head_limit` default changed from unlimited to 250 (0.2.83). No code uses `head_limit`.
-  - `SDKStreamlinedTextMessage` and `SDKStreamlinedToolUseSummaryMessage` removed from `StdoutMessage` union (0.2.90). No code references them.
-  - `SDKSystemMessage.session_id` changed from required to optional (0.2.86). Code already uses truthy checks.
-  - `PreToolUseHookSpecificOutput.permissionDecision` type expanded with `'defer'` value (0.2.89). Hooks not used.
+43 items total. Action: **Do** = implement, **Skip** = not needed. Codex: **x** = reusable for Codex (build as platform-common).
 
-#### ~~1.2 `SDKSessionStateChangedMessage` (since 0.2.81+) -- SKIP~~
-- ~~**Status:** Skipped~~
-- ~~**What:** New message type: session state transitions (`idle`, `running`, `requires_action`).~~
-- ~~**Why skipped:** Relay already tracks state more accurately via Socket.IO. Query start/end is directly controlled, `pendingPermissions`/`pendingElicitations` cover `requires_action`. SDK notification would lag behind relay's own tracking.~~
+### P1 - High (functional gaps, user-facing impact)
 
+| # | Item | Action | Codex | Current status | Where |
+|---|------|--------|:-----:|----------------|-------|
+| 1 | ~~npm upgrade to 0.2.112~~ | ~~Done~~ | | ~~0.2.112 installed. All 4 breaking changes verified safe~~ | -- |
+| 2 | ~~`'xhigh'` effort level~~ | ~~Done~~ | x | ~~Added to EFFORT_LEVELS, display name "X-High"~~ | `app-panels.js` |
+| 3 | ~~`SDKTaskUpdatedMessage`~~ | ~~Done~~ | x | ~~task_updated handler + client updateSubagentTaskStatus~~ | `sdk-message-processor.js`, `tools.js`, `app-messages.js` |
+| 4 | ~~`SDKNotificationMessage`~~ | ~~Done~~ | | ~~Forwarded as sdk_notification, displayed as system message~~ | `sdk-message-processor.js`, `app-messages.js` |
+| 5 | `SDKMemoryRecallMessage` | Skip | | Claude-only memory system, low user interest | -- |
 
-### Priority 2 - Medium (Improved reliability, better UX)
+### P2 - Medium (reliability, UX improvement)
 
-#### 2.1 `reloadPlugins()` query method (since 0.2.83+)
-- **Status:** Not started
-- **What:** Hot-reload MCP servers, skills, agents, and hooks without restarting the session. Returns `SDKControlReloadPluginsResponse` with updated lists and error count.
-- **Impact:** Currently adding/removing MCP servers requires session restart. This enables live reconfiguration.
-- **Where:** `sdk-bridge.js` - expose via WebSocket command. Call `session.queryInstance.reloadPlugins()`.
+| # | Item | Action | Codex | Current status | Where |
+|---|------|--------|:-----:|----------------|-------|
+| 6 | `startup()` + `WarmQuery` | **Do** | | Codex is API-based (no cold start). Claude-only but high ROI | `sdk-bridge.js` |
+| 7 | `TerminalReason` | **Do** | x | Partial (error message only) | `sdk-bridge.js`, `sdk-message-processor.js`, client |
+| 8 | `reloadPlugins()` | **Do** | x | Not implemented (session restart required) | `sdk-bridge.js` |
+| 9 | `listSubagents()`/`getSubagentMessages()` | **Do** | | Not implemented | `project.js` WS handlers |
+| 10 | `SDKMessageOrigin` | **Do** | x | Not implemented. Relay already knows source | `sdk-bridge.js` message construction |
+| 11 | `systemPrompt` array + cache boundary | **Do** | | Single string only. Direct cost/speed impact | `sdk-bridge.js` query options |
+| 12 | `McpServerToolPolicy` | **Do** | x | Not implemented (server-level only) | `project-mcp.js` UI |
+| 13 | `SDKControlRenameSessionRequest` | Skip | | Relay has its own rename | -- |
+| 14 | `SDKControlRequestUserDialogRequest` | **Do** | | Not implemented. OAuth flows break without it | `sdk-bridge.js`, client dialog |
+| 15 | `SDKPluginInstallMessage` | **Do** | x | Not implemented (silent load) | `sdk-message-processor.js`, client |
+| 16 | Thinking display (`summarized`/`omitted`) | **Do** | x | Always full display, no control | `project-sessions.js`, client toggle |
+| 17 | `ttft_ms` | **Do** | x | Not implemented. Client-side timing as fallback | Client timestamp measurement |
+| 18 | Compact result/error + metadata | **Do** | x | compacting status only, no result/error | `sdk-message-processor.js`, client context bar |
+| 19 | `Options` spawn (cwd/settingSources) | Skip | | SDK internal | -- |
+| 20 | `PermissionMode: 'auto'` | Skip | | Claude-specific permission system | -- |
+| 21 | `seedReadState()` | Skip | | SDK internal, no file state to seed | -- |
+| 22 | Agent `effort`/`permissionMode` | Skip | | AgentDefinition-specific, redesign for multi-provider | -- |
+| 23 | Agent `background`/`memory` | Skip | | AgentDefinition-specific | -- |
+| 24 | `AgentDefinition.initialPrompt` | Skip | | Relay constructs its own | -- |
+| 25 | `PermissionDecisionClassification` | Skip | | SDK internal, relay handles own permission UX | -- |
+| 26 | Hook events (TaskCreated/CwdChanged/FileChanged) | Skip | | Hooks not adopted | -- |
+| 27 | `PermissionDenied` hook | Skip | | Hooks not adopted | -- |
 
-#### 2.2 `seedReadState()` query method (since 0.2.85+)
-- **Status:** Not started
-- **What:** Pre-seed file read cache with path and mtime. Tells the SDK that a file has already been read, avoiding redundant reads.
-- **Impact:** Performance optimization for resumed sessions or when relay knows file state.
-- **Where:** `sdk-bridge.js` - call during session resume if file state is cached.
+### P3 - Low (nice-to-have, polish)
 
-#### 2.3 `listSubagents()` / `getSubagentMessages()` top-level functions (since 0.2.89+)
-- **Status:** Not started
-- **What:** `listSubagents(sessionId, options?)` lists subagent IDs for a session. `getSubagentMessages(sessionId, agentId, options?)` reads a subagent's conversation transcript.
-- **Impact:** Enables viewing subagent conversation history in UI. Useful for debugging and transparency.
-- **Where:** `project.js` - expose via WebSocket handlers, similar to existing `getSessionMessages()` pattern.
-- **Options:** `ListSubagentsOptions: { dir?: string }`, `GetSubagentMessagesOptions: { dir?: string, limit?: number, offset?: number }`.
+| # | Item | Action | Codex | Current status | Where |
+|---|------|--------|:-----:|----------------|-------|
+| 28 | Settings UI (advisorModel, autoDreamEnabled, showClearContextOnPlanAccept, autoCompactWindow, disableSkillShellExecution) | **Do** | | Not implemented | `project-sessions.js`, client settings panel |
+| 29 | Skill settings (3 fields) | Skip | | Claude-specific skill system | -- |
+| 30 | Task `toolStats` | **Do** | x | Not implemented. Track at relay level | `sdk-message-processor.js`, client task UI |
+| 31 | `api_error_status` | Skip | | Developer debug, minimal user value | -- |
+| 32 | `skip_transcript` | **Do** | | Not implemented. Simple flag forwarding | `sdk-message-processor.js` |
+| 33 | Elicitation display fields (title, display_name, description) | **Do** | | Not implemented | Client permission dialog |
+| 34 | `SDKStatus: 'requesting'` | Skip | | Zero user impact | -- |
+| 35 | `bypassPermissions` mode | Skip | | Already used internally | -- |
+| 36 | `workflow_name` on task started | Skip | | Just a label | -- |
+| 37 | Hook `if`/`shell` config | Skip | | Hooks not adopted | -- |
+| 38 | `head_limit` default change | Skip | | Verified no impact | -- |
+| 39 | `includeHookEvents` | Skip | | Hooks not adopted | -- |
 
-#### 2.4 `TerminalReason` on result messages (since 0.2.91+)
-- **Status:** Not started
-- **What:** `SDKResultMessage` gained `terminal_reason?: TerminalReason` field. Values: `'blocking_limit'`, `'rapid_refill_breaker'`, `'prompt_too_long'`, `'image_error'`, `'model_error'`, `'aborted_streaming'`, `'aborted_tools'`, `'stop_hook_prevented'`, `'hook_stopped'`, `'tool_deferred'`, `'max_turns'`, `'completed'`.
-- **Impact:** UI can show why a query ended (e.g., "context too long", "max turns reached") instead of generic "done".
-- **Where:** `sdk-bridge.js` - forward `terminal_reason` in query_done event. Client-side: display in status area.
+### Defer (alpha/beta, revisit when stable)
 
-#### 2.5 `PermissionMode: 'auto'` (since 0.2.91+)
-- **Status:** Not started
-- **What:** New `'auto'` value added to `PermissionMode`. Appears in `SDKControlSetPermissionModeRequest`, `SDKSessionStateChangedMessage`, and settings `defaultMode`.
-- **Impact:** Enables autonomous permission handling mode. Evaluate if/how to expose in UI permission mode selector.
-
-#### 2.6 Agent config: `effort` and `permissionMode` (since 0.2.92+)
-- **Status:** Not started
-- **What:** `AgentDefinition` gained `effort?: ('low' | 'medium' | 'high' | 'max') | number` and `permissionMode?: PermissionMode`.
-- **Impact:** Per-agent effort and permission settings. Enables differentiated agent behavior (e.g., low-effort background agents).
-
-#### 2.7 Agent config: `background` and `memory` (since 0.2.89+)
-- **Status:** Not started
-- **What:** `AgentDefinition` gained `background?: boolean` (fire-and-forget agent) and `memory?: 'user' | 'project' | 'local'` (auto-load memory scope).
-- **Impact:** Background agents run without blocking the main thread. Memory scoping enables agent-specific context loading.
-
-#### 2.8 New hook events: `TaskCreated`, `CwdChanged`, `FileChanged` (since 0.2.83+)
-- **Status:** Not started (no code change needed unless hooks are adopted)
-- **What:** Three new `HookEvent` values. `CwdChanged` fires on working directory change (provides `old_cwd`, `new_cwd`). `FileChanged` fires on file system changes (provides `file_path`, `event: 'change' | 'add' | 'unlink'`). `TaskCreated` fires when a task is created (provides `task_id`, `task_subject`, etc.).
-- **Impact:** Enables reactive hooks (e.g., auto-lint on file save, notify on directory change). `FileChanged` and `CwdChanged` hooks can return `watchPaths` to control which paths are monitored.
-
-#### 2.9 `PermissionDenied` hook event (since 0.2.89+)
-- **Status:** Not started (no code change needed unless hooks are adopted)
-- **What:** New hook event fired when a permission is denied. Input includes `tool_name`, `tool_input`, `tool_use_id`, `reason`. Hook output can set `retry?: boolean`.
-- **Impact:** Enables automated recovery from permission denials (e.g., retry with different parameters).
-
-#### 2.10 `AgentDefinition.initialPrompt` (since 0.2.83+)
-- **Status:** Not started
-- **What:** New optional field on `AgentDefinition`. Auto-submitted as the first user turn for main thread agents.
-- **Impact:** Enables pre-configured agent workflows that start automatically without user input.
-
-#### 2.11 `PermissionDecisionClassification` on `PermissionResult` (since 0.2.83+)
-- **Status:** Not started
-- **What:** New optional `decisionClassification` field on allow/deny permission results: `'user_temporary'`, `'user_permanent'`, `'user_reject'`.
-- **Impact:** SDK can distinguish between one-time allows and permanent permission grants. Could improve permission UX.
+| # | Item | Action | Codex | Current status | Where |
+|---|------|--------|:-----:|----------------|-------|
+| 40 | Assistant Worker module | Defer | | alpha, new module | -- |
+| 41 | `connectRemoteControl*` types | Defer | | alpha | -- |
+| 42 | Bridge enhancements | Defer | | alpha | -- |
+| 43 | `taskBudget` query option | Defer | | alpha, beta header required | -- |
 
 
-### Priority 3 - Low (Nice-to-have, polish)
-
-#### 3.1 `SDKTaskStartedMessage.workflow_name` (since 0.2.83+)
-- **Status:** Not started
-- **What:** New optional field on task started messages, set when `task_type` is `'local_workflow'`.
-- **Impact:** Better labeling of workflow-originated sub-agents in UI.
-
-#### 3.2 Hook config enhancements: `if`, `shell` fields (since 0.2.85+)
-- **Status:** Not started (no code change needed unless hooks are adopted)
-- **What:** Hooks can now have `if` (permission rule syntax filter) and `shell` (`'bash' | 'powershell'`) fields.
-- **Impact:** More flexible hook configuration.
-
-#### 3.3 New Settings fields for Settings UI (since 0.2.83-0.2.92)
-- **Status:** Not started
-- **What:** Expose new SDK settings in the existing project/server settings panels.
-- **Fields to add:**
-  - `advisorModel` (string) - model for the advisor tool. Add to model settings section alongside main model selector.
-  - `autoDreamEnabled` (boolean) - background memory consolidation toggle. Add as on/off toggle in server settings.
-  - `showClearContextOnPlanAccept` (boolean) - show "clear context" option when accepting plans. Add as toggle in project settings.
-  - `autoCompactWindow` (number) - auto-compact window size (since 0.2.89+). Add as numeric input in server settings.
-  - `disableSkillShellExecution` (boolean) - disables inline shell execution in skills (since 0.2.91+). Add as toggle in server settings.
-- **Fields to skip:**
-  - `defaultShell` - clay targets macOS/Linux, nearly always bash.
-  - `channelsEnabled` / `allowedChannelPlugins` - Teams/Enterprise only.
-  - `strictPluginOnlyCustomization` - Enterprise admin feature.
-  - `forceRemoteSettingsRefresh` - managed/enterprise only (since 0.2.89+).
-  - `proactive` - autonomous background operation, needs architectural evaluation (since 0.2.91+).
-- **Where:** `project-settings.js`, `server-settings.js` for UI. `project.js` for WebSocket handlers. Need to read/write via SDK settings API or settings.json.
-
-#### 3.4 `SdkMcpToolDefinition._meta` (since 0.2.83+)
-- **Status:** Available (no code change needed)
-- **What:** MCP tool definitions can now carry `_meta` metadata.
-
-#### 3.5 `tool()` function `searchHint` (since 0.2.85+)
-- **Status:** Available (no code change needed)
-- **What:** Custom tools can provide `searchHint` for SDK tool search/discovery.
-
-#### 3.6 Sandbox `failIfUnavailable` (since 0.2.85+)
-- **Status:** Available (no code change needed)
-- **What:** Sandbox config can set `failIfUnavailable: true` to exit with error if sandbox cannot start.
-
-#### 3.7 Grep `head_limit` default change (since 0.2.83+)
-- **Status:** Not started (behavioral change, no code needed)
-- **What:** Grep tool `head_limit` now defaults to 250 instead of unlimited. Pass `head_limit: 0` explicitly for unlimited.
-- **Impact:** May affect relay code that relies on grep returning unlimited results without specifying head_limit.
-
-#### ~~3.8 `getContextUsage()` query method (since 0.2.86+) -- DONE~~
-- ~~**Status:** Implemented~~
-- ~~**What:** Returns `SDKControlGetContextUsageResponse` with detailed context window breakdown (tokens per category, model, memory files, MCP tools, agents, skills, auto-compact threshold, etc.).~~
-- ~~**Impact:** Rich context usage popover on header context bar click. Shows stacked category bar, message breakdown, system prompt sections, memory files, and auto-compact threshold.~~
-- ~~**Where:** `sdk-worker.js` calls `getContextUsage()` after query completes. `sdk-bridge.js` relays via `context_usage` message. `app.js` renders popover. `title-bar.css` styles popover.~~
-
-#### 3.9 `tool()` function `alwaysLoad` (since 0.2.92+)
-- **Status:** Available (no code change needed)
-- **What:** Custom tools can set `alwaysLoad: true` to prevent being deferred.
-
-#### 3.10 `'anthropicAws'` API provider (since 0.2.90+)
-- **Status:** Available (no code change needed)
-- **What:** New `apiProvider` value alongside `'firstParty'`, `'bedrock'`, `'vertex'`, `'foundry'`.
-
-#### 3.11 `SDKDeferredToolUse` on `SDKResultMessage` (since 0.2.89+)
-- **Status:** Available (no code change needed)
-- **What:** `SDKResultMessage` gained `deferred_tool_use?: SDKDeferredToolUse` field with `id`, `name`, `input`.
-
-#### 3.12 `includeHookEvents` query option (since 0.2.86+)
-- **Status:** Not started
-- **What:** When `true`, emits `hook_started`, `hook_progress`, and `hook_response` system messages for all hook event types.
-- **Impact:** Visibility into hook execution. Only useful once hooks are adopted.
-
-#### 3.13 `file_unchanged` tool output and `staleReadFileStateHint` (since 0.2.86+)
-- **Status:** Available (no code change needed)
-- **What:** New `file_unchanged` tool output type with `filePath`. `BashOutput` gained `staleReadFileStateHint` field listing read-file-state entries whose mtime changed during a command.
+---
 
 
-## Deferred (alpha/beta, revisit when stable)
+## Action Summary
 
-#### `taskBudget` query option (since 0.2.83+, @alpha, beta header required)
-- **What:** `QueryOptions.taskBudget: { total: number }` (output token unit). Sets API-side token budget per query. Claude paces tool use and wraps up before the limit. Requires `task-budgets-2026-03-13` beta header.
-- **Impact:** Per-query cost limiting. Useful for Ralph Loop autonomous runs.
-- **Why deferred:** @alpha, requires beta header. API may change.
-
-#### Bridge module (`@anthropic-ai/claude-agent-sdk/bridge`) (since 0.2.83+, @alpha)
-- **What:** Remote session management. External worker attaches to claude.ai sessions via JWT. Bidirectional message/permission relay over SSE/HTTP. Functions: `createCodeSession()`, `fetchRemoteCredentials()`, `attachBridgeSession()`.
-- **Impact:** Could enable relay-as-a-service, multi-device, cloud-hosted sessions.
-- **Why deferred:** @alpha with separate versioning (breaking changes without major bump). Needs architectural evaluation.
-- **0.2.91 update:** `fetchRemoteCredentials()` signature changed (added `trustedDeviceToken` param, return type expanded with `CredentialsFailure`). Still @alpha.
+| | Count | Items |
+|--|-------|-------|
+| **Done** | 4 | ~~#1-4~~ |
+| **Do** | 16 | #6-12, #14-18, #28, #30, #32-33 |
+| of which **Codex-reusable** | 9 | #7, #8, #10, #12, #15-18, #30 |
+| Skip | 19 | #5, #13, #19-27, #29, #31, #34-39 |
+| Defer | 4 | #40-43 |
 
 
-## Upgrade Steps (0.2.80 -> 0.2.92)
+---
 
-1. ~~Verify no references to removed `SubscribeMcpResource*` / `SubscribePolling*` types~~ -- verified, none found
-2. ~~Check grep usage for implicit `head_limit` reliance~~ -- verified, no `head_limit` usage in relay code
-3. ~~Verify no references to `SDKStreamlinedTextMessage` / `SDKStreamlinedToolUseSummaryMessage`~~ -- verified, none found
-4. ~~Verify `session_id` usage handles optional~~ -- verified, already uses truthy checks
-5. `npm install @anthropic-ai/claude-agent-sdk@0.2.92`
-6. Implement Priority 2 items as needed
-7. Priority 3 items can be done incrementally
+
+## Upgrade Steps
+
+1. Verify `SDKSessionInfo.systemPrompt` handling works with `string[]` (was `string`)
+2. Verify `EditFileOutput.originalFile` null handling
+3. Verify no references to removed `proactive` settings block or `SDKControlSetProactiveRequest`
+4. `npm install @anthropic-ai/claude-agent-sdk@0.2.112`
+5. Add `'xhigh'` to effort selector UI
+6. Handle new message types: `task_updated`, `notification`, `plugin_install`
+7. Implement remaining items
+
+
+---
+
+
+## Detailed Specs (work items only)
+
+
+### #1 npm upgrade to 0.2.112
+
+`npm install @anthropic-ai/claude-agent-sdk@0.2.112`
+
+Dependency bumps: `@anthropic-ai/sdk` ^0.80.0 -> ^0.81.0, `@modelcontextprotocol/sdk` ^1.27.1 -> ^1.29.0.
+
+Breaking changes to verify:
+- `SDKSessionInfo.systemPrompt` changed from `string` to `string[]`. Check all relay code accessing `systemPrompt`.
+- `EditFileOutput.originalFile` changed from `string` to `string | null`. Check null handling.
+- `proactive` settings block removed entirely. No relay code uses it (was deferred). Safe.
+- `SDKControlSetProactiveRequest` removed from `SDKControlRequestInner`. No relay code uses it. Safe.
+- `SubscribeMcpResource*` and `SubscribePolling*` tool types removed (0.2.85). Verified no references.
+- `SDKStreamlinedTextMessage` / `SDKStreamlinedToolUseSummaryMessage` removed from `StdoutMessage` (0.2.90). Verified no references.
+- `SDKSystemMessage.session_id` changed from required to optional (0.2.86). Already uses truthy checks.
+
+
+### #2 `'xhigh'` effort level
+New `EffortLevel` value between `'high'` and `'max'`. Added across `AgentDefinition.effort`, `ModelInfo.supportedEffortLevels`, `Options.effort`, and settings `effortLevel`.
+
+**Codex:** Abstract effort levels as platform concept. Map Claude low/medium/high/xhigh/max and Codex equivalents to common enum.
+
+**Where:** Client effort selector UI, `sdk-bridge.js` effort handling, `project-sessions.js` set_effort handler.
+
+
+### #3 `SDKTaskUpdatedMessage`
+Live task state patches: `{ task_id, patch: { status?, description?, end_time?, total_paused_ms?, error?, is_backgrounded? } }`.
+
+Currently sub-agent task status only shows start/progress/done. This enables real-time updates (running, completed, failed, killed) and background task tracking.
+
+**Codex:** Build unified task state model at relay level. Claude provides `task_updated`, Codex provides its own task events. Both feed the same client UI.
+
+**Where:** `sdk-message-processor.js` - handle `subtype: 'task_updated'`. Update sub-agent tracking state and forward to client.
+
+
+### #4 `SDKNotificationMessage`
+`{ key, text, priority: 'low'|'medium'|'high'|'immediate', color?, timeout_ms? }`.
+
+**Where:** `sdk-message-processor.js` - handle `subtype: 'notification'`. Forward to client. Render as toast (immediate/high) or notification center entry (medium/low).
+
+
+### #6 `startup()` + `WarmQuery`
+
+`startup({ options?, initializeTimeoutMs? })` returns a `WarmQuery` with `query(prompt)` and `close()`. Subprocess pre-warms with loaded plugins.
+
+Eliminates cold-start latency on first query. Subprocess boots in background, ready when user sends first message.
+
+**Where:** `sdk-bridge.js` - call `startup()` during session creation, use `WarmQuery.query()` for first query instead of `sdk.query()`.
+
+
+### #7 `TerminalReason`
+`SDKResultMessage` gained `terminal_reason?: TerminalReason`. Values: `'blocking_limit'`, `'rapid_refill_breaker'`, `'prompt_too_long'`, `'image_error'`, `'model_error'`, `'aborted_streaming'`, `'aborted_tools'`, `'stop_hook_prevented'`, `'hook_stopped'`, `'tool_deferred'`, `'max_turns'`, `'completed'`.
+
+Currently partially implemented (appended to error messages only).
+
+**Codex:** Common stop-reason enum. Claude: map terminal_reason values. Codex: map finish_reason (stop/length/tool_calls/content_filter). Display in status area: "Stopped: context too long", "Completed", "Max turns reached".
+
+**Where:** `sdk-bridge.js` - forward `terminal_reason` in query_done. `sdk-message-processor.js` already has partial handling at line 334. Client: display in status area.
+
+
+### #8 `reloadPlugins()`
+Hot-reload MCP servers, skills, agents, and hooks without restarting the session. Returns `SDKControlReloadPluginsResponse` with updated lists and error count.
+
+Currently adding/removing MCP servers requires session restart.
+
+**Codex:** MCP is cross-provider. Build "reload MCP" command at relay level, calling Claude SDK's `reloadPlugins()` or Codex equivalent.
+
+**Where:** `sdk-bridge.js` - expose via WebSocket command. Call `session.queryInstance.reloadPlugins()`.
+
+
+### #9 `listSubagents()` / `getSubagentMessages()`
+
+`listSubagents(sessionId, options?)` lists subagent IDs. `getSubagentMessages(sessionId, agentId, options?)` reads transcript.
+
+Options: `ListSubagentsOptions: { dir?: string }`, `GetSubagentMessagesOptions: { dir?: string, limit?: number, offset?: number }`.
+
+**Where:** `project.js` - expose via WebSocket handlers, similar to existing `getSessionMessages()` pattern.
+
+
+### #10 `SDKMessageOrigin`
+`SDKUserMessage` gained `origin?: SDKMessageOrigin` (`{ kind: 'human'|'channel'|'peer'|'task-notification'|'coordinator' }`) and `shouldQuery?: boolean`.
+
+**Codex:** Relay already knows message source (user typed, scheduled, mention, loop). Tag at relay level regardless of provider. `shouldQuery: false` enables appending context without triggering response, useful for context injection.
+
+**Where:** `sdk-bridge.js` - set `origin` when submitting messages. Apply to Codex adapter too.
+
+
+### #11 `systemPrompt` array + cache boundary
+
+`Options.systemPrompt` expanded to `string | string[]`. When array, elements joined with `SYSTEM_PROMPT_DYNAMIC_BOUNDARY` for cross-session prompt caching. Also `excludeDynamicSections?: boolean`.
+
+Better prompt cache hit rates across sessions sharing the same system prompt prefix. Direct cost/speed impact.
+
+**Where:** `sdk-bridge.js` - split system prompt into static prefix (mate identity, project rules) and dynamic suffix (session-specific context). Pass as array.
+
+
+### #12 `McpServerToolPolicy`
+`McpHttpServerConfig` and `McpSseServerConfig` gained `tools?: McpServerToolPolicy[]`. Each: `{ name, permission_policy: 'always_allow'|'always_ask'|'always_deny' }`.
+
+**Codex:** MCP is provider-neutral. Per-tool permissions config stored at relay level, applied to any provider's MCP connection.
+
+**Where:** `project-mcp.js` - expose per-tool policy config in MCP server settings UI.
+
+
+### #14 `SDKControlRequestUserDialogRequest`
+
+New control request `{ subtype: 'request_user_dialog', dialog_kind, payload, tool_use_id? }`. SDK requests custom UI dialogs (OAuth popups, custom forms) beyond elicitation.
+
+Without this, certain MCP server authentication flows break silently.
+
+**Where:** `sdk-bridge.js` - forward to client, render appropriate dialog based on `dialog_kind`.
+
+
+### #15 `SDKPluginInstallMessage`
+`{ status: 'started'|'installed'|'failed'|'completed', name?, error? }`.
+
+**Codex:** "Loading plugin..." progress is universal. Build common plugin status UI, fed by Claude SDK events or Codex MCP connection status.
+
+**Where:** `sdk-message-processor.js` - handle `subtype: 'plugin_install'`. Show as progress indicator or system message.
+
+
+### #16 Thinking display control
+`ThinkingAdaptive` and `ThinkingEnabled` gained `display?: 'summarized'|'omitted'`.
+
+Currently thinking is always shown in full. Users want control.
+
+**Codex:** Codex reasoning also benefits from display modes. Build toggle at relay level: full/summarized/hidden. Apply to both providers.
+
+**Where:** `project-sessions.js` thinking config, client thinking display toggle.
+
+
+### #17 `ttft_ms`
+Time-to-first-token in milliseconds on `SDKPartialAssistantMessage`.
+
+**Codex:** Can measure client-side for any provider: timestamp(first_token) - timestamp(request_sent). SDK value is more accurate but client measurement works as fallback.
+
+**Where:** Client-side timing. Optionally use SDK value when available. Display in status bar or info popover.
+
+
+### #18 Compact result/error + metadata
+`SDKStatusMessage` gained `compact_result?: 'success'|'failed'`, `compact_error?: string`. Compact events gained `post_tokens?: number`, `duration_ms?: number`.
+
+Currently only shows "compacting..." status with no result.
+
+**Codex:** Context compression is a common need for long conversations. Show: "Compacted: 120k -> 45k tokens (1.2s)" or "Compact failed: [error]".
+
+**Where:** `sdk-message-processor.js` - forward fields. Client context bar - display result.
+
+
+### #28 Settings UI (5 fields)
+
+Fields to add:
+- `advisorModel` (string) - model for the advisor tool. Add to model settings section.
+- `autoDreamEnabled` (boolean) - background memory consolidation. On/off toggle.
+- `showClearContextOnPlanAccept` (boolean) - clear context on plan accept. Toggle.
+- `autoCompactWindow` (number) - auto-compact window size. Numeric input.
+- `disableSkillShellExecution` (boolean) - disable skill shell execution. Toggle.
+
+Fields to skip: `defaultShell`, `channelsEnabled`/`allowedChannelPlugins`, `strictPluginOnlyCustomization`, `forceRemoteSettingsRefresh`.
+
+**Where:** `project-sessions.js` for WS handlers, client settings panel for UI.
+
+
+### #30 Task `toolStats`
+`{ readCount, searchCount, bashCount, editFileCount, linesAdded, linesRemoved, otherToolCount }` on task completion.
+
+**Codex:** Track tool invocation counts at relay level (already routes all tool calls). "3 files edited, 5 commands run, +120/-45 lines" summary works for any provider.
+
+**Where:** `sdk-message-processor.js` for Claude data, relay-level counting as polyfill. Client task completion UI.
+
+
+### #32 `skip_transcript`
+`SDKTaskStartedMessage` and `SDKTaskProgressMessage` gained `skip_transcript?: boolean` for ambient/housekeeping tasks.
+
+**Where:** `sdk-message-processor.js` - forward flag. Client filters these from sub-agent task list.
+
+
+### #33 Elicitation display fields
+
+Permission/elicitation gained `title?`, `display_name?`/`displayName?`, `description?`.
+
+Better permission dialog UX with human-readable labels instead of raw tool names.
+
+**Where:** Client permission dialog rendering. Extract and display these fields.
 
 
 ---
@@ -204,97 +309,55 @@ Previous round (0.2.38 through 0.2.76) is archived at the bottom.
 ### ~~1.1 `onElicitation` callback (since 0.2.39+)~~
 - ~~**Status:** Implemented~~
 - ~~**What:** MCP servers can request user input (OAuth login, form fields) via elicitation. Without this callback, all elicitation requests are auto-declined.~~
-- ~~**Impact:** Slack, GitHub, and other OAuth-based MCP servers cannot authenticate through the relay UI.~~
-- ~~**Where:** `sdk-bridge.js` - add `onElicitation` to queryOptions in `startQuery()`. Forward elicitation requests to the client via WebSocket, collect user response, return result.~~
-- ~~**Types:** `ElicitationRequest`, `ElicitationResult`, `OnElicitation`, `SDKElicitationCompleteMessage`~~
-- ~~**Related messages:** `SDKElicitationCompleteMessage` (new message type to handle)~~
+- ~~**Where:** `sdk-bridge.js` - add `onElicitation` to queryOptions in `startQuery()`.~~
 
 ### ~~1.2 `setEffort()` mid-query method (since 0.2.45+)~~
 - ~~**Status:** Implemented~~
 - ~~**What:** Change effort level on an active query without restarting it.~~
-- ~~**Impact:** UI already has effort selector. Currently changing effort mid-conversation requires a new query.~~
-- ~~**Where:** `sdk-bridge.js` - add `setEffort(session, effort)` method similar to `setModel()`. Call `session.queryInstance.setEffort(effort)`.~~
 
-### ~~1.3 npm upgrade to 0.2.76 (prerequisite for all below)~~
+### ~~1.3 npm upgrade to 0.2.76~~
 - ~~**Status:** Done~~
-- ~~**What:** `npm install @anthropic-ai/claude-agent-sdk@0.2.76`~~
-- ~~**Impact:** Required for all new APIs. Peer dependency changed to `zod ^4.0.0`.~~
-- ~~**Breaking:** `PermissionMode` removed `'delegate'` option (was in 0.2.38, gone by 0.2.63). Verify no code references it.~~
 
 
-## Priority 2 - Medium (Improved reliability, better UX)
+## Priority 2 - Medium -- DONE
 
-### ~~2.1 `listSessions()` top-level function (since 0.2.51+)~~
+### ~~2.1 `listSessions()` (since 0.2.51+)~~
 - ~~**Status:** Implemented~~
-- ~~**What:** SDK-level session listing with pagination support. Replaces manual file system reading of `~/.claude/projects/` directories.~~
-- ~~**Impact:** More reliable session discovery, handles edge cases (worktrees, symlinks) that manual FS reading might miss.~~
-- ~~**Where:** `project.js` `list_cli_sessions` handler now uses `sdk.listSessions()` with fallback to manual parsing.~~
-- ~~**Options:** `{ dir?: string, limit?: number }`~~
 
-### ~~2.2 `getSessionMessages()` top-level function (since 0.2.51+) -- SKIP~~
-- ~~**Status:** Skipped~~
-- ~~**What:** Read session conversation messages with pagination.~~
-- ~~**Why skipped:** Relay already loads session history via `readCliSessionHistory()` which works well. SDK function adds no sync benefit (unlike renameSession/listSessions). Per-session API calls make it unsuitable for search. No current feature needs this.~~
+### ~~2.2 `getSessionMessages()` (since 0.2.51+) -- SKIP~~
+- ~~Relay already loads history via `readCliSessionHistory()`.~~
 
-### ~~2.3 `getSessionInfo()` top-level function (since 0.2.74+)~~
+### ~~2.3 `getSessionInfo()` (since 0.2.74+)~~
 - ~~**Status:** Implemented~~
-- ~~**What:** Lightweight single-session metadata lookup (vs listing all sessions).~~
-- ~~**Impact:** Used in `resume_session` handler to get SDK-resolved title (customTitle > aiTitle > firstPrompt).~~
 
-### ~~2.4 `agentProgressSummaries` query option (since 0.2.72+)~~
+### ~~2.4 `agentProgressSummaries` (since 0.2.72+)~~
 - ~~**Status:** Implemented~~
-- ~~**What:** AI-generated periodic progress summaries for running sub-agents. Piggybacks on prompt cache, so nearly free.~~
-- ~~**Impact:** Better sub-agent progress visibility in UI. Currently only tool names/descriptions are shown.~~
-- ~~**Where:** `sdk-bridge.js` - add `agentProgressSummaries: true` to queryOptions. Handle new summary messages in `processSDKMessage()`.~~
 
-### ~~2.5 `forkSession()` top-level function (since 0.2.76+)~~
+### ~~2.5 `forkSession()` (since 0.2.76+)~~
 - ~~**Status:** Implemented~~
-- ~~**What:** Branch a conversation from a specific message point. Creates a new session with transcript sliced at `upToMessageId`.~~
-- ~~**Impact:** Enables "branch conversation" UI feature. Reuses prompt cache, so cost is minimal.~~
-- ~~**Options:** `{ upToMessageId?: string, title?: string, dir?: string }`~~
-- ~~**Returns:** `{ sessionId: string }`~~
 
 
-## Priority 3 - Low (Nice-to-have, polish)
+## Priority 3 - Low -- DONE
 
-### ~~3.1 `renameSession()` top-level function (since 0.2.74+)~~
+### ~~3.1 `renameSession()` (since 0.2.74+)~~
 - ~~**Status:** Implemented~~
-- ~~**What:** Rename a session title via SDK.~~
-- ~~**Impact:** Session titles now sync to SDK on rename, auto-title, and via one-time migration of existing relay titles.~~
 
-### ~~3.2 `tagSession()` top-level function (since 0.2.76+) -- SKIP~~
-- ~~**Status:** Skipped~~
-- ~~**What:** Attach/detach a tag string to a session (single tag per session).~~
-- ~~**Why skipped:** SDK only supports 1 tag per session. Relay will implement its own multi-tag system (GitHub issue-style labels with colors) stored in relay metadata. SDK tagSession may be used as auxiliary sync for the primary tag.~~
+### ~~3.2 `tagSession()` (since 0.2.76+) -- SKIP~~
+- ~~SDK only supports 1 tag. Relay will implement own multi-tag system.~~
 
-### ~~3.3 `supportedAgents()` query method (since 0.2.51+) -- SKIP~~
-- ~~**Status:** Skipped~~
-- ~~**What:** Get list of available sub-agent types with names, descriptions, and models.~~
-- ~~**Why skipped:** Sub-agent type is chosen by Claude, not by the user. Displaying the list in UI would be informational only with no actionable value.~~
+### ~~3.3 `supportedAgents()` (since 0.2.51+) -- SKIP~~
+- ~~Informational only, no actionable value.~~
 
 ### ~~3.4 `ThinkingConfig` types (since 0.2.51+)~~
 - ~~**Status:** Implemented~~
-- ~~**What:** `ThinkingAdaptive | ThinkingEnabled | ThinkingDisabled` config for controlling extended thinking.~~
-- ~~**Impact:** Fine-grained thinking control. Current code doesn't expose thinking settings.~~
 
-### ~~3.5 `ToolConfig` type (since 0.2.76+) -- SKIP~~
-- ~~**Status:** Skipped~~
-- ~~**What:** Configure AskUserQuestion preview format (`'markdown'` vs `'html'`).~~
-- ~~**Why skipped:** Current monospace `<pre>` rendering is clean and appropriate for ASCII diagrams/code previews. HTML mode adds XSS risk and Claude compliance is not guaranteed.~~
+### ~~3.5 `ToolConfig` (since 0.2.76+) -- SKIP~~
+- ~~HTML mode adds XSS risk.~~
 
-### ~~3.6 New hook events (since 0.2.51+, 0.2.76+) -- N/A~~
-- ~~**Status:** Available (no code change needed, hooks not used)~~
-
-### ~~3.7 `AgentDefinition.model` expanded type (since 0.2.76+) -- N/A~~
-- ~~**Status:** Available (no code change needed)~~
-
-### ~~3.8 `Settings` interface export (since 0.2.76+) -- N/A~~
-- ~~**Status:** Available (TypeScript not used)~~
+### ~~3.6-3.8 Hook events, AgentDefinition.model, Settings export -- N/A~~
 
 
 ## Already Implemented (0.2.38 -> 0.2.63 range)
-
-These were added between 0.2.38 and 0.2.63 and are already integrated:
 
 - [x] `promptSuggestions` query option + `SDKPromptSuggestionMessage` handling
 - [x] `SDKRateLimitEvent` / `rate_limit_event` with UI display
@@ -302,16 +365,7 @@ These were added between 0.2.38 and 0.2.63 and are already integrated:
 - [x] `FastModeState` with UI indicator (zap icon)
 - [x] `stopTask()` method with fallback abort
 - [x] `supportedModels()` in warmup
-- [x] `forkSession` option on QueryOptions (boolean flag, not the top-level function)
+- [x] `forkSession` option on QueryOptions (boolean flag)
 - [x] `betas` query option support
 - [x] `effort` query option at creation time
-
-
-## Upgrade Steps (0.2.38 -> 0.2.76, completed)
-
-1. ~~Check `zod` peer dependency compatibility (needs `^4.0.0`)~~
-2. ~~`npm install @anthropic-ai/claude-agent-sdk@0.2.76`~~
-3. ~~Verify no references to removed `PermissionMode: 'delegate'`~~
-4. ~~Implement Priority 1 items~~
-5. ~~Implement Priority 2 items as needed~~
-6. ~~Priority 3 items can be done incrementally~~
+- [x] `getContextUsage()` query method with context usage popover
