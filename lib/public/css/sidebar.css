@@ -1376,8 +1376,39 @@
   display: none;
 }
 
+/* Mate sidebar resize handle (same style) */
+#mate-sidebar-resize-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+  margin-left: -4px;
+  cursor: col-resize;
+  z-index: 10;
+}
+#mate-sidebar-resize-handle::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+#mate-sidebar-resize-handle:hover::before,
+#mate-sidebar-resize-handle.dragging::before {
+  opacity: 1;
+}
+#mate-sidebar-resize-handle.hidden {
+  display: none;
+}
+
 @media (max-width: 768px) {
-  #sidebar-resize-handle {
+  #sidebar-resize-handle,
+  #mate-sidebar-resize-handle {
     display: none;
   }
 
