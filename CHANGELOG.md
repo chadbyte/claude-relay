@@ -1,3 +1,22 @@
+# [2.31.0-beta.1](https://github.com/chadbyte/clay/compare/v2.30.0...v2.31.0-beta.1) (2026-04-17)
+
+
+### Bug Fixes
+
+* **browser:** use extension WebSocket for tab context requests ([19b909e](https://github.com/chadbyte/clay/commit/19b909e9fd4fef0f617e3ef18e421aac0245386b))
+* **email:** resolve MCP tool account lookup for per-session context ([9aaa7fd](https://github.com/chadbyte/clay/commit/9aaa7fd515a2f3dbe8bd71ac470ed383c7e5246b))
+* **email:** resolve userId dynamically in MCP tool deps ([e2cd5dc](https://github.com/chadbyte/clay/commit/e2cd5dc5d3ecbdf751c4a6908be396c88befa75a))
+* **ui:** prevent notification banner title overflow ([04e65e2](https://github.com/chadbyte/clay/commit/04e65e28f28296825ab5b911739bf128530a6764))
+
+
+### Features
+
+* **email:** add clay_move_email tool for folder/label management ([26e8d84](https://github.com/chadbyte/clay/commit/26e8d84c76a4c175dcc9a5dde4fdfa2e8b352c6a))
+* **email:** add email integration with IMAP/SMTP and SDK tools ([e80dde8](https://github.com/chadbyte/clay/commit/e80dde8c98a8e92bdf9deb705c3b9e68e9532f6c))
+* **file-browser:** add distinct panel styling, transitions, and drag-to-input ([2147c48](https://github.com/chadbyte/clay/commit/2147c480f12485460abe36c8fccdb9e2e6e36137))
+* **sdk:** upgrade to 0.2.112, implement P1 items ([ea72066](https://github.com/chadbyte/clay/commit/ea72066d4a0355f6a602435e2596bdb72b5bc6d8))
+* **ui:** add mate sidebar resize handle and sync widths ([ce9f2c8](https://github.com/chadbyte/clay/commit/ce9f2c8457885db005cba0e8c1187f262d56fb35))
+
 # [2.30.0](https://github.com/chadbyte/clay/compare/v2.29.5...v2.30.0) (2026-04-16)
 
 
