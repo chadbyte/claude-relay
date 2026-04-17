@@ -705,6 +705,10 @@
   box-shadow: 0 0 0 1px var(--border);
 }
 
+#input-textarea-wrap {
+  position: relative;
+}
+
 #input {
   width: 100%;
   background: transparent;
@@ -954,52 +958,66 @@
 }
 
 /* ==========================================================================
-   Prompt Suggestion Chips
+   Prompt Suggestion Chips (legacy, hidden)
    ========================================================================== */
 
-#suggestion-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  padding: 4px 6px;
+#suggestion-chips { display: none; }
+
+/* ==========================================================================
+   Ghost Suggestion (inline prompt recommendation)
+   ========================================================================== */
+
+#ghost-suggestion {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 8px 10px 4px;
+  font-size: 16px;
+  font-family: inherit;
+  line-height: 1.4;
+  color: var(--text-muted);
+  pointer-events: none;
+  white-space: pre-wrap;
+  overflow: hidden;
+  max-height: 120px;
+  box-sizing: border-box;
 }
 
-#suggestion-chips.hidden { display: none; }
+#ghost-suggestion.hidden { display: none; }
 
-.suggestion-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 4px 10px 4px 8px;
-  border-radius: 6px;
+/* Hide native placeholder when ghost suggestion is visible */
+#input-textarea-wrap:has(#ghost-suggestion:not(.hidden)) #input::placeholder {
+  color: transparent;
+}
+
+/* Ghost hint — inline "Enter to send" after suggestion text */
+
+.ghost-hint {
+  font-size: 11px;
+  margin-left: 8px;
+  opacity: 0.55;
+  white-space: nowrap;
+}
+
+.ghost-hint kbd {
+  display: inline-block;
+  padding: 1px 5px;
+  border-radius: 3px;
   border: 1px solid var(--border);
   background: rgba(var(--overlay-rgb), 0.08);
-  color: var(--text-secondary);
-  font-size: 12px;
   font-family: inherit;
-  cursor: pointer;
-  transition: border-color 0.15s, background 0.15s, color 0.15s;
-  text-align: left;
-  max-width: 100%;
-  line-height: 1.2;
+  font-size: 10px;
+  line-height: 1.4;
 }
 
-.suggestion-chip:hover {
-  border-color: var(--accent);
-  background: var(--accent-bg);
-  color: var(--accent);
+@keyframes ghost-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-.suggestion-chip .lucide {
-  width: 12px;
-  height: 12px;
-  flex-shrink: 0;
-  color: var(--accent);
-}
-
-.suggestion-chip-text {
-  flex: 1;
-  min-width: 0;
+#ghost-suggestion:not(.hidden) {
+  animation: ghost-fade-in 0.3s ease;
 }
 
 /* ==========================================================================

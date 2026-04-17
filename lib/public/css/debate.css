@@ -5,7 +5,8 @@
 .debate-floor-mode #context-sources-bar,
 .debate-floor-mode #mention-menu,
 .debate-floor-mode #slash-menu,
-.debate-floor-mode #suggestion-chips {
+.debate-floor-mode #suggestion-chips,
+.debate-floor-mode #ghost-suggestion {
   display: none !important;
 }
 

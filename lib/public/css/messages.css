@@ -1688,6 +1688,7 @@ pre.mermaid-error {
 /* DM mode: hide project-specific UI elements */
 #main-column.dm-mode .msg-group,
 #main-column.dm-mode #suggestion-chips,
+#main-column.dm-mode #ghost-suggestion,
 #main-column.dm-mode .tool-group {
   display: none;
 }
