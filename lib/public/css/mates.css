@@ -616,41 +616,47 @@
   font-weight: 600;
 }
 
-/* Vendor toggle in mate header */
+/* Vendor toggle in mate header (split pill) */
 .mate-vendor-toggle {
   display: flex;
   align-items: center;
-  gap: 2px;
+  border: 1px solid rgba(255,255,255,0.4);
+  border-radius: 6px;
+  overflow: hidden;
+  height: 24px;
 }
 .mate-vendor-btn {
-  width: 24px;
-  height: 24px;
-  border: none;
-  border-radius: 6px;
-  background: rgba(255,255,255,0.15);
-  cursor: pointer;
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 0;
-  opacity: 0.5;
-  transition: opacity 0.15s, background 0.15s;
+  gap: 3px;
+  padding: 0 6px;
+  height: 100%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 11px;
+  color: rgba(255,255,255,0.5);
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
 }
+.mate-vendor-btn:first-child { border-right: 1px solid rgba(255,255,255,0.4); }
 .mate-vendor-btn.active {
-  opacity: 1;
-  background: rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.25);
+  color: #fff;
+  font-weight: 600;
 }
 .mate-vendor-btn.disabled {
-  opacity: 0.2;
+  opacity: 0.3;
   cursor: default;
 }
-.mate-vendor-btn:hover:not(.disabled) {
-  background: rgba(255,255,255,0.35);
-}
 .mate-vendor-icon {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   border-radius: 3px;
+  background: #fff;
+}
+.mate-vendor-label {
+  pointer-events: none;
 }
 
 /* Collapse button inside mate header: white to match header style */

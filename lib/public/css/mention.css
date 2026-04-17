@@ -29,6 +29,21 @@
   background: var(--sidebar-bg);
   border-bottom: 1px solid var(--border-subtle);
   z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.mention-close-btn {
+  border: none;
+  background: none;
+  color: var(--text-dimmer);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+}
+.mention-close-btn:hover {
+  color: var(--text-secondary);
 }
 
 .mention-item {
@@ -47,11 +62,29 @@
   background: rgba(var(--overlay-rgb), 0.05);
 }
 
+.mention-item-avatar-wrap {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
 .mention-item-avatar {
   width: 24px;
   height: 24px;
   border-radius: 50%;
   flex-shrink: 0;
+}
+.mention-item-vendor-badge {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1.5px solid var(--sidebar-bg);
+  background: #fff;
+  object-fit: cover;
+  object-position: center;
 }
 
 .mention-item-info {
