@@ -362,18 +362,89 @@ The Mate writes the entire `.canvas` file as a single unit. No partial updates. 
 
 ---
 
-## Where Canvases Appear
+## Canvas Lifecycle
+
+A canvas starts as an inline artifact in chat and can optionally be saved as a persistent Mate canvas.
+
+### Flow
+
+```
+User asks for something visual
+  -> Mate generates canvas HTML
+  -> Canvas appears inline in chat (ephemeral)
+  -> User can interact, ask for refinements
+  -> Mate updates the canvas in-place
+  -> If one-off: conversation ends, canvas stays in chat history only
+  -> If useful: user clicks "Save to Canvases"
+     -> Saved to ~/.clay/mates/{userId}/{mateId}/canvases/
+     -> Appears in Mate's canvas registry
+     -> Can be promoted to Home Hub
+```
+
+### Where Canvases Appear
 
 | Location | What shows | How |
 |----------|-----------|-----|
-| Mate DM | All canvases owned by this Mate | Sidebar panel or inline in chat |
-| Home Hub | Only promoted canvases | User pins from Mate DM |
-| Mate Settings | Canvas list with preview/edit/delete | Management UI |
+| Chat inline | Ephemeral canvas during conversation | Mate generates via `clay_canvas_render` |
+| Side panel | Canvas viewer (like file preview) | Click to expand inline canvas |
+| Mate Canvas Registry | All saved canvases | Sidebar panel in Mate DM |
+| Home Hub | Promoted canvases | User pins from registry |
+
+### Inline Canvas (Ephemeral)
+
+During conversation, Mate renders a canvas directly in the chat stream. This is similar to how Claude Desktop's visualize feature works: the canvas appears between messages, not in a separate panel.
+
+```
+User: "Show me my spending this month"
+
+Mate: "Here's your April spending breakdown:"
+
+┌──────────────────────────────────┐
+│  Monthly Spending   April 2026   │
+│  ┌─────────────────────────┐     │
+│  │ ████████████  320,000   │     │
+│  │ ████████     210,000    │     │
+│  │ █████        150,000    │     │
+│  └─────────────────────────┘     │
+│              [Open in Panel]     │
+│              [Save to Canvases]  │
+└──────────────────────────────────┘
+
+Mate: "Food is the biggest category at 320K. Want me to break it down further?"
+
+User: "Add a comparison with last month"
+
+Mate: [updates the same canvas inline with comparison data]
+```
+
+**Inline canvas actions:**
+- **Open in Panel**: Opens the canvas in a side panel viewer (larger view, better for complex charts)
+- **Save to Canvases**: Persists to Mate's canvas directory, registers in Mate's canvas list
+- **Refine**: User asks Mate to modify, Mate updates in-place
+
+### Side Panel Viewer
+
+Clicking "Open in Panel" shows the canvas in a right-side panel (same pattern as file preview). The panel provides:
+- Full-size rendering
+- Canvas title and metadata
+- Save/Pin actions
+- Close button
+
+### Saved Canvas (Persistent)
+
+Once saved, the canvas:
+- Lives in `~/.clay/mates/{userId}/{mateId}/canvases/{filename}.canvas`
+- Appears in the Mate's canvas registry (sidebar panel when in Mate DM)
+- Can connect to Datastore via `<clay-schema>` bindings
+- Auto-updates when Datastore data changes
+- Can be promoted to Home Hub
 
 ### Promote to Home Hub
 
+From the canvas registry or side panel:
+
 ```
-Canvas header in Mate DM: [Monthly Spending Trend]  [Pin to Home Hub]
+Canvas actions: [Open] [Edit] [Pin to Home Hub] [Delete]
 ```
 
 Home Hub layout stores references, not copies:
@@ -386,6 +457,43 @@ Home Hub layout stores references, not copies:
   ]
 }
 ```
+
+---
+
+## SDK Tools
+
+### Ephemeral (inline chat)
+
+```
+Tool: clay_canvas_render
+  html: "<clay-canvas>...</clay-canvas>"
+```
+
+Renders a canvas inline in the chat. Ephemeral (not saved). The user sees it immediately. Mate can call this multiple times to update/replace the inline canvas.
+
+### Persistent (saved)
+
+```
+Tool: clay_canvas_save
+  filename: "monthly-expense"
+  content: "<clay-canvas>...</clay-canvas>"
+
+Tool: clay_canvas_update
+  filename: "monthly-expense"
+  content: "<clay-canvas>...</clay-canvas>"
+
+Tool: clay_canvas_delete
+  filename: "monthly-expense"
+
+Tool: clay_canvas_list
+  (lists all saved .canvas files owned by this Mate)
+
+Tool: clay_canvas_read
+  filename: "monthly-expense"
+  (returns full .canvas file content)
+```
+
+`clay_canvas_render` is for conversation flow (show something now). `clay_canvas_save` is for persistence (keep it forever). The user can also trigger save from the inline canvas UI without the Mate.
 
 ---
 
