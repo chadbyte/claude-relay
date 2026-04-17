@@ -471,9 +471,19 @@
               <button id="attach-image-btn" type="button" aria-label="Attach image" title="Attach image"><i data-lucide="image"></i></button>
               <button id="stt-btn" type="button" aria-label="Voice input" title="Voice input"><i data-lucide="mic"></i></button>
               <button id="schedule-btn" type="button" aria-label="Schedule message" title="Schedule message"><i data-lucide="clock"></i></button>
-              <button id="ask-mate-btn" type="button" aria-label="Ask Mate"><span class="ask-mate-label">@ Ask Mate</span></button>
+              <button id="ask-mate-btn" type="button" aria-label="Ask Mate" title="Ask Mate"><span class="ask-mate-label">@</span></button>
             </div>
             <div id="input-bottom-right">
+              <div id="vendor-toggle-wrap">
+                <button id="vendor-btn-claude" class="vendor-toggle-btn active" data-vendor="claude">
+                  <img src="/claude-code-avatar.png" class="vendor-toggle-icon" alt="Claude">
+                  <span class="vendor-toggle-label">Claude</span>
+                </button>
+                <button id="vendor-btn-codex" class="vendor-toggle-btn" data-vendor="codex">
+                  <img src="/codex-avatar.png" class="vendor-toggle-icon" alt="Codex">
+                  <span class="vendor-toggle-label">Codex</span>
+                </button>
+              </div>
               <div id="config-chip-wrap" class="hidden">
                 <button id="config-chip" title="Model, mode, and effort settings">
                   <i class="config-chip-icon" data-lucide="sliders-horizontal"></i>

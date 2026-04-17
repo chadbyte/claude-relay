@@ -8,17 +8,28 @@
   bottom: 100%;
   left: 0;
   right: 0;
-  max-height: 240px;
+  max-height: 280px;
   overflow-y: auto;
-  background: var(--bg-alt);
+  background: var(--sidebar-bg);
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: 10px;
   margin-bottom: 8px;
-  box-shadow: 0 -4px 24px rgba(var(--shadow-rgb), 0.4);
+  box-shadow: 0 4px 12px rgba(var(--shadow-rgb), 0.15);
   z-index: 10;
 }
 
 #mention-menu.visible { display: block; }
+
+.mention-hint {
+  position: sticky;
+  top: 0;
+  padding: 8px 16px;
+  font-size: 12px;
+  color: var(--text-muted);
+  background: var(--sidebar-bg);
+  border-bottom: 1px solid var(--border-subtle);
+  z-index: 1;
+}
 
 .mention-item {
   display: flex;
