@@ -1,3 +1,15 @@
+# [2.32.0-beta.3](https://github.com/chadbyte/clay/compare/v2.32.0-beta.2...v2.32.0-beta.3) (2026-04-18)
+
+
+### Bug Fixes
+
+* **ui:** replace bare ws and dmTargetUser refs with proper accessors ([b944731](https://github.com/chadbyte/clay/commit/b944731f7e3813c8e105dac9cc99d8743db74b6d))
+
+
+### Features
+
+* **session:** auto-generate session title via SDK after 3 turns ([022f07e](https://github.com/chadbyte/clay/commit/022f07e5ccdbc04d7c29a4f3897e3717168de1a8))
+
 # [2.32.0-beta.2](https://github.com/chadbyte/clay/compare/v2.32.0-beta.1...v2.32.0-beta.2) (2026-04-18)
 
 
