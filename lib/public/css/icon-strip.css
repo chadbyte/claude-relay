@@ -222,14 +222,30 @@
   animation: permShake 2s ease-in-out infinite;
 }
 
-/* Mate status dot (bottom-right, matching user online dot) */
+/* Mate status dot (top-left) */
 .icon-strip-mate .icon-strip-status {
-  top: auto;
-  left: auto;
-  bottom: 5px;
-  right: 5px;
+  top: 3px;
+  left: 3px;
+  bottom: auto;
+  right: auto;
   border-color: var(--sidebar-bg);
   z-index: 3;
+}
+
+/* Mate vendor badge (bottom-right) */
+.icon-strip-mate .icon-strip-vendor-badge {
+  position: absolute;
+  bottom: 3px;
+  right: 3px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid var(--sidebar-bg);
+  background: #fff;
+  object-fit: cover;
+  object-position: center;
+  z-index: 3;
+  pointer-events: none;
 }
 
 .icon-strip-mate.active .icon-strip-status {

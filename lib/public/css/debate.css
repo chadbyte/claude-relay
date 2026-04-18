@@ -2,10 +2,11 @@
 .debate-floor-mode #schedule-btn,
 .debate-floor-mode #ask-mate-btn,
 .debate-floor-mode #config-chip-wrap,
-.debate-floor-mode #context-sources-bar,
+.debate-floor-mode #context-sources-btn-wrap,
 .debate-floor-mode #mention-menu,
 .debate-floor-mode #slash-menu,
-.debate-floor-mode #suggestion-chips {
+.debate-floor-mode #suggestion-chips,
+.debate-floor-mode #ghost-suggestion {
   display: none !important;
 }
 

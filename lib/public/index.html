@@ -40,10 +40,6 @@
   body.wide-view:not(.mate-dm-active) .tool-group{max-width:100%!important}
   body.wide-view:not(.mate-dm-active) .turn-meta{max-width:100%!important}
 }
-#ask-mate-btn::before{content:""!important;position:absolute!important;inset:0!important;background:linear-gradient(135deg,#4ecdc4 0%,#556bf7 33%,#a855f7 55%,#f857a6 78%,#ff6b6b 100%)!important;border-radius:inherit!important;opacity:0;transform:scale(0.3);transition:opacity 0.3s ease,transform 0.35s cubic-bezier(0.34,1.56,0.64,1);z-index:-1}
-#ask-mate-btn:hover::before{opacity:1!important;transform:scale(1)!important}
-#ask-mate-btn:hover{border-color:transparent!important;background:transparent!important;transform:translateY(-1px);box-shadow:0 2px 12px rgba(148,130,247,0.4)}
-#ask-mate-btn:hover .ask-mate-label{background:none!important;-webkit-text-fill-color:#fff!important}
 </style>
 </head>
 <body>
@@ -219,15 +215,7 @@
               <button id="session-search-clear" type="button" aria-label="Clear search"><i data-lucide="x"></i></button>
             </div>
           </div>
-          <div id="files-header-content" class="hidden">
-            <div class="session-list-header">
-              <span>File Browser</span>
-              <div class="session-list-header-actions">
-                <button id="file-panel-refresh" type="button" title="Refresh file tree"><i data-lucide="refresh-cw"></i></button>
-                <button id="file-panel-close" type="button" title="Close file browser"><i data-lucide="x"></i></button>
-              </div>
-            </div>
-          </div>
+          <div id="files-header-content" class="hidden"></div>
         </div>
         <div id="ralph-loop-section"></div>
         <div id="sidebar-panel-projects" class="sidebar-panel hidden">
@@ -244,6 +232,15 @@
           </div>
         </div>
         <div id="sidebar-panel-files" class="sidebar-panel hidden">
+          <div class="fb-titlebar">
+            <button id="file-panel-refresh" type="button" title="Refresh file tree"><i data-lucide="refresh-cw"></i></button>
+            <span class="fb-titlebar-title">File Browser</span>
+            <button id="file-panel-close" type="button" title="Close file browser"><i data-lucide="x"></i></button>
+          </div>
+          <div class="fb-search-bar">
+            <i data-lucide="search" class="fb-search-icon"></i>
+            <input id="fb-search-input" type="text" placeholder="Search files..." autocomplete="off" spellcheck="false" />
+          </div>
           <div id="file-tree"></div>
         </div>
       </div>
@@ -256,6 +253,7 @@
       <div class="mate-sidebar-header" id="mate-sidebar-header">
         <img id="mate-sidebar-avatar" class="mate-sidebar-avatar" alt="">
         <span id="mate-sidebar-name" class="mate-sidebar-name"></span>
+        <div id="mate-vendor-toggle" class="mate-vendor-toggle"></div>
         <div id="mate-sidebar-seed-tooltip" class="mate-seed-tooltip hidden"></div>
         <button id="mate-sidebar-toggle-btn" class="sidebar-collapse-btn" title="Collapse sidebar"><i data-lucide="panel-left-close"></i></button>
       </div>
@@ -446,15 +444,6 @@
       <div id="input-wrapper">
         <div id="mention-menu"></div>
         <div id="slash-menu"></div>
-        <div id="context-sources-bar">
-          <div id="context-sources-chips"></div>
-          <button id="context-sources-add" type="button" title="Add context source"><i data-lucide="plus"></i><span>Context Sources</span></button>
-          <div id="context-sources-picker" class="hidden">
-            <div class="context-picker-section" id="context-picker-email"></div>
-            <div class="context-picker-section" id="context-picker-terminals"></div>
-            <div class="context-picker-section" id="context-picker-tabs"></div>
-          </div>
-        </div>
         <div id="input-row">
           <div id="context-mini" class="hidden">
             <div class="context-mini-bar">
@@ -464,16 +453,37 @@
           </div>
           <div id="image-preview-bar"></div>
           <div id="suggestion-chips" class="hidden"></div>
-          <textarea id="input" rows="1" placeholder="Message Claude Code..." enterkeyhint="send" dir="auto"></textarea>
+          <div id="input-textarea-wrap">
+            <textarea id="input" rows="1" placeholder="Message Claude Code..." enterkeyhint="send" dir="auto"></textarea>
+            <div id="ghost-suggestion" class="hidden" aria-hidden="true"></div>
+          </div>
           <div id="input-bottom">
             <div id="attach-wrap">
               <button id="attach-file-btn" type="button" aria-label="Attach file" title="Attach file"><i data-lucide="paperclip"></i></button>
               <button id="attach-image-btn" type="button" aria-label="Attach image" title="Attach image"><i data-lucide="image"></i></button>
               <button id="stt-btn" type="button" aria-label="Voice input" title="Voice input"><i data-lucide="mic"></i></button>
               <button id="schedule-btn" type="button" aria-label="Schedule message" title="Schedule message"><i data-lucide="clock"></i></button>
-              <button id="ask-mate-btn" type="button" aria-label="Ask Mate"><span class="ask-mate-label">@ Ask Mate</span></button>
+              <button id="ask-mate-btn" type="button" aria-label="Ask Mate" title="Ask a Mate for advice on this session"><i data-lucide="at-sign"></i></button>
+              <div id="context-sources-btn-wrap">
+                <button id="context-sources-add" type="button" title="Add context sources"><i data-lucide="plus"></i><span class="ctx-label">Context</span></button>
+                <div id="context-sources-picker" class="hidden">
+                  <div class="context-picker-section" id="context-picker-email"></div>
+                  <div class="context-picker-section" id="context-picker-terminals"></div>
+                  <div class="context-picker-section" id="context-picker-tabs"></div>
+                </div>
+              </div>
             </div>
             <div id="input-bottom-right">
+              <div id="vendor-toggle-wrap">
+                <button id="vendor-btn-claude" class="vendor-toggle-btn active" data-vendor="claude">
+                  <img src="/claude-code-avatar.png" class="vendor-toggle-icon" alt="Claude">
+                  <span class="vendor-toggle-label">Claude Code</span>
+                </button>
+                <button id="vendor-btn-codex" class="vendor-toggle-btn" data-vendor="codex">
+                  <img src="/codex-avatar.png" class="vendor-toggle-icon" alt="Codex">
+                  <span class="vendor-toggle-label">Codex</span>
+                </button>
+              </div>
               <div id="config-chip-wrap" class="hidden">
                 <button id="config-chip" title="Model, mode, and effort settings">
                   <i class="config-chip-icon" data-lucide="sliders-horizontal"></i>
@@ -510,6 +520,18 @@
                         <span class="config-toggle-knob"></span>
                       </button>
                     </div>
+                  </div>
+                  <div id="config-approval-section" class="config-section" style="display:none">
+                    <div class="config-section-label">APPROVAL</div>
+                    <div id="config-approval-bar" class="config-segmented"></div>
+                  </div>
+                  <div id="config-sandbox-section" class="config-section" style="display:none">
+                    <div class="config-section-label">SANDBOX</div>
+                    <div id="config-sandbox-bar" class="config-segmented"></div>
+                  </div>
+                  <div id="config-websearch-section" class="config-section" style="display:none">
+                    <div class="config-section-label">WEB SEARCH</div>
+                    <div id="config-websearch-bar" class="config-segmented"></div>
                   </div>
                 </div>
               </div>

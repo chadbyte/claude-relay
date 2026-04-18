@@ -180,6 +180,25 @@
 }
 .notif-banner-close .lucide { width: 12px; height: 12px; }
 
+/* Update available banner */
+.notif-banner-update .notif-banner-icon {
+  background: none;
+}
+.notif-banner-update-now {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: var(--accent, #6c5ce7);
+  color: #fff;
+  transition: opacity 0.15s;
+}
+.notif-banner-update-now:hover { opacity: 0.85; }
+.notif-banner-update-now:disabled { opacity: 0.6; cursor: default; }
+
 /* ========================================================
    Mobile
    ======================================================== */

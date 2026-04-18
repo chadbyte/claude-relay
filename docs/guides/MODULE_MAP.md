@@ -96,9 +96,9 @@ Add it in `project-http.js` inside the `handleHTTP` function.
 
 ## Client-side Modules (lib/public/modules/)
 
-### app.js (coordinator, ~8,600 lines, being decomposed)
+### app.js (bootstrap coordinator, ~1,100 lines)
 
-Bootstraps UI, wires modules, dispatches WebSocket messages via `processMessage`.
+Bootstraps UI, initializes store, wires remaining Tier 3 modules. All business logic lives in modules. See [NO-GOD-OBJECTS.md](./NO-GOD-OBJECTS.md) for architectural principles.
 
 | Module | Concern |
 |--------|---------|
@@ -165,4 +165,6 @@ module.exports = { attachExample: attachExample };
 ## See Also
 
 - [STATE_CONVENTIONS.md](./STATE_CONVENTIONS.md) for state management rules
-- [REFACTORING_ROADMAP.md](./REFACTORING_ROADMAP.md) for remaining extraction work
+- [CLIENT_MODULE_DEPS.md](./CLIENT_MODULE_DEPS.md) for client-side dependency rules (store.js, ws-ref.js, direct imports)
+- [NO-GOD-OBJECTS.md](./NO-GOD-OBJECTS.md) for architectural principles (why and how we keep modules small)
+- [REFACTORING_ROADMAP.md](../roadmaps/completed/REFACTORING_ROADMAP.md) for decomposition history

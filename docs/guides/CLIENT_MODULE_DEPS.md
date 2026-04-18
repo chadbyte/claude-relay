@@ -24,26 +24,32 @@ There is no framework. There is no context bag. Every module is a plain ES modul
 ```js
 import { store } from './store.js';
 
-// Read
-var slug = store.getState().currentSlug;
-var s = store.getState();  // grab snapshot when you need multiple fields
+// Read a single field
+var slug = store.get('currentSlug');
+
+// Snapshot for multiple fields
+var s = store.snap();
 if (s.dmMode && s.dmTargetUser) { ... }
 
-// Write
-store.setState({ connected: true });
-store.setState({ dmMode: false, dmTargetUser: null });  // multiple fields at once
+// Write (shallow merge)
+store.set({ connected: true });
+store.set({ dmMode: false, dmTargetUser: null });
 
-// Subscribe (reactive updates)
+// Subscribe (reactive UI sync)
+// Use when a state change should always trigger specific UI updates.
+// See app-connection.js for a real example (connected/processing -> status dot, overlay, sendBtn).
 store.subscribe(function (state, prev) {
   if (state.connected !== prev.connected) {
-    // react to connection change
+    document.getElementById("connect-overlay")
+      .classList.toggle("hidden", state.connected);
   }
 });
 ```
 
 Key points:
-- `setState` does a shallow merge (like zustand/React setState), not a full replacement.
-- `subscribe` fires on every `setState` call. Compare prev vs current to filter.
+- `store.get('key')` for single field reads, `store.snap()` when you need multiple fields at once.
+- `store.set()` does a shallow merge (like zustand), not a full replacement.
+- `subscribe` fires on every `set` call. Compare prev vs current to filter.
 - Only **data** lives in store. Functions stay in their owning modules.
 
 ---
@@ -52,13 +58,13 @@ Key points:
 
 | I need... | I get it from... | Example |
 |-----------|-----------------|---------|
-| Mutable UI state (dmMode, connected, currentSlug, ...) | `store.js` | `store.getState().dmMode` |
-| Update UI state | `store.js` | `store.setState({ processing: true })` |
+| Mutable UI state (dmMode, connected, currentSlug, ...) | `store.js` | `store.get('dmMode')` |
+| Update UI state | `store.js` | `store.set({ processing: true })` |
 | WebSocket | `ws-ref.js` | `import { getWs } from './ws-ref.js'` |
 | Send a WS message | `ws-ref.js` | `getWs().send(JSON.stringify({ type: 'foo' }))` |
 | Function from another module | That module | `import { getCachedProjects } from './app-projects.js'` |
 | DOM element | Query locally or import from creator | `document.getElementById('messages')` |
-| basePath, wsPath | `store.js` | `store.getState().basePath` |
+| basePath, wsPath | `store.js` | `store.get('basePath')` |
 | React to state changes | `store.subscribe` | See subscribe example above |
 
 ---
@@ -75,12 +81,11 @@ var exampleEl = null;
 
 export function handleExampleMessage(msg) {
   if (!exampleEl) exampleEl = document.getElementById('example-panel');
-  var s = store.getState();
-  if (s.dmMode) return;  // skip in DM
+  if (store.get('dmMode')) return;  // skip in DM
 
   exampleEl.innerHTML = escapeHtml(msg.text);
   getWs().send(JSON.stringify({ type: 'example-ack', id: msg.id }));
-  store.setState({ lastExampleId: msg.id });
+  store.set({ lastExampleId: msg.id });
 }
 ```
 
@@ -95,7 +100,7 @@ Notice:
 
 ## Adding features to modules that still have _ctx
 
-Some modules still use the legacy `var _ctx = null` / `initXxx(ctx)` pattern (see [CTX-ELIMINATION-ROADMAP](../roadmaps/in-progress/CTX-ELIMINATION-ROADMAP.md) for the full list).
+The legacy `var _ctx = null` / `initXxx(ctx)` pattern has been fully eliminated (see [CTX-ELIMINATION-ROADMAP](../roadmaps/completed/CTX-ELIMINATION-ROADMAP.md)).
 
 When adding new code to these modules:
 - **Never add new `_ctx.xxx` references.** Use `store.getState()`, `store.setState()`, `getWs()`, or direct imports.
@@ -113,3 +118,5 @@ When adding new code to these modules:
 | `_ctx.cachedProjects` | Reaching into another module's data via bag | `import { getCachedProjects } from './app-projects.js'` |
 | Putting functions in store | Store is for data only | Export function from owning module |
 | `localStorage.setItem('setting', ...)` | Settings must persist across devices | Send via WS, store server-side |
+| `store.getState().xxx` | Verbose, use shorthand | `store.get('xxx')` or `store.snap()` for multi-field |
+| `store.setState({...})` | Verbose, use shorthand | `store.set({...})` |

@@ -1,6 +1,6 @@
 # State Management Conventions
 
-> These conventions apply to all module extractions in the [Refactoring Roadmap](./REFACTORING_ROADMAP.md) and to any new modules created afterward.
+> These conventions apply to all module extractions in the [Refactoring Roadmap](./roadmap/REFACTORING_ROADMAP.md) and to any new modules created afterward.
 
 ---
 

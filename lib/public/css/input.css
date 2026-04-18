@@ -275,44 +275,53 @@
    Context Sources — chips above input
    ========================================================================== */
 
-#context-sources-bar {
+/* --- Context Sources (button in toolbar, chips in input-row) --- */
+
+#context-sources-btn-wrap {
+  position: relative;
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 4px;
-  padding: 0 8px 4px;
-  position: relative;
 }
 
 #context-sources-add {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border-radius: 6px;
-  border: 1px dashed var(--border);
+  gap: 3px;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 18px;
+  border: none;
   background: transparent;
-  color: var(--text-dimmer);
+  color: var(--text-muted);
   font-family: inherit;
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
-  transition: color 0.15s, border-color 0.15s, background 0.15s;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
 }
 
-#context-sources-add .lucide { width: 12px; height: 12px; }
+#context-sources-add .lucide { width: 20px; height: 20px; flex-shrink: 0; }
 
 #context-sources-add:hover {
-  color: var(--text-secondary);
-  border-color: var(--text-dimmer);
-  background: var(--sidebar-hover);
+  background: rgba(var(--overlay-rgb), 0.06);
+  color: var(--text);
 }
 
-#context-sources-chips {
-  display: flex;
+/* Badge count when sources are active */
+#context-sources-add .ctx-badge {
+  display: inline-flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 4px;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: #3b82f6;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .context-chip {
@@ -371,9 +380,9 @@
 
 #context-sources-picker {
   position: absolute;
-  bottom: calc(100% + 4px);
+  bottom: calc(100% + 8px);
   left: 0;
-  min-width: 200px;
+  min-width: 220px;
   max-height: 320px;
   overflow-y: auto;
   background: var(--sidebar-bg);
@@ -705,6 +714,10 @@
   box-shadow: 0 0 0 1px var(--border);
 }
 
+#input-textarea-wrap {
+  position: relative;
+}
+
 #input {
   width: 100%;
   background: transparent;
@@ -739,6 +752,68 @@
   display: flex;
   align-items: center;
   gap: 4px;
+}
+
+/* --- Vendor toggle (split toggle) --- */
+#vendor-toggle-wrap {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  height: 30px;
+  flex-shrink: 0;
+}
+#vendor-toggle-wrap.hidden { display: none; }
+#vendor-toggle-wrap.locked {
+  border: none;
+  height: auto;
+  pointer-events: none;
+}
+#vendor-toggle-wrap.locked .vendor-toggle-btn:not(.active) { display: none; }
+#vendor-toggle-wrap.locked .vendor-toggle-btn.active {
+  background: transparent;
+  padding: 0;
+  gap: 0;
+  opacity: 0.7;
+}
+#vendor-toggle-wrap.locked .vendor-toggle-btn.active .vendor-toggle-label { display: none; }
+#vendor-toggle-wrap.locked .vendor-toggle-btn:first-child { border-right: none; }
+.vendor-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 10px;
+  height: 100%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-secondary);
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.vendor-toggle-btn:first-child { border-right: 1px solid var(--border); }
+.vendor-toggle-btn.active {
+  background: var(--accent-12);
+  color: var(--accent);
+  font-weight: 600;
+}
+.vendor-toggle-btn.disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.vendor-toggle-icon {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  object-fit: cover;
+}
+.vendor-toggle-label {
+  pointer-events: none;
+}
+@media (max-width: 600px) {
+  .vendor-toggle-label { display: none; }
 }
 
 /* --- Attach buttons & menu --- */
@@ -776,62 +851,54 @@
 #schedule-btn:hover { background: rgba(var(--overlay-rgb), 0.06); color: var(--text); }
 
 #ask-mate-btn {
-  height: 28px;
-  padding: 0 10px;
-  border-radius: 10px;
-  border: 1px solid transparent;
-  background:
-    linear-gradient(var(--ask-mate-bg, var(--bg)), var(--ask-mate-bg, var(--bg))) padding-box,
-    linear-gradient(135deg, #4ecdc4 0%, #4ecdc4 25%, #556bf7, #a855f7, #f857a6, #ff6b6b) border-box;
-  color: transparent;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-family: 'Nunito', sans-serif;
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: 0.2px;
-  transition: transform 0.1s, box-shadow 0.3s, border-color 0.3s;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
   touch-action: manipulation;
   position: relative;
-  overflow: hidden;
-  z-index: 0;
 }
-#ask-mate-btn::before {
-  content: "";
+
+#ask-mate-btn .lucide { width: 20px; height: 20px; flex-shrink: 0; }
+
+#ask-mate-btn:hover { background: rgba(var(--overlay-rgb), 0.06); color: var(--text); }
+#ask-mate-btn:active { transform: scale(0.95); }
+
+/* Mate avatar overlay on @ button */
+.ask-mate-avatar {
   position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, #4ecdc4 0%, #4ecdc4 32%, #556bf7 34%, #556bf7 50%, #a855f7 52%, #a855f7 68%, #f857a6 70%, #f857a6 84%, #ff6b6b 86%, #ff6b6b 100%);
-  border-radius: inherit;
+  bottom: 0;
+  right: -2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid var(--input-bg);
+  pointer-events: none;
+  opacity: 0.55;
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+#ask-mate-btn:hover .ask-mate-avatar {
+  opacity: 0.85;
+}
+
+.ask-mate-avatar.fade-out {
   opacity: 0;
-  transform: scale(0.3);
-  transition: opacity 0.3s ease, transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-  z-index: -1;
+  transform: scale(0.6);
 }
-.ask-mate-label {
-  white-space: nowrap;
-  background: linear-gradient(135deg, #4ecdc4 0%, #4ecdc4 25%, #556bf7, #a855f7, #f857a6, #ff6b6b);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  transition: opacity 0.2s;
-}
-#ask-mate-btn:hover::before {
-  opacity: 1;
+
+.ask-mate-avatar.fade-in {
+  opacity: 0.55;
   transform: scale(1);
 }
-#ask-mate-btn:hover {
-  border-color: transparent;
-  background: transparent;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 12px rgba(148, 130, 247, 0.4);
-}
-#ask-mate-btn:hover .ask-mate-label {
-  background: none;
-  -webkit-text-fill-color: #fff;
-}
-#ask-mate-btn:active { transform: translateY(-1px) scale(0.95); }
 
 #send-btn {
   flex-shrink: 0;
@@ -918,52 +985,66 @@
 }
 
 /* ==========================================================================
-   Prompt Suggestion Chips
+   Prompt Suggestion Chips (legacy, hidden)
    ========================================================================== */
 
-#suggestion-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  padding: 4px 6px;
+#suggestion-chips { display: none; }
+
+/* ==========================================================================
+   Ghost Suggestion (inline prompt recommendation)
+   ========================================================================== */
+
+#ghost-suggestion {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 8px 10px 4px;
+  font-size: 16px;
+  font-family: inherit;
+  line-height: 1.4;
+  color: var(--text-muted);
+  pointer-events: none;
+  white-space: pre-wrap;
+  overflow: hidden;
+  max-height: 120px;
+  box-sizing: border-box;
 }
 
-#suggestion-chips.hidden { display: none; }
+#ghost-suggestion.hidden { display: none; }
 
-.suggestion-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 4px 10px 4px 8px;
-  border-radius: 6px;
+/* Hide native placeholder when ghost suggestion is visible */
+#input-textarea-wrap:has(#ghost-suggestion:not(.hidden)) #input::placeholder {
+  color: transparent;
+}
+
+/* Ghost hint — inline "Enter to send" after suggestion text */
+
+.ghost-hint {
+  font-size: 11px;
+  margin-left: 8px;
+  opacity: 0.55;
+  white-space: nowrap;
+}
+
+.ghost-hint kbd {
+  display: inline-block;
+  padding: 1px 5px;
+  border-radius: 3px;
   border: 1px solid var(--border);
   background: rgba(var(--overlay-rgb), 0.08);
-  color: var(--text-secondary);
-  font-size: 12px;
   font-family: inherit;
-  cursor: pointer;
-  transition: border-color 0.15s, background 0.15s, color 0.15s;
-  text-align: left;
-  max-width: 100%;
-  line-height: 1.2;
+  font-size: 10px;
+  line-height: 1.4;
 }
 
-.suggestion-chip:hover {
-  border-color: var(--accent);
-  background: var(--accent-bg);
-  color: var(--accent);
+@keyframes ghost-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-.suggestion-chip .lucide {
-  width: 12px;
-  height: 12px;
-  flex-shrink: 0;
-  color: var(--accent);
-}
-
-.suggestion-chip-text {
-  flex: 1;
-  min-width: 0;
+#ghost-suggestion:not(.hidden) {
+  animation: ghost-fade-in 0.3s ease;
 }
 
 /* ==========================================================================

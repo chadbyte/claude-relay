@@ -1688,6 +1688,7 @@ pre.mermaid-error {
 /* DM mode: hide project-specific UI elements */
 #main-column.dm-mode .msg-group,
 #main-column.dm-mode #suggestion-chips,
+#main-column.dm-mode #ghost-suggestion,
 #main-column.dm-mode .tool-group {
   display: none;
 }
@@ -1696,6 +1697,7 @@ pre.mermaid-error {
 #main-column.dm-mode #stt-btn,
 #main-column.dm-mode #config-chip-wrap,
 #main-column.dm-mode #context-mini,
+#main-column.dm-mode #context-sources-btn-wrap,
 #main-column.dm-mode #slash-menu {
   display: none !important;
 }

@@ -616,6 +616,49 @@
   font-weight: 600;
 }
 
+/* Vendor toggle in mate header (split pill) */
+.mate-vendor-toggle {
+  display: flex;
+  align-items: center;
+  border: 1px solid rgba(255,255,255,0.4);
+  border-radius: 6px;
+  overflow: hidden;
+  height: 24px;
+}
+.mate-vendor-btn {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0 6px;
+  height: 100%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 11px;
+  color: rgba(255,255,255,0.5);
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.mate-vendor-btn:first-child { border-right: 1px solid rgba(255,255,255,0.4); }
+.mate-vendor-btn.active {
+  background: rgba(255,255,255,0.25);
+  color: #fff;
+  font-weight: 600;
+}
+.mate-vendor-btn.disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+.mate-vendor-icon {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  background: #fff;
+}
+.mate-vendor-label {
+  pointer-events: none;
+}
+
 /* Collapse button inside mate header: white to match header style */
 .mate-sidebar-header .sidebar-collapse-btn {
   color: rgba(255,255,255,0.7);
