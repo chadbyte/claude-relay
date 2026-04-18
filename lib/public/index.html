@@ -215,15 +215,7 @@
               <button id="session-search-clear" type="button" aria-label="Clear search"><i data-lucide="x"></i></button>
             </div>
           </div>
-          <div id="files-header-content" class="hidden">
-            <div class="session-list-header">
-              <span>File Browser</span>
-              <div class="session-list-header-actions">
-                <button id="file-panel-refresh" type="button" title="Refresh file tree"><i data-lucide="refresh-cw"></i></button>
-                <button id="file-panel-close" type="button" title="Close file browser"><i data-lucide="x"></i></button>
-              </div>
-            </div>
-          </div>
+          <div id="files-header-content" class="hidden"></div>
         </div>
         <div id="ralph-loop-section"></div>
         <div id="sidebar-panel-projects" class="sidebar-panel hidden">
@@ -240,6 +232,15 @@
           </div>
         </div>
         <div id="sidebar-panel-files" class="sidebar-panel hidden">
+          <div class="fb-titlebar">
+            <button id="file-panel-refresh" type="button" title="Refresh file tree"><i data-lucide="refresh-cw"></i></button>
+            <span class="fb-titlebar-title">File Browser</span>
+            <button id="file-panel-close" type="button" title="Close file browser"><i data-lucide="x"></i></button>
+          </div>
+          <div class="fb-search-bar">
+            <i data-lucide="search" class="fb-search-icon"></i>
+            <input id="fb-search-input" type="text" placeholder="Search files..." autocomplete="off" spellcheck="false" />
+          </div>
           <div id="file-tree"></div>
         </div>
       </div>

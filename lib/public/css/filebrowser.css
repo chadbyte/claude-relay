@@ -92,7 +92,97 @@
   background: var(--filebrowser-bg);
   border: 1px solid var(--filebrowser-border);
   border-radius: 8px;
-  margin: 0 6px 12px;
+  margin: 6px 6px 12px;
+  display: flex;
+  flex-direction: column;
+}
+#sidebar-panel-files.hidden { display: none; }
+
+/* --- File browser titlebar --- */
+.fb-titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 6px;
+  border-bottom: 1px solid var(--filebrowser-border);
+  flex-shrink: 0;
+  user-select: none;
+}
+.fb-titlebar-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  flex: 1;
+  text-align: center;
+  pointer-events: none;
+}
+.fb-titlebar button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--text-dimmer);
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s, background 0.15s;
+}
+.fb-titlebar button .lucide { width: 13px; height: 13px; }
+.fb-titlebar button:hover { color: var(--text); background: var(--sidebar-hover); }
+
+/* --- File search bar (always visible) --- */
+.fb-search-bar {
+  display: flex;
+  align-items: center;
+  padding: 4px 6px 6px;
+  position: relative;
+  flex-shrink: 0;
+}
+.fb-search-icon {
+  position: absolute;
+  left: 14px;
+  width: 13px;
+  height: 13px;
+  color: var(--text-dimmer);
+  pointer-events: none;
+}
+#fb-search-input {
+  width: 100%;
+  height: 28px;
+  padding: 0 8px 0 28px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 12px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+#fb-search-input:focus { border-color: var(--accent); }
+#fb-search-input::placeholder { color: var(--text-dimmer); }
+
+/* Search match highlight */
+.file-tree-name mark {
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+.fb-search-empty {
+  padding: 16px 12px;
+  font-size: 12px;
+  color: var(--text-dimmer);
+  text-align: center;
+}
+
+#file-tree {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
 }
 
 #sidebar-panel-files.fb-enter { animation: fb-in 0.2s ease-out both; }
