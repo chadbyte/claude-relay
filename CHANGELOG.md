@@ -1,3 +1,10 @@
+# [2.32.0-beta.5](https://github.com/chadbyte/clay/compare/v2.32.0-beta.4...v2.32.0-beta.5) (2026-04-18)
+
+
+### Bug Fixes
+
+* **sdk:** preserve mid-session model change across warmup cycles ([420ad34](https://github.com/chadbyte/clay/commit/420ad340140d129bab11e3c8d1068667610b640d)), closes [#321](https://github.com/chadbyte/clay/issues/321)
+
 # [2.32.0-beta.4](https://github.com/chadbyte/clay/compare/v2.32.0-beta.3...v2.32.0-beta.4) (2026-04-18)
 
 
