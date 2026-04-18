@@ -1,3 +1,11 @@
+# [2.32.0-beta.6](https://github.com/chadbyte/clay/compare/v2.32.0-beta.5...v2.32.0-beta.6) (2026-04-18)
+
+
+### Bug Fixes
+
+* **mates:** delta-based DM digests to prevent content loss past 6k chars ([466b67d](https://github.com/chadbyte/clay/commit/466b67daa3c958376815313fd52f48bc0d6a7d84)), closes [#282](https://github.com/chadbyte/clay/issues/282)
+* **mates:** restore mention indicator across view switches and DOM rebuilds ([4ee0eb8](https://github.com/chadbyte/clay/commit/4ee0eb81f1875f9d11c9c9399350d48f3d85eedb)), closes [#308](https://github.com/chadbyte/clay/issues/308)
+
 # [2.32.0-beta.5](https://github.com/chadbyte/clay/compare/v2.32.0-beta.4...v2.32.0-beta.5) (2026-04-18)
 
 
