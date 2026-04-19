@@ -1,3 +1,10 @@
+# [2.32.0-beta.7](https://github.com/chadbyte/clay/compare/v2.32.0-beta.6...v2.32.0-beta.7) (2026-04-19)
+
+
+### Bug Fixes
+
+* **yoke:** resolve claude binary via which for non-standard installs ([7985abf](https://github.com/chadbyte/clay/commit/7985abffff5abd7bc2018b73fa1c2669dcc8835f))
+
 # [2.32.0-beta.6](https://github.com/chadbyte/clay/compare/v2.32.0-beta.5...v2.32.0-beta.6) (2026-04-18)
 
 
