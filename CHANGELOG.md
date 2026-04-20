@@ -1,3 +1,23 @@
+# [2.32.0-beta.8](https://github.com/chadbyte/clay/compare/v2.32.0-beta.7...v2.32.0-beta.8) (2026-04-20)
+
+
+### Bug Fixes
+
+* **codex:** correct skills/list perCwdExtraUserRoots format ([3480f3c](https://github.com/chadbyte/clay/commit/3480f3c5d7c66834b252e0f3ec064c14598de62d))
+* **codex:** wrap command/file approval response in decision object ([ad6a5f5](https://github.com/chadbyte/clay/commit/ad6a5f5e07131769faceff781343e7e848502ed6))
+* improve codex defaults and mate notification flows ([939dcea](https://github.com/chadbyte/clay/commit/939dcea863236af3e1b72d2d5c6a073ef8d5ce84))
+* **notifications:** resolve mate DM navigation from notifications ([08ad961](https://github.com/chadbyte/clay/commit/08ad9610e94524c39f50d508b08c59295d5be5c4))
+
+
+### Features
+
+* **codex:** recognize Claude skills via \$<skill-name> references ([689a04e](https://github.com/chadbyte/clay/commit/689a04e599aad5dc02ff6b8849fc023b0c535308))
+* **codex:** vendor-specific slash commands ([ae62fd2](https://github.com/chadbyte/clay/commit/ae62fd295070a9871da0b8a622d5e96af5b58f65))
+* **input:** mobile unified bottom sheet for attach, image, and context sources ([f55bb45](https://github.com/chadbyte/clay/commit/f55bb456f0969225eca5d8adc91d7fadfb89e916))
+* **notifications:** add mention response notifications with mate avatar ([04efe57](https://github.com/chadbyte/clay/commit/04efe57d2959c2cc914ec317302584d9bd6ba95c))
+* **ui:** restore terminal toggle button in top bar ([1bdd6fd](https://github.com/chadbyte/clay/commit/1bdd6fdb17a91beeb94c0e0cc11ab99432d7f40b))
+* **ui:** richer context tooltip and hourly update push ([b7adcdd](https://github.com/chadbyte/clay/commit/b7adcdd462ee19837f17bf3d39a9d9556a2ae543))
+
 # [2.32.0-beta.7](https://github.com/chadbyte/clay/compare/v2.32.0-beta.6...v2.32.0-beta.7) (2026-04-19)
 
 

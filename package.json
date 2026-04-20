@@ -1,6 +1,6 @@
 {
   "name": "clay-server",
-  "version": "2.32.0-beta.7",
+  "version": "2.32.0-beta.8",
   "description": "Self-hosted Claude Code in your browser. Multi-session, multi-user, push notifications.",
   "bin": {
     "clay-server": "./bin/cli.js",
