@@ -459,13 +459,14 @@
           </div>
           <div id="input-bottom">
             <div id="attach-wrap">
-              <button id="attach-file-btn" type="button" aria-label="Attach file" title="Attach file"><i data-lucide="paperclip"></i></button>
-              <button id="attach-image-btn" type="button" aria-label="Attach image" title="Attach image"><i data-lucide="image"></i></button>
+              <button id="input-more-btn" type="button" aria-label="More options" title="More options" class="mobile-only"><i data-lucide="plus"></i></button>
+              <button id="attach-file-btn" type="button" aria-label="Attach file" title="Attach file" class="desktop-only"><i data-lucide="paperclip"></i></button>
+              <button id="attach-image-btn" type="button" aria-label="Attach image" title="Attach image" class="desktop-only"><i data-lucide="image"></i></button>
               <button id="stt-btn" type="button" aria-label="Voice input" title="Voice input"><i data-lucide="mic"></i></button>
               <button id="schedule-btn" type="button" aria-label="Schedule message" title="Schedule message"><i data-lucide="clock"></i></button>
               <button id="ask-mate-btn" type="button" aria-label="Ask Mate" title="Ask a Mate for advice on this session"><i data-lucide="at-sign"></i></button>
-              <div id="context-sources-btn-wrap">
-                <button id="context-sources-add" type="button" title="Add context sources"><i data-lucide="plus"></i><span class="ctx-label">Context</span></button>
+              <div id="context-sources-btn-wrap" class="desktop-only">
+                <button id="context-sources-add" type="button" title="Add context sources"><i data-lucide="library"></i><span class="ctx-label">Context</span></button>
                 <div id="context-sources-picker" class="hidden">
                   <div class="context-picker-section" id="context-picker-email"></div>
                   <div class="context-picker-section" id="context-picker-terminals"></div>
@@ -542,6 +543,34 @@
       </div>
     </div>
   </div>
+  <!-- Mobile input-more bottom sheet: attach / image + context sources -->
+  <div id="input-more-sheet" class="hidden">
+    <div class="input-more-backdrop"></div>
+    <div class="input-more-content">
+      <div class="input-more-handle"></div>
+      <div class="input-more-actions">
+        <button class="input-more-action" id="input-more-attach">
+          <i data-lucide="paperclip"></i>
+          <span>Attach file</span>
+        </button>
+        <button class="input-more-action" id="input-more-image">
+          <i data-lucide="image"></i>
+          <span>Image</span>
+        </button>
+      </div>
+      <div class="input-more-divider"></div>
+      <div class="input-more-section-label">
+        <i data-lucide="library"></i>
+        <span>Context sources</span>
+      </div>
+      <div class="input-more-context-body" id="input-more-context-body">
+        <div class="context-picker-section" id="context-picker-email-mobile"></div>
+        <div class="context-picker-section" id="context-picker-terminals-mobile"></div>
+        <div class="context-picker-section" id="context-picker-tabs-mobile"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- Mobile fullscreen sheet overlay (Projects / Sessions) -->
   <div id="mobile-sheet" class="hidden">
     <div class="mobile-sheet-backdrop"></div>
