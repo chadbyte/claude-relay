@@ -50,6 +50,7 @@ Wires all modules, sets up session manager and SDK bridge, dispatches messages.
 | `sdk-skill-discovery.js` | Skill directory scanning, shell segment splitting, SDK/filesystem skill merging |
 | `sdk-message-queue.js` | Async iterable message queue for streaming input to SDK |
 | `sdk-message-processor.js` | SDK stream event processing (message_start, content_block_*), sub-agent message routing |
+| `codex-defaults.js` | Codex-specific default values (sandbox, approval, web search). **Single source of truth** - do not duplicate elsewhere |
 | `mates.js` | Mate CRUD, builtin mate management, atomic section enforcement, migration |
 | `mates-prompts.js` | System section enforcers (team, session memory, sticky notes, project registry, debate), marker constants |
 | `mates-knowledge.js` | Common knowledge registry (promote/depromote, cross-mate file sharing) |
@@ -60,6 +61,24 @@ Wires all modules, sets up session manager and SDK bridge, dispatches messages.
 | `users-preferences.js` | DM favorites/hidden, auto-continue, chat layout, deleted builtin keys, mate onboarding |
 | `daemon-projects.js` | Worktree tracking (scan, rescan, cleanup), removed project filtering |
 | `ws-schema.js` | WebSocket message type registry (328 message types, informational) |
+
+### YOKE Adapters (lib/yoke/)
+
+YOKE is the vendor-agnostic interface layer. Each adapter implements the same contract (init, createQuery, etc.) for a specific agent runtime.
+
+| Module | Concern |
+|--------|---------|
+| `yoke/index.js` | Adapter factory, wraps createQuery with project instructions |
+| `yoke/interface.js` | YOKE interface contract definition |
+| `yoke/adapters/claude.js` | Claude adapter using `@anthropic-ai/claude-agent-sdk`. In-process + worker (OS user isolation) paths |
+| `yoke/adapters/codex.js` | Codex adapter using `codex app-server` JSON-RPC protocol. Handles approval events, skill injection, MCP bridge config |
+| `yoke/adapters/gemini.js` | Gemini adapter using `@google/genai` API SDK. Pure LLM API - Clay handles tool calls directly |
+| `yoke/codex-app-server.js` | Codex `app-server` child process manager. JSON-RPC 2.0 over stdin/stdout, request ID tracking, event routing |
+| `yoke/mcp-bridge-server.js` | Stdio MCP server spawned by Codex. Proxies tool list/call to Clay via HTTP at `/api/mcp-bridge` |
+
+**When adding a new vendor**: implement the YOKE interface, register in `yoke/index.js` createAdapter switch. Do not add vendor-specific logic outside the adapter.
+
+**For Codex-specific patterns and gotchas**: see [CODEX-INTEGRATION.md](./CODEX-INTEGRATION.md).
 
 ### Server Modules (lib/server-*.js)
 
@@ -167,4 +186,6 @@ module.exports = { attachExample: attachExample };
 - [STATE_CONVENTIONS.md](./STATE_CONVENTIONS.md) for state management rules
 - [CLIENT_MODULE_DEPS.md](./CLIENT_MODULE_DEPS.md) for client-side dependency rules (store.js, ws-ref.js, direct imports)
 - [NO-GOD-OBJECTS.md](./NO-GOD-OBJECTS.md) for architectural principles (why and how we keep modules small)
+- [MCP-IMPLEMENTATION.md](./MCP-IMPLEMENTATION.md) for MCP server architecture (local + extension-bridged)
+- [CODEX-INTEGRATION.md](./CODEX-INTEGRATION.md) for Codex-specific patterns, gotchas, and testing checklist
 - [REFACTORING_ROADMAP.md](../roadmaps/completed/REFACTORING_ROADMAP.md) for decomposition history
