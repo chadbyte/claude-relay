@@ -746,12 +746,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 4px;
 }
 
 #input-bottom-right {
   display: flex;
   align-items: center;
   gap: 4px;
+  flex-shrink: 0;
 }
 
 /* --- Vendor toggle (split toggle) --- */
@@ -812,17 +814,20 @@
 .vendor-toggle-label {
   pointer-events: none;
 }
-@media (max-width: 600px) {
+@media (max-width: 900px) {
   .vendor-toggle-label { display: none; }
+  .vendor-toggle-btn { padding: 0 8px; }
 }
 
 /* --- Attach buttons & menu --- */
 #attach-wrap {
   position: relative;
-  flex-shrink: 0;
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 2px;
+  flex-wrap: nowrap;
+  overflow: hidden;
 }
 
 #attach-file-btn,
