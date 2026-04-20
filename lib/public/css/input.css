@@ -830,6 +830,11 @@
   overflow: hidden;
 }
 
+/* Allow popovers (context picker) to escape when open */
+#attach-wrap:has(#context-sources-picker:not(.hidden)) {
+  overflow: visible;
+}
+
 #attach-file-btn,
 #attach-image-btn,
 #schedule-btn,
