@@ -32,7 +32,7 @@
 ### Bug Fixes
 
 * open external links in new tab via marked renderer ([#326](https://github.com/chadbyte/clay/issues/326)) ([2011da9](https://github.com/chadbyte/clay/commit/2011da99dd7ed7d13b426884c234b078b8908648))
-* **ui,sdk-bridge:** 'codex --login' -> 'codex login' in loginCommand prompts ([#329](https://github.com/chadbyte/clay/issues/329)) ([2519403](https://github.com/chadbyte/clay/commit/2519403f77e9d75294d7c3db728702c377d6bef6)), closes [#327](https://github.com/chadbyte/clay/issues/327) [#327](https://github.com/chadbyte/clay/issues/327)
+* **ui,sdk-bridge:** use `codex login --device-auth` in loginCommand prompts ([#329](https://github.com/chadbyte/clay/issues/329)) ([2519403](https://github.com/chadbyte/clay/commit/2519403f77e9d75294d7c3db728702c377d6bef6)), closes [#327](https://github.com/chadbyte/clay/issues/327) [#327](https://github.com/chadbyte/clay/issues/327)
 
 # [2.32.0](https://github.com/chadbyte/clay/compare/v2.31.0...v2.32.0) (2026-04-20)
 
