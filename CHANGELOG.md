@@ -1,3 +1,11 @@
+## [2.32.1-beta.2](https://github.com/chadbyte/clay/compare/v2.32.1-beta.1...v2.32.1-beta.2) (2026-04-22)
+
+
+### Bug Fixes
+
+* **session,permissions:** trim migration titles + inherit bypassPermissions in scheduled tasks ([#328](https://github.com/chadbyte/clay/issues/328)) ([492d310](https://github.com/chadbyte/clay/commit/492d31031b5b1e12874075928ffb13e908293a62))
+* **yoke:** use findCodexPath() instead of hardcoded darwin-arm64 path ([#330](https://github.com/chadbyte/clay/issues/330)) ([f2de390](https://github.com/chadbyte/clay/commit/f2de3900391596ab97efc3ae433d4e1af57906c7)), closes [#325](https://github.com/chadbyte/clay/issues/325) [#file-tree](https://github.com/chadbyte/clay/issues/file-tree) [#share-pill](https://github.com/chadbyte/clay/issues/share-pill) [#327](https://github.com/chadbyte/clay/issues/327)
+
 ## [2.32.1-beta.1](https://github.com/chadbyte/clay/compare/v2.32.0...v2.32.1-beta.1) (2026-04-22)
 
 
