@@ -794,12 +794,23 @@
   height: 22px;
 }
 
-/* --- User avatars (circle, above my-avatar at bottom) --- */
-.icon-strip-users {
+/* Mate section wrapper — pinned just above the user-island at the
+   bottom of the strip. Groups the \u2318M hint pill with the users
+   list so the hint sits directly above the mate avatars rather than
+   floating up in the project section's flex flow. */
+.icon-strip-mate-section {
   position: absolute;
   bottom: 74px; /* above user-island (58px + 8px bottom + 8px gap) */
   left: 50%;
   transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+/* --- User avatars (circle, inside the mate section) --- */
+.icon-strip-users {
   width: 56px;
   display: flex;
   flex-direction: column;
