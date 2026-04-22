@@ -313,12 +313,6 @@
   opacity: 0;
   padding-bottom: 0;
 }
-.sidebar-tools-divider {
-  height: 1px;
-  background: var(--border-subtle);
-  margin: 4px 12px;
-}
-
 /* --- Sessions header (pinned above scroll) --- */
 #sidebar-sessions-header {
   flex-shrink: 0;

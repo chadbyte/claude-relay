@@ -2,27 +2,36 @@
    File Browser
    ========================================================================== */
 
-/* --- Session actions --- */
+/* --- Session actions ---
+   Compact icon+caption grid (Launchpad-style) so the tools panel stays
+   small no matter how many tools we add. Keeps the session list — the
+   core of the sidebar — from getting pushed down as features grow (see
+   issue #325 item 3). Each tile shows a small icon above a two-line
+   caption so the tool is recognizable at a glance without a hover. */
 #session-actions {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
   padding: 0 8px 4px;
 }
 
 #session-actions button {
+  position: relative;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
+  justify-content: center;
+  gap: 4px;
+  min-height: 58px;
+  padding: 6px 2px;
   border-radius: 10px;
   border: none;
   background: transparent;
   color: var(--text-muted);
   font-family: inherit;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 10px;
+  font-weight: 500;
   cursor: pointer;
-  margin-bottom: 0;
   transition: background 0.15s, color 0.15s;
 }
 
@@ -30,47 +39,54 @@
 #session-actions button:hover { background: var(--sidebar-hover); color: var(--text-secondary); }
 #session-actions button.active { background: var(--sidebar-hover); color: var(--text); }
 
-.sidebar-badge {
-  background: rgba(var(--overlay-rgb), 0.1);
-  color: var(--text-dimmer);
+/* Tile caption — small, centered, wraps to at most two lines */
+#session-actions .tool-btn-label {
   font-size: 10px;
+  font-weight: 500;
+  line-height: 1.15;
+  text-align: center;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  word-break: break-word;
+}
+
+/* Badge becomes a small corner indicator in icon-only grid */
+.sidebar-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(var(--overlay-rgb), 0.15);
+  color: var(--text-dimmer);
+  font-size: 9px;
   font-weight: 700;
-  min-width: 16px;
-  height: 16px;
-  border-radius: 8px;
+  min-width: 14px;
+  height: 14px;
+  border-radius: 7px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0 4px;
-  margin-left: auto;
+  padding: 0 3px;
   line-height: 1;
+  pointer-events: none;
 }
 .sidebar-badge.hidden { display: none; }
 
+/* Sticky-notes badge stays clickable in the icon grid — it toggles the
+   archive panel. The old inline "Open Archive" expand label doesn't fit
+   a corner dot, so it's gone; the cursor and hover color still signal
+   that the badge itself is interactive. */
 #sticky-notes-sidebar-count {
   cursor: pointer;
-  overflow: hidden;
-  transition: padding 0.2s ease, background 0.15s ease, color 0.15s ease;
-}
-#sticky-notes-sidebar-count::after {
-  content: "Open Archive";
-  display: inline-block;
-  max-width: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  vertical-align: middle;
-  margin-left: 0;
-  opacity: 0;
-  transition: max-width 0.2s ease, margin-left 0.2s ease, opacity 0.15s ease;
+  pointer-events: auto;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 #sticky-notes-sidebar-count:hover {
   background: var(--accent);
   color: #fff;
-}
-#sticky-notes-sidebar-count:hover::after {
-  max-width: 80px;
-  margin-left: 4px;
-  opacity: 1;
 }
 
 /* --- Panels --- */
