@@ -588,6 +588,15 @@
   border-right: none;
   overflow: hidden;
   flex-shrink: 0;
+  -webkit-user-select: none;
+  user-select: none;
+}
+/* Inputs inside the mate sidebar remain selectable. */
+#mate-sidebar-column input,
+#mate-sidebar-column textarea,
+#mate-sidebar-column [contenteditable="true"] {
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 #mate-sidebar-column.hidden {
@@ -1015,59 +1024,18 @@ body.mate-dm-active #layout.sidebar-collapsed .mate-collapsed-info {
   text-overflow: ellipsis;
 }
 
-/* Mate sidebar tools: icon+caption grid, matches #session-actions. */
+/* Mate sidebar tools: icon+caption grid, matches #session-actions.
+   Tile styling comes from .palette-tile in sidebar.css. */
+#mate-sidebar-tools-wrap {
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 4px;
+}
 #mate-sidebar-tools {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 4px;
-  padding: 8px 8px 4px;
-  flex-shrink: 0;
-  border-bottom: 1px solid var(--border-subtle);
-}
-
-#mate-sidebar-tools button {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  min-height: 58px;
-  padding: 6px 2px;
-  border: none;
-  background: none;
-  color: var(--text-muted);
-  font-size: 10px;
-  font-weight: 500;
-  font-family: inherit;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-}
-
-#mate-sidebar-tools button:hover {
-  background: var(--sidebar-hover);
-  color: var(--text-secondary);
-}
-
-#mate-sidebar-tools button svg {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-}
-
-#mate-sidebar-tools .tool-btn-label {
-  font-size: 10px;
-  font-weight: 500;
-  line-height: 1.15;
-  text-align: center;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  word-break: break-word;
+  padding: 0 8px 4px;
 }
 
 /* Knowledge editor panel (overlays main content) */

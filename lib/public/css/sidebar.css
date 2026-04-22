@@ -18,6 +18,21 @@
   overflow: hidden;
 }
 
+/* Sidebar items aren't meant to be text-selected — the sidebar is for
+   navigation and drag-reorder. Disabling selection avoids accidental
+   highlights during clicks and drags. Inputs and contenteditables
+   inside the sidebar re-enable selection so users can still edit. */
+#sidebar-column {
+  -webkit-user-select: none;
+  user-select: none;
+}
+#sidebar-column input,
+#sidebar-column textarea,
+#sidebar-column [contenteditable="true"] {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
 #layout.sidebar-collapsed #sidebar-column {
   width: 0 !important;
   min-width: 0 !important;
@@ -273,45 +288,213 @@
   border-bottom: 1px solid var(--border-subtle);
   padding-bottom: 4px;
 }
-#sidebar-tools-toggle {
+
+/* Section header: the "Tools" label was redundant next to a grid of
+   labeled icons, so the header is now just the Edit pill right-aligned
+   above the grid. Kept as its own row instead of overlaying the grid
+   so it never collides with a tile or its badge. */
+.sidebar-tools-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  margin: 0;
-  padding: 8px 8px 4px 0;
-  box-sizing: border-box;
+  justify-content: flex-end;
+  padding: 4px 8px 2px;
+}
+
+/* Edit pill: muted by default, never a primary affordance. */
+.tool-palette-edit-btn {
   background: none;
   border: none;
   cursor: pointer;
+  font-family: inherit;
   font-size: 11px;
+  font-weight: 500;
+  color: var(--text-dimmer);
+  padding: 2px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.2px;
+  transition: background 0.15s, color 0.15s;
+}
+.tool-palette-edit-btn:hover {
+  background: var(--sidebar-hover);
+  color: var(--text-muted);
+}
+.tool-palette-edit-btn.active {
+  background: var(--accent);
+  color: #fff;
+}
+.tool-palette-edit-btn.active:hover {
+  background: var(--accent);
+  color: #fff;
+  filter: brightness(1.1);
+}
+
+/* Hidden-tools section appears only in edit mode when items are hidden. */
+.tool-palette-hidden-section {
+  padding: 4px 8px 8px;
+  border-top: 1px dashed var(--border-subtle);
+  margin-top: 4px;
+}
+.tool-palette-hidden-section.hidden {
+  display: none;
+}
+.tool-palette-hidden-label {
+  font-size: 10px;
   font-weight: 600;
   color: var(--text-dimmer);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  font-family: inherit;
+  padding: 2px 4px 6px;
 }
-#sidebar-tools-toggle:hover {
+.tool-palette-hidden-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+}
+
+/* --- Shared tile style (applies in both active and hidden grids) --- */
+.palette-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 58px;
+  padding: 6px 2px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
   color: var(--text-muted);
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
 }
-.sidebar-tools-chevron {
-  width: 14px;
-  height: 14px;
-  transition: transform 0.15s;
-}
-#sidebar-tools #session-actions {
-  max-height: 300px;
+.palette-tile .lucide { width: 16px; height: 16px; flex-shrink: 0; }
+.palette-tile:hover { background: var(--sidebar-hover); color: var(--text-secondary); }
+.palette-tile.active { background: var(--sidebar-hover); color: var(--text); }
+.palette-tile .tool-btn-label {
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.15;
+  text-align: center;
+  max-width: 100%;
   overflow: hidden;
-  transition: max-height 0.2s ease, opacity 0.2s ease;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  word-break: break-word;
+}
+
+/* --- Edit mode affordances (shared across session + mate palettes) --- */
+
+/* × remove badge on each tile. Hidden in normal mode; shown in edit. */
+.tool-palette-remove {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transform: scale(0.6);
+  pointer-events: none;
+  transition: opacity 0.15s, transform 0.15s;
+  z-index: 2;
+  user-select: none;
+}
+.edit-mode .tool-palette-remove {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+}
+.edit-mode .tool-palette-remove:hover {
+  filter: brightness(1.15);
+}
+
+/* Drag-reorder feedback. Tiles are draggable at all times (macOS dock
+   pattern) so users can rearrange without entering a separate mode.
+   -webkit-user-drag is explicit for Safari, which otherwise sometimes
+   ignores draggable when user-select is none on an ancestor. Edit mode
+   adds the outline so the tiles read as mutable during an edit. */
+#session-actions [data-tool-id],
+#mate-sidebar-tools [data-tool-id] {
+  -webkit-user-drag: element;
+}
+.edit-mode [data-tool-id] {
+  box-shadow: inset 0 0 0 1px var(--border-subtle);
+}
+[data-tool-id].dragging {
+  opacity: 0.4;
+  cursor: grabbing;
+}
+/* Children shouldn't swallow drag events — the browser starts drag on
+   the element under the pointer, and we want that to always be the
+   draggable button, not the inner icon/label/badge. The × affordance
+   stays interactive (it needs clicks in edit mode). */
+[data-tool-id] > i,
+[data-tool-id] > svg,
+[data-tool-id] > .tool-btn-label,
+[data-tool-id] > .sidebar-badge {
+  pointer-events: none;
+}
+
+/* Hidden-section tiles are dimmed to signal "not active" and get a small
+   + glyph on hover to suggest they can be restored. */
+.tool-palette-hidden-grid [data-tool-id] {
+  opacity: 0.55;
+  cursor: pointer;
+  transition: opacity 0.15s, background 0.15s, color 0.15s;
+}
+.tool-palette-hidden-grid [data-tool-id]:hover {
   opacity: 1;
 }
-#sidebar-tools.collapsed .sidebar-tools-chevron {
-  transform: rotate(-90deg);
+.tool-palette-hidden-grid .tool-palette-remove {
+  display: none;
 }
-#sidebar-tools.collapsed #session-actions {
-  max-height: 0;
-  opacity: 0;
-  padding-bottom: 0;
+.tool-palette-hidden-grid .sidebar-badge {
+  display: none;
+}
+
+/* Right-click context menu on palette tiles. Mirrors .session-ctx-menu. */
+.tool-palette-ctx-menu {
+  position: fixed;
+  background: var(--sidebar-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 4px 0;
+  min-width: 180px;
+  box-shadow: 0 4px 16px rgba(var(--shadow-rgb), 0.4);
+  z-index: 9999;
+  font-family: inherit;
+}
+.tool-palette-ctx-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+}
+.tool-palette-ctx-item:hover {
+  background: rgba(var(--overlay-rgb), 0.05);
 }
 /* --- Sessions header (pinned above scroll) --- */
 #sidebar-sessions-header {
