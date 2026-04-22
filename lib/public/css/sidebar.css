@@ -289,30 +289,54 @@
   padding-bottom: 4px;
 }
 
-/* Section header: the "Tools" label was redundant next to a grid of
-   labeled icons, so the header is now just the Edit pill right-aligned
-   above the grid. Kept as its own row instead of overlaying the grid
-   so it never collides with a tile or its badge. */
+/* Section header: "Tools" label on the left, a dim keyboard-hint next
+   to it explaining the Cmd+O shortcut, and a small pencil icon edit
+   button right-aligned. Three elements but each does just one thing,
+   so nothing reads as pushy. */
 .sidebar-tools-header {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  padding: 4px 8px 2px;
+  gap: 8px;
+  padding: 4px 8px 2px 12px;
+}
+.sidebar-tools-header .sidebar-section-label {
+  padding: 0;
 }
 
-/* Edit pill: muted by default, never a primary affordance. */
+/* Dim inline hint that advertises the Cmd/Ctrl+O keyboard shortcut.
+   Clickable too, so users who read the hint can also act on it. */
+.sidebar-tools-hint {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-dimmer);
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+}
+.sidebar-tools-hint:hover {
+  opacity: 1;
+}
+
+/* Pencil-icon edit button, far-right of the header. */
 .tool-palette-edit-btn {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
   background: none;
   border: none;
   cursor: pointer;
-  font-family: inherit;
-  font-size: 11px;
-  font-weight: 500;
   color: var(--text-dimmer);
-  padding: 2px 8px;
   border-radius: 6px;
-  letter-spacing: 0.2px;
   transition: background 0.15s, color 0.15s;
+}
+.tool-palette-edit-btn .lucide,
+.tool-palette-edit-btn svg {
+  width: 13px;
+  height: 13px;
 }
 .tool-palette-edit-btn:hover {
   background: var(--sidebar-hover);
@@ -434,10 +458,26 @@
 }
 .edit-mode [data-tool-id] {
   box-shadow: inset 0 0 0 1px var(--border-subtle);
+  animation: tile-wiggle 0.22s ease-in-out infinite;
+  transform-origin: 50% 50%;
 }
+/* Desync the wiggle across tiles so they don't swing in lockstep. */
+.edit-mode [data-tool-id]:nth-child(2n) {
+  animation-delay: -0.11s;
+}
+.edit-mode [data-tool-id]:nth-child(3n) {
+  animation-duration: 0.26s;
+}
+@keyframes tile-wiggle {
+  0%   { transform: rotate(-1.2deg); }
+  50%  { transform: rotate(1.2deg);  }
+  100% { transform: rotate(-1.2deg); }
+}
+/* The dragged tile shouldn't wiggle while under the cursor. */
 [data-tool-id].dragging {
   opacity: 0.4;
   cursor: grabbing;
+  animation: none;
 }
 /* Children shouldn't swallow drag events — the browser starts drag on
    the element under the pointer, and we want that to always be the
