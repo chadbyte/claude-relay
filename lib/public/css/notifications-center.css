@@ -41,6 +41,38 @@
   width: 340px;
 }
 
+/* "Clear all" pill — appears at the top of the stack when 2+ banners
+   are showing. Small, muted, aligned to the right so it sits above the
+   banners' corner without stealing attention. */
+.notif-banner-clear-all {
+  pointer-events: auto;
+  align-self: flex-end;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  background: color-mix(in srgb, var(--bg-alt, #1a1a2e) 75%, transparent);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border, #333);
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(var(--shadow-rgb, 0,0,0), 0.2);
+  transition: color 0.15s, background 0.15s;
+}
+.notif-banner-clear-all:hover {
+  color: var(--text);
+  background: color-mix(in srgb, var(--bg-alt, #1a1a2e) 90%, transparent);
+}
+.notif-banner-clear-all .lucide {
+  width: 12px;
+  height: 12px;
+}
+
 /* Individual banner (frosted glass) */
 .notif-banner {
   display: flex;
