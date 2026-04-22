@@ -1,3 +1,10 @@
+# [2.33.0-beta.2](https://github.com/chadbyte/clay/compare/v2.33.0-beta.1...v2.33.0-beta.2) (2026-04-22)
+
+
+### Bug Fixes
+
+* **codex:** prefer device auth in login prompts ([b0bcd2b](https://github.com/chadbyte/clay/commit/b0bcd2b2308485b8b129669284869f12a9f61f25))
+
 # [2.33.0-beta.1](https://github.com/chadbyte/clay/compare/v2.32.1-beta.2...v2.33.0-beta.1) (2026-04-22)
 
 
