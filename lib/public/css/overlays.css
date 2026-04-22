@@ -46,6 +46,13 @@
 .usage-check-link:hover {
   background: color-mix(in srgb, var(--text-dimmer) 16%, transparent);
 }
+.usage-check-vendor-icon {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  object-fit: cover;
+  flex: 0 0 auto;
+}
 .usage-check-link .lucide {
   width: 12px;
   height: 12px;
@@ -1258,4 +1265,3 @@ button.top-bar-pill.pill-accent:hover { background: color-mix(in srgb, var(--acc
   margin-top: 1.2rem;
   letter-spacing: 0.03em;
 }
-
