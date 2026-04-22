@@ -70,8 +70,45 @@
   margin: 6px 6px 12px;
   display: flex;
   flex-direction: column;
+  /* Own the scroll: inner file-tree scrolls, titlebar/search/hint stay
+     anchored. Without this the whole panel (inherited overflow-y:auto
+     from .sidebar-panel) scrolled past the search bar. */
+  overflow: hidden;
 }
 #sidebar-panel-files.hidden { display: none; }
+#sidebar-panel-files #file-tree {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* Keyboard hint footer — pinned below the tree, always visible. */
+.fb-kb-hint {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-top: 1px solid var(--border-subtle);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-dimmer);
+}
+.fb-kb-hint kbd {
+  display: inline-block;
+  padding: 1px 5px;
+  margin: 0 1px;
+  background: var(--bg-alt);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  font-size: 10px;
+  font-family: inherit;
+  color: var(--text-muted);
+}
+.fb-kb-hint span {
+  opacity: 0.9;
+}
 
 /* --- File browser titlebar --- */
 .fb-titlebar {
@@ -222,6 +259,18 @@
 
 .file-tree-item:hover { background: var(--sidebar-hover); color: var(--text); }
 .file-tree-item.active { background: var(--sidebar-active); color: var(--text); }
+/* Keyboard focus ring (arrow-key navigation) — separate from .active
+   so the currently-opened file stays visually marked even while the
+   user is exploring elsewhere with the arrows. */
+.file-tree-item.fb-kb-focus {
+  background: var(--sidebar-hover);
+  color: var(--text);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+#file-tree:focus { outline: none; }
+#file-tree:focus .file-tree-item.fb-kb-focus {
+  background: var(--sidebar-active);
+}
 .file-tree-item .lucide { width: 14px; height: 14px; flex-shrink: 0; }
 
 .file-tree-name {
