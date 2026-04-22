@@ -1,3 +1,17 @@
+## [2.33.1](https://github.com/chadbyte/clay/compare/v2.33.0...v2.33.1) (2026-04-22)
+
+
+### Bug Fixes
+
+* **auth:** preserve vendor selection and auth flow ([38d2b9a](https://github.com/chadbyte/clay/commit/38d2b9a7110226412eab2f8839289127003b0400))
+* **settings:** refine user settings layout ([9a060e1](https://github.com/chadbyte/clay/commit/9a060e16445d18f8491ad4d34bbef3c37396e617))
+* **title:** generate session titles after two turns ([4aaeade](https://github.com/chadbyte/clay/commit/4aaeade50bf457962c3e4fe94be3c20c826c859b))
+* **ui:** refine notification banner styling ([ae443b5](https://github.com/chadbyte/clay/commit/ae443b5442b3acffdddab49b0779711b5b7cc7fd))
+* **ui:** remove connection lost notifications ([d10d734](https://github.com/chadbyte/clay/commit/d10d7347c0be2b36878d29f99af19773e02d70da))
+* **ui:** style user island theme toggle ([fc58f3b](https://github.com/chadbyte/clay/commit/fc58f3be2c28fc3dbc66851dcee6ceabf430b00a))
+* **ui:** use clay icon for empty notifications ([743d5ad](https://github.com/chadbyte/clay/commit/743d5ad55b66203c895430541b8005c6d35dddd2))
+* **yoke:** resolve codex linux auth path ([cc94558](https://github.com/chadbyte/clay/commit/cc945584cc19caf5027d9db82304c13a8f843113))
+
 ## [2.33.1-beta.1](https://github.com/chadbyte/clay/compare/v2.33.0...v2.33.1-beta.1) (2026-04-22)
 
 
