@@ -51,22 +51,27 @@
   align-items: center;
   gap: 4px;
   padding: 3px 10px;
-  background: color-mix(in srgb, var(--bg-alt, #1a1a2e) 75%, transparent);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--border, #333);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.04)),
+    rgba(var(--overlay-rgb), 0.06);
+  backdrop-filter: blur(10px) saturate(1.1);
+  -webkit-backdrop-filter: blur(10px) saturate(1.1);
+  border: 1px solid rgba(255,255,255,0.18);
   border-radius: 999px;
   font-family: inherit;
   font-size: 11px;
   font-weight: 500;
   color: var(--text-muted);
   cursor: pointer;
-  box-shadow: 0 4px 20px rgba(var(--shadow-rgb, 0,0,0), 0.2);
-  transition: color 0.15s, background 0.15s;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.18);
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
 }
 .notif-banner-clear-all:hover {
   color: var(--text);
-  background: color-mix(in srgb, var(--bg-alt, #1a1a2e) 90%, transparent);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.06)),
+    rgba(var(--overlay-rgb), 0.08);
+  border-color: rgba(255,255,255,0.24);
 }
 .notif-banner-clear-all .lucide {
   width: 12px;
@@ -79,17 +84,19 @@
   align-items: center;
   gap: 10px;
   padding: 10px 14px;
-  background: color-mix(in srgb, var(--bg-alt, #1a1a2e) 75%, transparent);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--border, #333);
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(var(--shadow-rgb, 0,0,0), 0.25);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.04)),
+    rgba(var(--overlay-rgb), 0.07);
+  backdrop-filter: blur(10px) saturate(1.08);
+  -webkit-backdrop-filter: blur(10px) saturate(1.08);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 16px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2);
   pointer-events: auto;
   cursor: pointer;
   opacity: 0;
   transform: translateY(-100%);
-  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.18s ease, box-shadow 0.18s ease;
 }
 .notif-banner.show {
   opacity: 1;
@@ -99,6 +106,10 @@
   opacity: 0;
   transform: translateY(-100%);
 }
+.notif-banner:hover {
+  border-color: rgba(255,255,255,0.28);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.24);
+}
 
 .notif-banner-icon {
   flex-shrink: 0;
@@ -107,9 +118,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(var(--overlay-rgb, 0,0,0), 0.06);
-  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.04));
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 10px;
   color: var(--text-muted);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.18);
 }
 .notif-banner-icon .lucide { width: 16px; height: 16px; }
 .notif-banner-emoji { font-size: 18px; line-height: 1; }
@@ -215,7 +228,7 @@
 .notif-banner:hover .notif-banner-close { opacity: 1; }
 .notif-banner-close:hover {
   color: var(--text);
-  background: rgba(var(--overlay-rgb, 0,0,0), 0.08);
+  background: rgba(255,255,255,0.12);
 }
 .notif-banner-close .lucide { width: 12px; height: 12px; }
 
