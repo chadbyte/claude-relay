@@ -885,7 +885,10 @@
 #ask-mate-btn:hover { background: rgba(var(--overlay-rgb), 0.06); color: var(--text); }
 #ask-mate-btn:active { transform: scale(0.95); }
 
-/* Mate avatar overlay on @ button */
+/* Mate avatar overlay on @ button.
+   Rendered desaturated and dim so it sits quietly in the corner of the
+   input area. Regains saturation on hover, so the user only sees the
+   actual mate identity when they're actively reaching for the button. */
 .ask-mate-avatar {
   position: absolute;
   bottom: 0;
@@ -895,12 +898,14 @@
   border-radius: 50%;
   border: 1.5px solid var(--input-bg);
   pointer-events: none;
-  opacity: 0.55;
-  transition: opacity 0.3s, transform 0.3s;
+  opacity: 0.45;
+  filter: grayscale(100%);
+  transition: opacity 0.3s, transform 0.3s, filter 0.3s;
 }
 
 #ask-mate-btn:hover .ask-mate-avatar {
-  opacity: 0.85;
+  opacity: 0.9;
+  filter: grayscale(0%);
 }
 
 .ask-mate-avatar.fade-out {
@@ -909,7 +914,7 @@
 }
 
 .ask-mate-avatar.fade-in {
-  opacity: 0.55;
+  opacity: 0.45;
   transform: scale(1);
 }
 
