@@ -98,30 +98,13 @@ button.top-bar-pill.pill-accent:hover { background: color-mix(in srgb, var(--acc
 .top-bar-install-btn.hidden { display: none; }
 .pwa-standalone .top-bar-install-btn { display: none !important; }
 
-/* Share button — desktop only, same style as install pill */
-.top-bar-share-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
-  color: var(--accent);
-  border: none;
-  border-radius: 10px;
-  padding: 2px 10px;
-  font-family: inherit;
-  font-size: 11px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  line-height: 1;
-  transition: background 0.15s;
-}
-.top-bar-share-btn .lucide { width: 12px; height: 12px; }
-.top-bar-share-btn:hover { background: color-mix(in srgb, var(--accent) 20%, transparent); }
+/* Share button sits in .top-bar-actions with the bell/settings icons
+   and inherits their shared icon-button styling. Hide on mobile and
+   inside PWA standalone (matches previous pill behavior). */
 @media (max-width: 768px) {
-  .top-bar-share-btn { display: none; }
+  #share-pill { display: none; }
 }
-.pwa-standalone .top-bar-share-btn { display: none !important; }
+.pwa-standalone #share-pill { display: none !important; }
 
 /* Extension pill button — same style as share/install pills */
 .ext-pill-wrap {
