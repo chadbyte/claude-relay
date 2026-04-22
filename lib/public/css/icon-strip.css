@@ -112,6 +112,37 @@
   flex-shrink: 0;
 }
 
+/* Keyboard-shortcut hint above each switchable strip section. Tiny
+   pill with the platform-specific chord; clicking opens the switcher
+   in that mode, same as the keyboard shortcut itself. */
+.icon-strip-hint {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  padding: 2px 4px;
+  margin: 2px 0;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-alt);
+  color: var(--text-dimmer);
+  font-size: 10px;
+  font-weight: 600;
+  font-family: inherit;
+  border-radius: 6px;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.15s, color 0.15s, background 0.15s;
+}
+.icon-strip-hint:hover {
+  opacity: 1;
+  color: var(--text-muted);
+  background: var(--bg);
+}
+.icon-strip-hint.hidden {
+  display: none;
+}
+
 /* --- Scrollable project list area --- */
 .icon-strip-projects {
   width: 100%;

@@ -371,3 +371,189 @@
     display: none;
   }
 }
+
+/* --- Project switcher (Cmd/Ctrl+E) ---
+   macOS Cmd+Tab-style quick switcher: centered modal with a darker
+   backdrop than the command palette, projects laid out horizontally
+   as icon+label tiles that wrap to multiple rows when there are many.
+   Reuses .cmd-palette shell so positioning/animations stay consistent. */
+.project-switcher .cmd-palette-backdrop {
+  background: rgba(var(--shadow-rgb), 0.55);
+}
+.project-switcher-dialog {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-top: 1px solid var(--border);
+  border-radius: 16px;
+  width: min(820px, 85vw);
+  max-height: 80vh;
+  background: var(--bg-alt);
+  box-shadow: 0 20px 60px rgba(var(--shadow-rgb), 0.5);
+  animation: projSwitcherIn 0.12s ease-out;
+}
+@keyframes projSwitcherIn {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.96); }
+  to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+.project-switcher-header {
+  padding: 14px 20px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dimmer);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.project-switcher-dialog .cmd-palette-results {
+  padding: 12px 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-start;
+  overflow-y: auto;
+  max-height: calc(80vh - 110px);
+}
+.project-switcher-item {
+  flex: 0 0 auto;
+  width: 96px;
+  height: 104px;
+  padding: 10px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+  text-align: center;
+}
+/* Icon-strip-style treatment: rounded bg-alt fill that turns accent
+   on hover/active, and a 4-direction drop-shadow + white glow on the
+   emoji img for readability on either background. */
+.project-switcher-item .cmd-palette-item-icon {
+  width: 44px;
+  height: 44px;
+  font-size: 28px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: var(--bg-alt);
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+}
+.project-switcher-item .cmd-palette-item-icon .lucide {
+  width: 22px;
+  height: 22px;
+}
+.project-switcher-item .cmd-palette-item-icon img.emoji {
+  width: 26px;
+  height: 26px;
+  vertical-align: middle;
+  margin: 0;
+  filter:
+    drop-shadow(1px 0 0 rgba(0,0,0,0.25))
+    drop-shadow(-1px 0 0 rgba(0,0,0,0.25))
+    drop-shadow(0 1px 0 rgba(0,0,0,0.25))
+    drop-shadow(0 -1px 0 rgba(0,0,0,0.25))
+    drop-shadow(0 0 4px rgba(255,255,255,0.35));
+}
+.project-switcher-item:hover .cmd-palette-item-icon,
+.project-switcher-item.active .cmd-palette-item-icon {
+  background: var(--accent);
+  color: #fff;
+}
+.project-switcher-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  object-fit: cover;
+}
+.project-switcher-item .cmd-palette-item-body {
+  width: 100%;
+  display: block;
+}
+.project-switcher-item .cmd-palette-item-title-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 100%;
+}
+.project-switcher-item .cmd-palette-item-title {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--text-secondary);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}
+.project-switcher-item:hover {
+  background: transparent;
+}
+.project-switcher-item.active {
+  border-color: var(--accent);
+  background: transparent;
+}
+.project-switcher-item.active .cmd-palette-item-title {
+  color: var(--text);
+}
+
+.project-switcher-current {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--text-dimmer);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Disabled tile (e.g. worktree with worktreeAccessible: false). Not a
+   valid switch target, so skip highlight, skip click, visually dim. */
+.project-switcher-item.disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.project-switcher-item.disabled:hover {
+  background: transparent;
+}
+.project-switcher-item.disabled.active {
+  border-color: transparent;
+  background: transparent;
+}
+.project-switcher-disabled-reason {
+  font-size: 9px;
+  font-weight: 500;
+  color: var(--text-dimmer);
+  font-style: italic;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.project-switcher-footer {
+  padding: 10px 16px;
+  font-size: 11px;
+  color: var(--text-dimmer);
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  justify-content: center;
+}
+.project-switcher-footer kbd {
+  display: inline-block;
+  padding: 1px 5px;
+  margin: 0 1px;
+  background: rgba(var(--overlay-rgb), 0.1);
+  border-radius: 4px;
+  font-size: 10px;
+  font-family: inherit;
+  color: var(--text-muted);
+}
