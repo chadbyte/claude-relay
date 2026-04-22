@@ -467,6 +467,33 @@
   display: none;
 }
 
+/* Hotkey badge shown on each active palette tile while Cmd/Ctrl+O pick
+   mode is active. Top-left so it doesn't collide with the × (top-right)
+   or count badges. High-contrast accent so the keystroke is obvious. */
+.tool-palette-hotkey-badge {
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 4px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+  pointer-events: none;
+  z-index: 3;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  animation: tool-palette-hotkey-in 0.12s ease-out;
+}
+@keyframes tool-palette-hotkey-in {
+  from { opacity: 0; transform: scale(0.7); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
 /* Right-click context menu on palette tiles. Mirrors .session-ctx-menu. */
 .tool-palette-ctx-menu {
   position: fixed;
