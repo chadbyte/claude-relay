@@ -810,6 +810,21 @@
   box-shadow: 0 0 4px var(--success);
 }
 
+.session-bookmark-icon {
+  display: inline-flex;
+  align-items: center;
+  color: var(--accent);
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.session-bookmark-icon .lucide,
+.session-bookmark-icon svg {
+  width: 12px;
+  height: 12px;
+  display: block;
+}
+
 /* Session unread badge */
 .session-unread-badge {
   position: absolute;
@@ -1719,4 +1734,3 @@
   50% { opacity: 0.18; }
   100% { opacity: 0.1; }
 }
-

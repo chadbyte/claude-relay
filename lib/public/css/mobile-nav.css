@@ -518,9 +518,26 @@
 
   .mobile-session-title {
     flex: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .mobile-session-bookmark {
+    display: inline-flex;
+    align-items: center;
+    color: var(--accent, #ff7b54);
+    flex-shrink: 0;
+  }
+
+  .mobile-session-bookmark .lucide,
+  .mobile-session-bookmark svg {
+    width: 13px;
+    height: 13px;
+    display: block;
   }
 
   .mobile-session-processing {
