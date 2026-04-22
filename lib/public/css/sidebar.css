@@ -1418,6 +1418,30 @@
   transition: background 0.15s, color 0.15s;
 }
 
+.user-island-actions button#user-theme-toggle-btn {
+  color: var(--text-secondary);
+}
+
+.user-island-actions button#user-theme-toggle-btn:hover {
+  color: var(--text);
+}
+
+.user-island-actions button#user-theme-toggle-btn.theme-toggle-light {
+  color: #7b8cff;
+}
+
+.user-island-actions button#user-theme-toggle-btn.theme-toggle-light:hover {
+  color: #98a4ff;
+}
+
+.user-island-actions button#user-theme-toggle-btn.theme-toggle-dark {
+  color: #f2b84d;
+}
+
+.user-island-actions button#user-theme-toggle-btn.theme-toggle-dark:hover {
+  color: #ffca6b;
+}
+
 .user-island-actions button .lucide {
   width: 16px;
   height: 16px;
