@@ -928,23 +928,48 @@
         <div class="us-section" data-section="us-account">
           <h2>Account</h2>
           <div class="settings-card">
-            <div class="settings-field-row">
-              <div>
-                <div class="settings-label">Username</div>
-                <div class="settings-value" id="us-username">-</div>
+            <div class="us-account-hero">
+              <div class="us-account-avatar" aria-hidden="true">
+                <img id="us-account-avatar-img" class="us-account-avatar-img hidden" alt="">
+                <span id="us-account-avatar-fallback" class="us-account-avatar-fallback">?</span>
+              </div>
+              <div class="us-account-hero-copy">
+                <div class="us-account-name" id="us-account-name">-</div>
+                <div class="us-account-subline" id="us-account-subline">-</div>
+                <div class="settings-hint">Your profile is stored on this server and used across sessions.</div>
               </div>
             </div>
           </div>
           <h3>Security</h3>
           <div class="settings-card">
-            <div class="settings-field">
-              <label class="settings-label">PIN</label>
-              <div class="settings-hint">6-digit code used to sign in to your account.</div>
-              <div class="us-pin-row">
-                <input type="password" class="us-text-input us-pin-input" id="us-pin-input" maxlength="6" inputmode="numeric" pattern="[0-9]*" placeholder="Enter new PIN" autocomplete="off">
-                <button class="us-btn" id="us-pin-save" disabled>Change PIN</button>
+            <div class="settings-field-row">
+              <div>
+                <label class="settings-label">PIN</label>
+                <div class="settings-hint">Protect the web UI with a 6-digit PIN.</div>
               </div>
-              <div class="us-pin-msg hidden" id="us-pin-msg"></div>
+              <button class="settings-btn-sm" id="us-pin-set-btn">Set PIN</button>
+            </div>
+            <div class="settings-field hidden" id="us-pin-form">
+              <div class="settings-pin-form-title" id="us-pin-form-title">Change PIN</div>
+              <div class="settings-pin-current-row" id="us-pin-current-row">
+                <label class="settings-label" for="us-pin-current-input">Current PIN</label>
+                <input type="password" class="us-text-input us-pin-input" id="us-pin-current-input" maxlength="6" inputmode="numeric" pattern="[0-9]*" placeholder="000000" autocomplete="off">
+              </div>
+              <div class="settings-pin-row">
+                <div class="settings-pin-field">
+                  <label class="settings-label" for="us-pin-input">New PIN</label>
+                  <input type="password" class="us-text-input us-pin-input" id="us-pin-input" maxlength="6" inputmode="numeric" pattern="[0-9]*" placeholder="000000" autocomplete="off">
+                </div>
+                <div class="settings-pin-field">
+                  <label class="settings-label" for="us-pin-confirm-input">Confirm PIN</label>
+                  <input type="password" class="us-text-input us-pin-input" id="us-pin-confirm-input" maxlength="6" inputmode="numeric" pattern="[0-9]*" placeholder="000000" autocomplete="off">
+                </div>
+              </div>
+              <div class="settings-pin-actions-row">
+                <button class="us-btn" id="us-pin-save" disabled>Save</button>
+                <button class="settings-btn-sm settings-btn-ghost" id="us-pin-cancel">Cancel</button>
+              </div>
+              <div class="settings-hint settings-pin-error hidden" id="us-pin-msg"></div>
             </div>
           </div>
         </div>
@@ -987,6 +1012,21 @@
         <!-- Chat section -->
         <div class="us-section" data-section="us-chat">
           <h2>Chat</h2>
+          <div class="settings-card">
+            <div class="settings-field">
+              <label class="settings-label" for="us-lang-select">Voice Input Language</label>
+              <div class="settings-hint">Used by speech-to-text when you dictate messages.</div>
+              <select id="us-lang-select" class="settings-select us-lang-select">
+                <option value="en-US">English</option>
+                <option value="ko-KR">Korean</option>
+                <option value="ja-JP">Japanese</option>
+                <option value="zh-CN">Chinese</option>
+                <option value="es-ES">Spanish</option>
+                <option value="fr-FR">French</option>
+                <option value="de-DE">German</option>
+              </select>
+            </div>
+          </div>
           <div class="settings-card">
             <label class="settings-toggle-row">
               <div>
