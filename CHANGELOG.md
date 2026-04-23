@@ -1,3 +1,23 @@
+# [2.34.0-beta.4](https://github.com/chadbyte/clay/compare/v2.34.0-beta.3...v2.34.0-beta.4) (2026-04-23)
+
+
+### Bug Fixes
+
+* **sdk-bridge:** prevent cross-vendor model leak across sessions ([1f62af8](https://github.com/chadbyte/clay/commit/1f62af822c52506fd1d091b33a62d05063663fd1))
+* **search:** return all query occurrences per assistant turn ([21b0081](https://github.com/chadbyte/clay/commit/21b008111369abac9b28d2cac9577ee2b66f0ada))
+* **ui:** hide expand affordance for empty thinking blocks ([35bc428](https://github.com/chadbyte/clay/commit/35bc4282c79a09ad7673300bb0cc4c941deceb9c))
+
+
+### Features
+
+* **mates:** replace autonomy step with vendor choice in wizard ([f8b4f34](https://github.com/chadbyte/clay/commit/f8b4f3471ffb265ccff5e2d8b45217825683e39e))
+
+
+### Performance Improvements
+
+* **yoke:** cache checkInstalled result at module scope ([1ba9bff](https://github.com/chadbyte/clay/commit/1ba9bff1a8c31e54329b311f472ad4aadd24a7de))
+* **yoke:** defer adapter warmup to first websocket connection ([26ede6e](https://github.com/chadbyte/clay/commit/26ede6e7847f123ec848142452b70df24ea9718e))
+
 # [2.34.0-beta.3](https://github.com/chadbyte/clay/compare/v2.34.0-beta.2...v2.34.0-beta.3) (2026-04-23)
 
 
