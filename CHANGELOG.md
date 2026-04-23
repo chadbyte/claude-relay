@@ -1,3 +1,10 @@
+# [2.34.0-beta.7](https://github.com/chadbyte/clay/compare/v2.34.0-beta.6...v2.34.0-beta.7) (2026-04-23)
+
+
+### Bug Fixes
+
+* **claude:** correct worker ipv4 preload path ([fbc70b2](https://github.com/chadbyte/clay/commit/fbc70b2f30c56f5fb14bbd478e68d3f0d7330d02))
+
 # [2.34.0-beta.6](https://github.com/chadbyte/clay/compare/v2.34.0-beta.5...v2.34.0-beta.6) (2026-04-23)
 
 
