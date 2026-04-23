@@ -1,3 +1,10 @@
+# [2.34.0-beta.8](https://github.com/chadbyte/clay/compare/v2.34.0-beta.7...v2.34.0-beta.8) (2026-04-23)
+
+
+### Performance Improvements
+
+* **os-users:** reduce project switch overhead ([96fd254](https://github.com/chadbyte/clay/commit/96fd2540f4e5217fa52240bdd74cbfddf5ce6865))
+
 # [2.34.0-beta.7](https://github.com/chadbyte/clay/compare/v2.34.0-beta.6...v2.34.0-beta.7) (2026-04-23)
 
 
