@@ -1997,19 +1997,60 @@ body.mate-dm-active #layout.sidebar-collapsed .mate-collapsed-info {
 }
 
 /* Mate datastore inspector */
-#mate-sidebar-datastore {
+#mate-datastore-panel {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  background: var(--bg);
   display: flex;
   flex-direction: column;
-  flex: 1;
-  min-height: 0;
+  overflow: hidden;
 }
 
-#mate-sidebar-datastore.hidden {
+#mate-datastore-panel.hidden {
   display: none !important;
 }
 
+#main-column.mate-datastore-open > .title-bar-content,
+#main-column.mate-datastore-open > .dm-header-bar,
+#main-column.mate-datastore-open > #main-panels {
+  display: none !important;
+}
+
+.mate-datastore-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 48px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+
+.mate-datastore-top-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text);
+}
+
+.mate-datastore-top-title .lucide {
+  width: 14px;
+  height: 14px;
+  color: var(--accent);
+  opacity: 0.85;
+}
+
+.mate-datastore-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .mate-db-status {
-  padding: 8px 12px 0;
+  padding: 10px 14px 0;
   font-size: 12px;
   color: var(--text-secondary, #8e8e8e);
 }
@@ -2028,9 +2069,9 @@ body.mate-dm-active #layout.sidebar-collapsed .mate-collapsed-info {
 
 .mate-db-layout {
   display: grid;
-  grid-template-columns: 130px minmax(0, 1fr);
+  grid-template-columns: 220px minmax(0, 1fr);
   gap: 10px;
-  padding: 8px 8px 12px;
+  padding: 12px 10px 10px;
   min-height: 0;
   flex: 1;
 }
@@ -2044,10 +2085,10 @@ body.mate-dm-active #layout.sidebar-collapsed .mate-collapsed-info {
 
 .mate-db-table-list {
   overflow-y: auto;
-  border: 1px solid var(--border-subtle, rgba(255,255,255,0.08));
-  border-radius: 10px;
-  background: var(--bg-alt, rgba(255,255,255,0.03));
-  padding: 4px;
+  border: 1px solid var(--border-subtle, rgba(255,255,255,0.06));
+  border-radius: 12px;
+  background: var(--sidebar-bg, rgba(255,255,255,0.03));
+  padding: 6px;
   flex: 1;
 }
 
@@ -2123,46 +2164,32 @@ body.mate-dm-active #layout.sidebar-collapsed .mate-collapsed-info {
 }
 
 .mate-db-table-schema {
-  max-height: 120px;
+  max-height: 180px;
 }
 
-.mate-db-query,
-.mate-db-params {
-  width: 100%;
-  min-height: 72px;
-  padding: 10px;
-  border-radius: 10px;
-  border: 1px solid var(--border-subtle, rgba(255,255,255,0.1));
-  background: var(--bg-secondary, rgba(255,255,255,0.04));
-  color: var(--text, #fff);
-  font-family: var(--mono-font, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
-  font-size: 11px;
-  resize: vertical;
+@media (max-width: 900px) {
+  .mate-db-layout {
+    grid-template-columns: 1fr;
+  }
 }
 
-.mate-db-params {
-  min-height: 54px;
+body.mate-dm-active .mate-datastore-top-bar {
+  background: var(--mate-color);
+  color: #fff;
 }
 
-.mate-db-actions {
-  display: flex;
-  gap: 8px;
+body.mate-dm-active .mate-datastore-top-title,
+body.mate-dm-active .mate-datastore-top-title .lucide {
+  color: #fff;
 }
 
-.mate-db-actions button {
-  flex: 1;
-  height: 30px;
-  border: none;
-  border-radius: 8px;
-  background: var(--sidebar-active, rgba(255,255,255,0.08));
-  color: var(--text, #fff);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
+body.mate-dm-active .mate-datastore-top-bar .scheduler-close-btn {
+  color: rgba(255, 255, 255, 0.85);
 }
 
-.mate-db-actions button:hover {
-  background: var(--sidebar-hover, rgba(255,255,255,0.12));
+body.mate-dm-active .mate-datastore-top-bar .scheduler-close-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .mate-session-item.search-match {

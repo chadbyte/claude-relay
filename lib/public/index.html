@@ -270,7 +270,6 @@
         <div class="mate-sidebar-sessions-header">
           <span>Conversations</span>
           <div class="mate-sidebar-actions">
-            <button id="mate-data-btn" type="button" title="Data inspector"><i data-lucide="database"></i></button>
             <button id="mate-search-session-btn" type="button" title="Search sessions"><i data-lucide="search"></i></button>
             <button id="mate-new-session-btn" type="button" title="New session"><i data-lucide="plus"></i></button>
           </div>
@@ -280,33 +279,6 @@
           <button id="mate-session-search-clear" type="button" aria-label="Clear search"><i data-lucide="x"></i></button>
         </div>
         <div id="mate-session-list" class="mate-session-list"></div>
-      </div>
-      <div id="mate-sidebar-datastore" class="hidden">
-        <div class="mate-sidebar-sessions-header">
-          <span>Data</span>
-          <div class="mate-sidebar-actions">
-            <button id="mate-db-refresh-btn" type="button" title="Refresh tables"><i data-lucide="refresh-cw"></i></button>
-            <button id="mate-db-back-btn" type="button" title="Back to conversations"><i data-lucide="x"></i></button>
-          </div>
-        </div>
-        <div class="mate-db-status" id="mate-db-status"></div>
-        <div class="mate-db-layout">
-          <div class="mate-db-table-column">
-            <div class="mate-db-section-title">Objects</div>
-            <div id="mate-db-table-list" class="mate-db-table-list"></div>
-          </div>
-          <div class="mate-db-detail">
-            <div class="mate-db-section-title" id="mate-db-table-name">No table selected</div>
-            <pre id="mate-db-table-schema" class="mate-db-table-schema"></pre>
-            <textarea id="mate-db-query" class="mate-db-query" spellcheck="false" placeholder="SELECT * FROM table LIMIT 50;"></textarea>
-            <textarea id="mate-db-params" class="mate-db-params" spellcheck="false" placeholder='[]'></textarea>
-            <div class="mate-db-actions">
-              <button id="mate-db-query-btn" type="button">Query</button>
-              <button id="mate-db-exec-btn" type="button">Exec</button>
-            </div>
-            <pre id="mate-db-result" class="mate-db-result"></pre>
-          </div>
-        </div>
       </div>
       <div id="mate-sidebar-memory" class="hidden"></div>
       <div id="mate-sidebar-knowledge" class="hidden">
