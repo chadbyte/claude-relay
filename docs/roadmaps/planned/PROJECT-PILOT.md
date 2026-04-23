@@ -163,7 +163,7 @@ The user can be asleep, at lunch, or working on something else. The pilot keeps 
 
 ### Exists Today
 - Yoke model abstraction (`lib/yoke/`)
-- Yoke adapters (claude, gemini, codex)
+- Yoke adapters (claude, codex)
 - Session management (`lib/project-sessions.js`)
 - Sticky notes (`lib/notes.js`)
 - Permission system (`lib/users-permissions.js`)

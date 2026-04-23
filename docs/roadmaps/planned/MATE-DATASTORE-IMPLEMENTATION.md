@@ -58,7 +58,6 @@ Per Mate:
 - `lib/project-user-message.js` or `lib/project-mate-datastore.js` message wiring
 - `lib/yoke/adapters/claude.js`
 - `lib/yoke/adapters/codex.js`
-- `lib/yoke/adapters/gemini.js`
 - `lib/public/modules/app-messages.js`
 - `lib/public/modules/sidebar-mates.js` or a new focused inspector module if needed
 - `lib/ws-schema.js`

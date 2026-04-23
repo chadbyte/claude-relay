@@ -111,7 +111,6 @@ lib/yoke/
   adapters/
     codex.js            - Codex adapter
     claude.js           - Claude adapter (reference implementation)
-    gemini.js           - Gemini adapter
 
 lib/project.js          - Multi-adapter map, defaultVendor, get_vendor_models
 lib/sdk-bridge.js       - Per-session adapter selection via session.vendor
@@ -191,8 +190,5 @@ Investigate if Codex app-server protocol provides streaming deltas (vs CLI batch
 ### 3. Image support
 Map base64 images to temp files for Codex `local_image` support.
 
-### 4. Gemini vendor
-Add auth check and toggle support for Gemini (currently `gemini: false`).
-
-### 5. Vendor-specific mode mapping
+### 4. Vendor-specific mode mapping
 Map Claude's MODE (Plan, Auto-accept) to Codex's approvalPolicy.
