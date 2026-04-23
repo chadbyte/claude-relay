@@ -1855,7 +1855,7 @@
             <div class="mate-intro-step"><span class="mate-intro-step-num">2</span> Have a short interview where your Mate gets to know you</div>
             <div class="mate-intro-step"><span class="mate-intro-step-num">3</span> Start talking</div>
           </div>
-          <p class="mate-intro-privacy">Mates run on Claude Code. No separate API keys or external services needed. Your conversations stay on your Clay server and are never stored elsewhere.</p>
+          <p class="mate-intro-privacy">Mates run on Claude Code or ChatGPT Codex, your choice. No separate API keys or external services needed. Your conversations stay on your Clay server and are never stored elsewhere.</p>
         </div>
       </div>
       <!-- Step 1: Relationship -->
@@ -1996,26 +1996,24 @@
         </div>
       </div>
 
-      <!-- Step 4: Autonomy -->
+      <!-- Step 4: Vendor -->
       <div class="mate-step" data-step="4">
-        <h3>How much should they do on their own?</h3>
-        <p class="mate-hint">This is about how much freedom your mate gets before checking with you.</p>
-        <div class="mate-autonomy-options">
-          <button class="mate-autonomy-btn" data-value="always_ask">
-            <span class="mate-autonomy-title">Ask me everything</span>
-            <span class="mate-autonomy-desc">"Before you do anything, run it by me first."</span>
+        <h3>Which model should power them?</h3>
+        <p class="mate-hint">You can switch this anytime from the mate's settings.</p>
+        <div class="mate-vendor-option-list">
+          <button class="mate-vendor-option-btn active" data-value="claude">
+            <img src="/claude-code-avatar.png" class="mate-vendor-option-icon" alt="Claude Code">
+            <div class="mate-vendor-option-text">
+              <span class="mate-vendor-option-title">Claude Code</span>
+              <span class="mate-vendor-option-desc">Anthropic's Claude. Thoughtful, conversational, strong at nuanced reasoning and long-form writing. A good default for most mates.</span>
+            </div>
           </button>
-          <button class="mate-autonomy-btn active" data-value="minor_stuff_ok">
-            <span class="mate-autonomy-title">Small stuff is fine</span>
-            <span class="mate-autonomy-desc">"Little things, just do it. Anything big, ask me."</span>
-          </button>
-          <button class="mate-autonomy-btn" data-value="mostly_autonomous">
-            <span class="mate-autonomy-title">Mostly free</span>
-            <span class="mate-autonomy-desc">"Do your thing. Only check if it's really important."</span>
-          </button>
-          <button class="mate-autonomy-btn" data-value="fully_autonomous">
-            <span class="mate-autonomy-title">Full freedom</span>
-            <span class="mate-autonomy-desc">"Just get it done and tell me after."</span>
+          <button class="mate-vendor-option-btn" data-value="codex">
+            <img src="/codex-avatar.png" class="mate-vendor-option-icon" alt="ChatGPT Codex">
+            <div class="mate-vendor-option-text">
+              <span class="mate-vendor-option-title">ChatGPT Codex</span>
+              <span class="mate-vendor-option-desc">OpenAI's GPT coding agent. Fast and direct, strong at code generation and tight execution loops. Good for builder-type mates.</span>
+            </div>
           </button>
         </div>
       </div>
