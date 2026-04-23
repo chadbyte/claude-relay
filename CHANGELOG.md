@@ -1,3 +1,10 @@
+# [2.34.0-beta.6](https://github.com/chadbyte/clay/compare/v2.34.0-beta.5...v2.34.0-beta.6) (2026-04-23)
+
+
+### Bug Fixes
+
+* **claude:** sanitize worker ipc payloads ([6867c79](https://github.com/chadbyte/clay/commit/6867c79eb3a94bdf483a5c65fc692c63d0df89f4))
+
 # [2.34.0-beta.5](https://github.com/chadbyte/clay/compare/v2.34.0-beta.4...v2.34.0-beta.5) (2026-04-23)
 
 
