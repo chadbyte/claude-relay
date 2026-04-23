@@ -1,3 +1,17 @@
+# [2.34.0-beta.1](https://github.com/chadbyte/clay/compare/v2.33.1...v2.34.0-beta.1) (2026-04-23)
+
+
+### Bug Fixes
+
+* render codex plans as plan variants ([5e2a4e9](https://github.com/chadbyte/clay/commit/5e2a4e9b2e7c10b830c9d4ad7c3d5aa3424cc485))
+* **security:** harden shell command execution ([a2540c2](https://github.com/chadbyte/clay/commit/a2540c24f0ec634c6eb26ee314478a21fc6a0562)), closes [#334](https://github.com/chadbyte/clay/issues/334)
+* **ui:** restore notification contrast in light mode ([c51f870](https://github.com/chadbyte/clay/commit/c51f87016ad68dab0135a35d371754bdd2c86b72))
+
+
+### Features
+
+* **mates:** add Mate SQLite datastore and inspector ([24bf2f9](https://github.com/chadbyte/clay/commit/24bf2f978f096b497272011b2c53e2e56ba76921))
+
 ## [2.33.1](https://github.com/chadbyte/clay/compare/v2.33.0...v2.33.1) (2026-04-22)
 
 
