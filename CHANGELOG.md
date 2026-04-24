@@ -1,3 +1,11 @@
+## [2.34.1-beta.4](https://github.com/chadbyte/clay/compare/v2.34.1-beta.3...v2.34.1-beta.4) (2026-04-24)
+
+
+### Bug Fixes
+
+* **messages:** stop vendor flapping under high-latency connections ([d15afbe](https://github.com/chadbyte/clay/commit/d15afbea8d37ce51b25b57a54e2459034d9a1c55)), closes [hi#latency](https://github.com/hi/issues/latency)
+* **skills:** make outdated-skill prompt skippable instead of silently ignored ([b612a91](https://github.com/chadbyte/clay/commit/b612a915592f00f356935560e5418d239c45985a))
+
 ## [2.34.1-beta.3](https://github.com/chadbyte/clay/compare/v2.34.1-beta.2...v2.34.1-beta.3) (2026-04-24)
 
 
