@@ -1,3 +1,11 @@
+## [2.34.1-beta.2](https://github.com/chadbyte/clay/compare/v2.34.1-beta.1...v2.34.1-beta.2) (2026-04-24)
+
+
+### Bug Fixes
+
+* **input:** prevent ghost-text suggestion from swallowing pasted content on Enter ([a657a09](https://github.com/chadbyte/clay/commit/a657a091a0d6557f94651e4a0c4e5797a6ac3ce9))
+* **mates:** persist deletedBuiltinKeys in single-user mode ([3986088](https://github.com/chadbyte/clay/commit/3986088f4bf79181095799e39d59253e09726e86))
+
 ## [2.34.1-beta.1](https://github.com/chadbyte/clay/compare/v2.34.0...v2.34.1-beta.1) (2026-04-24)
 
 
