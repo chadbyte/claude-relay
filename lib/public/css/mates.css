@@ -3113,11 +3113,13 @@ body.mate-dm-active .activity-inline:not(.mention-activity-bar):not(.mate-pre-ac
    other users) but greys out and disables the Mates-specific bits. */
 
 /* Always hide pure-Mates UI: rotating switch hint, individual mate
-   avatars in the icon strip, and the home-hub mates strip. These never
-   contain anything but mates, so they collapse in both modes. */
+   avatars in the icon strip, the home-hub mates strip, and the
+   "Ask Mate" button in the chat input. These never contain anything
+   but mates, so they collapse in both modes. */
 body.mates-disabled .icon-strip-mate,
 body.mates-disabled #icon-strip-hint-mate,
-body.mates-disabled #home-hub-mates {
+body.mates-disabled #home-hub-mates,
+body.mates-disabled #ask-mate-btn {
   display: none !important;
 }
 
