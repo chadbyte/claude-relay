@@ -1040,8 +1040,8 @@
 }
 
 .session-favorites-empty {
-  margin: 2px 0 4px;
-  padding: 6px 2px 8px;
+  margin: 2px 0 0;
+  padding: 6px 2px 2px;
   border: none;
   border-radius: 0;
   background: transparent;
