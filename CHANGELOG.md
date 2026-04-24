@@ -1,3 +1,12 @@
+## [2.34.1-beta.1](https://github.com/chadbyte/clay/compare/v2.34.0...v2.34.1-beta.1) (2026-04-24)
+
+
+### Bug Fixes
+
+* normalize model ids across session switching ([dae5344](https://github.com/chadbyte/clay/commit/dae5344ed34fbfbb3d0553a9dfa06f4014006872))
+* preserve session vendor on reconnect ([5b061ae](https://github.com/chadbyte/clay/commit/5b061ae16c6b06fca3db5ecd18c047fd38f508b6))
+* **sidebar:** render worktree icon when set ([43292ab](https://github.com/chadbyte/clay/commit/43292ab6f63598a0c30ce9479ddc798809dd1517))
+
 # [2.34.0](https://github.com/chadbyte/clay/compare/v2.33.1...v2.34.0) (2026-04-24)
 
 
