@@ -1,3 +1,18 @@
+# [2.34.0-beta.10](https://github.com/chadbyte/clay/compare/v2.34.0-beta.9...v2.34.0-beta.10) (2026-04-24)
+
+
+### Bug Fixes
+
+* **codex:** preserve content array when prepending system prompt ([eae322c](https://github.com/chadbyte/clay/commit/eae322c6b3fe145225bf4c7b4a23fcc6ab1fe77f))
+* **sw:** bump cache version to evict stale connection-lost notification ([c91c6ff](https://github.com/chadbyte/clay/commit/c91c6ff60d5cd2dfe107ece213af9ae7e31f96b9))
+
+
+### Features
+
+* refine session favorites sidebar ([3bc6bb8](https://github.com/chadbyte/clay/commit/3bc6bb898d3651524a1fdfcadd2dfe8e1a48fd75))
+* **sidebar:** two-click arm to delete session and polish presence layout ([af66342](https://github.com/chadbyte/clay/commit/af66342fcdbcff3a38fea4419fc5f9ddcc1a5a63))
+* **tools:** render codex patch diffs with filename header and split toggle ([1c6ebe2](https://github.com/chadbyte/clay/commit/1c6ebe2f3240fe3f986562e2a80d3325c0f755bd))
+
 # [2.34.0-beta.9](https://github.com/chadbyte/clay/compare/v2.34.0-beta.8...v2.34.0-beta.9) (2026-04-23)
 
 
