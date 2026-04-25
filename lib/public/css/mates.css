@@ -3140,7 +3140,7 @@ body.mates-disabled:not(.is-multi-user) #icon-strip-mate-section {
    sentence, and a CTA that deep-links into User Settings → Mates. */
 
 .dm-picker-mates-promo {
-  padding: 4px 12px 12px;
+  padding: 0 12px 8px;
 }
 
 .dm-picker-mates-promo .dm-user-picker-section {
@@ -3149,8 +3149,8 @@ body.mates-disabled:not(.is-multi-user) #icon-strip-mate-section {
 
 .dm-picker-mates-marquee {
   position: relative;
-  height: 44px;
-  margin: 8px -12px;
+  height: 28px;
+  margin: 4px -12px;
   overflow: hidden;
   -webkit-mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);
   mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);
@@ -3159,7 +3159,7 @@ body.mates-disabled:not(.is-multi-user) #icon-strip-mate-section {
 .dm-picker-mates-marquee-track {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   width: max-content;
   height: 100%;
   padding: 0 12px;
@@ -3167,8 +3167,8 @@ body.mates-disabled:not(.is-multi-user) #icon-strip-mate-section {
 }
 
 .dm-picker-mates-marquee-avatar {
-  width: 36px;
-  height: 36px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   flex-shrink: 0;
   opacity: 0.85;
@@ -3181,10 +3181,10 @@ body.mates-disabled:not(.is-multi-user) #icon-strip-mate-section {
 }
 
 .dm-picker-mates-promo-text {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-dimmer, #888);
-  line-height: 1.55;
-  margin: 4px 0 12px;
+  line-height: 1.5;
+  margin: 4px 0 8px;
 }
 
 .dm-picker-mates-promo-cta {
@@ -3193,11 +3193,11 @@ body.mates-disabled:not(.is-multi-user) #icon-strip-mate-section {
   justify-content: center;
   gap: 6px;
   width: 100%;
-  padding: 8px 12px;
+  padding: 6px 10px;
   border: 1px solid var(--border, #2a2a2a);
   background: var(--bg-alt, rgba(255, 255, 255, 0.04));
   color: var(--text);
-  font-size: 12px;
+  font-size: 11px;
   cursor: pointer;
   border-radius: 6px;
   transition: background 0.15s, border-color 0.15s;
@@ -3209,7 +3209,7 @@ body.mates-disabled:not(.is-multi-user) #icon-strip-mate-section {
 }
 
 .dm-picker-mates-promo-cta i {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   flex-shrink: 0;
 }
