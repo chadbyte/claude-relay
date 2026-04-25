@@ -1,3 +1,10 @@
+# [2.35.0-beta.2](https://github.com/chadbyte/clay/compare/v2.35.0-beta.1...v2.35.0-beta.2) (2026-04-25)
+
+
+### Bug Fixes
+
+* **settings:** persist single-user preference writes ([7fb2dd5](https://github.com/chadbyte/clay/commit/7fb2dd54d520eb4dcb8bcb7b4d89b2aceeb3e360))
+
 # [2.35.0-beta.1](https://github.com/chadbyte/clay/compare/v2.34.1-beta.4...v2.35.0-beta.1) (2026-04-25)
 
 
