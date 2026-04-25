@@ -598,6 +598,161 @@
   text-align: center;
 }
 
+#sched-create-desc-row.hidden { display: none; }
+
+.sched-create-row-icon-spacer {
+  width: 15px;
+  flex-shrink: 0;
+}
+
+.sched-review-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.sched-review-toggle input[type="checkbox"] {
+  accent-color: var(--accent);
+}
+
+.sched-review-label {
+  flex-shrink: 0;
+}
+
+.sched-review-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.sched-review-count.hidden {
+  display: none;
+}
+
+.sched-create-desc-wrap {
+  margin-top: 10px;
+}
+
+.sched-create-desc-wrap .sched-create-row-textarea {
+  width: 100%;
+}
+
+/* --- Accordion sections --- */
+.sched-accordion-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 14px 0;
+  opacity: 0.5;
+}
+
+.sched-accordion-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 14px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text);
+  transition: background 0.12s;
+  text-align: left;
+}
+
+.sched-accordion-header:hover {
+  background: var(--hover);
+}
+
+.sched-accordion-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sched-accordion-icon {
+  width: 15px;
+  height: 15px;
+  color: var(--text-dimmer);
+  flex-shrink: 0;
+}
+
+.sched-accordion.has-value .sched-accordion-icon {
+  color: var(--accent);
+}
+
+.sched-accordion-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.sched-accordion-title {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.sched-accordion-subtitle {
+  font-size: 11px;
+  color: var(--text-dimmer);
+  line-height: 1.3;
+  margin-top: 1px;
+}
+
+.sched-accordion-header-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sched-accordion-clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  color: var(--text-dimmer);
+  transition: background 0.12s, color 0.12s;
+}
+
+.sched-accordion-clear:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+
+.sched-accordion-clear .lucide {
+  width: 12px;
+  height: 12px;
+}
+
+.sched-accordion-clear.hidden {
+  display: none;
+}
+
+.sched-accordion-chevron {
+  width: 14px;
+  height: 14px;
+  color: var(--text-dimmer);
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.sched-accordion.open .sched-accordion-chevron {
+  transform: rotate(90deg);
+}
+
+.sched-accordion-body {
+  padding: 4px 14px 10px 39px;
+}
+
+.sched-accordion-body.hidden {
+  display: none;
+}
+
 /* --- Bottom bar --- */
 .sched-create-bottom {
   display: flex;
@@ -1061,7 +1216,7 @@
   max-width: 100px;
 }
 
-.sched-custom-repeat-panel .sched-field-select {
+.sched-accordion-body .sched-field-select {
   padding: 5px 26px 5px 8px;
   font-size: 12px;
   border-radius: 6px;

@@ -18,3 +18,50 @@
 }
 
 .tooltip.visible { opacity: 1; }
+
+.tooltip.multi-line {
+  white-space: pre-line;
+  text-align: left;
+  max-width: 320px;
+  line-height: 1.5;
+}
+
+/* Context sources tooltip */
+.ctx-tip-header {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.ctx-tip-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  color: var(--text);
+  font-size: 12px;
+}
+
+.ctx-tip-row .lucide {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: var(--text-secondary);
+}
+
+.ctx-tip-favicon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  border-radius: 2px;
+}
+
+.ctx-tip-row span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 260px;
+}

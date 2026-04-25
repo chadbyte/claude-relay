@@ -836,54 +836,6 @@
   50% { box-shadow: 0 0 0 6px rgba(var(--accent-rgb, 99, 102, 241), 0); }
 }
 
-#sticky-notes-toggle-btn.sn-onboarding-pulse {
-  animation: snOnboardingPulse 2s ease-in-out infinite;
-  color: var(--accent) !important;
-  border-color: var(--accent) !important;
-}
-
-/* Tooltip bubble */
-.sn-onboarding-tooltip {
-  position: fixed;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  background: var(--code-bg);
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 500;
-  white-space: nowrap;
-  box-shadow: 0 4px 16px rgba(var(--shadow-rgb), 0.4);
-  z-index: 1000;
-  pointer-events: none;
-  transform: translateX(-50%);
-  animation: snOnboardingAppear 0.3s ease-out;
-}
-
-.sn-onboarding-tooltip::before {
-  content: "";
-  position: absolute;
-  top: -6px;
-  left: 50%;
-  transform: translateX(-50%);
-  border: 6px solid transparent;
-  border-bottom-color: var(--code-bg);
-  border-top: none;
-}
-
-@keyframes snOnboardingAppear {
-  from { opacity: 0; transform: translateX(-50%) translateY(-4px); }
-  to { opacity: 1; transform: translateX(-50%) translateY(0); }
-}
-
-.sn-onboarding-tooltip.sn-onboarding-fade-out {
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
 /* --- Mobile: hide entirely --- */
 @media (max-width: 768px) {
   #sticky-notes-container,

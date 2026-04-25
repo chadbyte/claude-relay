@@ -2,50 +2,51 @@
    File Browser
    ========================================================================== */
 
-/* --- Session actions --- */
+/* --- Session actions ---
+   Compact icon+caption grid. Tile styles come from .palette-tile in
+   sidebar.css so the same tiles render correctly in both the active
+   grid here and the hidden-grid when edit-mode moves them. */
 #session-actions {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
   padding: 0 8px 4px;
 }
 
-#session-actions button {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  border-radius: 10px;
-  border: none;
-  background: transparent;
-  color: var(--text-muted);
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  margin-bottom: 0;
-  transition: background 0.15s, color 0.15s;
-}
-
-#session-actions button .lucide { width: 16px; height: 16px; flex-shrink: 0; }
-#session-actions button:hover { background: var(--sidebar-hover); color: var(--text-secondary); }
-#session-actions button.active { background: var(--sidebar-hover); color: var(--text); }
-
+/* Badge becomes a small corner indicator in icon-only grid */
 .sidebar-badge {
-  background: var(--accent);
-  color: #fff;
-  font-size: 10px;
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(var(--overlay-rgb), 0.15);
+  color: var(--text-dimmer);
+  font-size: 9px;
   font-weight: 700;
-  min-width: 16px;
-  height: 16px;
-  border-radius: 8px;
+  min-width: 14px;
+  height: 14px;
+  border-radius: 7px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0 4px;
-  margin-left: auto;
+  padding: 0 3px;
   line-height: 1;
+  pointer-events: none;
 }
 .sidebar-badge.hidden { display: none; }
+
+/* Sticky-notes badge stays clickable in the icon grid — it toggles the
+   archive panel. The old inline "Open Archive" expand label doesn't fit
+   a corner dot, so it's gone; the cursor and hover color still signal
+   that the badge itself is interactive. */
+#sticky-notes-sidebar-count {
+  cursor: pointer;
+  pointer-events: auto;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+#sticky-notes-sidebar-count:hover {
+  background: var(--accent);
+  color: #fff;
+}
 
 /* --- Panels --- */
 .sidebar-panel { flex: 1; overflow-y: auto; min-height: 0; }
@@ -60,6 +61,185 @@
 #file-panel-refresh.spinning,
 #file-viewer-refresh.spinning { animation: spin-once 0.5s ease; }
 @keyframes spin-once { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* --- File browser panel background --- */
+#sidebar-panel-files {
+  background: var(--filebrowser-bg);
+  border: 1px solid var(--filebrowser-border);
+  border-radius: 8px;
+  margin: 6px 6px 12px;
+  display: flex;
+  flex-direction: column;
+  /* Own the scroll: inner file-tree scrolls, titlebar/search/hint stay
+     anchored. Without this the whole panel (inherited overflow-y:auto
+     from .sidebar-panel) scrolled past the search bar. */
+  overflow: hidden;
+}
+#sidebar-panel-files.hidden { display: none; }
+#sidebar-panel-files #file-tree {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* Keyboard hint footer — pinned below the tree, always visible. */
+.fb-kb-hint {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-top: 1px solid var(--border-subtle);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-dimmer);
+}
+.fb-kb-hint kbd {
+  display: inline-block;
+  padding: 1px 5px;
+  margin: 0 1px;
+  background: var(--bg-alt);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  font-size: 10px;
+  font-family: inherit;
+  color: var(--text-muted);
+}
+.fb-kb-hint span {
+  opacity: 0.9;
+}
+
+/* --- File browser titlebar --- */
+.fb-titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 6px;
+  border-bottom: 1px solid var(--filebrowser-border);
+  flex-shrink: 0;
+  user-select: none;
+}
+.fb-titlebar-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  flex: 1;
+  text-align: center;
+  pointer-events: none;
+}
+.fb-titlebar button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--text-dimmer);
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s, background 0.15s;
+}
+.fb-titlebar button .lucide { width: 13px; height: 13px; }
+.fb-titlebar button:hover { color: var(--text); background: var(--sidebar-hover); }
+
+/* --- File search bar (always visible) --- */
+.fb-search-bar {
+  display: flex;
+  align-items: center;
+  padding: 4px 6px 6px;
+  position: relative;
+  flex-shrink: 0;
+}
+.fb-search-icon {
+  position: absolute;
+  left: 14px;
+  width: 13px;
+  height: 13px;
+  color: var(--text-dimmer);
+  pointer-events: none;
+}
+#fb-search-input {
+  width: 100%;
+  height: 28px;
+  padding: 0 8px 0 28px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 12px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+#fb-search-input:focus { border-color: var(--accent); }
+#fb-search-input::placeholder { color: var(--text-dimmer); }
+
+/* Search match highlight */
+.file-tree-name mark {
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+.fb-search-empty {
+  padding: 16px 12px;
+  font-size: 12px;
+  color: var(--text-dimmer);
+  text-align: center;
+}
+
+#file-tree {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+#sidebar-panel-files.fb-enter { animation: fb-in 0.2s ease-out both; }
+#sidebar-panel-files.fb-exit  { animation: fb-out 0.15s ease-in both; }
+
+@keyframes fb-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fb-out {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(6px); }
+}
+
+/* --- Drag-and-drop file path into input --- */
+.file-tree-item[draggable="true"] { cursor: grab; }
+.file-tree-item[draggable="true"]:active { cursor: grabbing; }
+
+#input.drop-target {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  background: var(--accent-8);
+}
+
+.fb-drop-hint {
+  position: absolute;
+  top: -32px;
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background: var(--accent);
+  color: var(--bg);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  box-shadow: 0 2px 8px rgba(var(--shadow-rgb), 0.25);
+  transition: opacity 0.15s, transform 0.15s;
+}
+.fb-drop-hint.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
 
 /* --- File tree --- */
 #file-tree { padding: 4px 8px; }
@@ -79,6 +259,18 @@
 
 .file-tree-item:hover { background: var(--sidebar-hover); color: var(--text); }
 .file-tree-item.active { background: var(--sidebar-active); color: var(--text); }
+/* Keyboard focus ring (arrow-key navigation) — separate from .active
+   so the currently-opened file stays visually marked even while the
+   user is exploring elsewhere with the arrows. */
+.file-tree-item.fb-kb-focus {
+  background: var(--sidebar-hover);
+  color: var(--text);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+#file-tree:focus { outline: none; }
+#file-tree:focus .file-tree-item.fb-kb-focus {
+  background: var(--sidebar-active);
+}
 .file-tree-item .lucide { width: 14px; height: 14px; flex-shrink: 0; }
 
 .file-tree-name {
@@ -227,6 +419,210 @@
   margin: -8px 0 20px;
 }
 
+/* MCP Servers Modal */
+#mcp-modal { position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; }
+#mcp-modal.hidden { display: none; }
+.mcp-dialog {
+  width: 480px;
+  max-width: 94vw;
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
+.mcp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.mcp-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+.mcp-title .lucide { width: 18px; height: 18px; }
+.mcp-content {
+  padding: 16px 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+.mcp-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0 0 16px;
+  line-height: 1.5;
+}
+.mcp-empty {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--text-muted);
+}
+.mcp-empty .lucide { width: 32px; height: 32px; margin-bottom: 12px; opacity: 0.4; }
+.mcp-empty-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin: 0 0 6px;
+}
+.mcp-empty-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.5;
+}
+.mcp-ext-setup-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  margin-top: 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  background: var(--bg-hover, rgba(255,255,255,0.06));
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.mcp-ext-setup-btn:hover {
+  background: var(--bg-active, rgba(255,255,255,0.1));
+}
+.mcp-ext-setup-btn .lucide {
+  width: 14px;
+  height: 14px;
+}
+.mcp-install-cmd-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  max-width: 100%;
+}
+.mcp-install-cmd {
+  flex: 1;
+  padding: 8px 10px;
+  background: var(--bg-deep, rgba(0,0,0,0.25));
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: "SF Mono", Monaco, "Cascadia Code", monospace;
+  font-size: 12px;
+  color: var(--text);
+  overflow-x: auto;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+.mcp-install-copy-btn {
+  flex-shrink: 0;
+  padding: 6px 8px;
+  background: var(--bg-hover, rgba(255,255,255,0.06));
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.mcp-install-copy-btn:hover {
+  background: var(--bg-active, rgba(255,255,255,0.1));
+}
+.mcp-install-copy-btn .lucide {
+  width: 14px;
+  height: 14px;
+}
+.mcp-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.mcp-step {
+  display: flex;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  transition: opacity 0.15s;
+}
+.mcp-step.disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+.mcp-step-icon {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  margin-top: 1px;
+  color: var(--text-muted);
+}
+.mcp-step-icon.done {
+  color: var(--green, #2ecc71);
+}
+.mcp-step-icon .lucide {
+  width: 20px;
+  height: 20px;
+}
+.mcp-step-body {
+  flex: 1;
+  min-width: 0;
+}
+.mcp-step-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+.mcp-step-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+.mcp-step.done .mcp-step-desc {
+  color: var(--green, #2ecc71);
+}
+.mcp-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 12px 0;
+}
+.mcp-server-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.mcp-server-row:last-child { border-bottom: none; }
+.mcp-server-row:hover { background: var(--bg-dim); margin: 0 -20px; padding: 10px 20px; }
+.mcp-server-row input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.mcp-server-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+.mcp-server-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+}
+.mcp-server-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
 /* Beta toggle row inside settings card */
 .ps-beta-toggle-row,
 .ss-beta-toggle-row {
@@ -274,7 +670,14 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
 }
+.ps-owner-locked-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  width: 100%;
+}
+.ps-owner-locked-hint.hidden { display: none; }
 
 .ps-transfer-form {
   margin-top: 8px;
@@ -873,7 +1276,8 @@
 .terminal-tab.active { color: var(--text); border-color: var(--accent); }
 .terminal-tab.exited { opacity: 0.5; }
 
-.terminal-tab-close {
+
+.terminal-tab-more {
   display: none;
   align-items: center;
   justify-content: center;
@@ -888,9 +1292,44 @@
   line-height: 1;
 }
 
-.terminal-tab:hover .terminal-tab-close,
-.terminal-tab.active .terminal-tab-close { display: flex; }
-.terminal-tab-close:hover { background: rgba(var(--overlay-rgb),0.1); color: var(--text); }
+.terminal-tab:hover .terminal-tab-more,
+.terminal-tab.active .terminal-tab-more { display: flex; }
+.terminal-tab-more:hover { background: rgba(var(--overlay-rgb),0.1); color: var(--text); }
+
+.terminal-tab-ctx {
+  position: fixed;
+  z-index: 9999;
+  min-width: 120px;
+  background: var(--bg-elevated, var(--bg));
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.terminal-tab-ctx-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.terminal-tab-ctx-item:hover {
+  background: rgba(var(--overlay-rgb),0.08);
+  color: var(--text);
+}
+
+.terminal-tab-ctx-danger:hover {
+  color: #e74c3c;
+}
 
 .terminal-tab-label { cursor: default; }
 
@@ -971,6 +1410,7 @@
 
 .terminal-tab-body .xterm {
   height: 100%;
+  overflow: hidden;
 }
 
 /* --- Terminal key toolbar (mobile) --- */

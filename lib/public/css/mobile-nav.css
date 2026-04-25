@@ -342,7 +342,6 @@
     margin-bottom: 4px;
     background: none;
     border: none;
-    border-bottom: 1px solid var(--border-subtle);
     color: var(--accent);
     font-family: "Pretendard", system-ui, sans-serif;
     font-size: 15px;
@@ -350,6 +349,9 @@
     cursor: pointer;
     text-align: left;
     -webkit-tap-highlight-color: transparent;
+  }
+  .mobile-session-new:last-of-type {
+    border-bottom: 1px solid var(--border-subtle);
   }
 
   .mobile-session-new:active {
@@ -516,6 +518,9 @@
 
   .mobile-session-title {
     flex: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -1000,5 +1005,48 @@
     border-radius: 6px;
     flex-shrink: 0;
     margin-left: auto;
+  }
+
+  /* ---- Mobile mate DM: force bubble layout for user messages ---- */
+  body.mate-dm-active .msg-user {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-end !important;
+    gap: initial !important;
+    max-width: 100% !important;
+    padding: 0 20px !important;
+    margin: 0 0 8px !important;
+    border-radius: initial !important;
+    justify-content: initial !important;
+  }
+  body.mate-dm-active .msg-user .dm-bubble-avatar-me {
+    display: none !important;
+  }
+  body.mate-dm-active .msg-user .dm-bubble-content {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-end !important;
+    flex: initial !important;
+    width: 100% !important;
+  }
+  body.mate-dm-active .msg-user .dm-bubble-header {
+    display: none !important;
+  }
+  body.mate-dm-active .msg-user .bubble {
+    background: var(--user-bubble) !important;
+    border-radius: 20px 20px 4px 20px !important;
+    padding: 12px 18px !important;
+    max-width: 85% !important;
+    width: fit-content !important;
+    font-size: 15px !important;
+    line-height: 1.55 !important;
+    white-space: pre-wrap !important;
+    word-wrap: break-word !important;
+  }
+  body.mate-dm-active .msg-user .msg-actions {
+    display: flex !important;
+  }
+  body.mate-dm-active .msg-user:hover {
+    background: initial !important;
   }
 }

@@ -18,6 +18,21 @@
   overflow: hidden;
 }
 
+/* Sidebar items aren't meant to be text-selected — the sidebar is for
+   navigation and drag-reorder. Disabling selection avoids accidental
+   highlights during clicks and drags. Inputs and contenteditables
+   inside the sidebar re-enable selection so users can still edit. */
+#sidebar-column {
+  -webkit-user-select: none;
+  user-select: none;
+}
+#sidebar-column input,
+#sidebar-column textarea,
+#sidebar-column [contenteditable="true"] {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
 #layout.sidebar-collapsed #sidebar-column {
   width: 0 !important;
   min-width: 0 !important;
@@ -257,91 +272,426 @@
   letter-spacing: 0.5px;
 }
 
-/* --- Tools section --- */
-#sidebar-tools {
-  flex-shrink: 0;
-  border-bottom: 1px solid var(--border-subtle);
-  padding-top: 8px;
-  padding-bottom: 4px;
-}
-
-/* --- Sessions header (pinned above scroll) --- */
-#sidebar-sessions-header {
-  flex-shrink: 0;
-}
-
-.session-list-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 8px 4px 12px;
+/* --- Section labels --- */
+.sidebar-section-label {
   font-size: 11px;
   font-weight: 600;
   color: var(--text-dimmer);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  padding: 4px 12px 2px;
 }
 
-.session-list-header-actions {
+/* --- Tools section --- */
+#sidebar-tools {
+  flex-shrink: 0;
+  padding-bottom: 6px;
+}
+
+/* Section header: "Tools" label on the left, a dim keyboard-hint next
+   to it explaining the Cmd+O shortcut, and a small pencil icon edit
+   button right-aligned. Three elements but each does just one thing,
+   so nothing reads as pushy. */
+.sidebar-tools-header {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 8px;
+  padding: 4px 8px 2px 12px;
+}
+.sidebar-tools-header .sidebar-section-label {
+  padding: 0;
 }
 
-.session-list-header-actions button:not(.new-ralph-pill) {
-  display: flex;
+/* Small shortcut-pill for the Cmd/Ctrl+O hotkey overlay. Mirrors the
+   icon-strip hotkey hints so keyboard shortcuts look the same across
+   the sidebar surface. */
+.sidebar-tools-hint {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  padding: 2px 4px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-alt);
+  color: var(--text-dimmer);
+  font-size: 10px;
+  font-weight: 600;
+  font-family: inherit;
+  border-radius: 6px;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.15s, color 0.15s, background 0.15s;
+}
+.sidebar-tools-hint:hover {
+  opacity: 1;
+  color: var(--text-muted);
+  background: var(--bg);
+}
+
+/* Pencil-icon edit button, far-right of the header. Dim by default so
+   it doesn't pull attention; on hover it brightens to signal that
+   it's a real affordance. */
+.tool-palette-edit-btn {
+  margin-left: auto;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 22px;
   height: 22px;
-  border-radius: 6px;
+  background: none;
   border: none;
+  cursor: pointer;
+  color: var(--text-dimmer);
+  opacity: 0.45;
+  border-radius: 6px;
+  transition: background 0.15s, color 0.15s, opacity 0.15s;
+}
+.tool-palette-edit-btn .lucide,
+.tool-palette-edit-btn svg {
+  width: 13px;
+  height: 13px;
+}
+.tool-palette-edit-btn:hover {
+  background: var(--sidebar-hover);
+  color: var(--text-muted);
+  opacity: 1;
+}
+.tool-palette-edit-btn.active {
+  background: var(--accent);
+  color: #fff;
+  opacity: 1;
+}
+.tool-palette-edit-btn.active:hover {
+  background: var(--accent);
+  color: #fff;
+  opacity: 1;
+  filter: brightness(1.1);
+}
+
+/* Hidden-tools section appears only in edit mode when items are hidden. */
+.tool-palette-hidden-section {
+  padding: 4px 8px 8px;
+  border-top: 1px dashed var(--border-subtle);
+  margin-top: 4px;
+}
+.tool-palette-hidden-section.hidden {
+  display: none;
+}
+.tool-palette-hidden-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-dimmer);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 4px 6px;
+}
+.tool-palette-hidden-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+}
+
+/* --- Shared tile style (applies in both active and hidden grids) --- */
+.palette-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 58px;
+  padding: 6px 2px;
+  border-radius: 10px;
+  border: none;
+  background: rgba(var(--overlay-rgb), 0.025);
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+}
+.palette-tile .lucide { width: 16px; height: 16px; flex-shrink: 0; }
+.palette-tile:hover {
+  background: rgba(var(--overlay-rgb), 0.08);
+  color: var(--text-secondary);
+  box-shadow: 0 2px 10px rgba(var(--shadow-rgb), 0.08);
+}
+.palette-tile.active {
+  background: rgba(var(--overlay-rgb), 0.08);
+  color: var(--text);
+}
+.palette-tile .tool-btn-label {
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.15;
+  text-align: center;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  word-break: break-word;
+}
+
+/* --- Edit mode affordances (shared across session + mate palettes) --- */
+
+/* × remove badge on each tile. Hidden in normal mode; shown in edit. */
+.tool-palette-remove {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transform: scale(0.6);
+  pointer-events: none;
+  transition: opacity 0.15s, transform 0.15s;
+  z-index: 2;
+  user-select: none;
+}
+.edit-mode .tool-palette-remove {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+}
+.edit-mode .tool-palette-remove:hover {
+  filter: brightness(1.15);
+}
+
+/* Drag-reorder feedback. Tiles are draggable at all times (macOS dock
+   pattern) so users can rearrange without entering a separate mode.
+   -webkit-user-drag is explicit for Safari, which otherwise sometimes
+   ignores draggable when user-select is none on an ancestor. Edit mode
+   adds the outline so the tiles read as mutable during an edit. */
+#session-actions [data-tool-id],
+#mate-sidebar-tools [data-tool-id] {
+  -webkit-user-drag: element;
+}
+.edit-mode [data-tool-id] {
+  box-shadow: inset 0 0 0 1px var(--border-subtle);
+  animation: tile-wiggle 0.22s ease-in-out infinite;
+  transform-origin: 50% 50%;
+}
+/* Desync the wiggle across tiles so they don't swing in lockstep. */
+.edit-mode [data-tool-id]:nth-child(2n) {
+  animation-delay: -0.11s;
+}
+.edit-mode [data-tool-id]:nth-child(3n) {
+  animation-duration: 0.26s;
+}
+@keyframes tile-wiggle {
+  0%   { transform: rotate(-1.2deg); }
+  50%  { transform: rotate(1.2deg);  }
+  100% { transform: rotate(-1.2deg); }
+}
+/* The dragged tile shouldn't wiggle while under the cursor. */
+[data-tool-id].dragging {
+  opacity: 0.4;
+  cursor: grabbing;
+  animation: none;
+}
+/* Children shouldn't swallow drag events — the browser starts drag on
+   the element under the pointer, and we want that to always be the
+   draggable button, not the inner icon/label/badge. The × affordance
+   stays interactive (it needs clicks in edit mode). */
+[data-tool-id] > i,
+[data-tool-id] > svg,
+[data-tool-id] > .tool-btn-label,
+[data-tool-id] > .sidebar-badge {
+  pointer-events: none;
+}
+
+/* Hidden-section tiles are dimmed to signal "not active" and get a small
+   + glyph on hover to suggest they can be restored. */
+.tool-palette-hidden-grid [data-tool-id] {
+  opacity: 0.55;
+  cursor: pointer;
+  transition: opacity 0.15s, background 0.15s, color 0.15s;
+}
+.tool-palette-hidden-grid [data-tool-id]:hover {
+  opacity: 1;
+}
+.tool-palette-hidden-grid .tool-palette-remove {
+  display: none;
+}
+.tool-palette-hidden-grid .sidebar-badge {
+  display: none;
+}
+
+/* Hotkey badge shown on each active palette tile while Cmd/Ctrl+O pick
+   mode is active. Top-left so it doesn't collide with the × (top-right)
+   or count badges. High-contrast accent so the keystroke is obvious. */
+.tool-palette-hotkey-badge {
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 4px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+  pointer-events: none;
+  z-index: 3;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  animation: tool-palette-hotkey-in 0.12s ease-out;
+}
+@keyframes tool-palette-hotkey-in {
+  from { opacity: 0; transform: scale(0.7); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Right-click context menu on palette tiles. Mirrors .session-ctx-menu. */
+.tool-palette-ctx-menu {
+  position: fixed;
+  background: var(--sidebar-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 4px 0;
+  min-width: 180px;
+  box-shadow: 0 4px 16px rgba(var(--shadow-rgb), 0.4);
+  z-index: 9999;
+  font-family: inherit;
+}
+.tool-palette-ctx-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+}
+.tool-palette-ctx-item:hover {
+  background: rgba(var(--overlay-rgb), 0.05);
+}
+/* --- Sessions header (pinned above scroll) --- */
+#sidebar-sessions-header {
+  flex-shrink: 0;
+}
+
+.sidebar-sessions-header-row {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px 2px 12px;
+  gap: 8px;
+}
+
+/* --- Session search --- */
+.sidebar-sessions-search-inline {
+  position: relative;
+  margin-left: auto;
+  width: 150px;
+}
+
+.sidebar-sessions-search-inline.hidden {
+  display: none;
+}
+
+.sidebar-sessions-header-row .sidebar-section-label {
+  padding: 0;
+}
+
+.session-filter-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: rgba(var(--overlay-rgb), 0.08);
+  color: var(--text-dimmer);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.session-filter-count.hidden {
+  display: none;
+}
+
+.sidebar-sessions-header-row > #session-header-search-btn {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 6px;
   background: transparent;
   color: var(--text-dimmer);
   cursor: pointer;
   padding: 0;
-  transition: color 0.15s, background 0.15s;
+  opacity: 0.45;
+  transition: color 0.15s, background 0.15s, opacity 0.15s;
 }
 
-.session-list-header-actions button:not(.new-ralph-pill) .lucide { width: 14px; height: 14px; }
-.session-list-header-actions button:not(.new-ralph-pill):hover { color: var(--text); background: var(--sidebar-hover); }
-
-/* --- Session search --- */
-#session-search {
-  padding: 0 12px 8px;
-  position: relative;
+.sidebar-sessions-header-row > #session-header-search-btn.active,
+.sidebar-sessions-header-row > #session-header-search-btn:hover {
+  color: var(--text);
+  background: var(--sidebar-hover);
+  opacity: 1;
 }
 
-#session-search.hidden {
-  display: none;
+.sidebar-sessions-header-row > #session-header-search-btn .lucide,
+.sidebar-sessions-header-row > #session-header-search-btn svg {
+  width: 14px;
+  height: 14px;
 }
 
-#session-search-input {
+.sidebar-sessions-search-inline:not(.hidden) + #session-header-search-btn {
+  margin-left: 0;
+}
+
+.sidebar-sessions-search-inline input {
   width: 100%;
-  padding: 7px 28px 7px 10px;
+  padding: 6px 28px 6px 10px;
   border-radius: 8px;
   border: 1px solid var(--border);
   background: var(--input-bg);
   color: var(--text);
-  font-size: 13px;
+  font-size: 12px;
   font-family: inherit;
   outline: none;
   transition: border-color 0.15s;
   box-sizing: border-box;
 }
 
-#session-search-input:focus {
+.sidebar-sessions-search-inline input:focus {
   border-color: var(--accent);
 }
 
-#session-search-input::placeholder {
+.sidebar-sessions-search-inline input::placeholder {
   color: var(--text-dimmer);
 }
 
-#session-search-clear {
+.sidebar-sessions-search-inline button {
   position: absolute;
-  right: 16px;
-  top: calc(50% - 4px);
+  right: 6px;
+  top: 50%;
   transform: translateY(-50%);
   display: flex;
   align-items: center;
@@ -357,12 +707,12 @@
   transition: color 0.15s, background 0.15s;
 }
 
-#session-search-clear .lucide { width: 14px; height: 14px; }
-#session-search-clear:hover { color: var(--text); background: var(--sidebar-hover); }
-
-#search-session-btn.active {
-  color: var(--accent);
+.sidebar-sessions-search-inline button.hidden {
+  display: none;
 }
+
+.sidebar-sessions-search-inline button .lucide { width: 14px; height: 14px; }
+.sidebar-sessions-search-inline button:hover { color: var(--text); background: var(--sidebar-hover); }
 
 .session-item.search-match {
   background: var(--accent-12);
@@ -373,10 +723,6 @@
   color: var(--accent);
 }
 
-.session-item.search-dimmed {
-  opacity: 0.35;
-}
-
 .session-highlight {
   background: var(--accent-30);
   color: var(--text);
@@ -385,15 +731,46 @@
 }
 
 #session-list {
-  padding: 2px 8px;
+  padding: 0 8px 2px;
 }
 
 .session-group-header {
-  padding: 10px 12px 4px;
-  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 12px 8px 4px;
+  padding: 0;
+  min-height: 22px;
+  font-size: 10px;
   font-weight: 600;
   color: var(--text-dimmer);
-  letter-spacing: 0.3px;
+  letter-spacing: 0.2px;
+}
+
+.session-group-header-label {
+  min-width: 0;
+  color: var(--text-dimmer);
+}
+
+.session-group-clear-btn {
+  border: none;
+  background: rgba(var(--overlay-rgb), 0.04);
+  color: var(--text-dimmer);
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0 8px;
+  height: 20px;
+  border-radius: 999px;
+  letter-spacing: 0.2px;
+  opacity: 0.82;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.session-group-clear-btn:hover {
+  color: var(--text);
+  background: rgba(var(--overlay-rgb), 0.08);
 }
 
 /* --- Schedule countdown items --- */
@@ -477,6 +854,26 @@
   font-weight: 600;
 }
 
+.session-item.drag-over-above::before,
+.session-item.drag-over-below::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--accent);
+  pointer-events: none;
+}
+
+.session-item.drag-over-above::before {
+  top: -1px;
+}
+
+.session-item.drag-over-below::after {
+  bottom: -1px;
+}
+
 .session-item .session-processing,
 .mate-session-item .session-processing {
   display: inline-block;
@@ -498,7 +895,7 @@
 /* Session unread badge */
 .session-unread-badge {
   position: absolute;
-  right: 32px;
+  right: 8px;
   top: 50%;
   transform: translateY(-50%);
   min-width: 18px;
@@ -517,8 +914,204 @@
   z-index: 2;
 }
 
+.session-item .session-item-text {
+  padding-right: 28px;
+}
+
+.session-item:has(.session-presence) .session-item-text {
+  padding-right: 54px;
+}
+
+.session-close-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-dimmer);
+  cursor: pointer;
+  padding: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.session-close-btn .lucide,
+.session-close-btn svg {
+  width: 12px;
+  height: 12px;
+  display: block;
+}
+
+.session-item:hover .session-close-btn,
+.session-loop-child:hover .session-close-btn,
+.session-item:focus-within .session-close-btn,
+.session-loop-child:focus-within .session-close-btn {
+  opacity: 0.82;
+  pointer-events: auto;
+}
+
+.session-close-btn:hover {
+  opacity: 1;
+  color: var(--text);
+  background: rgba(var(--overlay-rgb), 0.08);
+}
+
+.session-close-btn.armed {
+  opacity: 1;
+  pointer-events: auto;
+  width: 20px;
+  height: 20px;
+  color: #fff;
+  background: rgba(220, 38, 38, 0.92);
+  box-shadow: 0 2px 8px rgba(var(--shadow-rgb), 0.18);
+}
+
+.session-close-btn.armed:hover {
+  color: #fff;
+  background: rgba(220, 38, 38, 1);
+}
+
+.session-close-btn.armed .lucide,
+.session-close-btn.armed svg {
+  width: 13px;
+  height: 13px;
+}
+
+.session-item:hover .session-unread-badge,
+.session-item:focus-within .session-unread-badge {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.session-top-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2px;
+  padding: 0 0 2px;
+}
+
+.session-top-action {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 34px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  min-width: 0;
+  opacity: 0.62;
+  transition: background 0.15s, color 0.15s, opacity 0.15s;
+}
+
+.session-top-action .lucide,
+.session-top-action svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.session-top-action:hover {
+  background: var(--sidebar-hover);
+  color: var(--text);
+  opacity: 1;
+}
+
+.session-favorites-section {
+  min-height: 6px;
+  margin: 0 8px;
+  border-radius: 12px;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.session-favorites-empty {
+  margin: 2px 0 0;
+  padding: 6px 2px 2px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  font-size: 11px;
+  line-height: 1.4;
+  color: color-mix(in srgb, var(--text-dimmer) 88%, transparent);
+  text-align: center;
+  text-shadow: 0 0 10px rgba(var(--shadow-rgb), 0.08);
+}
+
+.session-list-sticky-top {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: var(--sidebar-bg);
+}
+
+.session-favorites-divider {
+  position: relative;
+  margin: 0 12px 2px;
+  height: 18px;
+  border-radius: 999px;
+}
+
+.session-favorites-divider::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: var(--border-subtle, var(--border));
+  transform: translateY(-50%);
+}
+
+.session-favorites-section.drag-hover,
+.session-regular-drop.drag-hover {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.session-favorites-section.drag-hover {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.session-favorites-section.drag-hover .session-favorites-empty {
+  background: transparent;
+  color: var(--text);
+}
+
+.session-favorites-divider.drag-hover::before {
+  background: var(--accent);
+  height: 2px;
+}
+
+.session-regular-drop {
+  min-height: 12px;
+  border-radius: 12px;
+}
+
+.session-item[draggable="true"] {
+  -webkit-user-drag: element;
+}
+
+.session-item.dragging {
+  opacity: 0.45;
+}
+
 .session-unread-badge.has-unread {
   display: flex;
+  transition: opacity 0.15s ease;
 }
 
 .session-more-btn {
@@ -553,6 +1146,14 @@
   align-items: center;
   flex-shrink: 0;
   margin-right: 2px;
+}
+
+.session-item .session-presence {
+  position: absolute;
+  right: 30px;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-right: 0;
 }
 
 .session-presence-avatar {
@@ -778,6 +1379,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
+  padding-right: 22px;
 }
 
 .session-loop-child .session-processing {
@@ -899,41 +1501,6 @@
 
 .session-loop-run-wrapper .session-loop-children {
   margin-left: 12px;
-}
-
-/* --- New Ralph Loop pill button --- */
-.new-ralph-pill {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  height: 22px;
-  padding: 0 8px;
-  border: 1px solid var(--accent);
-  border-radius: 6px;
-  background: var(--accent-12, rgba(108, 92, 231, 0.12));
-  color: var(--accent);
-  font-size: 10px;
-  font-weight: 700;
-  font-family: inherit;
-  letter-spacing: 0.2px;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.15s, color 0.15s;
-}
-
-.new-ralph-pill .lucide {
-  width: 10px;
-  height: 10px;
-}
-
-.new-ralph-pill + button {
-  margin-left: 4px;
-}
-
-.new-ralph-pill:hover {
-  background: var(--accent);
-  color: #fff;
 }
 
 @media (hover: none) {
@@ -1074,6 +1641,30 @@
   align-items: center;
   justify-content: center;
   transition: background 0.15s, color 0.15s;
+}
+
+.user-island-actions button#user-theme-toggle-btn {
+  color: var(--text-secondary);
+}
+
+.user-island-actions button#user-theme-toggle-btn:hover {
+  color: var(--text);
+}
+
+.user-island-actions button#user-theme-toggle-btn.theme-toggle-light {
+  color: #7b8cff;
+}
+
+.user-island-actions button#user-theme-toggle-btn.theme-toggle-light:hover {
+  color: #98a4ff;
+}
+
+.user-island-actions button#user-theme-toggle-btn.theme-toggle-dark {
+  color: #f2b84d;
+}
+
+.user-island-actions button#user-theme-toggle-btn.theme-toggle-dark:hover {
+  color: #ffca6b;
 }
 
 .user-island-actions button .lucide {
@@ -1322,8 +1913,39 @@
   display: none;
 }
 
+/* Mate sidebar resize handle (same style) */
+#mate-sidebar-resize-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+  margin-left: -4px;
+  cursor: col-resize;
+  z-index: 10;
+}
+#mate-sidebar-resize-handle::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+#mate-sidebar-resize-handle:hover::before,
+#mate-sidebar-resize-handle.dragging::before {
+  opacity: 1;
+}
+#mate-sidebar-resize-handle.hidden {
+  display: none;
+}
+
 @media (max-width: 768px) {
-  #sidebar-resize-handle {
+  #sidebar-resize-handle,
+  #mate-sidebar-resize-handle {
     display: none;
   }
 
@@ -1373,4 +1995,3 @@
   50% { opacity: 0.18; }
   100% { opacity: 0.1; }
 }
-

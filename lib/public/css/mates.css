@@ -410,18 +410,18 @@
   line-height: 1.4;
 }
 
-/* Step 4: Autonomy options */
-.mate-autonomy-options {
+/* Step 4: Vendor options */
+.mate-vendor-option-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
-.mate-autonomy-btn {
+.mate-vendor-option-btn {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: flex-start;
-  gap: 2px;
-  padding: 12px 16px;
+  gap: 14px;
+  padding: 14px 16px;
   background: var(--input-bg, #1a1a2e);
   border: 2px solid var(--border, #333);
   border-radius: 10px;
@@ -430,21 +430,36 @@
   text-align: left;
   color: var(--text, #fff);
   font-family: inherit;
+  width: 100%;
 }
-.mate-autonomy-btn:hover {
+.mate-vendor-option-btn:hover {
   border-color: var(--text-dimmer, #6272a4);
 }
-.mate-autonomy-btn.active {
+.mate-vendor-option-btn.active {
   border-color: var(--accent, #6c5ce7);
   background: var(--accent-bg, rgba(108,92,231,0.12));
 }
-.mate-autonomy-title {
+.mate-vendor-option-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  object-fit: cover;
+}
+.mate-vendor-option-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.mate-vendor-option-title {
   font-weight: 600;
   font-size: 14px;
 }
-.mate-autonomy-desc {
+.mate-vendor-option-desc {
   font-size: 12px;
   color: var(--text-muted, #9ea8c7);
+  line-height: 1.4;
 }
 
 /* Footer */
@@ -487,24 +502,24 @@
   background: var(--border, #333);
 }
 
-/* === Mate badge in user strip === */
-.icon-strip-user-mate-badge {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 14px;
-  height: 14px;
-  background: var(--accent, #6c5ce7);
-  border-radius: 50%;
-  border: 2px solid var(--bg, #282a36);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* === Mate avatar in user strip: squircle + desaturate === */
+.icon-strip-mate .icon-strip-user-avatar {
+  border-radius: 8px;
+  filter: saturate(0.65);
 }
-.icon-strip-user-mate-badge svg {
-  width: 8px;
-  height: 8px;
-  color: #fff;
+.icon-strip-mate:hover .icon-strip-user-avatar,
+.icon-strip-mate.mention-active .icon-strip-user-avatar {
+  filter: saturate(1);
+}
+.icon-strip-mate.active .icon-strip-user-avatar {
+  filter: saturate(1);
+  box-shadow: 0 0 0 2px var(--accent);
+  border-radius: 8px;
+}
+
+/* Hide legacy bot badge (replaced by squircle shape) */
+.icon-strip-user-mate-badge {
+  display: none;
 }
 
 /* Mate item in DM picker */
@@ -588,6 +603,15 @@
   border-right: none;
   overflow: hidden;
   flex-shrink: 0;
+  -webkit-user-select: none;
+  user-select: none;
+}
+/* Inputs inside the mate sidebar remain selectable. */
+#mate-sidebar-column input,
+#mate-sidebar-column textarea,
+#mate-sidebar-column [contenteditable="true"] {
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 #mate-sidebar-column.hidden {
@@ -614,6 +638,49 @@
   flex: 1;
   font-size: 15px;
   font-weight: 600;
+}
+
+/* Vendor toggle in mate header (split pill) */
+.mate-vendor-toggle {
+  display: flex;
+  align-items: center;
+  border: 1px solid rgba(255,255,255,0.4);
+  border-radius: 6px;
+  overflow: hidden;
+  height: 24px;
+}
+.mate-vendor-btn {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0 6px;
+  height: 100%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 11px;
+  color: rgba(255,255,255,0.5);
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.mate-vendor-btn:first-child { border-right: 1px solid rgba(255,255,255,0.4); }
+.mate-vendor-btn.active {
+  background: rgba(255,255,255,0.25);
+  color: #fff;
+  font-weight: 600;
+}
+.mate-vendor-btn.disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+.mate-vendor-icon {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  background: #fff;
+}
+.mate-vendor-label {
+  pointer-events: none;
 }
 
 /* Collapse button inside mate header: white to match header style */
@@ -732,7 +799,7 @@ body.mate-dm-active #layout.sidebar-collapsed .mate-collapsed-info {
   right: 12px;
   margin-top: 4px;
   padding: 10px 14px;
-  background: var(--bg-primary, #fff);
+  background: var(--bg);
   border: 1px solid var(--border-subtle);
   border-radius: 8px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.15);
@@ -823,7 +890,7 @@ body.mate-dm-active #layout.sidebar-collapsed .mate-collapsed-info {
   justify-content: center;
 }
 .mate-confirm-box {
-  background: var(--bg-primary, #fff);
+  background: var(--bg);
   border: 1px solid var(--border-subtle);
   border-radius: 12px;
   padding: 20px 24px;
@@ -846,7 +913,7 @@ body.mate-dm-active #layout.sidebar-collapsed .mate-collapsed-info {
   border: 1px solid var(--border-subtle);
   font-size: 13px;
   cursor: pointer;
-  background: var(--bg-primary);
+  background: var(--bg);
   color: var(--text);
 }
 .mate-confirm-delete {
@@ -873,7 +940,7 @@ body.mate-dm-active #layout.sidebar-collapsed .mate-collapsed-info {
   background: rgba(0,0,0,0.45);
 }
 .mate-onboarding-card {
-  background: var(--bg-primary, #fff);
+  background: var(--bg);
   border: 1px solid var(--border-subtle);
   border-radius: 16px;
   padding: 32px 36px;
@@ -972,38 +1039,18 @@ body.mate-dm-active #layout.sidebar-collapsed .mate-collapsed-info {
   text-overflow: ellipsis;
 }
 
-#mate-sidebar-tools {
-  display: flex;
-  flex-direction: column;
-  padding: 8px 8px 4px;
+/* Mate sidebar tools: icon+caption grid, matches #session-actions.
+   Tile styling comes from .palette-tile in sidebar.css. */
+#mate-sidebar-tools-wrap {
   flex-shrink: 0;
   border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 4px;
 }
-
-#mate-sidebar-tools button {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 10px;
-  border: none;
-  background: none;
-  color: var(--text-muted);
-  font-size: 13px;
-  font-weight: 600;
-  font-family: inherit;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-}
-
-#mate-sidebar-tools button:hover {
-  background: var(--sidebar-hover);
-  color: var(--text-secondary);
-}
-
-#mate-sidebar-tools button svg {
-  width: 16px;
-  height: 16px;
+#mate-sidebar-tools {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  padding: 0 8px 4px;
 }
 
 /* Knowledge editor panel (overlays main content) */
@@ -1852,6 +1899,11 @@ body.mate-dm-active #layout.sidebar-collapsed .mate-collapsed-info {
   height: 16px;
 }
 
+.mate-sidebar-actions button.active {
+  background: var(--bg-hover, rgba(255,255,255,0.1));
+  color: var(--text-primary, #fff);
+}
+
 .mate-session-list {
   flex: 1;
   overflow-y: auto;
@@ -1958,6 +2010,203 @@ body.mate-dm-active #layout.sidebar-collapsed .mate-collapsed-info {
 #mate-search-session-btn.active {
   color: var(--accent);
 }
+
+/* Mate datastore inspector */
+#mate-datastore-panel {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#mate-datastore-panel.hidden {
+  display: none !important;
+}
+
+#main-column.mate-datastore-open > .title-bar-content,
+#main-column.mate-datastore-open > .dm-header-bar,
+#main-column.mate-datastore-open > #main-panels {
+  display: none !important;
+}
+
+.mate-datastore-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 48px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+
+.mate-datastore-top-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text);
+}
+
+.mate-datastore-top-title .lucide {
+  width: 14px;
+  height: 14px;
+  color: var(--accent);
+  opacity: 0.85;
+}
+
+.mate-datastore-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mate-db-status {
+  padding: 10px 14px 0;
+  font-size: 12px;
+  color: var(--text-secondary, #8e8e8e);
+}
+
+.mate-db-status[data-kind="error"] {
+  color: var(--error, #ff6b6b);
+}
+
+.mate-db-status[data-kind="warn"] {
+  color: var(--warning, #f5a524);
+}
+
+.mate-db-status[data-kind="ok"] {
+  color: var(--success, #36b37e);
+}
+
+.mate-db-layout {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 10px;
+  padding: 12px 10px 10px;
+  min-height: 0;
+  flex: 1;
+}
+
+.mate-db-table-column,
+.mate-db-detail {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.mate-db-table-list {
+  overflow-y: auto;
+  border: 1px solid var(--border-subtle, rgba(255,255,255,0.06));
+  border-radius: 12px;
+  background: var(--sidebar-bg, rgba(255,255,255,0.03));
+  padding: 6px;
+  flex: 1;
+}
+
+.mate-db-table-item {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 8px 10px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary, #aaa);
+  border-radius: 8px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.mate-db-table-item:hover,
+.mate-db-table-item.active {
+  background: var(--sidebar-active, rgba(255,255,255,0.08));
+  color: var(--text, #fff);
+}
+
+.mate-db-table-item-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.mate-db-table-item-type {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+.mate-db-empty {
+  padding: 16px 10px;
+  color: var(--text-secondary, #8e8e8e);
+  font-size: 12px;
+}
+
+.mate-db-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted, #9aa0a6);
+  margin: 0 0 6px;
+}
+
+.mate-db-detail {
+  gap: 8px;
+  min-width: 0;
+}
+
+.mate-db-table-schema,
+.mate-db-result {
+  margin: 0;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle, rgba(255,255,255,0.08));
+  background: var(--bg-alt, rgba(255,255,255,0.03));
+  color: var(--text-secondary, #b8b8b8);
+  font-size: 11px;
+  line-height: 1.5;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  min-height: 0;
+}
+
+.mate-db-table-schema {
+  max-height: 180px;
+}
+
+@media (max-width: 900px) {
+  .mate-db-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+body.mate-dm-active .mate-datastore-top-bar {
+  background: var(--mate-color);
+  color: #fff;
+}
+
+body.mate-dm-active .mate-datastore-top-title,
+body.mate-dm-active .mate-datastore-top-title .lucide {
+  color: #fff;
+}
+
+body.mate-dm-active .mate-datastore-top-bar .scheduler-close-btn {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+body.mate-dm-active .mate-datastore-top-bar .scheduler-close-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.15);
+}
+
 .mate-session-item.search-match {
   background: var(--accent-12, rgba(108, 92, 231, 0.12));
 }
@@ -2342,7 +2591,9 @@ body.mate-dm-active .turn-meta {
    ========================================================================== */
 
 /* --- Mate Thinking: flex layout matching msg-assistant --- */
-body.mate-dm-active .mate-thinking {
+/* Applies in both Mate DM and channel project chat */
+body.mate-dm-active .mate-thinking,
+body.wide-view .mate-thinking {
   display: flex;
   flex-direction: row;
   align-items: flex-start;
@@ -2351,10 +2602,12 @@ body.mate-dm-active .mate-thinking {
   margin: 0;
   max-width: 100%;
 }
-body.mate-dm-active .mate-thinking:hover {
+body.mate-dm-active .mate-thinking:hover,
+body.wide-view .mate-thinking:hover {
   background: var(--bg-alt);
 }
-body.mate-dm-active .mate-thinking > .dm-bubble-avatar {
+body.mate-dm-active .mate-thinking > .dm-bubble-avatar,
+body.wide-view .mate-thinking > .dm-bubble-avatar {
   display: block;
   width: 36px;
   height: 36px;
@@ -2362,7 +2615,8 @@ body.mate-dm-active .mate-thinking > .dm-bubble-avatar {
   flex-shrink: 0;
   margin-top: 2px;
 }
-body.mate-dm-active .mate-thinking > .dm-bubble-content {
+body.mate-dm-active .mate-thinking > .dm-bubble-content,
+body.wide-view .mate-thinking > .dm-bubble-content {
   flex: 1;
   min-width: 0;
 }
@@ -2373,7 +2627,8 @@ body.mate-dm-active .mate-thinking > .dm-bubble-content {
   gap: 4px;
   padding: 4px 0;
 }
-body.mate-dm-active .mate-thinking:not(.done) .mate-thinking-row {
+body.mate-dm-active .mate-thinking:not(.done) .mate-thinking-row,
+body.wide-view .mate-thinking:not(.done) .mate-thinking-row {
   display: flex;
 }
 .mate-thinking-dots {
@@ -2400,10 +2655,16 @@ body.mate-dm-active .mate-thinking:not(.done) .mate-thinking-row {
 }
 
 /* When done, hide mate row (JS does this too), show compact expandable header */
-body.mate-dm-active .mate-thinking.done .mate-thinking-row {
+body.mate-dm-active .mate-thinking.done .mate-thinking-row,
+body.wide-view .mate-thinking.done .mate-thinking-row {
   display: none;
 }
-body.mate-dm-active .mate-thinking.done .thinking-header {
+body.mate-dm-active .mate-thinking.done .mate-thinking-activity,
+body.wide-view .mate-thinking.done .mate-thinking-activity {
+  display: none;
+}
+body.mate-dm-active .mate-thinking.done .thinking-header,
+body.wide-view .mate-thinking.done .thinking-header {
   display: inline-flex !important;
   font-size: 12px;
   padding: 4px 10px;
@@ -2412,16 +2673,19 @@ body.mate-dm-active .mate-thinking.done .thinking-header {
   opacity: 0.7;
   transition: opacity 0.15s;
 }
-body.mate-dm-active .mate-thinking.done .thinking-header:hover {
+body.mate-dm-active .mate-thinking.done .thinking-header:hover,
+body.wide-view .mate-thinking.done .thinking-header:hover {
   opacity: 1;
   background: rgba(var(--overlay-rgb), 0.08);
 }
-body.mate-dm-active .mate-thinking .thinking-content {
+body.mate-dm-active .mate-thinking .thinking-content,
+body.wide-view .mate-thinking .thinking-content {
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.25s ease;
 }
-body.mate-dm-active .mate-thinking.expanded .thinking-content {
+body.mate-dm-active .mate-thinking.expanded .thinking-content,
+body.wide-view .mate-thinking.expanded .thinking-content {
   max-height: 2000px;
 }
 
@@ -2476,8 +2740,10 @@ body.mate-dm-active .mate-tool-group .tool-name {
   color: var(--text-muted);
 }
 
-/* --- Mate Permission: flex layout matching msg-assistant --- */
-body.mate-dm-active .mate-permission {
+/* --- Conversational Permission: flex layout matching msg-assistant --- */
+/* Applies in both Mate DM and channel project chat */
+body.mate-dm-active .mate-permission,
+body.wide-view .mate-permission {
   display: flex;
   flex-direction: row;
   align-items: flex-start;
@@ -2490,10 +2756,12 @@ body.mate-dm-active .mate-permission {
   margin: 0;
   max-width: 100%;
 }
-body.mate-dm-active .mate-permission:hover {
+body.mate-dm-active .mate-permission:hover,
+body.wide-view .mate-permission:hover {
   background: var(--bg-alt);
 }
-body.mate-dm-active .mate-permission > .dm-bubble-avatar {
+body.mate-dm-active .mate-permission > .dm-bubble-avatar,
+body.wide-view .mate-permission > .dm-bubble-avatar {
   display: block;
   width: 36px;
   height: 36px;
@@ -2501,7 +2769,8 @@ body.mate-dm-active .mate-permission > .dm-bubble-avatar {
   flex-shrink: 0;
   margin-top: 2px;
 }
-body.mate-dm-active .mate-permission > .dm-bubble-content {
+body.mate-dm-active .mate-permission > .dm-bubble-content,
+body.wide-view .mate-permission > .dm-bubble-content {
   flex: 1;
   min-width: 0;
 }
@@ -2569,14 +2838,14 @@ body.mate-dm-active .mate-permission > .dm-bubble-content {
 .mate-permission-deny {
   color: var(--text-muted);
 }
-/* Resolved state */
-body.mate-dm-active .mate-permission.resolved .mate-permission-actions {
+/* Resolved state (works in both Mate DM and channel project chat) */
+.mate-permission.resolved .mate-permission-actions {
   pointer-events: none;
 }
-body.mate-dm-active .mate-permission.resolved .mate-permission-reply {
+.mate-permission.resolved .mate-permission-reply {
   display: none;
 }
-body.mate-dm-active .mate-permission.resolved .permission-decision-label {
+.mate-permission.resolved .permission-decision-label {
   font-size: 12px;
   color: var(--text-dimmer);
 }
@@ -2648,6 +2917,63 @@ body.mate-dm-active .activity-inline:not(.mention-activity-bar):not(.mate-pre-ac
 }
 
 @media (max-width: 768px) {
+  /* Mobile mate DM: revert user messages to default bubble layout */
+  body.mate-dm-active .msg-user,
+  body.mate-dm-active .msg-assistant {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: initial !important;
+    gap: initial !important;
+    max-width: var(--content-width) !important;
+    padding: 0 20px !important;
+    margin: 0 auto 8px !important;
+    border-radius: initial !important;
+  }
+  body.mate-dm-active .msg-user {
+    align-items: flex-end !important;
+  }
+  body.mate-dm-active .msg-assistant {
+    margin-bottom: 12px !important;
+    padding: 4px 20px !important;
+  }
+  body.mate-dm-active .msg-user:hover {
+    background: initial !important;
+  }
+  body.mate-dm-active .msg-user .dm-bubble-avatar-me {
+    display: none !important;
+  }
+  body.mate-dm-active .msg-user .dm-bubble-content {
+    align-items: flex-end !important;
+    flex: initial !important;
+    width: 100% !important;
+  }
+  body.mate-dm-active .msg-user .dm-bubble-header {
+    display: none !important;
+  }
+  body.mate-dm-active .msg-user .bubble {
+    background: var(--user-bubble) !important;
+    border-radius: 20px 20px 4px 20px !important;
+    padding: 12px 18px !important;
+    max-width: 85% !important;
+    width: fit-content !important;
+    font-size: 15px !important;
+    line-height: 1.55 !important;
+    white-space: pre-wrap !important;
+    word-wrap: break-word !important;
+  }
+  body.mate-dm-active .msg-user .msg-actions {
+    display: flex !important;
+  }
+  body.mate-dm-active .msg-assistant .dm-bubble-content {
+    flex: initial !important;
+    width: 100% !important;
+  }
+  body.mate-dm-active .msg-assistant .md-content {
+    background: initial !important;
+    border-radius: initial !important;
+    padding: initial !important;
+  }
+
   .mate-mobile-title:not(.hidden) {
     display: flex !important;
   }
@@ -2673,27 +2999,6 @@ body.mate-dm-active .activity-inline:not(.mention-activity-bar):not(.mate-pre-ac
     min-width: 0;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-  }
-
-  .mate-mobile-back {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    flex-shrink: 0;
-    background: none;
-    border: none;
-    color: #fff;
-    cursor: pointer;
-    padding: 0;
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  .mate-mobile-back svg {
-    width: 22px;
-    height: 22px;
   }
 
   .mate-mobile-avatar {
@@ -2798,4 +3103,107 @@ body.mate-dm-active .activity-inline:not(.mention-activity-bar):not(.mate-pre-ac
     display: flex !important;
     flex: 1;
   }
+}
+
+/* === Mates UI gate === */
+/* body.mates-disabled is set when the user flips the Mates toggle off in
+   User Settings → Mates. body.is-multi-user is set when the deploy hosts
+   more than one user. Single-user collapses the whole Mates surface;
+   multi-user keeps Mates-adjacent containers visible (they still host
+   other users) but greys out and disables the Mates-specific bits. */
+
+/* Always hide pure-Mates UI: rotating switch hint, individual mate
+   avatars in the icon strip, the home-hub mates strip, and the
+   "Ask Mate" button in the chat input. These never contain anything
+   but mates, so they collapse in both modes. */
+body.mates-disabled .icon-strip-mate,
+body.mates-disabled #icon-strip-hint-mate,
+body.mates-disabled #home-hub-mates,
+body.mates-disabled #ask-mate-btn {
+  display: none !important;
+}
+
+/* Single-user only: collapse the whole icon-strip mate wrapper since it
+   shares space with the user-strip but has no other users to display in
+   single-user mode. The DM picker stays visible in both modes so the
+   user always has a way to discover the toggle (single-user can't reach
+   the picker today since the + button lives inside the wrapper, but if
+   that ever changes the same disabled UX applies). */
+body.mates-disabled:not(.is-multi-user) #icon-strip-mate-section {
+  display: none !important;
+}
+
+/* === Mates discovery promo (DM picker, disabled state) === */
+/* Shown in both modes when Mates is off. Replaces the old "greyed mate
+   list with trash icons" pattern with a softer invitation: section
+   label, an animated avatar marquee that loops left, a value-prop
+   sentence, and a CTA that deep-links into User Settings → Mates. */
+
+.dm-picker-mates-promo {
+  padding: 0 12px 8px;
+}
+
+.dm-picker-mates-promo .dm-user-picker-section {
+  margin-top: 0;
+}
+
+.dm-picker-mates-marquee {
+  position: relative;
+  height: 28px;
+  margin: 4px -12px;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);
+  mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);
+}
+
+.dm-picker-mates-marquee-track {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: max-content;
+  height: 100%;
+  padding: 0 12px;
+  animation: dm-picker-mates-marquee-flow 22s linear infinite;
+}
+
+.dm-picker-mates-marquee-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  opacity: 0.85;
+  background: var(--bg-alt, rgba(255, 255, 255, 0.04));
+}
+
+@keyframes dm-picker-mates-marquee-flow {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.dm-picker-mates-promo-text {
+  font-size: 11px;
+  color: var(--text-dimmer, #888);
+  line-height: 1.5;
+  margin: 4px 0 8px;
+}
+
+.dm-picker-mates-promo-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--border, #2a2a2a);
+  background: var(--bg-alt, rgba(255, 255, 255, 0.04));
+  color: var(--text);
+  font-size: 11px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.dm-picker-mates-promo-cta:hover {
+  background: var(--bg-hover, rgba(255, 255, 255, 0.08));
+  border-color: var(--accent, #6366f1);
 }

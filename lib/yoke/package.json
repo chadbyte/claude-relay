@@ -1,0 +1,7 @@
+{
+  "name": "yoke",
+  "version": "0.1.0",
+  "description": "YOKE - Yoke Overrides Known Engines. Vendor-independent harness abstraction for Clay.",
+  "main": "index.js",
+  "license": "MIT"
+}

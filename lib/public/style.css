@@ -4,7 +4,7 @@
 @import url("css/sidebar.css");
 @import url("css/overlays.css");
 @import url("css/menus.css");
-@import url("css/messages.css");
+@import url("css/messages.css?v=20260407");
 @import url("css/rewind.css");
 @import url("css/input.css");
 @import url("css/filebrowser.css");
@@ -13,7 +13,7 @@
 @import url("css/server-settings.css");
 @import url("css/sticky-notes.css");
 @import url("css/skills.css");
-@import url("css/mobile-nav.css");
+@import url("css/mobile-nav.css?v=20260407");
 @import url("css/loop.css");
 @import url("css/scheduler.css");
 @import url("css/scheduler-modal.css");
@@ -25,7 +25,8 @@
 @import url("css/admin.css");
 @import url("css/session-search.css");
 @import url("css/tooltip.css");
-@import url("css/mates.css");
+@import url("css/mates.css?v=20260407");
 @import url("css/command-palette.css");
 @import url("css/mention.css");
 @import url("css/debate.css");
+@import url("css/notifications-center.css");

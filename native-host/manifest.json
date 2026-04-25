@@ -1,0 +1,7 @@
+{
+  "name": "com.clay.mcp_bridge",
+  "description": "Clay MCP Bridge - Manages local MCP server processes",
+  "path": "__INSTALL_PATH__/clay-mcp-host.js",
+  "type": "stdio",
+  "allowed_origins": ["chrome-extension://__EXTENSION_ID__/"]
+}

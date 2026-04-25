@@ -150,6 +150,21 @@
   text-align: start;
 }
 
+/* Other user's message: left-aligned with flipped bubble */
+.msg-user-other {
+  align-items: flex-start;
+}
+.msg-user-other .bubble {
+  background: var(--bg-elevated, var(--bg-hover));
+  border-radius: 20px 20px 20px 4px;
+}
+.msg-user-other .dm-bubble-avatar-other {
+  display: block;
+}
+.msg-user-other .dm-bubble-header {
+  display: flex;
+}
+
 /* --- User message action bar --- */
 .msg-actions {
   display: flex;
@@ -1218,6 +1233,29 @@ pre.mermaid-error {
 .plan-card-body strong { font-weight: 600; }
 .plan-card-body blockquote { border-left: 3px solid var(--border); padding-left: 12px; color: var(--text-muted); margin: 8px 0; }
 
+.todo-widget.todo-widget-plan .todo-header {
+  background: linear-gradient(180deg, rgba(var(--overlay-rgb), 0.04), rgba(var(--overlay-rgb), 0.015));
+}
+
+.todo-widget.todo-widget-plan .todo-header-icon,
+.todo-widget.todo-widget-plan .todo-header-title {
+  color: var(--accent);
+}
+
+.todo-widget.todo-widget-plan .todo-header-count {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.todo-widget.todo-widget-plan .todo-item.pending .todo-item-icon {
+  opacity: 0.75;
+}
+
+.todo-widget.todo-widget-plan .todo-item.in-progress .todo-item-text {
+  color: var(--text);
+  font-weight: 500;
+}
+
 /* --- Plan permission (ExitPlanMode) --- */
 .plan-permission-header {
   background: var(--success-8) !important;
@@ -1488,69 +1526,6 @@ pre.mermaid-error {
 .context-overflow-btn:hover { background: var(--accent-hover); }
 
 /* ==========================================================================
-   Auth Required Message
-   ========================================================================== */
-
-.auth-required-msg {
-  max-width: 420px;
-  margin: 12px auto;
-  padding: 14px 18px;
-  background: color-mix(in srgb, var(--warning) 8%, var(--bg));
-  border: 1px solid color-mix(in srgb, var(--warning) 30%, transparent);
-  border-radius: 12px;
-  font-size: 13px;
-}
-
-.auth-required-header {
-  font-weight: 600;
-  color: var(--warning);
-  margin-bottom: 4px;
-}
-
-.auth-required-hint {
-  color: var(--text-muted);
-  font-size: 12px;
-  line-height: 1.5;
-  margin-bottom: 4px;
-}
-
-.auth-required-guide {
-  color: var(--text-muted);
-  font-size: 11px;
-  line-height: 1.4;
-  margin-bottom: 8px;
-  opacity: 0.8;
-}
-
-.auth-required-cmd {
-  display: block;
-  padding: 8px 12px;
-  margin-bottom: 12px;
-  background: var(--input-bg);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  font-family: var(--font-mono);
-  font-size: 13px;
-  color: var(--text);
-  user-select: all;
-}
-
-.auth-required-btn {
-  padding: 8px 20px;
-  border: none;
-  border-radius: 8px;
-  background: var(--accent);
-  color: #fff;
-  font-size: 13px;
-  font-weight: 500;
-  font-family: inherit;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.auth-required-btn:hover { background: var(--accent-hover); }
-
-/* ==========================================================================
    Rate Limit Message
    ========================================================================== */
 
@@ -1673,6 +1648,7 @@ pre.mermaid-error {
 /* DM mode: hide project-specific UI elements */
 #main-column.dm-mode .msg-group,
 #main-column.dm-mode #suggestion-chips,
+#main-column.dm-mode #ghost-suggestion,
 #main-column.dm-mode .tool-group {
   display: none;
 }
@@ -1681,6 +1657,7 @@ pre.mermaid-error {
 #main-column.dm-mode #stt-btn,
 #main-column.dm-mode #config-chip-wrap,
 #main-column.dm-mode #context-mini,
+#main-column.dm-mode #context-sources-btn-wrap,
 #main-column.dm-mode #slash-menu {
   display: none !important;
 }
@@ -1783,6 +1760,23 @@ body.wide-view .msg-assistant:hover {
   background: var(--bg-alt);
 }
 
+/* Grouped messages: same sender within same minute, hide avatar + header */
+body.wide-view .msg-user.grouped > .dm-bubble-avatar,
+body.wide-view .msg-assistant.grouped > .dm-bubble-avatar,
+body.mate-dm-active .msg-assistant.grouped > .dm-bubble-avatar {
+  visibility: hidden;
+}
+body.wide-view .msg-user.grouped .dm-bubble-header,
+body.wide-view .msg-assistant.grouped .dm-bubble-header,
+body.mate-dm-active .msg-assistant.grouped .dm-bubble-header {
+  display: none;
+}
+body.wide-view .msg-user.grouped,
+body.wide-view .msg-assistant.grouped,
+body.mate-dm-active .msg-assistant.grouped {
+  padding-top: 1px;
+}
+
 body.wide-view .msg-user {
   justify-content: flex-start;
 }
@@ -1823,43 +1817,52 @@ body.wide-view .turn-meta {
   max-width: 100%;
 }
 
-/* Mobile: force bubble layout regardless of user setting */
+/* Mobile: force bubble layout regardless of user setting (except mate mode) */
 @media (max-width: 768px) {
-  body.wide-view { --content-width: var(--content-width, 720px); }
-  body.wide-view .msg-user,
-  body.wide-view .msg-assistant {
-    display: revert;
-    flex-direction: revert;
-    align-items: revert;
-    gap: revert;
-    max-width: revert;
-    padding: revert;
-    margin: revert;
-    border-radius: revert;
+  body.wide-view:not(.mate-dm-active) { --content-width: 720px; }
+  body.wide-view:not(.mate-dm-active) .msg-user {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: initial;
+    max-width: var(--content-width);
+    padding: 0 20px;
+    margin: 0 auto 8px;
+    border-radius: initial;
+    justify-content: initial;
   }
-  body.wide-view .msg-user:hover,
-  body.wide-view .msg-assistant:hover { background: revert; }
-  body.wide-view .msg-user { justify-content: revert; }
-  body.wide-view .msg-user .dm-bubble-avatar-me { order: revert; }
-  body.wide-view .msg-user .bubble {
-    background: revert;
-    border-radius: revert;
-    padding: revert;
-    max-width: revert;
-    font-size: revert;
-    line-height: revert;
-    white-space: revert;
-    word-wrap: revert;
+  body.wide-view:not(.mate-dm-active) .msg-assistant {
+    display: block;
+    flex-direction: initial;
+    align-items: initial;
+    gap: initial;
+    max-width: var(--content-width);
+    padding: 4px 20px;
+    margin: 0 auto 12px;
+    border-radius: 12px;
   }
-  body.wide-view .msg-user .msg-actions { align-self: revert; margin-left: revert; padding-top: revert; }
-  body.wide-view .msg-user .msg-actions .msg-action-time { display: revert; }
-  body.wide-view .msg-assistant .md-content {
-    background: revert;
-    border-radius: revert;
-    padding: revert;
+  body.wide-view:not(.mate-dm-active) .msg-user:hover { background: initial; }
+  body.wide-view:not(.mate-dm-active) .msg-assistant:hover { background: rgba(var(--overlay-rgb), 0.02); }
+  body.wide-view:not(.mate-dm-active) .msg-user .dm-bubble-avatar-me { order: initial; }
+  body.wide-view:not(.mate-dm-active) .msg-user .bubble {
+    background: var(--user-bubble);
+    border-radius: 20px 20px 4px 20px;
+    padding: 12px 18px;
+    max-width: 85%;
+    font-size: 15px;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    word-wrap: break-word;
   }
-  body.wide-view .thinking-item,
-  body.wide-view .tool-item,
-  body.wide-view .tool-group { max-width: revert; }
-  body.wide-view .turn-meta { max-width: revert; }
+  body.wide-view:not(.mate-dm-active) .msg-user .msg-actions { align-self: initial; margin-left: initial; padding-top: initial; }
+  body.wide-view:not(.mate-dm-active) .msg-user .msg-actions .msg-action-time { display: initial; }
+  body.wide-view:not(.mate-dm-active) .msg-assistant .md-content {
+    background: initial;
+    border-radius: initial;
+    padding: initial;
+  }
+  body.wide-view:not(.mate-dm-active) .thinking-item,
+  body.wide-view:not(.mate-dm-active) .tool-item,
+  body.wide-view:not(.mate-dm-active) .tool-group { max-width: var(--content-width); }
+  body.wide-view:not(.mate-dm-active) .turn-meta { max-width: var(--content-width); }
 }

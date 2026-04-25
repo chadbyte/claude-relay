@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <script>
 (function(){
   var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
-  if(!isIOS){var l=document.createElement("link");l.rel="manifest";l.href="manifest.json";document.head.appendChild(l)}
+  if(!isIOS){var l=document.createElement("link");l.rel="manifest";l.href="/manifest.json";document.head.appendChild(l)}
 })();
 </script>
 <meta name="theme-color" content="#282a36">
@@ -23,7 +23,24 @@
 (function(){try{var k="clay-theme-vars",v=localStorage.getItem(k),r=document.documentElement;if(v){var o=JSON.parse(v),p;for(p in o)r.style.setProperty(p,o[p]);var vt=localStorage.getItem(k.replace("-vars","-variant"));if(vt==="light"){r.classList.add("light-theme");r.classList.remove("dark-theme")}else{r.classList.add("dark-theme");r.classList.remove("light-theme")}var m=document.querySelector('meta[name="theme-color"]');if(m&&o["--bg"])m.setAttribute("content",o["--bg"])}else{var sl=window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches;if(sl){r.classList.add("light-theme");r.classList.remove("dark-theme")}}}catch(e){}})();
 </script>
 <script>if(window.navigator.standalone||window.matchMedia("(display-mode:standalone)").matches){document.documentElement.classList.add("pwa-standalone")}</script>
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=20260407">
+<style>
+@media(max-width:768px){
+  /* User messages: vertical stack, avatar on top, right-aligned */
+  body.wide-view:not(.mate-dm-active) .msg-user{flex-direction:column!important;align-items:flex-end!important;gap:4px!important;max-width:100%!important;padding:0 16px!important;margin:0 0 8px!important;justify-content:initial!important}
+  body.wide-view:not(.mate-dm-active) .msg-user .dm-bubble-avatar-me{order:-1!important}
+  body.wide-view:not(.mate-dm-active) .msg-user .dm-bubble-content{display:flex!important;flex-direction:column!important;align-items:flex-end!important;width:100%!important;flex:initial!important}
+  body.wide-view:not(.mate-dm-active) .msg-user .bubble{background:var(--user-bubble)!important;border-radius:20px 20px 4px 20px!important;padding:12px 18px!important;max-width:85%!important;width:fit-content!important;font-size:15px!important;line-height:1.55!important;white-space:pre-wrap!important;word-wrap:break-word!important}
+  body.wide-view:not(.mate-dm-active) .msg-user:hover{background:initial!important}
+  /* Assistant messages: row (avatar left), keep channel style */
+  body.wide-view:not(.mate-dm-active) .msg-assistant{max-width:100%!important;padding:4px 16px!important;margin:0 0 12px!important}
+  body.wide-view:not(.mate-dm-active) .msg-assistant .md-content{background:initial!important;border-radius:initial!important;padding:initial!important}
+  body.wide-view:not(.mate-dm-active) .thinking-item,
+  body.wide-view:not(.mate-dm-active) .tool-item,
+  body.wide-view:not(.mate-dm-active) .tool-group{max-width:100%!important}
+  body.wide-view:not(.mate-dm-active) .turn-meta{max-width:100%!important}
+}
+</style>
 </head>
 <body>
 <div id="layout">
@@ -31,7 +48,28 @@
   <div id="top-bar">
     <div class="top-bar-left-pills">
       <button id="pwa-install-pill" class="top-bar-install-btn hidden" title="Open as app"><i data-lucide="download"></i> Open as app</button>
-      <button id="share-pill" class="top-bar-share-btn" title="Share"><i data-lucide="qr-code"></i> Share</button>
+      <div id="ext-pill-wrap" class="ext-pill-wrap">
+        <button id="ext-pill" class="top-bar-ext-btn" title="Chrome Extension"><i data-lucide="puzzle"></i> Extension</button>
+        <div id="ext-popover" class="ext-popover">
+          <div class="ext-popover-header">
+            <div class="ext-popover-title">Clay for Chrome <span class="ext-experimental">Experimental</span></div>
+            <div class="ext-popover-sub">v0.1.0 &middot; <a href="https://github.com/chadbyte/clay-chrome" target="_blank" rel="noopener">GitHub</a></div>
+          </div>
+          <div class="ext-popover-connected hidden" id="ext-connected-banner"><i data-lucide="check-circle"></i> Extension connected</div>
+          <div class="ext-popover-desc" id="ext-popover-desc">Connect your browser to Clay. Gives Claude visibility into open tabs, console, network, DOM, and screenshots.</div>
+          <button class="ext-popover-download" id="ext-download-btn"><i data-lucide="download"></i> Download Extension (.zip)</button>
+          <div class="ext-popover-status hidden" id="ext-download-status"></div>
+          <div class="ext-popover-divider" id="ext-popover-divider"></div>
+          <div class="ext-popover-guide-title" id="ext-popover-guide-title">Installation</div>
+          <div class="ext-popover-steps">
+            <div class="ext-popover-step"><span class="ext-snum">1</span> Download above, then unzip to a permanent folder.</div>
+            <div class="ext-popover-step"><span class="ext-snum">2</span> Open <code id="ext-copy-url" class="ext-popover-code" title="Click to copy">chrome://extensions</code></div>
+            <div class="ext-popover-step"><span class="ext-snum">3</span> Enable <strong>Developer mode</strong> (top-right toggle).</div>
+            <div class="ext-popover-step"><span class="ext-snum">4</span> <strong>Load unpacked</strong> > select the unzipped folder.</div>
+            <div class="ext-popover-step"><span class="ext-snum">5</span> Refresh this page. Done!</div>
+          </div>
+        </div>
+      </div>
       <div id="update-pill-wrap" class="top-bar-update hidden">
         <button id="update-pill" class="top-bar-update-btn"><i data-lucide="arrow-up-circle"></i> <span id="update-version"></span> is available. Update now</button>
       <div id="update-popover" class="top-bar-popover">
@@ -45,6 +83,8 @@
       <!-- Pill badges -->
       <div id="skip-perms-pill" class="top-bar-pill pill-error hidden"><i data-lucide="shield-off"></i> <span>Skip perms</span></div>
       <div id="client-count" class="top-bar-pill pill-accent hidden"><i data-lucide="users"></i> <span id="client-count-text"></span></div>
+      <button id="share-pill" title="Share"><i data-lucide="share-2"></i></button>
+      <button id="notif-center-btn" title="Notifications"><i data-lucide="bell"></i><span id="notif-center-badge" class="notif-badge hidden">0</span></button>
       <button id="server-settings-btn" title="Server settings"><i data-lucide="settings"></i></button>
     </div>
   </div>
@@ -59,15 +99,15 @@
       <img class="icon-strip-logo" src="icon-banded-76.png" width="38" height="38" alt="Clay">
     </div>
     <div class="icon-strip-separator"></div>
+    <button type="button" class="icon-strip-hint" id="icon-strip-hint-project" data-switcher-mode="project" aria-label="Switch project"></button>
     <div class="icon-strip-projects" id="icon-strip-projects">
       <div class="skeleton-icon-strip-item"></div>
       <div class="skeleton-icon-strip-item"></div>
     </div>
     <button class="icon-strip-add" id="icon-strip-add" title="Add project"><i data-lucide="plus"></i></button>
-    <div class="icon-strip-users" id="icon-strip-users">
-      <div class="skeleton-icon-strip-user"></div>
-      <div class="skeleton-icon-strip-user"></div>
-      <div class="skeleton-icon-strip-user"></div>
+    <div class="icon-strip-mate-section" id="icon-strip-mate-section">
+      <button type="button" class="icon-strip-hint hidden" id="icon-strip-hint-mate" data-switcher-mode="mate" aria-label="Switch mate"></button>
+      <div class="icon-strip-users hidden" id="icon-strip-users"></div>
     </div>
     <div class="icon-strip-me" id="icon-strip-me"></div>
   </div>
@@ -147,39 +187,27 @@
       </div>
       <div id="sidebar">
         <div id="sidebar-tools">
-          <div id="session-actions">
-            <button id="file-browser-btn"><i data-lucide="folder-tree"></i> <span>File browser</span></button>
-            <button id="terminal-sidebar-btn"><i data-lucide="square-terminal"></i> <span>Terminal</span><span id="terminal-sidebar-count" class="sidebar-badge hidden"></span></button>
-            <button id="sticky-notes-sidebar-btn"><i data-lucide="sticky-note"></i> <span>Sticky Notes</span><span id="sticky-notes-sidebar-count" class="sidebar-badge hidden"></span></button>
-            <button id="skills-btn"><i data-lucide="puzzle"></i> <span>Skills</span></button>
-            <button id="scheduler-btn"><i data-lucide="calendar-clock"></i> <span>Scheduled Tasks</span></button>
+          <div class="sidebar-tools-header">
+            <span class="sidebar-section-label">Tools</span>
+            <span class="sidebar-tools-hint" data-palette="session" title="Show keyboard hotkeys"></span>
+            <button type="button" class="tool-palette-edit-btn" data-palette="session" aria-label="Edit tool palette" title="Edit palette"><i data-lucide="pencil"></i></button>
           </div>
+          <div id="session-actions"></div>
+          <div id="session-actions-hidden" class="tool-palette-hidden-section hidden"></div>
         </div>
         <div id="sidebar-sessions-header">
           <div id="sessions-header-content">
-            <div class="session-list-header">
-              <span>Sessions</span>
-              <div class="session-list-header-actions">
-                <button id="new-ralph-btn" type="button" class="new-ralph-pill" data-tip="New Ralph Loop"><i data-lucide="repeat"></i> Ralph Loop</button>
-                <button id="new-session-btn" type="button" data-tip="New session"><i data-lucide="plus"></i></button>
-                <button id="resume-session-btn" type="button" data-tip="Import CLI session"><i data-lucide="import"></i></button>
-                <button id="search-session-btn" type="button" data-tip="Search sessions"><i data-lucide="search"></i></button>
+            <div class="sidebar-sessions-header-row">
+              <span class="sidebar-section-label">Sessions</span>
+              <span id="session-filter-count" class="session-filter-count hidden"></span>
+              <div id="session-header-search-inline" class="sidebar-sessions-search-inline hidden">
+                <input id="session-header-search-input" type="text" placeholder="Search sessions..." autocomplete="off" spellcheck="false" />
+                <button id="session-header-search-clear" type="button" aria-label="Clear search"><i data-lucide="x"></i></button>
               </div>
-            </div>
-            <div id="session-search" class="hidden">
-              <input id="session-search-input" type="text" placeholder="Search sessions..." autocomplete="off" spellcheck="false" />
-              <button id="session-search-clear" type="button" aria-label="Clear search"><i data-lucide="x"></i></button>
+              <button id="session-header-search-btn" type="button" aria-label="Search sessions" title="Search sessions"><i data-lucide="search"></i></button>
             </div>
           </div>
-          <div id="files-header-content" class="hidden">
-            <div class="session-list-header">
-              <span>File Browser</span>
-              <div class="session-list-header-actions">
-                <button id="file-panel-refresh" type="button" title="Refresh file tree"><i data-lucide="refresh-cw"></i></button>
-                <button id="file-panel-close" type="button" title="Close file browser"><i data-lucide="x"></i></button>
-              </div>
-            </div>
-          </div>
+          <div id="files-header-content" class="hidden"></div>
         </div>
         <div id="ralph-loop-section"></div>
         <div id="sidebar-panel-projects" class="sidebar-panel hidden">
@@ -196,7 +224,21 @@
           </div>
         </div>
         <div id="sidebar-panel-files" class="sidebar-panel hidden">
+          <div class="fb-titlebar">
+            <button id="file-panel-refresh" type="button" title="Refresh file tree"><i data-lucide="refresh-cw"></i></button>
+            <span class="fb-titlebar-title">File Browser</span>
+            <button id="file-panel-close" type="button" title="Close file browser"><i data-lucide="x"></i></button>
+          </div>
+          <div class="fb-search-bar">
+            <i data-lucide="search" class="fb-search-icon"></i>
+            <input id="fb-search-input" type="text" placeholder="Search files..." autocomplete="off" spellcheck="false" />
+          </div>
           <div id="file-tree"></div>
+          <div class="fb-kb-hint">
+            <kbd>&#8593;&#8595;</kbd><span>nav</span>
+            <kbd>&#8592;&#8594;</kbd><span>fold</span>
+            <kbd>&#8629;</kbd><span>open</span>
+          </div>
         </div>
       </div>
     </div>
@@ -208,16 +250,18 @@
       <div class="mate-sidebar-header" id="mate-sidebar-header">
         <img id="mate-sidebar-avatar" class="mate-sidebar-avatar" alt="">
         <span id="mate-sidebar-name" class="mate-sidebar-name"></span>
+        <div id="mate-vendor-toggle" class="mate-vendor-toggle"></div>
         <div id="mate-sidebar-seed-tooltip" class="mate-seed-tooltip hidden"></div>
         <button id="mate-sidebar-toggle-btn" class="sidebar-collapse-btn" title="Collapse sidebar"><i data-lucide="panel-left-close"></i></button>
       </div>
-      <div id="mate-sidebar-tools">
-        <button id="mate-memory-btn"><i data-lucide="brain"></i> <span>Memory</span><span id="mate-memory-count" class="sidebar-badge hidden"></span></button>
-        <button id="mate-knowledge-btn"><i data-lucide="book-open"></i> <span>Knowledge</span><span id="mate-knowledge-count" class="sidebar-badge hidden"></span></button>
-        <button id="mate-sticky-notes-btn"><i data-lucide="sticky-note"></i> <span>Sticky Notes</span></button>
-        <button id="mate-skills-btn"><i data-lucide="puzzle"></i> <span>Skills</span></button>
-        <button id="mate-scheduler-btn"><i data-lucide="calendar-clock"></i> <span>Scheduled Tasks</span></button>
-        <button id="mate-debate-btn"><i data-lucide="mic"></i> <span>Debate</span></button>
+      <div id="mate-sidebar-tools-wrap">
+        <div class="sidebar-tools-header">
+          <span class="sidebar-section-label">Tools</span>
+          <span class="sidebar-tools-hint" data-palette="mate" title="Show keyboard hotkeys"></span>
+          <button type="button" class="tool-palette-edit-btn" data-palette="mate" aria-label="Edit tool palette" title="Edit palette"><i data-lucide="pencil"></i></button>
+        </div>
+        <div id="mate-sidebar-tools"></div>
+        <div id="mate-sidebar-tools-hidden" class="tool-palette-hidden-section hidden"></div>
       </div>
       <div id="mate-sidebar-conversations">
         <div class="mate-sidebar-sessions-header">
@@ -245,6 +289,7 @@
         <div id="mate-knowledge-files" class="mate-knowledge-file-list"></div>
       </div>
     </div>
+    <div id="mate-sidebar-resize-handle" class="hidden"></div>
 
     <div id="main-column">
       <!-- Knowledge editor (full overlay, shown on Edit) -->
@@ -293,7 +338,6 @@
           <button id="header-info-btn" type="button" title="Session info"><i data-lucide="info"></i></button>
           <button id="header-rename-btn" type="button" title="Rename session"><i data-lucide="pencil"></i></button>
           <div id="mate-mobile-title" class="mate-mobile-title hidden">
-            <button id="mate-mobile-back" class="mate-mobile-back" type="button" aria-label="Back"><i data-lucide="chevron-left"></i></button>
             <img id="mate-mobile-avatar" class="mate-mobile-avatar" alt="">
             <span id="mate-mobile-name" class="mate-mobile-name"></span>
           </div>
@@ -304,7 +348,6 @@
         <div class="status">
           <button id="debate-pdf-btn" class="hidden" title="Export debate as PDF"><i data-lucide="download"></i></button>
           <button id="find-in-session-btn" title="Search in session (Ctrl+F)"><i data-lucide="search"></i></button>
-          <button id="sticky-notes-toggle-btn" title="Sticky notes"><i data-lucide="sticky-note"></i><span class="sticky-notes-count hidden"></span></button>
           <button id="terminal-toggle-btn" title="Terminal"><i data-lucide="square-terminal"></i><span id="terminal-count" class="hidden"></span></button>
         </div>
       </div>
@@ -398,7 +441,6 @@
       <div id="input-wrapper">
         <div id="mention-menu"></div>
         <div id="slash-menu"></div>
-        <div id="suggestion-chips" class="hidden"></div>
         <div id="input-row">
           <div id="context-mini" class="hidden">
             <div class="context-mini-bar">
@@ -407,16 +449,39 @@
             <span class="context-mini-label" id="context-mini-label">0%</span>
           </div>
           <div id="image-preview-bar"></div>
-          <textarea id="input" rows="1" placeholder="Message Claude Code..." enterkeyhint="send" dir="auto"></textarea>
+          <div id="suggestion-chips" class="hidden"></div>
+          <div id="input-textarea-wrap">
+            <textarea id="input" rows="1" placeholder="Message Claude Code..." enterkeyhint="send" dir="auto"></textarea>
+            <div id="ghost-suggestion" class="hidden" aria-hidden="true"></div>
+          </div>
           <div id="input-bottom">
             <div id="attach-wrap">
-              <button id="attach-file-btn" type="button" aria-label="Attach file" title="Attach file"><i data-lucide="paperclip"></i></button>
-              <button id="attach-image-btn" type="button" aria-label="Attach image" title="Attach image"><i data-lucide="image"></i></button>
+              <button id="input-more-btn" type="button" aria-label="More options" title="More options" class="mobile-only"><i data-lucide="plus"></i></button>
+              <button id="attach-file-btn" type="button" aria-label="Attach file" title="Attach file" class="desktop-only"><i data-lucide="paperclip"></i></button>
+              <button id="attach-image-btn" type="button" aria-label="Attach image" title="Attach image" class="desktop-only"><i data-lucide="image"></i></button>
               <button id="stt-btn" type="button" aria-label="Voice input" title="Voice input"><i data-lucide="mic"></i></button>
               <button id="schedule-btn" type="button" aria-label="Schedule message" title="Schedule message"><i data-lucide="clock"></i></button>
-              <button id="ask-mate-btn" type="button" aria-label="Ask Mate"><span class="ask-mate-label">@ Ask Mate</span></button>
+              <button id="ask-mate-btn" type="button" aria-label="Ask Mate" title="Ask a Mate for advice on this session"><i data-lucide="at-sign"></i></button>
+              <div id="context-sources-btn-wrap" class="desktop-only">
+                <button id="context-sources-add" type="button" title="Add context sources"><i data-lucide="library"></i><span class="ctx-label">Context</span></button>
+                <div id="context-sources-picker" class="hidden">
+                  <div class="context-picker-section" id="context-picker-email"></div>
+                  <div class="context-picker-section" id="context-picker-terminals"></div>
+                  <div class="context-picker-section" id="context-picker-tabs"></div>
+                </div>
+              </div>
             </div>
             <div id="input-bottom-right">
+              <div id="vendor-toggle-wrap">
+                <button id="vendor-btn-claude" class="vendor-toggle-btn active" data-vendor="claude">
+                  <img src="/claude-code-avatar.png" class="vendor-toggle-icon" alt="Claude">
+                  <span class="vendor-toggle-label">Claude Code</span>
+                </button>
+                <button id="vendor-btn-codex" class="vendor-toggle-btn" data-vendor="codex">
+                  <img src="/codex-avatar.png" class="vendor-toggle-icon" alt="Codex">
+                  <span class="vendor-toggle-label">Codex</span>
+                </button>
+              </div>
               <div id="config-chip-wrap" class="hidden">
                 <button id="config-chip" title="Model, mode, and effort settings">
                   <i class="config-chip-icon" data-lucide="sliders-horizontal"></i>
@@ -454,6 +519,18 @@
                       </button>
                     </div>
                   </div>
+                  <div id="config-approval-section" class="config-section" style="display:none">
+                    <div class="config-section-label">APPROVAL</div>
+                    <div id="config-approval-bar" class="config-segmented"></div>
+                  </div>
+                  <div id="config-sandbox-section" class="config-section" style="display:none">
+                    <div class="config-section-label">SANDBOX</div>
+                    <div id="config-sandbox-bar" class="config-segmented"></div>
+                  </div>
+                  <div id="config-websearch-section" class="config-section" style="display:none">
+                    <div class="config-section-label">WEB SEARCH</div>
+                    <div id="config-websearch-bar" class="config-segmented"></div>
+                  </div>
                 </div>
               </div>
               <button id="send-btn" disabled aria-label="Send"><i data-lucide="arrow-up"></i></button>
@@ -463,6 +540,34 @@
       </div>
     </div>
   </div>
+  <!-- Mobile input-more bottom sheet: attach / image + context sources -->
+  <div id="input-more-sheet" class="hidden">
+    <div class="input-more-backdrop"></div>
+    <div class="input-more-content">
+      <div class="input-more-handle"></div>
+      <div class="input-more-actions">
+        <button class="input-more-action" id="input-more-attach">
+          <i data-lucide="paperclip"></i>
+          <span>Attach file</span>
+        </button>
+        <button class="input-more-action" id="input-more-image">
+          <i data-lucide="image"></i>
+          <span>Image</span>
+        </button>
+      </div>
+      <div class="input-more-divider"></div>
+      <div class="input-more-section-label">
+        <i data-lucide="library"></i>
+        <span>Context sources</span>
+      </div>
+      <div class="input-more-context-body" id="input-more-context-body">
+        <div class="context-picker-section" id="context-picker-email-mobile"></div>
+        <div class="context-picker-section" id="context-picker-terminals-mobile"></div>
+        <div class="context-picker-section" id="context-picker-tabs-mobile"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- Mobile fullscreen sheet overlay (Projects / Sessions) -->
   <div id="mobile-sheet" class="hidden">
     <div class="mobile-sheet-backdrop"></div>
@@ -592,6 +697,7 @@
                 <div class="ps-owner-row">
                   <span class="settings-value" id="ps-owner-name">-</span>
                   <button class="settings-btn-sm" id="ps-transfer-btn">Transfer</button>
+                  <span class="ps-owner-locked-hint hidden" id="ps-owner-locked-hint">Ownership of home directory projects cannot be transferred.</span>
                 </div>
                 <div class="ps-transfer-form hidden" id="ps-transfer-form">
                   <select class="ps-select" id="ps-transfer-select"></select>
@@ -749,6 +855,7 @@
       </div>
     </div>
     <div class="user-island-actions">
+      <button id="user-theme-toggle-btn" title="Switch theme" aria-label="Switch theme"><i data-lucide="moon"></i></button>
       <button id="user-settings-btn" title="User settings"><i data-lucide="settings"></i></button>
     </div>
   </div>
@@ -793,7 +900,7 @@
   <div class="confirm-backdrop" id="user-settings-backdrop"></div>
   <div class="us-modal">
     <div class="us-modal-header">
-      <span class="us-modal-title">Settings</span>
+      <span class="us-modal-title">User Settings</span>
       <button class="us-modal-close" id="user-settings-close" title="Close"><i data-lucide="x"></i></button>
     </div>
     <div class="us-modal-body">
@@ -802,11 +909,15 @@
           <option value="us-account" selected>Account</option>
           <option value="us-appearance">Appearance</option>
           <option value="us-chat">Chat</option>
+          <option value="us-mates">Mates</option>
+          <option value="us-email">Email</option>
         </select>
         <div class="us-modal-nav-items">
           <button class="us-nav-item active" data-section="us-account"><span>Account</span></button>
           <button class="us-nav-item" data-section="us-appearance"><span>Appearance</span></button>
           <button class="us-nav-item" data-section="us-chat"><span>Chat</span></button>
+          <button class="us-nav-item" data-section="us-mates"><span>Mates</span></button>
+          <button class="us-nav-item" data-section="us-email"><span>Email</span></button>
           <div class="us-nav-separator"></div>
           <button class="us-nav-item us-nav-danger" data-section="us-logout"><span>Log Out</span></button>
         </div>
@@ -817,23 +928,48 @@
         <div class="us-section" data-section="us-account">
           <h2>Account</h2>
           <div class="settings-card">
-            <div class="settings-field-row">
-              <div>
-                <div class="settings-label">Username</div>
-                <div class="settings-value" id="us-username">-</div>
+            <div class="us-account-hero">
+              <div class="us-account-avatar" aria-hidden="true">
+                <img id="us-account-avatar-img" class="us-account-avatar-img hidden" alt="">
+                <span id="us-account-avatar-fallback" class="us-account-avatar-fallback">?</span>
+              </div>
+              <div class="us-account-hero-copy">
+                <div class="us-account-name" id="us-account-name">-</div>
+                <div class="us-account-subline" id="us-account-subline">-</div>
+                <div class="settings-hint">Your profile is stored on this server and used across sessions.</div>
               </div>
             </div>
           </div>
           <h3>Security</h3>
           <div class="settings-card">
-            <div class="settings-field">
-              <label class="settings-label">PIN</label>
-              <div class="settings-hint">6-digit code used to sign in to your account.</div>
-              <div class="us-pin-row">
-                <input type="password" class="us-text-input us-pin-input" id="us-pin-input" maxlength="6" inputmode="numeric" pattern="[0-9]*" placeholder="Enter new PIN" autocomplete="off">
-                <button class="us-btn" id="us-pin-save" disabled>Change PIN</button>
+            <div class="settings-field-row">
+              <div>
+                <label class="settings-label">PIN</label>
+                <div class="settings-hint">Protect the web UI with a 6-digit PIN.</div>
               </div>
-              <div class="us-pin-msg hidden" id="us-pin-msg"></div>
+              <button class="settings-btn-sm" id="us-pin-set-btn">Set PIN</button>
+            </div>
+            <div class="settings-field hidden" id="us-pin-form">
+              <div class="settings-pin-form-title" id="us-pin-form-title">Change PIN</div>
+              <div class="settings-pin-current-row" id="us-pin-current-row">
+                <label class="settings-label" for="us-pin-current-input">Current PIN</label>
+                <input type="password" class="us-text-input us-pin-input" id="us-pin-current-input" maxlength="6" inputmode="numeric" pattern="[0-9]*" placeholder="000000" autocomplete="off">
+              </div>
+              <div class="settings-pin-row">
+                <div class="settings-pin-field">
+                  <label class="settings-label" for="us-pin-input">New PIN</label>
+                  <input type="password" class="us-text-input us-pin-input" id="us-pin-input" maxlength="6" inputmode="numeric" pattern="[0-9]*" placeholder="000000" autocomplete="off">
+                </div>
+                <div class="settings-pin-field">
+                  <label class="settings-label" for="us-pin-confirm-input">Confirm PIN</label>
+                  <input type="password" class="us-text-input us-pin-input" id="us-pin-confirm-input" maxlength="6" inputmode="numeric" pattern="[0-9]*" placeholder="000000" autocomplete="off">
+                </div>
+              </div>
+              <div class="settings-pin-actions-row">
+                <button class="us-btn" id="us-pin-save" disabled>Save</button>
+                <button class="settings-btn-sm settings-btn-ghost" id="us-pin-cancel">Cancel</button>
+              </div>
+              <div class="settings-hint settings-pin-error hidden" id="us-pin-msg"></div>
             </div>
           </div>
         </div>
@@ -877,6 +1013,21 @@
         <div class="us-section" data-section="us-chat">
           <h2>Chat</h2>
           <div class="settings-card">
+            <div class="settings-field">
+              <label class="settings-label" for="us-lang-select">Voice Input Language</label>
+              <div class="settings-hint">Used by speech-to-text when you dictate messages.</div>
+              <select id="us-lang-select" class="settings-select us-lang-select">
+                <option value="en-US">English</option>
+                <option value="ko-KR">Korean</option>
+                <option value="ja-JP">Japanese</option>
+                <option value="zh-CN">Chinese</option>
+                <option value="es-ES">Spanish</option>
+                <option value="fr-FR">French</option>
+                <option value="de-DE">German</option>
+              </select>
+            </div>
+          </div>
+          <div class="settings-card">
             <label class="settings-toggle-row">
               <div>
                 <span class="settings-label">Auto-continue</span>
@@ -886,6 +1037,30 @@
               <span class="toggle-track"><span class="toggle-thumb"></span></span>
             </label>
           </div>
+        </div>
+
+        <!-- Mates section -->
+        <div class="us-section" data-section="us-mates">
+          <h2>Mates</h2>
+          <p class="settings-hint">Specialist AI teammates with assigned roles and long-term memory across sessions. They carry context forward and push back when a session drifts. Use the built-ins or design your own.</p>
+          <div class="settings-card">
+            <label class="settings-toggle-row">
+              <div>
+                <span class="settings-label">Use Mates</span>
+                <div class="settings-hint">Off hides every Mates surface in Clay. Existing Mates and their memory are preserved.</div>
+              </div>
+              <input type="checkbox" id="us-mates-enabled">
+              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Email section -->
+        <div class="us-section" data-section="us-email">
+          <h2>Email Accounts</h2>
+          <p class="settings-hint">Connect personal email accounts so your Mates can read, search, and send emails on your behalf. Credentials are encrypted and private to you.</p>
+          <div class="settings-card" id="us-email-list"></div>
+          <button class="us-email-add-btn" id="us-email-add">+ Add Account</button>
         </div>
 
         <!-- Log out section -->
@@ -1412,6 +1587,7 @@
     <div class="add-project-body">
       <div class="add-project-panel active" data-panel="existing">
         <div class="add-project-input-wrap">
+          <span id="add-project-prefix" class="add-project-prefix hidden"></span>
           <input type="text" id="add-project-input" placeholder="/" autocomplete="off" spellcheck="false">
           <div id="add-project-suggestions" class="hidden"></div>
         </div>
@@ -1460,30 +1636,67 @@
   </div>
 </div>
 
-<!-- Debate Modal -->
+<!-- MCP Servers Modal -->
+<div id="mcp-modal" class="hidden">
+  <div class="confirm-backdrop"></div>
+  <div class="confirm-dialog mcp-dialog">
+    <div class="mcp-header">
+      <span class="mcp-title"><i data-lucide="cable"></i> MCP Servers</span>
+      <button class="skills-close" id="mcp-modal-close"><i data-lucide="x"></i></button>
+    </div>
+    <div class="mcp-content" id="mcp-content">
+      <p class="mcp-no-servers">No MCP servers detected. Configure in Clay Chrome Extension.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Email Defaults Modal -->
+<div id="email-defaults-modal" class="hidden">
+  <div class="confirm-backdrop"></div>
+  <div class="confirm-dialog mcp-dialog">
+    <div class="mcp-header">
+      <span class="mcp-title"><i data-lucide="mail"></i> Email</span>
+      <button class="skills-close" id="email-defaults-close"><i data-lucide="x"></i></button>
+    </div>
+    <div class="mcp-content" id="email-defaults-content">
+      <p class="mcp-desc">Toggle email accounts to auto-enable them for every new session in this project.</p>
+      <div id="email-defaults-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Debate Modal (Wizard) -->
 <div id="debate-modal" class="hidden">
   <div class="debate-modal-backdrop"></div>
   <div class="debate-modal-card">
     <div class="debate-modal-header">
       <span><i data-lucide="mic"></i> New Debate</span>
+      <div class="debate-wizard-steps">
+        <span class="debate-step-dot active" data-step="0"></span>
+        <span class="debate-step-dot" data-step="1"></span>
+      </div>
       <button id="debate-modal-close">&times;</button>
     </div>
-    <div class="debate-modal-body">
-      <label class="debate-field-label" for="debate-topic-input">Topic <span class="debate-field-req">*</span></label>
-      <textarea id="debate-topic-input" rows="2" placeholder="e.g. Should AI development be regulated?"></textarea>
-      <label class="debate-field-label" for="debate-panel-list">Select panelists</label>
-      <div id="debate-panel-list" class="debate-panel-list"></div>
-      <div id="debate-skip-setup-row" class="debate-skip-setup-row hidden">
-        <label class="debate-toggle-label">
-          <input type="checkbox" id="debate-skip-setup-toggle">
-          <span>Skip setup</span>
-          <span class="debate-skip-setup-hint">Moderator generates the brief automatically from conversation context</span>
-        </label>
+    <!-- Step 0: Topic -->
+    <div class="debate-wizard-page active" data-step="0">
+      <div class="debate-modal-body">
+        <label class="debate-field-label" for="debate-topic-input">Topic <span class="debate-field-req">*</span></label>
+        <textarea id="debate-topic-input" rows="2" placeholder="e.g. Should AI development be regulated?"></textarea>
+      </div>
+    </div>
+    <!-- Step 1: Panelists -->
+    <div class="debate-wizard-page" data-step="1">
+      <div class="debate-modal-body">
+        <label class="debate-field-label" for="debate-panel-list">Select panelists</label>
+        <div id="debate-panel-list" class="debate-panel-list"></div>
       </div>
     </div>
     <div class="debate-modal-footer">
       <button id="debate-modal-cancel" class="debate-btn-cancel">Cancel</button>
-      <button id="debate-modal-start" class="debate-btn-start">Start</button>
+      <button id="debate-modal-back" class="debate-btn-back hidden">Back</button>
+      <button id="debate-modal-quick" class="debate-btn-quick hidden">Quick Start</button>
+      <button id="debate-modal-next" class="debate-btn-next hidden">Choose Panel</button>
+      <button id="debate-modal-start" class="debate-btn-start hidden">Design Debate</button>
     </div>
   </div>
 </div>
@@ -1493,59 +1706,106 @@
   <div class="ralph-wizard-backdrop"></div>
   <div class="ralph-wizard-card">
     <div class="ralph-wizard-header">
-      <span>New Ralph Loop</span>
+      <span>New Loop</span>
       <button id="ralph-wizard-close">&times;</button>
     </div>
     <div class="ralph-wizard-progress">
       <span class="ralph-dot active" data-step="1"></span>
       <span class="ralph-dot" data-step="2"></span>
+      <span class="ralph-dot" data-step="3"></span>
     </div>
     <div class="ralph-wizard-steps">
       <div class="ralph-step active" data-step="1">
-        <h3>What's Ralph Loop?</h3>
-        <div class="ralph-intro">
-          <p>An autonomous coding loop. Claude writes code, a separate judge reviews the result, and if it's not done yet, Claude tries again &mdash; repeating until the judge says it passes.</p>
-          <div class="ralph-intro-diagram">
-            <div class="ralph-dia-row">
-              <span class="ralph-dia-node">Claude codes</span>
-              <span class="ralph-dia-fwd">&rarr;</span>
-              <span class="ralph-dia-node">Judge reviews</span>
-              <span class="ralph-dia-fwd">&rarr;</span>
-              <span class="ralph-dia-done">Done</span>
+        <h3>Choose loop mode</h3>
+        <div id="ralph-install-status" class="hidden"></div>
+        <div class="ralph-mode-preview" id="ralph-mode-preview">
+          <div class="ralph-mode-preview-judge">
+            <div class="ralph-intro-diagram">
+              <div class="ralph-dia-row">
+                <span class="ralph-dia-node">Coding agent</span>
+                <span class="ralph-dia-fwd">&rarr;</span>
+                <span class="ralph-dia-node">Judge reviews</span>
+                <span class="ralph-dia-fwd">&rarr;</span>
+                <span class="ralph-dia-done">Done</span>
+              </div>
+              <div class="ralph-dia-loop">
+                <svg class="ralph-dia-svg" viewBox="0 0 200 28" preserveAspectRatio="none">
+                  <path d="M170 2 C190 2 196 14 190 24 L10 24 C4 24 -2 14 10 2" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="4 3"/>
+                  <polygon points="14,-1 6,5 14,5" fill="currentColor" transform="translate(0,0)"/>
+                </svg>
+                <span class="ralph-dia-loop-label">Fail &mdash; retry</span>
+              </div>
             </div>
-            <div class="ralph-dia-loop">
-              <svg class="ralph-dia-svg" viewBox="0 0 200 28" preserveAspectRatio="none">
-                <path d="M170 2 C190 2 196 14 190 24 L10 24 C4 24 -2 14 10 2" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="4 3"/>
-                <polygon points="14,-1 6,5 14,5" fill="currentColor" transform="translate(0,0)"/>
-              </svg>
-              <span class="ralph-dia-loop-label">Fail &mdash; retry</span>
-            </div>
+            <p class="ralph-mode-preview-text">Each iteration is reviewed by a separate judge session that decides pass or fail. The coding agent does not see the judge's result. On fail, a fresh session retries from scratch. The loop ends on pass or when the max iteration count is reached. Best suited for tasks with clear success criteria, like making tests pass or matching a spec.</p>
           </div>
-          <p class="ralph-intro-detail">In the next step you'll describe what to build. Claude will draft the instructions, and you can preview and edit them before anything runs.</p>
-          <div id="ralph-install-status" class="hidden"></div>
+          <div class="ralph-mode-preview-simple" style="display:none">
+            <div class="ralph-intro-diagram">
+              <div class="ralph-dia-row">
+                <span class="ralph-dia-node">Coding agent</span>
+                <span class="ralph-dia-fwd">&rarr;</span>
+                <span class="ralph-dia-node">Repeat N times</span>
+                <span class="ralph-dia-fwd">&rarr;</span>
+                <span class="ralph-dia-done">Done</span>
+              </div>
+            </div>
+            <p class="ralph-mode-preview-text">The original Ralph Loop. The prompt runs a set number of times with no review step in between. Each iteration starts a fresh session. There is no judge and no pass/fail. Useful when the task itself is the goal, not a specific outcome. Suited for bulk refactoring, repeated migrations, or running the same operation across multiple targets.</p>
+          </div>
+        </div>
+        <div class="ralph-mode-choice">
+          <button class="ralph-mode-card active" data-loop-mode="judge">
+            <span class="ralph-mode-card-icon"><i data-lucide="scale"></i></span>
+            <span class="ralph-mode-card-title">Clay Loop</span>
+            <span class="ralph-mode-card-sub">Loop + Judge</span>
+          </button>
+          <button class="ralph-mode-card" data-loop-mode="simple">
+            <span class="ralph-mode-card-icon"><i data-lucide="repeat"></i></span>
+            <span class="ralph-mode-card-title">Ralph Loop</span>
+            <span class="ralph-mode-card-sub">Loop only</span>
+          </button>
         </div>
       </div>
       <div class="ralph-step" data-step="2">
-        <h3>What do you want to build?</h3>
-        <div class="ralph-mode-tabs">
-          <button class="ralph-mode-tab active" data-mode="draft">Let Clay draft it</button>
-          <button class="ralph-mode-tab" data-mode="own">I have my own</button>
-        </div>
-        <div class="ralph-mode-panel active" data-mode="draft">
-          <p class="ralph-hint">Write a rough idea, Clay will refine it into detailed instructions. You can review and edit everything before the loop starts.</p>
-          <label class="ralph-field-label" for="ralph-task">Task description <span class="ralph-field-req">*</span></label>
-          <textarea id="ralph-task" rows="5" placeholder="e.g. Add dark mode toggle to the settings page"></textarea>
-        </div>
-        <div class="ralph-mode-panel" data-mode="own">
-          <p class="ralph-hint">Paste your PROMPT.md content. JUDGE.md is optional; if omitted, Clay will generate it for you.</p>
-          <label class="ralph-field-label" for="ralph-prompt-input">PROMPT.md <span class="ralph-field-req">*</span></label>
-          <textarea id="ralph-prompt-input" rows="5" placeholder="Paste your PROMPT.md content here"></textarea>
-          <label class="ralph-field-label" for="ralph-judge-input" style="margin-top: 8px;">JUDGE.md <span class="ralph-field-opt">(optional)</span></label>
-          <p class="ralph-hint" style="margin-top: 2px; margin-bottom: 6px;">The judge reviews each iteration and decides pass/fail. Only needed for multi-iteration loops. For single-run tasks, you can skip this.</p>
-          <textarea id="ralph-judge-input" rows="4" placeholder="Paste your JUDGE.md content here (optional)"></textarea>
+        <h3>Who writes the instructions?</h3>
+        <p class="ralph-hint">Choose who provides each file.</p>
+        <div class="ralph-authorship-rows">
+          <div class="ralph-authorship-row">
+            <div class="ralph-authorship-info">
+              <span class="ralph-authorship-label">PROMPT</span>
+              <span class="ralph-authorship-desc">The instructions the coding agent follows each iteration.</span>
+            </div>
+            <div class="config-segmented ralph-authorship-toggle" data-file="prompt">
+              <button class="config-segment-btn" data-author="me">Me</button>
+              <button class="config-segment-btn active" data-author="clay">Clay</button>
+            </div>
+          </div>
+          <div class="ralph-authorship-row" id="ralph-judge-authorship-row">
+            <div class="ralph-authorship-info">
+              <span class="ralph-authorship-label">JUDGE</span>
+              <span class="ralph-authorship-desc">The criteria used to evaluate each iteration as pass or fail.</span>
+            </div>
+            <div class="config-segmented ralph-authorship-toggle" data-file="judge">
+              <button class="config-segment-btn" data-author="me">Me</button>
+              <button class="config-segment-btn active" data-author="clay">Clay</button>
+            </div>
+          </div>
         </div>
       </div>
-      <input type="hidden" id="ralph-max-iterations" value="25">
+      <div class="ralph-step" data-step="3">
+        <h3>Provide details</h3>
+        <div id="ralph-input-task-section" class="hidden">
+          <label class="ralph-field-label" for="ralph-task">Task description <span class="ralph-field-req">*</span></label>
+          <p class="ralph-hint">Write a rough idea. Clay will refine it into detailed instructions.</p>
+          <textarea id="ralph-task" rows="5" placeholder="e.g. Add dark mode toggle to the settings page"></textarea>
+        </div>
+        <div id="ralph-input-prompt-section" class="hidden">
+          <label class="ralph-field-label" for="ralph-prompt-input">PROMPT.md <span class="ralph-field-req">*</span></label>
+          <textarea id="ralph-prompt-input" rows="5" placeholder="Paste your PROMPT.md content here"></textarea>
+        </div>
+        <div id="ralph-input-judge-section" class="hidden">
+          <label class="ralph-field-label" for="ralph-judge-input" style="margin-top: 8px;">JUDGE.md <span class="ralph-field-req">*</span></label>
+          <textarea id="ralph-judge-input" rows="4" placeholder="Paste your JUDGE.md content here"></textarea>
+        </div>
+      </div>
     </div>
     <div class="ralph-wizard-footer">
       <button id="ralph-wizard-back" class="ralph-btn secondary">Back</button>
@@ -1557,22 +1817,29 @@
   </div>
 </div>
 
-<!-- Ralph Preview Modal -->
+<!-- Ralph Preview Modal (also serves as the execution modal) -->
 <div id="ralph-preview-modal" class="hidden">
   <div class="confirm-backdrop"></div>
   <div class="ralph-preview-dialog">
     <div class="ralph-preview-header">
-      <span class="ralph-preview-name" id="ralph-preview-name">Ralph Loop</span>
+      <span class="ralph-preview-name" id="ralph-preview-name">Loop</span>
       <div class="ralph-preview-actions">
-        <button class="ralph-preview-action-btn primary" id="ralph-preview-run" title="Start loop"><i data-lucide="play"></i> Run now</button>
         <button class="ralph-preview-action-icon" id="ralph-preview-delete" title="Cancel and discard"><i data-lucide="trash-2"></i></button>
       </div>
     </div>
     <div class="ralph-preview-tabs">
       <button class="ralph-tab active" data-tab="prompt">PROMPT.md</button>
       <button class="ralph-tab" data-tab="judge">JUDGE.md</button>
+      <button class="ralph-tab" data-tab="model">Model</button>
     </div>
     <div id="ralph-preview-body" class="ralph-preview-body"></div>
+    <div class="ralph-preview-footer" id="ralph-preview-footer">
+      <button class="ralph-run-combo" id="ralph-preview-run">
+        <span class="ralph-run-combo-label" id="ralph-run-combo-label">Run</span>
+        <span class="ralph-run-combo-sep"></span>
+        <input type="number" id="ralph-preview-iterations" class="ralph-run-combo-input" value="20" min="1" max="100" onclick="event.stopPropagation()">
+      </button>
+    </div>
   </div>
 </div>
 
@@ -1603,7 +1870,7 @@
             <div class="mate-intro-step"><span class="mate-intro-step-num">2</span> Have a short interview where your Mate gets to know you</div>
             <div class="mate-intro-step"><span class="mate-intro-step-num">3</span> Start talking</div>
           </div>
-          <p class="mate-intro-privacy">Mates run on Claude Code. No separate API keys or external services needed. Your conversations stay on your Clay server and are never stored elsewhere.</p>
+          <p class="mate-intro-privacy">Mates run on Claude Code or ChatGPT Codex, your choice. No separate API keys or external services needed. Your conversations stay on your Clay server and are never stored elsewhere.</p>
         </div>
       </div>
       <!-- Step 1: Relationship -->
@@ -1744,26 +2011,24 @@
         </div>
       </div>
 
-      <!-- Step 4: Autonomy -->
+      <!-- Step 4: Vendor -->
       <div class="mate-step" data-step="4">
-        <h3>How much should they do on their own?</h3>
-        <p class="mate-hint">This is about how much freedom your mate gets before checking with you.</p>
-        <div class="mate-autonomy-options">
-          <button class="mate-autonomy-btn" data-value="always_ask">
-            <span class="mate-autonomy-title">Ask me everything</span>
-            <span class="mate-autonomy-desc">"Before you do anything, run it by me first."</span>
+        <h3>Which model should power them?</h3>
+        <p class="mate-hint">You can switch this anytime from the mate's settings.</p>
+        <div class="mate-vendor-option-list">
+          <button class="mate-vendor-option-btn active" data-value="claude">
+            <img src="/claude-code-avatar.png" class="mate-vendor-option-icon" alt="Claude Code">
+            <div class="mate-vendor-option-text">
+              <span class="mate-vendor-option-title">Claude Code</span>
+              <span class="mate-vendor-option-desc">Anthropic's Claude. Thoughtful, conversational, strong at nuanced reasoning and long-form writing. A good default for most mates.</span>
+            </div>
           </button>
-          <button class="mate-autonomy-btn active" data-value="minor_stuff_ok">
-            <span class="mate-autonomy-title">Small stuff is fine</span>
-            <span class="mate-autonomy-desc">"Little things, just do it. Anything big, ask me."</span>
-          </button>
-          <button class="mate-autonomy-btn" data-value="mostly_autonomous">
-            <span class="mate-autonomy-title">Mostly free</span>
-            <span class="mate-autonomy-desc">"Do your thing. Only check if it's really important."</span>
-          </button>
-          <button class="mate-autonomy-btn" data-value="fully_autonomous">
-            <span class="mate-autonomy-title">Full freedom</span>
-            <span class="mate-autonomy-desc">"Just get it done and tell me after."</span>
+          <button class="mate-vendor-option-btn" data-value="codex">
+            <img src="/codex-avatar.png" class="mate-vendor-option-icon" alt="ChatGPT Codex">
+            <div class="mate-vendor-option-text">
+              <span class="mate-vendor-option-title">ChatGPT Codex</span>
+              <span class="mate-vendor-option-desc">OpenAI's GPT coding agent. Fast and direct, strong at code generation and tight execution loops. Good for builder-type mates.</span>
+            </div>
           </button>
         </div>
       </div>
@@ -1791,8 +2056,6 @@
     <div class="sched-create-date-chips">
       <input type="date" class="sched-create-date-input" id="sched-create-date-picker" value="">
       <input type="time" class="sched-create-time-input" id="sched-create-time" value="09:00">
-      <button class="sched-create-recurrence-btn" id="sched-create-recurrence-btn" title="Recurrence"><i data-lucide="repeat"></i></button>
-      <button class="sched-create-interval-btn" id="sched-create-interval-btn" title="Interval"><i data-lucide="timer"></i></button>
     </div>
     <button class="sched-create-close-btn" id="sched-create-cancel" title="Close"><i data-lucide="x"></i></button>
   </div>
@@ -1817,7 +2080,7 @@
     </div>
     <input type="text" class="sched-create-title-input" id="sched-create-title" placeholder="Schedule Title" maxlength="80" spellcheck="false" autocomplete="off">
   </div>
-  <!-- Task (JS dropdown) -->
+  <!-- Task -->
   <div class="sched-create-row">
     <i data-lucide="list-todo" class="sched-create-row-icon"></i>
     <div class="sched-create-task-dropdown" id="sched-create-task-wrap">
@@ -1829,31 +2092,40 @@
       <div class="sched-create-task-list hidden" id="sched-create-task-list"></div>
     </div>
   </div>
-  <!-- Description -->
+  <!-- Review toggle -->
   <div class="sched-create-row">
+    <div class="sched-create-row-icon-spacer"></div>
+    <label class="sched-review-toggle">
+      <input type="checkbox" id="sched-review-check">
+      <span class="sched-review-label">Review multiple times</span>
+      <span class="sched-review-count hidden" id="sched-review-count">
+        <input type="number" id="sched-create-iterations" min="2" max="100" value="3" class="sched-create-iter-input">
+        <span class="sched-create-iter-hint">x</span>
+      </span>
+    </label>
+  </div>
+  <!-- Description (shown only when editing a record that has one) -->
+  <div class="sched-create-row hidden" id="sched-create-desc-row">
     <i data-lucide="align-left" class="sched-create-row-icon"></i>
-    <textarea class="sched-create-row-textarea" id="sched-create-desc" rows="3" placeholder="Description"></textarea>
+    <textarea class="sched-create-row-textarea" id="sched-create-desc" rows="2" placeholder="Description"></textarea>
   </div>
-  <!-- Bottom bar -->
-  <div class="sched-create-bottom">
-    <div class="sched-create-bottom-left">
-      <div class="sched-create-run-mode">
-        <button type="button" class="sched-run-mode-btn active" data-mode="single" title="Run once without iteration"><i data-lucide="play"></i> Single run</button>
-        <button type="button" class="sched-run-mode-btn" data-mode="multi" title="Run multiple iterations with a judge reviewing each round"><i data-lucide="repeat"></i> Multi-round</button>
-        <label class="sched-create-iter-label hidden" id="sched-create-iter-group">
-          <input type="number" id="sched-create-iterations" min="2" max="100" value="3" class="sched-create-iter-input">
-          <span class="sched-create-iter-hint">rounds</span>
-        </label>
+  <!-- Repeat accordion -->
+  <div class="sched-accordion" id="sched-accordion-repeat">
+    <div class="sched-accordion-divider"></div>
+    <button class="sched-accordion-header" id="sched-accordion-repeat-header" type="button">
+      <div class="sched-accordion-header-left">
+        <i data-lucide="repeat" class="sched-accordion-icon"></i>
+        <div class="sched-accordion-text">
+          <span class="sched-accordion-title">Repeat</span>
+          <span class="sched-accordion-subtitle" id="sched-accordion-repeat-subtitle">Which days to run</span>
+        </div>
       </div>
-    </div>
-    <div class="sched-create-bottom-right">
-      <button class="sched-create-delete-btn hidden" id="sched-create-delete" title="Delete"><i data-lucide="trash-2"></i></button>
-      <button class="sched-create-save-btn" id="sched-create-submit">Save</button>
-    </div>
-  </div>
-  <!-- Recurrence dropdown -->
-  <div class="sched-create-recurrence-dropdown hidden" id="sched-create-recurrence-dropdown">
-    <div class="sched-custom-repeat-panel" id="sched-custom-repeat-panel">
+      <div class="sched-accordion-header-right">
+        <span class="sched-accordion-clear hidden" id="sched-accordion-repeat-clear" title="Clear"><i data-lucide="x"></i></span>
+        <i data-lucide="chevron-right" class="sched-accordion-chevron"></i>
+      </div>
+    </button>
+    <div class="sched-accordion-body hidden" id="sched-accordion-repeat-body">
       <div class="sched-custom-row">
         <span class="sched-custom-label">Every</span>
         <input type="number" class="sched-custom-interval" id="sched-custom-interval" value="1" min="1" max="99">
@@ -1898,7 +2170,6 @@
           <span class="sched-custom-end-after-suffix">times</span>
         </div>
       </div>
-      <!-- Inline calendar for "Until" date picking -->
       <div class="sched-custom-end-calendar hidden" id="sched-custom-end-calendar">
         <div class="sched-cal-header">
           <span class="sched-cal-title" id="sched-cal-title">April 2026</span>
@@ -1912,48 +2183,65 @@
         </div>
         <div class="sched-cal-grid" id="sched-cal-grid"></div>
       </div>
-      <div class="sched-custom-actions">
-        <button class="sched-btn sched-btn-cancel" id="sched-custom-cancel">Cancel</button>
-        <button class="sched-btn sched-btn-save" id="sched-custom-ok">OK</button>
+    </div>
+  </div>
+  <!-- Interval accordion -->
+  <div class="sched-accordion" id="sched-accordion-interval">
+    <div class="sched-accordion-divider"></div>
+    <button class="sched-accordion-header" id="sched-accordion-interval-header" type="button">
+      <div class="sched-accordion-header-left">
+        <i data-lucide="timer" class="sched-accordion-icon"></i>
+        <div class="sched-accordion-text">
+          <span class="sched-accordion-title">Interval</span>
+          <span class="sched-accordion-subtitle" id="sched-accordion-interval-subtitle">How often within each day</span>
+        </div>
+      </div>
+      <div class="sched-accordion-header-right">
+        <span class="sched-accordion-clear hidden" id="sched-accordion-interval-clear" title="Clear"><i data-lucide="x"></i></span>
+        <i data-lucide="chevron-right" class="sched-accordion-chevron"></i>
+      </div>
+    </button>
+    <div class="sched-accordion-body hidden" id="sched-accordion-interval-body">
+      <div class="sched-interval-custom-row">
+        <span class="sched-custom-label">Every</span>
+        <input type="number" class="sched-custom-interval" id="sched-interval-custom-value" value="10" min="1" max="999">
+        <div class="sched-interval-unit-toggle" id="sched-interval-custom-unit">
+          <button type="button" class="sched-interval-seg active" data-unit="minute">min</button><button type="button" class="sched-interval-seg" data-unit="hour">hrs</button>
+        </div>
+      </div>
+      <div class="sched-interval-end-section hidden" id="sched-interval-end-section">
+        <div class="sched-interval-end-divider"></div>
+        <div class="sched-interval-end-options">
+          <button class="sched-interval-end-opt active" data-iend="allday">All day</button>
+          <button class="sched-interval-end-opt" data-iend="after">Stop after</button>
+          <button class="sched-interval-end-opt" data-iend="until">Stop at</button>
+        </div>
+        <div class="sched-interval-end-after hidden" id="sched-interval-end-after-row">
+          <input type="number" class="sched-interval-end-input" id="sched-interval-end-after" value="5" min="1" max="999">
+          <span class="sched-interval-end-label">runs</span>
+        </div>
+        <div class="sched-interval-end-until hidden" id="sched-interval-end-until-row">
+          <input type="time" class="sched-interval-end-time" id="sched-interval-end-time" value="18:00">
+        </div>
+      </div>
+      <div class="sched-skip-running-row" id="sched-skip-running-row">
+        <label class="sched-switch-label" for="sched-skip-running">
+          <div class="sched-switch">
+            <input type="checkbox" id="sched-skip-running" checked>
+            <span class="sched-switch-slider"></span>
+          </div>
+          <span class="sched-switch-text">Skip if previous run still active</span>
+        </label>
       </div>
     </div>
   </div>
-  <!-- Interval dropdown -->
-  <div class="sched-create-interval-dropdown hidden" id="sched-create-interval-dropdown">
-    <div class="sched-interval-custom-row">
-      <span class="sched-custom-label">Every</span>
-      <input type="number" class="sched-custom-interval" id="sched-interval-custom-value" value="10" min="1" max="999">
-      <div class="sched-interval-unit-toggle" id="sched-interval-custom-unit">
-        <button type="button" class="sched-interval-seg active" data-unit="minute">min</button><button type="button" class="sched-interval-seg" data-unit="hour">hrs</button>
-      </div>
+  <!-- Bottom bar -->
+  <div class="sched-create-bottom">
+    <div class="sched-create-bottom-left">
+      <button class="sched-create-delete-btn hidden" id="sched-create-delete" title="Delete"><i data-lucide="trash-2"></i></button>
     </div>
-    <div class="sched-interval-end-section hidden" id="sched-interval-end-section">
-      <div class="sched-interval-end-divider"></div>
-      <div class="sched-interval-end-options">
-        <button class="sched-interval-end-opt active" data-iend="allday">All day</button>
-        <button class="sched-interval-end-opt" data-iend="after">Stop after</button>
-        <button class="sched-interval-end-opt" data-iend="until">Stop at</button>
-      </div>
-      <div class="sched-interval-end-after hidden" id="sched-interval-end-after-row">
-        <input type="number" class="sched-interval-end-input" id="sched-interval-end-after" value="5" min="1" max="999">
-        <span class="sched-interval-end-label">runs</span>
-      </div>
-      <div class="sched-interval-end-until hidden" id="sched-interval-end-until-row">
-        <input type="time" class="sched-interval-end-time" id="sched-interval-end-time" value="18:00">
-      </div>
-    </div>
-    <div class="sched-skip-running-row" id="sched-skip-running-row">
-      <label class="sched-switch-label" for="sched-skip-running">
-        <div class="sched-switch">
-          <input type="checkbox" id="sched-skip-running" checked>
-          <span class="sched-switch-slider"></span>
-        </div>
-        <span class="sched-switch-text">Skip if previous run still active</span>
-      </label>
-    </div>
-    <div class="sched-custom-actions">
-      <button class="sched-btn sched-btn-cancel" id="sched-interval-cancel">Cancel</button>
-      <button class="sched-btn sched-btn-save" id="sched-interval-ok">OK</button>
+    <div class="sched-create-bottom-right">
+      <button class="sched-create-save-btn" id="sched-create-submit">Save</button>
     </div>
   </div>
 </div>
@@ -1986,6 +2274,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@xterm/xterm@5/lib/xterm.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@xterm/addon-fit@0/lib/addon-fit.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@xterm/addon-web-links@0/lib/addon-web-links.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@xterm/addon-webgl@0/lib/addon-webgl.min.js"></script>
 <script type="module" src="app.js"></script>
 <div id="pwa-install-modal" class="pwa-modal hidden">
   <div class="pwa-modal-backdrop"></div>

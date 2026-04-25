@@ -46,6 +46,13 @@
 .usage-check-link:hover {
   background: color-mix(in srgb, var(--text-dimmer) 16%, transparent);
 }
+.usage-check-vendor-icon {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  object-fit: cover;
+  flex: 0 0 auto;
+}
 .usage-check-link .lucide {
   width: 12px;
   height: 12px;
@@ -98,13 +105,26 @@ button.top-bar-pill.pill-accent:hover { background: color-mix(in srgb, var(--acc
 .top-bar-install-btn.hidden { display: none; }
 .pwa-standalone .top-bar-install-btn { display: none !important; }
 
-/* Share button — desktop only, same style as install pill */
-.top-bar-share-btn {
+/* Share button sits in .top-bar-actions with the bell/settings icons
+   and inherits their shared icon-button styling. Hide on mobile and
+   inside PWA standalone (matches previous pill behavior). */
+@media (max-width: 768px) {
+  #share-pill { display: none; }
+}
+.pwa-standalone #share-pill { display: none !important; }
+
+/* Extension pill button — same style as share/install pills */
+.ext-pill-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.top-bar-ext-btn {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
-  color: var(--accent);
+  background: color-mix(in srgb, var(--text-muted) 10%, transparent);
+  color: var(--text-secondary);
   border: none;
   border-radius: 10px;
   padding: 2px 10px;
@@ -114,14 +134,165 @@ button.top-bar-pill.pill-accent:hover { background: color-mix(in srgb, var(--acc
   cursor: pointer;
   white-space: nowrap;
   line-height: 1;
-  transition: background 0.15s;
+  transition: background 0.15s, color 0.15s;
 }
-.top-bar-share-btn .lucide { width: 12px; height: 12px; }
-.top-bar-share-btn:hover { background: color-mix(in srgb, var(--accent) 20%, transparent); }
+.top-bar-ext-btn .lucide { width: 12px; height: 12px; }
+.top-bar-ext-btn:hover { background: color-mix(in srgb, var(--text-muted) 18%, transparent); color: var(--text); }
 @media (max-width: 768px) {
-  .top-bar-share-btn { display: none; }
+  .top-bar-ext-btn span { display: none; }
 }
-.pwa-standalone .top-bar-share-btn { display: none !important; }
+
+/* Extension popover */
+.ext-popover {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  z-index: 200;
+  box-shadow: 0 8px 32px rgba(var(--shadow-rgb), 0.35);
+  width: 340px;
+}
+.ext-popover.visible { display: block; }
+.ext-popover-header { margin-bottom: 8px; }
+.ext-popover-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+.ext-experimental {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--warning, #f59e0b);
+  background: color-mix(in srgb, var(--warning, #f59e0b) 12%, transparent);
+  padding: 2px 6px;
+  border-radius: 6px;
+  vertical-align: middle;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  position: relative;
+  top: -1px;
+}
+.ext-popover-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.ext-popover-sub a {
+  color: var(--accent);
+  text-decoration: none;
+}
+.ext-popover-sub a:hover { text-decoration: underline; }
+.ext-popover-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+.ext-popover-download {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 8px 0;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.ext-popover-download .lucide { width: 14px; height: 14px; }
+.ext-popover-download:hover { opacity: 0.85; }
+.ext-popover-download:disabled { opacity: 0.5; cursor: default; }
+.ext-popover-status {
+  font-size: 11px;
+  color: var(--accent);
+  text-align: center;
+  margin-top: 6px;
+}
+.ext-popover-status.hidden { display: none; }
+.ext-popover-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 12px 0;
+}
+.ext-popover-guide-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+.ext-popover-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ext-popover-step {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+.ext-snum {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+  position: relative;
+  top: 1px;
+}
+.ext-popover-code {
+  font-family: "Roboto Mono", monospace;
+  font-size: 11px;
+  background: var(--bg-tertiary);
+  padding: 1px 5px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.ext-popover-code:hover { background: color-mix(in srgb, var(--accent) 15%, var(--bg-tertiary)); }
+
+/* Extension connected state */
+.top-bar-ext-btn.ext-connected {
+  background: color-mix(in srgb, var(--success, #22c55e) 12%, transparent);
+  color: var(--success, #22c55e);
+}
+.top-bar-ext-btn.ext-connected:hover {
+  background: color-mix(in srgb, var(--success, #22c55e) 20%, transparent);
+  color: var(--success, #22c55e);
+}
+.ext-popover-connected {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  background: color-mix(in srgb, var(--success, #22c55e) 10%, transparent);
+  color: var(--success, #22c55e);
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.ext-popover-connected .lucide { width: 15px; height: 15px; }
+.ext-popover-connected.hidden { display: none; }
 
 /* PWA install modal */
 .pwa-modal {
@@ -831,22 +1002,41 @@ button.top-bar-pill.pill-accent:hover { background: color-mix(in srgb, var(--acc
 
 .add-project-body { margin-bottom: 16px; }
 
-.add-project-input-wrap { position: relative; }
+.add-project-input-wrap { position: relative; display: flex; align-items: center; background: var(--input-bg); border: 1px solid var(--border); border-radius: 8px; transition: border-color 0.2s; }
+.add-project-input-wrap:focus-within { border-color: var(--text-dimmer); }
+
+.add-project-prefix {
+  flex-shrink: 0;
+  padding: 5px 0 5px 8px;
+  font-size: 12px;
+  font-family: "Roboto Mono", monospace;
+  color: var(--accent);
+  background: var(--bg-alt);
+  border-radius: 5px 0 0 5px;
+  white-space: nowrap;
+  user-select: none;
+  pointer-events: none;
+  margin: 4px 0 4px 4px;
+  padding: 3px 6px;
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  border-radius: 4px;
+}
+.add-project-prefix.hidden { display: none; }
 
 #add-project-input {
-  width: 100%;
-  background: var(--input-bg);
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: none;
   color: var(--text);
   font-size: 13px;
   font-family: "Roboto Mono", monospace;
-  padding: 10px 12px;
+  padding: 10px 12px 10px 6px;
   outline: none;
-  transition: border-color 0.2s;
 }
+.add-project-prefix.hidden + #add-project-input { padding-left: 12px; }
 
-#add-project-input:focus { border-color: var(--text-dimmer); }
+#add-project-input:focus { border-color: transparent; }
 #add-project-input::placeholder { color: var(--text-muted); font-family: "Pretendard", system-ui, sans-serif; }
 
 #add-project-suggestions {
@@ -1075,4 +1265,3 @@ button.top-bar-pill.pill-accent:hover { background: color-mix(in srgb, var(--acc
   margin-top: 1.2rem;
   letter-spacing: 0.03em;
 }
-

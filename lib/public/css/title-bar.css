@@ -23,8 +23,8 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: color-mix(in srgb, var(--success) 12%, transparent);
-  color: var(--success);
+  background: color-mix(in srgb, #3b82f6 12%, transparent);
+  color: #3b82f6;
   border: none;
   border-radius: 10px;
   padding: 2px 10px;
@@ -38,7 +38,7 @@
 }
 
 .top-bar-update-btn .lucide { width: 12px; height: 12px; }
-.top-bar-update-btn:hover { background: color-mix(in srgb, var(--success) 20%, transparent); }
+.top-bar-update-btn:hover { background: color-mix(in srgb, #3b82f6 20%, transparent); }
 
 /* --- Top bar actions (right-aligned group) --- */
 .top-bar-actions {
@@ -342,6 +342,7 @@
   gap: 6px;
   width: 80px;
   cursor: default;
+  position: relative;
 }
 
 .header-context-bar {
@@ -368,6 +369,191 @@
   font-size: 10px;
   color: var(--text-dimmer);
   white-space: nowrap;
+}
+
+/* --- Context usage popover --- */
+.context-usage-popover {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: -12px;
+  width: 320px;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  box-shadow: 0 4px 16px rgba(var(--shadow-rgb), 0.4);
+  z-index: 200;
+  animation: ctx-popover-in 0.12s ease-out;
+  line-height: 1.5;
+}
+
+.context-usage-popover.hidden { display: none; }
+
+@keyframes ctx-popover-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Header */
+.ctx-pop-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 12px;
+}
+
+.ctx-pop-model {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-family: "Roboto Mono", monospace;
+}
+
+.ctx-pop-pct {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text);
+  font-family: "Roboto Mono", monospace;
+  letter-spacing: -0.5px;
+}
+
+.ctx-pop-tokens {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: "Roboto Mono", monospace;
+  margin-left: 6px;
+  font-weight: 400;
+}
+
+/* Stacked category bar */
+.ctx-cat-bar {
+  display: flex;
+  height: 10px;
+  border-radius: 5px;
+  overflow: hidden;
+  background: var(--border);
+  margin-bottom: 12px;
+  gap: 1px;
+}
+
+.ctx-cat-bar > div {
+  height: 100%;
+  min-width: 3px;
+  transition: width 0.3s ease;
+  border-radius: 2px;
+}
+
+/* Category legend */
+.ctx-cat-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-bottom: 4px;
+}
+
+.ctx-cat-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  font-size: 12px;
+  padding: 3px 0;
+  border-radius: 4px;
+  transition: background 0.1s ease;
+}
+
+.ctx-cat-item:hover {
+  background: rgba(var(--overlay-rgb), 0.03);
+}
+
+.ctx-emoji {
+  display: inline-block;
+  filter: grayscale(1);
+  font-size: 12px;
+  transition: filter 0.15s ease;
+}
+
+.ctx-cat-item:hover .ctx-emoji,
+.ctx-pop-row:hover .ctx-emoji,
+.ctx-pop-note .ctx-emoji {
+  filter: grayscale(0);
+}
+
+.ctx-cat-name {
+  color: var(--text-secondary);
+}
+
+.ctx-cat-value {
+  font-family: "Roboto Mono", monospace;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Sections */
+.ctx-pop-divider {
+  border: none;
+  height: 1px;
+  background: var(--border-subtle);
+  margin: 10px 0;
+}
+
+.ctx-pop-section-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.8px;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.ctx-pop-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  padding: 3px 0;
+  border-radius: 4px;
+  transition: background 0.1s ease;
+}
+
+.ctx-pop-row:hover {
+  background: rgba(var(--overlay-rgb), 0.03);
+}
+
+.ctx-pop-row-label {
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-right: 12px;
+}
+
+.ctx-pop-row-value {
+  font-family: "Roboto Mono", monospace;
+  color: var(--text-muted);
+  font-size: 11px;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.ctx-pop-note {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 10px;
+  text-align: center;
+  padding: 4px 8px;
+  background: var(--border-subtle);
+  border-radius: 4px;
+  font-family: "Roboto Mono", monospace;
+}
+
+@media (max-width: 400px) {
+  .context-usage-popover {
+    width: 260px;
+    right: -8px;
+  }
 }
 
 /* --- Shared pill style for rate limit & fast mode --- */

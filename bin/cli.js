@@ -1507,6 +1507,7 @@ async function forkDaemon(mode, keepAwake, extraProjects, addCwd, wantOsUsers) {
     if (prevProjectMap[cwd]) {
       if (prevProjectMap[cwd].visibility) cwdEntry.visibility = prevProjectMap[cwd].visibility;
       if (prevProjectMap[cwd].allowedUsers) cwdEntry.allowedUsers = prevProjectMap[cwd].allowedUsers;
+      if (prevProjectMap[cwd].ownerId) cwdEntry.ownerId = prevProjectMap[cwd].ownerId;
     }
     allProjects.push(cwdEntry);
     usedSlugs.push(slug);
@@ -1525,6 +1526,7 @@ async function forkDaemon(mode, keepAwake, extraProjects, addCwd, wantOsUsers) {
       if (prevProjectMap[rp.path]) {
         if (prevProjectMap[rp.path].visibility) rpEntry.visibility = prevProjectMap[rp.path].visibility;
         if (prevProjectMap[rp.path].allowedUsers) rpEntry.allowedUsers = prevProjectMap[rp.path].allowedUsers;
+        if (prevProjectMap[rp.path].ownerId) rpEntry.ownerId = prevProjectMap[rp.path].ownerId;
       }
       allProjects.push(rpEntry);
     }
@@ -1879,19 +1881,13 @@ async function restartDaemonWithTLS(config, callback) {
   }
   clearStaleConfig();
 
-  // Re-fork with TLS
-  var newConfig = {
+  // Re-fork with TLS (preserve all existing config fields)
+  var newConfig = Object.assign({}, config, {
     pid: null,
-    port: config.port,
-    pinHash: config.pinHash || null,
     tls: true,
     builtinCert: hasBuiltinCert,
     mkcertDetected: mkcertDetected,
-    debug: config.debug || false,
-    keepAwake: config.keepAwake || false,
-    dangerouslySkipPermissions: config.dangerouslySkipPermissions || false,
-    projects: config.projects || [],
-  };
+  });
 
   ensureConfigDir();
   saveConfig(newConfig);
