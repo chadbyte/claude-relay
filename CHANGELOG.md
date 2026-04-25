@@ -1,3 +1,10 @@
+## [2.35.1-beta.1](https://github.com/chadbyte/clay/compare/v2.35.0...v2.35.1-beta.1) (2026-04-25)
+
+
+### Bug Fixes
+
+* **mates:** widen mention context to 32KB byte budget instead of per-turn 500-char truncation ([78fb881](https://github.com/chadbyte/clay/commit/78fb8819edcb1cfcee3a9fbbe6f032a3e81f323c))
+
 # [2.35.0](https://github.com/chadbyte/clay/compare/v2.34.0...v2.35.0) (2026-04-25)
 
 
