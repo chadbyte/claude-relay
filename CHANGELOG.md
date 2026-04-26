@@ -1,3 +1,11 @@
+# [2.36.0-beta.1](https://github.com/chadbyte/clay/compare/v2.35.1...v2.36.0-beta.1) (2026-04-26)
+
+
+### Features
+
+* **mention:** add plain Claude/Codex mentions and fix mobile chip flow ([d68c693](https://github.com/chadbyte/clay/commit/d68c693d72cf7098032a1de961a7330d8921b2eb))
+* **mention:** support user-to-user [@mentions](https://github.com/mentions) with notifications and push ([618e508](https://github.com/chadbyte/clay/commit/618e508866973b4bb59885abd370c6b74b9d74e2))
+
 ## [2.35.1](https://github.com/chadbyte/clay/compare/v2.35.0...v2.35.1) (2026-04-25)
 
 

@@ -1,7 +1,7 @@
 {
   "name": "clay-server",
-  "version": "2.35.1",
-  "description": "Self-hosted Claude Code in your browser. Multi-session, multi-user, push notifications.",
+  "version": "2.36.0-beta.1",
+  "description": "Self-hosted team workspace for Claude Code and Codex. Multi-user, browser-based, with persistent AI mates.",
   "bin": {
     "clay-server": "./bin/cli.js",
     "claude-relay": "./bin/claude-relay.js",
@@ -20,21 +20,33 @@
   "keywords": [
     "claude",
     "claude-code",
-    "cli",
+    "claude-agent-sdk",
+    "codex",
+    "codex-cli",
+    "openai",
+    "self-hosted",
+    "multi-user",
+    "team",
+    "workspace",
+    "ai-agent",
+    "ai-coding-agent",
+    "mates",
+    "ralph-loop",
+    "cron",
     "mobile",
-    "remote",
-    "relay",
+    "pwa",
     "web-ui",
-    "tailscale"
+    "browser",
+    "relay"
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/chadbyte/claude-relay.git"
+    "url": "git+https://github.com/chadbyte/clay.git"
   },
   "bugs": {
-    "url": "https://github.com/chadbyte/claude-relay/issues"
+    "url": "https://github.com/chadbyte/clay/issues"
   },
-  "homepage": "https://github.com/chadbyte/claude-relay#readme",
+  "homepage": "https://github.com/chadbyte/clay#readme",
   "author": "Chad",
   "dependencies": {
     "@anthropic-ai/claude-agent-sdk": "^0.2.112",
