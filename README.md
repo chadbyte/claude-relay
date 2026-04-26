@@ -128,6 +128,9 @@ No. Clay drives Claude Code through the [Claude Agent SDK](https://www.npmjs.com
 **"Can I run Claude Code and Codex in the same workspace?"**
 Yes. Pick a vendor when you open a session. Switch per session. Same projects, same Mates, same memory.
 
+**"How are Mates different from Claude Code's sub-agents?"**
+Sub-agents are ephemeral specialists spawned inside a single Claude Code session — a role and a system prompt for one task, then forgotten when the task ends. Mates are persistent teammates with their own knowledge files and memory that survive every session. A sub-agent forgets you the moment it returns; a Mate remembers your codebase, your decisions, and your conventions across months of work. @mention a Mate mid-session, DM it between sessions, or drop several into a debate.
+
 **"Does my code leave my machine?"**
 Only as model API calls (the same as using the CLI directly). Sessions, Mates, knowledge, and settings all stay on disk.
 
