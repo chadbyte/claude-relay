@@ -1,3 +1,10 @@
+# [2.36.0-beta.2](https://github.com/chadbyte/clay/compare/v2.36.0-beta.1...v2.36.0-beta.2) (2026-04-27)
+
+
+### Bug Fixes
+
+* **yoke:** resolve per-user Claude binary in worker for OS-level multi-user mode ([df35864](https://github.com/chadbyte/clay/commit/df35864ad99a5d43babc6978dd08104f51bbccfb))
+
 # [2.36.0-beta.1](https://github.com/chadbyte/clay/compare/v2.35.1...v2.36.0-beta.1) (2026-04-26)
 
 
