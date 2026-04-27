@@ -2,7 +2,6 @@
 
 > **PHASE A — AMoS deferred.** Sessions do code work directly in this project. **No AMoS dispatch. No intent-payload handoff.** The agentic-program end-state contract (PROGRAM.md §1, PATTERN.md §4–§10) describes the destination, not today's operational mode. If you're tempted to hand work to AMoS, stop and execute it in-session. Tracked: project-agents lr-3129.
 
-- Never add `Co-Authored-By` lines to git commit messages.
 - Use `var` instead of `const`/`let`. No arrow functions.
 - Server-side: CommonJS (`require`). Client-side: ES modules (`import`).
 - Never commit, create PRs, merge, or comment on issues automatically. Only do these when explicitly asked.
