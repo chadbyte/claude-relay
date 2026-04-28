@@ -18,6 +18,24 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+.profile-popover.profile-popover-mobile {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  bottom: auto;
+  transform: translate(-50%, -50%);
+  width: calc(100vw - 32px);
+  max-width: 360px;
+  max-height: 80vh;
+  overflow-y: auto;
+  animation: profile-popover-mobile-in 0.15s ease-out;
+}
+
+@keyframes profile-popover-mobile-in {
+  from { opacity: 0; transform: translate(-50%, -45%); }
+  to { opacity: 1; transform: translate(-50%, -50%); }
+}
+
 /* Banner */
 .profile-banner {
   height: 52px;
