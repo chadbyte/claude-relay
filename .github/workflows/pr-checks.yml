@@ -1,0 +1,74 @@
+name: PR Checks
+
+# pull_request_target reads the workflow file from the BASE branch (main),
+# so existing PRs that were opened before this workflow existed still get
+# checked on reopen / new pushes. The trade-off: pull_request_target normally
+# grants secret access to fork code, which is dangerous. This workflow is
+# safe under that model because it:
+#   - never runs `npm install` (no install-script execution),
+#   - never reads secrets,
+#   - only runs `node --check` (parse, no execute) and a pure-stdlib reader
+#     script (scripts/check-client-imports.js).
+# We must still explicitly check out the PR head SHA below — otherwise we'd
+# be checking main's code instead of the PR's.
+on:
+  pull_request_target:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR head (or pushed ref)
+        uses: actions/checkout@v4
+        with:
+          # On pull_request_target, default checkout is the base branch.
+          # We want to inspect the PR's actual code, so pin to the head SHA.
+          # On push events, github.event.pull_request is null and this
+          # falls back to the default ref (the pushed commit).
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # No npm install — checks only need the standard library.
+
+      - name: Verify client ES module imports resolve
+        run: node scripts/check-client-imports.js
+
+      - name: Syntax check server-side JS (CommonJS)
+        run: |
+          # Server-side .js is CommonJS in this project (no "type" in
+          # package.json). `node --check` parses without executing.
+          # Excludes lib/public (client ES modules — different parse mode,
+          # covered by the import-resolution check above).
+          set -e
+          fail=0
+          while IFS= read -r f; do
+            if ! node --check "$f"; then
+              echo "Syntax error in: $f" >&2
+              fail=1
+            fi
+          done < <(find bin lib -name '*.js' -not -path 'lib/public/*')
+          exit $fail
+
+      - name: Syntax check client-side JS (ES modules)
+        run: |
+          set -e
+          fail=0
+          while IFS= read -r f; do
+            if ! node --check --input-type=module < "$f" >/dev/null 2>&1; then
+              # Re-run without redirect to surface the error.
+              echo "Syntax error in: $f" >&2
+              node --check --input-type=module < "$f" || true
+              fail=1
+            fi
+          done < <(find lib/public -name '*.js')
+          exit $fail
