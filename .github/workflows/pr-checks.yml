@@ -84,3 +84,6 @@ jobs:
             fi
           done < <(find lib/public -name '*.js')
           exit $fail
+
+      - name: Run tests
+        run: node --test --test-force-exit test/*.test.js
