@@ -33,4 +33,4 @@ jobs:
           exit $fail
       
       - name: Test
-        run: node --test test/
+        run: node --test test/*.test.js
