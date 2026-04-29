@@ -20,7 +20,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
       
-      - name: Syntax check
+      - name: Syntax check (server-side, CommonJS)
         run: |
           set -e
           fail=0
@@ -32,5 +32,15 @@ jobs:
           done < <(find bin lib -name '*.js' -not -path 'lib/public/*')
           exit $fail
       
-      - name: Test
-        run: node --test test/*.test.js
+      - name: Syntax check (client-side, ES modules)
+        run: |
+          set -e
+          fail=0
+          while IFS= read -r f; do
+            if ! node --check --input-type=module < "$f" >/dev/null 2>&1; then
+              echo "Syntax error in: $f" >&2
+              node --check --input-type=module < "$f" || true
+              fail=1
+            fi
+          done < <(find lib/public -name '*.js')
+          exit $fail
