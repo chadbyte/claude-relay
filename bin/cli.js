@@ -1503,11 +1503,9 @@ async function forkDaemon(mode, keepAwake, extraProjects, addCwd, wantOsUsers) {
         break;
       }
     }
-    // Restore access settings from previous config
+    // Restore project-level settings from previous config
     if (prevProjectMap[cwd]) {
-      if (prevProjectMap[cwd].visibility) cwdEntry.visibility = prevProjectMap[cwd].visibility;
-      if (prevProjectMap[cwd].allowedUsers) cwdEntry.allowedUsers = prevProjectMap[cwd].allowedUsers;
-      if (prevProjectMap[cwd].ownerId) cwdEntry.ownerId = prevProjectMap[cwd].ownerId;
+      cwdEntry = Object.assign({}, prevProjectMap[cwd], cwdEntry);
     }
     allProjects.push(cwdEntry);
     usedSlugs.push(slug);
@@ -1522,21 +1520,19 @@ async function forkDaemon(mode, keepAwake, extraProjects, addCwd, wantOsUsers) {
       var rpSlug = generateSlug(rp.path, usedSlugs);
       usedSlugs.push(rpSlug);
       var rpEntry = { path: rp.path, slug: rpSlug, title: rp.title || undefined, icon: rp.icon || undefined, addedAt: rp.addedAt || Date.now() };
-      // Restore access settings from previous config
+      // Restore project-level settings from previous config
       if (prevProjectMap[rp.path]) {
-        if (prevProjectMap[rp.path].visibility) rpEntry.visibility = prevProjectMap[rp.path].visibility;
-        if (prevProjectMap[rp.path].allowedUsers) rpEntry.allowedUsers = prevProjectMap[rp.path].allowedUsers;
-        if (prevProjectMap[rp.path].ownerId) rpEntry.ownerId = prevProjectMap[rp.path].ownerId;
+        rpEntry = Object.assign({}, prevProjectMap[rp.path], rpEntry);
       }
       allProjects.push(rpEntry);
     }
   }
 
-  var config = {
+  var config = Object.assign({}, prevConfig || {}, {
     pid: null,
     port: port,
     host: host,
-    pinHash: mode === "multi" && cliPin ? generateAuthToken(cliPin) : null,
+    pinHash: mode === "multi" && cliPin ? generateAuthToken(cliPin) : (prevConfig && prevConfig.pinHash) || null,
     tls: hasTls,
     builtinCert: hasBuiltinCert,
     mkcertDetected: mkcertDetected,
@@ -1548,7 +1544,7 @@ async function forkDaemon(mode, keepAwake, extraProjects, addCwd, wantOsUsers) {
     mode: mode || "single",
     setupCompleted: true,
     projects: allProjects,
-  };
+  });
 
   ensureConfigDir();
   saveConfig(config);
@@ -1687,8 +1683,7 @@ async function devMode(mode, keepAwake, existingPinHash, wantOsUsers) {
   }
   // Restore access settings for cwd from previous config
   if (prevDevProjectMap[cwd]) {
-    if (prevDevProjectMap[cwd].visibility) cwdDevEntry.visibility = prevDevProjectMap[cwd].visibility;
-    if (prevDevProjectMap[cwd].allowedUsers) cwdDevEntry.allowedUsers = prevDevProjectMap[cwd].allowedUsers;
+    cwdDevEntry = Object.assign({}, prevDevProjectMap[cwd], cwdDevEntry);
   }
   var allProjects = [cwdDevEntry];
   var usedSlugs = [slug];
@@ -1697,15 +1692,14 @@ async function devMode(mode, keepAwake, existingPinHash, wantOsUsers) {
     var rpSlug = generateSlug(rp.path, usedSlugs);
     usedSlugs.push(rpSlug);
     var rpDevEntry = { path: rp.path, slug: rpSlug, title: rp.title || undefined, icon: rp.icon || undefined, addedAt: rp.addedAt || Date.now() };
-    // Restore access settings from previous config
+    // Restore project-level settings from previous config
     if (prevDevProjectMap[rp.path]) {
-      if (prevDevProjectMap[rp.path].visibility) rpDevEntry.visibility = prevDevProjectMap[rp.path].visibility;
-      if (prevDevProjectMap[rp.path].allowedUsers) rpDevEntry.allowedUsers = prevDevProjectMap[rp.path].allowedUsers;
+      rpDevEntry = Object.assign({}, prevDevProjectMap[rp.path], rpDevEntry);
     }
     allProjects.push(rpDevEntry);
   }
 
-  var config = {
+  var config = Object.assign({}, prevDevConfig || {}, {
     pid: null,
     port: port,
     host: host,
@@ -1720,7 +1714,7 @@ async function devMode(mode, keepAwake, existingPinHash, wantOsUsers) {
     setupCompleted: true,
     projects: allProjects,
     osUsers: wantOsUsers || (prevDevConfig ? (prevDevConfig.osUsers || false) : false),
-  };
+  });
 
   ensureConfigDir();
   saveConfig(config);
