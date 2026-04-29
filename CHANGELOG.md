@@ -1,3 +1,11 @@
+## [2.36.1-beta.1](https://github.com/chadbyte/clay/compare/v2.36.0...v2.36.1-beta.1) (2026-04-29)
+
+
+### Bug Fixes
+
+* **app-messages:** drop stray agent-picker import and case blocks ([edea532](https://github.com/chadbyte/clay/commit/edea532324cd237c47ccc371befc05ba1201e264)), closes [chadbyte/clay#342](https://github.com/chadbyte/clay/issues/342)
+* **scroll:** pin viewport to bottom on resume so deferred layout can't strand user mid-conversation ([34ffc1a](https://github.com/chadbyte/clay/commit/34ffc1a07f9dc602b387bd23bcd3bc80cda11575)), closes [#messages](https://github.com/chadbyte/clay/issues/messages)
+
 # [2.36.0](https://github.com/chadbyte/clay/compare/v2.35.1...v2.36.0) (2026-04-27)
 
 
