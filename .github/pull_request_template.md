@@ -1,5 +1,5 @@
 ## Summary
-<!-- 一句话描述这个 PR 做了什么 -->
+<!-- Describe what this PR does in one sentence -->
 
 ## Changes
 - 
@@ -10,7 +10,7 @@
 - [ ] Documentation updated
 
 ## Screenshots (if applicable)
-<!-- 截图或 GIF -->
+<!-- Screenshots or GIFs -->
 
 ## Related Issues
 Closes #
