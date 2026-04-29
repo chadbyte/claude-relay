@@ -482,6 +482,32 @@
     margin-left: auto;
   }
 
+  /* Close button on session items */
+  .mobile-session-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    color: var(--text-dimmer);
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-left: 2px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .mobile-session-close svg {
+    width: 14px;
+    height: 14px;
+    display: block;
+  }
+
+  .mobile-session-close:active {
+    background: rgba(var(--overlay-rgb), 0.08);
+    color: var(--text);
+  }
+
   /* --- Session items inside sheet --- */
   .mobile-session-item {
     display: flex;
@@ -649,6 +675,34 @@
     background: rgba(var(--warning-rgb, 234, 179, 8), 0.15);
     color: var(--warning, #eab308);
     flex-shrink: 0;
+  }
+
+  .mobile-loop-more-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border: none;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text-dimmer);
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+    margin-left: 2px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .mobile-loop-more-btn svg {
+    width: 14px;
+    height: 14px;
+    display: block;
+  }
+
+  .mobile-loop-more-btn:active {
+    background: rgba(var(--overlay-rgb), 0.08);
+    color: var(--text);
   }
 
   .mobile-loop-children {
