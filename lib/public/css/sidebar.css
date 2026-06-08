@@ -1040,6 +1040,28 @@
   opacity: 1;
 }
 
+/* Split button: main action + chevron sharing one grid cell. */
+.session-top-action-split {
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  min-width: 0;
+}
+
+.session-top-action-split .split-main {
+  flex: 1 1 auto;
+  width: auto;
+}
+
+.session-top-action-split .split-chevron {
+  flex: 0 0 auto;
+  width: 28px;
+  min-width: 28px;
+  padding: 0;
+  justify-content: center;
+  gap: 0;
+}
+
 .session-favorites-section {
   min-height: 6px;
   margin: 0 8px;
