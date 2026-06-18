@@ -37,6 +37,7 @@ var { loadConfig, saveConfig, configPath, socketPath, logPath, ensureConfigDir, 
 var { sendIPCCommand } = require("../lib/ipc");
 var { generateAuthToken } = require("../lib/server");
 var { enableMultiUser, disableMultiUser, hasAdmin, isMultiUser, getSetupCode } = require("../lib/users");
+var clayStudioCert = require("../lib/clay-studio-cert");
 
 function openUrl(url) {
   try {
@@ -567,6 +568,12 @@ function getAllIPs() {
 
 function getBuiltinCert() {
   try {
+    // Prefer the cert fetched at runtime from the clay.studio endpoint (always
+    // current) over the copy baked into the package (expires ~90 days after
+    // publish). forkDaemon refreshes this cache before we get here.
+    var fetched = clayStudioCert.cachedCertFiles();
+    if (fetched) return { key: fetched.key, cert: fetched.cert, caRoot: null, builtin: true };
+
     var certDir = path.join(__dirname, "..", "lib", "certs");
     var keyPath = path.join(certDir, "privkey.pem");
     var certPath = path.join(certDir, "fullchain.pem");
@@ -1458,13 +1465,19 @@ async function forkDaemon(mode, keepAwake, extraProjects, addCwd, wantOsUsers) {
   var mkcertDetected = false;
 
   if (useHttps) {
+    // Refresh the runtime cert cache from the clay.studio endpoint (best effort,
+    // short timeout) so getBuiltinCert picks up the current auto-renewed cert
+    // instead of the stale baked copy. Skipped when the user forces mkcert.
+    if (!forceMkcert) {
+      try { await clayStudioCert.refreshCache(5000); } catch (e) {}
+    }
     var certPaths = ensureCerts(ip);
     if (certPaths) {
       hasTls = true;
       if (certPaths.builtin) hasBuiltinCert = true;
       if (certPaths.mkcertDetected) mkcertDetected = true;
     } else {
-      log(sym.warn + "  " + a.yellow + "HTTPS unavailable" + a.reset + a.dim + " · mkcert not installed" + a.reset);
+      log(sym.warn + "  " + a.yellow + "HTTPS unavailable" + a.reset + a.dim + " · could not obtain a certificate" + a.reset);
     }
   }
 
@@ -1640,6 +1653,12 @@ async function devMode(mode, keepAwake, existingPinHash, wantOsUsers) {
   var mkcertDetected = false;
 
   if (useHttps) {
+    // Refresh the runtime cert cache from the clay.studio endpoint (best effort,
+    // short timeout) so getBuiltinCert picks up the current auto-renewed cert
+    // instead of the stale baked copy. Skipped when the user forces mkcert.
+    if (!forceMkcert) {
+      try { await clayStudioCert.refreshCache(5000); } catch (e) {}
+    }
     var certPaths = ensureCerts(ip);
     if (certPaths) {
       hasTls = true;
@@ -1851,6 +1870,9 @@ async function devMode(mode, keepAwake, existingPinHash, wantOsUsers) {
 // ==============================
 async function restartDaemonWithTLS(config, callback) {
   var ip = getLocalIP();
+  if (!forceMkcert) {
+    try { await clayStudioCert.refreshCache(5000); } catch (e) {}
+  }
   var certPaths = ensureCerts(ip);
   if (!certPaths) {
     callback(config);
