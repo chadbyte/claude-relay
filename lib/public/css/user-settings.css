@@ -360,6 +360,15 @@
   color: var(--text-muted);
 }
 
+/* Padded body for cards that hold free content (not a toggle/field row),
+   so their inset matches the 16px used by toggle rows above/below. */
+#user-settings .settings-card-body {
+  padding: 14px 16px;
+}
+#user-settings .settings-card-body > .settings-label:first-child {
+  margin-bottom: 2px;
+}
+
 /* Auto-approve allow-list editor */
 #us-claude-allow-list {
   width: 100%;

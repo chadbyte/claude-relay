@@ -1061,24 +1061,26 @@
             <label class="settings-toggle-row">
               <div>
                 <span class="settings-label">Open Claude as terminal (TUI)</span>
-                <div class="settings-hint">Render Claude sessions in an embedded `claude` terminal instead of Clay's chat UI. Keeps usage in the Interactive billing bucket (post 2026-06-15 Agent SDK split). Applies on the next session open.</div>
+                <div class="settings-hint">Render Claude sessions in an embedded <code>claude</code> terminal instead of Clay's chat UI. Applies on the next session open.</div>
               </div>
               <input type="checkbox" id="us-claude-open-mode">
               <span class="toggle-track"><span class="toggle-thumb"></span></span>
             </label>
           </div>
           <div class="settings-card">
-            <div class="settings-label">Auto-approved commands</div>
-            <div class="settings-hint">Extra patterns Clay should pre-approve in your <code>~/.claude/settings.json</code> so TUI sessions don't prompt for them. One per line. Examples: <code>Bash(npm test:*)</code>, <code>Read</code>, <code>mcp__myserver__*</code>. Clay's safe defaults (read-only tools, common git/ls/grep) are always applied on top and shown below for reference.</div>
-            <textarea id="us-claude-allow-list" rows="6" spellcheck="false" placeholder="Bash(npm test:*)&#10;Bash(make:*)"></textarea>
-            <div class="settings-allow-actions">
-              <button type="button" id="us-claude-allow-save" class="settings-action">Save</button>
-              <span id="us-claude-allow-status" class="settings-allow-status"></span>
+            <div class="settings-card-body">
+              <div class="settings-label">Auto-approved commands</div>
+              <div class="settings-hint">Extra patterns Clay should pre-approve in your <code>~/.claude/settings.json</code> so TUI sessions don't prompt for them. One per line. Examples: <code>Bash(npm test:*)</code>, <code>Read</code>, <code>mcp__myserver__*</code>. Clay's safe defaults (read-only tools, common git/ls/grep) are always applied on top and shown below for reference.</div>
+              <textarea id="us-claude-allow-list" rows="6" spellcheck="false" placeholder="Bash(npm test:*)&#10;Bash(make:*)"></textarea>
+              <div class="settings-allow-actions">
+                <button type="button" id="us-claude-allow-save" class="settings-action">Save</button>
+                <span id="us-claude-allow-status" class="settings-allow-status"></span>
+              </div>
+              <details class="settings-allow-defaults">
+                <summary>Show Clay's managed defaults</summary>
+                <div id="us-claude-allow-managed" class="settings-allow-managed"></div>
+              </details>
             </div>
-            <details class="settings-allow-defaults">
-              <summary>Show Clay's managed defaults</summary>
-              <div id="us-claude-allow-managed" class="settings-allow-managed"></div>
-            </details>
           </div>
         </div>
 
