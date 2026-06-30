@@ -1151,6 +1151,7 @@
           </optgroup>
           <optgroup label="Server">
             <option value="keep-awake" class="hidden" id="settings-keep-awake-opt">Keep Awake</option>
+            <option value="inherit-groups" class="hidden" id="settings-inherit-groups-opt">User Groups</option>
             <option value="restart">Restart</option>
             <option value="shutdown">Shutdown</option>
           </optgroup>
@@ -1177,6 +1178,7 @@
           <div class="settings-nav-separator"></div>
           <div class="settings-nav-category">Server</div>
           <button class="settings-nav-item hidden" data-section="keep-awake" id="settings-keep-awake-nav"><span>Keep Awake</span></button>
+          <button class="settings-nav-item hidden settings-admin-only" data-section="inherit-groups" id="settings-inherit-groups-nav"><span>User Groups</span></button>
           <button class="settings-nav-item" data-section="restart"><span>Restart</span></button>
           <button class="settings-nav-item settings-nav-danger" data-section="shutdown"><span>Shutdown</span></button>
         </div>
@@ -1426,6 +1428,19 @@
                 <div class="settings-hint">Prevent the system from sleeping while the server is running (macOS only).</div>
               </div>
               <input type="checkbox" id="settings-keep-awake">
+              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            </label>
+          </div>
+        </div>
+        <div class="server-settings-section hidden settings-admin-only" data-section="inherit-groups" id="settings-inherit-groups-section">
+          <h2>User Groups</h2>
+          <div class="settings-card">
+            <label class="settings-toggle-row">
+              <div>
+                <span class="settings-label">Inherit supplementary groups</span>
+                <div class="settings-hint">Give each session the user's full group membership (docker, video, etc.), matching a normal login. Disable to run sessions with only the primary group. Requires <code>setpriv</code> (util-linux). Applies to new sessions.</div>
+              </div>
+              <input type="checkbox" id="settings-inherit-groups">
               <span class="toggle-track"><span class="toggle-thumb"></span></span>
             </label>
           </div>
