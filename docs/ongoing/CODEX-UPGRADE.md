@@ -1,8 +1,8 @@
 # Codex App-Server Upgrade Tracker
 
-Installed: `@openai/codex@0.124.0`
-Latest: `@openai/codex@0.128.0` (npm)
-Updated: 2026-05-08
+Installed: `@openai/codex@0.142.4`
+Latest: `@openai/codex@0.142.4` (npm)
+Updated: 2026-07-01
 
 Tracks Clay's integration against the OpenAI Codex CLI / `codex app-server` JSON-RPC protocol. Mirrors the structure of `SDK-UPGRADE.md` so the same review cadence applies.
 
@@ -107,7 +107,9 @@ These are the `Codex: x` rows in `SDK-UPGRADE.md`. When the platform-common feat
 
 ### Codex-specific items (no SDK counterpart)
 
-Empty for now. Fill as we encounter Codex protocol behaviors with no Claude analog.
+| Item | Version range | Status | Notes |
+|------|---------------|--------|-------|
+| Binary layout moved `vendor/<triple>/codex/` → `vendor/<triple>/bin/` | 0.124 → 0.142 | **Fixed** | `findCodexPath()` in `codex-app-server.js` would not find the binary after the bump (Codex fails to launch entirely). Resolver now probes both layouts (`bin/codex` then `codex/codex`) and returns the first that exists. |
 
 
 ---
@@ -138,13 +140,13 @@ For protocol-level diagnosis, the codex app-server speaks JSON-RPC 2.0; you can 
 
 ## Upgrade Steps
 
-### 0.124.0 -> 0.128.0 (next)
+### 0.124.0 -> 0.142.4 (done, npm bump + binary-path fix; UI matrix pending)
 
-1. Run the verification matrix above against `0.128.0`.
-2. `npm install @openai/codex@0.128.0`
-3. Update `package.json` semver caret if breaking; otherwise let the caret pick it up.
-4. Smoke test the matrix above end to end.
-5. If protocol fields changed, update `lib/yoke/adapters/codex.js` `convertItemToEvents` mapping and add a row in this file.
+1. ~~`npm install @openai/codex@^0.142.4` (package.json caret bumped to `^0.142.4`).~~
+2. ~~**Breaking:** binary moved to `vendor/<triple>/bin/codex`. Fixed `findCodexPath()` to probe both layouts (see Codex-specific items).~~
+3. ~~Headless protocol smoke: spawn `app-server`, `initialize` handshake succeeds (response `userAgent` reports `0.142.4`). Core JSON-RPC protocol intact.~~
+4. **Pending (needs runtime/UI):** the full verification matrix above — approval, file edit, plan, MCP tool, compaction, interrupt, rewind. The headless smoke only covers spawn + initialize.
+5. If any matrix step regresses, update `lib/yoke/adapters/codex.js` `convertItemToEvents` and add a row here.
 
 ### Future bumps
 
