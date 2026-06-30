@@ -26,10 +26,9 @@ Next up, in order (detail under "New in 0.2.133-0.3.196"):
 2. **#73-74** — model-refusal messages (fallback + no-fallback)
 3. **#79 + #75** — `informational` + `permission_denied` system messages
 4. **#76-78** — `reloadSkills` (supersedes #8), `setMcpPermissionModeOverride`, `thinking_tokens`
-5. **#80-81** — `toolAliases`, `backgroundTasks`
-6. **#82-84** — `commands_changed`, `worker_shutting_down`, verify built-in tool surface (#84)
+5. **#82-84** — `commands_changed`, `worker_shutting_down`, verify built-in tool surface (#84)
 
-Done: npm bump + #68-71. Deferred: #85 (experimental usage API).
+Done: npm bump + #68-79 (incl. #76/#77 client UI). Deferred: #80 toolAliases, #81 backgroundTasks (no driver in Clay), #85 (experimental usage API).
 
 
 ---
@@ -210,8 +209,8 @@ Largest delta in the tracker: minor bump 0.2 -> 0.3 plus ~64 patches. Derived by
 | 77 | `setMcpPermissionModeOverride(server, 'default'\|'auto'\|null)` | **Do** | x | Realizes the runtime half of #12 (per-server MCP permission mode). Returns `warning` on fuzzy server-name match | `sdk-bridge.js`, `project-mcp.js` UI |
 | 78 | `SDKThinkingTokensMessage` (`subtype:'thinking_tokens'`) | **Do** | x | Live thinking-token estimate (`estimated_tokens`, `_delta`). Feeds #16/#17 (thinking display, ttft) | `sdk-message-processor.js`, client |
 | 79 | `SDKInformationalMessage` (`subtype:'informational'`) | **Do** | x | Generalizes #4 notification: `level: info\|notice\|suggestion\|warning`, `tool_use_id` dedupe, `prevent_continuation`. Honor the render level and stop-on-`prevent_continuation` | `sdk-message-processor.js`, client |
-| 80 | `Options.toolAliases: Record<string,string>` | **Do** | x | Remap a tool name to another (e.g. `{Bash:'mcp__workspace__bash'}`). Complements `disallowedTools`. Useful for routing built-ins to sandboxed equivalents | `sdk-bridge.js` query options |
-| 81 | `backgroundTasks(toolUseId?)` + `BackgroundTaskSummary` | **Do** | x | Query/poll background task state from the relay. Pairs with the background-agent UX | `sdk-bridge.js`, client task UI |
+| 80 | `Options.toolAliases: Record<string,string>` | Defer | x | No driver in Clay: aliasing exists to route built-ins to sandboxed equivalents, but sandbox is not adopted (#88). Revisit if/when a tool-alias config or sandbox lands | `sdk-bridge.js` query options |
+| 81 | `backgroundTasks(toolUseId?)` + `BackgroundTaskSummary` | Defer | x | Polling API with no trigger/UI in Clay. Background-agent state is already pushed via `task_updated`/`task_notification` (incl. backgrounded). Revisit if an on-demand refresh is needed | `sdk-bridge.js`, client task UI |
 
 #### P3 - Low
 
@@ -237,14 +236,14 @@ Largest delta in the tracker: minor bump 0.2 -> 0.3 plus ~64 patches. Derived by
 
 | | Count | Items |
 |--|-------|-------|
-| **Do** | 12 | #72-83 |
-| of which **Codex-reusable** | 10 | #72, #75-83 |
+| **Do** | 10 | #72-79, #82-83 |
+| of which **Codex-reusable** | 8 | #72, #75-79, #82-83 |
 | **Verify** | 2 | #71, #84 |
-| Defer | 1 | #85 |
+| Defer | 3 | #80, #81, #85 |
 | Skip | 5 | #86-90 |
 | N/A (removed upstream) | 3 | #68-70 (retires #40-42) |
 
-Suggested order once the npm bump lands: #72 (host dialog / #14) -> #73-74 (refusal handling) -> #79 + #75 (informational + permission-denied messages) -> #76-78 -> remainder.
+Done so far: #68-79 (#72 host dialog, #73-74 refusal, #75 permission-denied, #76 reloadSkills, #77 MCP permission override, #78 thinking-tokens, #79 informational) plus #76/#77 client UI. Deferred #80/#81 (no driver in Clay). Remaining: #82-83 (messages) + #84 (verify).
 
 
 ---
