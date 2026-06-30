@@ -349,6 +349,12 @@ body.tui-suspended #tui-resume-bar {
   border: 1px solid var(--border);
   box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6);
 }
+/* Compact variant for short content (e.g. login wizard): smaller box so the
+   terminal hugs the content instead of leaving a tall empty area below. */
+.tui-modal.tui-modal-compact {
+  width: min(720px, 96%);
+  height: min(480px, 90%);
+}
 .tui-modal-header {
   display: flex;
   align-items: center;
