@@ -16,6 +16,25 @@ Codex multi-provider expansion planned. Items marked with Codex support are wort
 ---
 
 
+## Current Focus (2026-06-30)
+
+**On 0.3.196.** The npm bump and breaking-change verification are done (see header). Active work is the 0.2.133 -> 0.3.196 feature backlog below. Older 0.2.x items (#6-63) stay open as lower-priority backlog; fully completed history lives in the **Archive** at the bottom of this file.
+
+Next up, in order (detail under "New in 0.2.133-0.3.196"):
+
+1. **#72** — host dialog / `onUserDialog`; lands long-standing **#14** (OAuth / interactive auth)
+2. **#73-74** — model-refusal messages (fallback + no-fallback)
+3. **#79 + #75** — `informational` + `permission_denied` system messages
+4. **#76-78** — `reloadSkills` (supersedes #8), `setMcpPermissionModeOverride`, `thinking_tokens`
+5. **#80-81** — `toolAliases`, `backgroundTasks`
+6. **#82-84** — `commands_changed`, `worker_shutting_down`, verify built-in tool surface (#84)
+
+Done: npm bump + #68-71. Deferred: #85 (experimental usage API).
+
+
+---
+
+
 ## Master Item Table
 
 67 items total. Action: **Do** = implement, **Skip** = not needed. Codex: **x** = reusable for Codex (build as platform-common).
@@ -248,13 +267,7 @@ Suggested order once the npm bump lands: #72 (host dialog / #14) -> #73-74 (refu
 
 ## Upgrade Steps
 
-### 0.2.92 -> 0.2.112 (done)
-1. ~~Verify `SDKSessionInfo.systemPrompt` handling works with `string[]`~~
-2. ~~Verify `EditFileOutput.originalFile` null handling~~
-3. ~~Verify no references to removed `proactive` settings block~~
-4. ~~`npm install @anthropic-ai/claude-agent-sdk@0.2.112`~~
-5. ~~Add `'xhigh'` to effort selector UI~~
-6. ~~Handle new message types: `task_updated`, `notification`, `plugin_install`~~
+> Completed step lists (0.2.38 -> 0.2.112) are in the Archive at the bottom.
 
 ### 0.2.112 -> 0.2.132 (next)
 1. **Verify** `query()` `settingSources` behavior (#44). Pass explicit `settingSources: ["user", "project", "local"]` already (relay does this) — confirm no regression.
@@ -563,9 +576,21 @@ Decisions where Clay deliberately deviates from the Claude Code reference, beyon
 ---
 
 
-# Archive: 0.2.38 -> 0.2.76 (completed 2026-03-17)
+# Archive
 
-## Priority 1 - High (Functional gaps, user-facing impact) -- DONE
+## Upgrade Steps: 0.2.92 -> 0.2.112 (completed)
+
+1. ~~Verify `SDKSessionInfo.systemPrompt` handling works with `string[]`~~
+2. ~~Verify `EditFileOutput.originalFile` null handling~~
+3. ~~Verify no references to removed `proactive` settings block~~
+4. ~~`npm install @anthropic-ai/claude-agent-sdk@0.2.112`~~
+5. ~~Add `'xhigh'` to effort selector UI~~
+6. ~~Handle new message types: `task_updated`, `notification`, `plugin_install`~~
+
+
+## 0.2.38 -> 0.2.76 (completed 2026-03-17)
+
+### Priority 1 - High (Functional gaps, user-facing impact) -- DONE
 
 ### ~~1.1 `onElicitation` callback (since 0.2.39+)~~
 - ~~**Status:** Implemented~~
@@ -580,7 +605,7 @@ Decisions where Clay deliberately deviates from the Claude Code reference, beyon
 - ~~**Status:** Done~~
 
 
-## Priority 2 - Medium -- DONE
+### Priority 2 - Medium -- DONE
 
 ### ~~2.1 `listSessions()` (since 0.2.51+)~~
 - ~~**Status:** Implemented~~
@@ -598,7 +623,7 @@ Decisions where Clay deliberately deviates from the Claude Code reference, beyon
 - ~~**Status:** Implemented~~
 
 
-## Priority 3 - Low -- DONE
+### Priority 3 - Low -- DONE
 
 ### ~~3.1 `renameSession()` (since 0.2.74+)~~
 - ~~**Status:** Implemented~~
@@ -618,7 +643,7 @@ Decisions where Clay deliberately deviates from the Claude Code reference, beyon
 ### ~~3.6-3.8 Hook events, AgentDefinition.model, Settings export -- N/A~~
 
 
-## Already Implemented (0.2.38 -> 0.2.63 range)
+### Already Implemented (0.2.38 -> 0.2.63 range)
 
 - [x] `promptSuggestions` query option + `SDKPromptSuggestionMessage` handling
 - [x] `SDKRateLimitEvent` / `rate_limit_event` with UI display
