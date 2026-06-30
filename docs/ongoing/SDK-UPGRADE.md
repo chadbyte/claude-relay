@@ -1,10 +1,11 @@
 # Claude Agent SDK Upgrade Tracker
 
-Installed: `@anthropic-ai/claude-agent-sdk@0.2.112` (Claude Code 2.1.112)
-Latest: `@anthropic-ai/claude-agent-sdk@0.2.132` (Claude Code 2.1.132, 2026-05-07)
-Updated: 2026-05-07
+Installed: `@anthropic-ai/claude-agent-sdk@0.2.132` (declared `^0.2.132`)
+Latest: `@anthropic-ai/claude-agent-sdk@0.3.196` (2026-06-30)
+Updated: 2026-06-30
 
-Covers all unapplied changes from 0.2.80 through 0.2.132.
+Covers all unapplied changes from 0.2.80 through 0.3.196.
+The 0.2.133 -> 0.3.196 delta (items #68+) was derived by diffing the published `.d.ts` surface (installed 0.2.132 vs npm 0.3.196), not a changelog, so the "since" version tags inside that range are approximate.
 Codex multi-provider expansion planned. Items marked with Codex support are worth building as platform-common features.
 
 **Deliberate parity divergences** (decisions that go beyond per-API skip judgments) are tracked at the bottom of this file under "Parity Divergences" so the rationale is preserved alongside the upgrade trail.
@@ -75,9 +76,9 @@ Codex multi-provider expansion planned. Items marked with Codex support are wort
 
 | # | Item | Action | Codex | Current status | Where |
 |---|------|--------|:-----:|----------------|-------|
-| 40 | Assistant Worker module | Defer | | alpha, new module | -- |
-| 41 | `connectRemoteControl*` types | Defer | | alpha | -- |
-| 42 | Bridge enhancements | Defer | | alpha | -- |
+| 40 | ~~Assistant Worker module~~ | ~~Defer~~ | | **Retired** — `runAssistantWorker`/`AssistantWorker*` removed from SDK in 0.3.x (see #69) | -- |
+| 41 | ~~`connectRemoteControl*` types~~ | ~~Defer~~ | | **Retired** — removed from SDK in 0.3.x (see #70) | -- |
+| 42 | ~~Bridge enhancements~~ | ~~Defer~~ | | **Retired** — alpha bridge surface removed/reshaped in 0.3.x (see #70) | -- |
 | 43 | `taskBudget` query option | Defer | | alpha, beta header required | -- |
 
 
@@ -156,6 +157,73 @@ Diff is small — mostly Remote Control toggles and SessionStore alpha extension
 | # | Item | Action | Codex | Current status | Where |
 |---|------|--------|:-----:|----------------|-------|
 | 67 | `Options.sessionStoreFlush: 'batched' \| 'eager'` (0.2.128, alpha) | Defer | | Flush strategy for SessionStore mirroring. Relevant only if #58 lands | -- |
+
+
+### New in 0.2.133-0.3.196 (added 2026-06-30)
+
+Largest delta in the tracker: minor bump 0.2 -> 0.3 plus ~64 patches. Derived by diffing the published type surface, so version tags below are approximate. **Good news for the bump itself:** no `Options` key was removed, and Clay references none of the removed symbols, so installing `0.3.196` does not break existing call sites. The work is additive: new system-message subtypes to handle, the host-dialog (OAuth) callback that finally lands #14, and a few new query-handle methods.
+
+#### Removed upstream (no Clay impact — confirm & retire tracker entries)
+
+| # | Item | Action | Codex | Current status | Where |
+|---|------|--------|:-----:|----------------|-------|
+| 68 | `unstable_v2_*` session API + `SDKSession`/`SDKSessionOptions` removed | N/A | | Clay never adopted the v2 session API (grep clean). No action | -- |
+| 69 | Assistant Worker removed (`runAssistantWorker`, `AssistantWorker*`, `WorkerState*`) | N/A | | Upstream dropped the module. **Retires #40.** Clay never imported it | -- |
+| 70 | `connectRemoteControl*` + alpha bridge types removed | N/A | | Upstream dropped Remote Control client surface. **Retires #41-42.** Clay never used it | -- |
+| 71 | Permission/prompt types reshaped (`CanUseToolContext`, `InboundPrompt`, `PromptRequest`/`PromptResponse` removed) | **Verify** | | Clay references none of these names, but confirm our `canUseTool` callback still matches the current signature after the bump | `sdk-bridge.js` |
+
+#### P1 - High
+
+| # | Item | Action | Codex | Current status | Where |
+|---|------|--------|:-----:|----------------|-------|
+| 72 | `Options.onUserDialog` + `supportedDialogKinds` (`OnUserDialog`/`UserDialogRequest`/`UserDialogResult`) | **Do** | x | **Lands #14.** Host-rendered dialog channel (the OAuth/interactive-auth flow path). Must answer unrecognized `dialogKind` with `{behavior:'cancelled'}`; providing the callback without `supportedDialogKinds` opts in to nothing | `sdk-bridge.js` query options, client dialog |
+| 73 | `SDKModelRefusalFallbackMessage` (`subtype:'model_refusal_fallback'`) | **Do** | | Model refused and CLI fell back to another model (`direction: retry/revert/sticky`, `original_model`->`fallback_model`, `api_refusal_category`). Surface as a distinct notice instead of dropping silently | `sdk-message-processor.js`, client |
+| 74 | `SDKModelRefusalNoFallbackMessage` (`subtype:'model_refusal_no_fallback'`) | **Do** | | Hard refusal, no fallback (`content`, `api_refusal_explanation`, `refused_user_message_uuid`). Pairs with #73; render as a clear error state | `sdk-message-processor.js`, client |
+
+#### P2 - Medium
+
+| # | Item | Action | Codex | Current status | Where |
+|---|------|--------|:-----:|----------------|-------|
+| 75 | `SDKPermissionDeniedMessage` (`subtype:'permission_denied'`) | **Do** | x | Tool call denied: `tool_name`, `tool_use_id`, `decision_reason_type`/`decision_reason`, `agent_id` for subagents. Surface why a tool was blocked (distinct from hook-config #27) | `sdk-message-processor.js`, client |
+| 76 | `reloadSkills()` + `SDKControlReloadSkillsResponse` | **Do** | x | **Supersedes #8** (`reloadPlugins`). Hot-reload skills without a session restart | `sdk-bridge.js`, WS handler |
+| 77 | `setMcpPermissionModeOverride(server, 'default'\|'auto'\|null)` | **Do** | x | Realizes the runtime half of #12 (per-server MCP permission mode). Returns `warning` on fuzzy server-name match | `sdk-bridge.js`, `project-mcp.js` UI |
+| 78 | `SDKThinkingTokensMessage` (`subtype:'thinking_tokens'`) | **Do** | x | Live thinking-token estimate (`estimated_tokens`, `_delta`). Feeds #16/#17 (thinking display, ttft) | `sdk-message-processor.js`, client |
+| 79 | `SDKInformationalMessage` (`subtype:'informational'`) | **Do** | x | Generalizes #4 notification: `level: info\|notice\|suggestion\|warning`, `tool_use_id` dedupe, `prevent_continuation`. Honor the render level and stop-on-`prevent_continuation` | `sdk-message-processor.js`, client |
+| 80 | `Options.toolAliases: Record<string,string>` | **Do** | x | Remap a tool name to another (e.g. `{Bash:'mcp__workspace__bash'}`). Complements `disallowedTools`. Useful for routing built-ins to sandboxed equivalents | `sdk-bridge.js` query options |
+| 81 | `backgroundTasks(toolUseId?)` + `BackgroundTaskSummary` | **Do** | x | Query/poll background task state from the relay. Pairs with the background-agent UX | `sdk-bridge.js`, client task UI |
+
+#### P3 - Low
+
+| # | Item | Action | Codex | Current status | Where |
+|---|------|--------|:-----:|----------------|-------|
+| 82 | `SDKCommandsChangedMessage` (`subtype:'commands_changed'`) | **Do** | x | Slash-command list changed mid-session (`commands: SlashCommand[]`). Refresh the command palette live | `sdk-message-processor.js`, client |
+| 83 | `SDKWorkerShuttingDownMessage` (`subtype:'worker_shutting_down'`) | **Do** | x | Worker shutdown with `reason` (`host_exit`, `remote_control_disabled`, ...). Extends #7 TerminalReason for clean teardown messaging | `sdk-message-processor.js` |
+| 84 | New built-in tool surface (`Cron*`, `Task*`, `Workflow`, `Monitor`, `Artifact`, `Projects`, `PushNotification`, `RemoteTrigger`, `ScheduleWakeup`, `EnterPlanMode`, `ReportFindings`, `ReadMcpResourceDir`) | **Verify** | x | SDK now ships many built-in tool I/O types. Confirm Clay's tool display/permission UI renders unknown tool names with a generic fallback rather than breaking | `tools.js`, client tool display |
+| 85 | `usage_EXPERIMENTAL_MAY_CHANGE...()` + `SDKControlGetUsageResponse` | Defer | x | Richer usage than #51: `subscription_type` (pro/max/team/enterprise/null), per-model usage, rate-limit status. Method name explicitly warns "do not rely yet" — revisit when stabilized | `sdk-bridge.js` |
+
+#### Skip
+
+| # | Item | Action | Codex | Current status | Where |
+|---|------|--------|:-----:|----------------|-------|
+| 86 | `MessageDisplayHook*`, `StopHookSpecificOutput`, `SubagentStopHookSpecificOutput` | Skip | | Hooks not adopted | -- |
+| 87 | Settings resolution API (`resolveSettings`, `ResolvedSettings`, `ResolvedSettingSource`, `PolicySettingsOrigin`) | Skip | | Programmatic/managed-settings resolution. SDK-internal; relay manages its own settings | -- |
+| 88 | `SandboxCredentialsConfig` + sandbox settings | Skip | | Sandbox execution not adopted. Revisit if/when Clay pursues sandboxing | -- |
+| 89 | `reinitialize()` query method | Skip | | Relay restarts/lazy-resumes sessions itself | -- |
+| 90 | CLI/SDK internals (`extractFromBunfs`, `filterEscalatingDefaultMode`, `meta`, `SpawnOptions`, `REPL*`, `ShowOnboardingRolePicker*`, `ProvenanceEntry`, `SSEOptions`) | Skip | | Not part of the consumed query/message surface | -- |
+
+
+### Delta Action Summary (0.2.133-0.3.196)
+
+| | Count | Items |
+|--|-------|-------|
+| **Do** | 12 | #72-83 |
+| of which **Codex-reusable** | 10 | #72, #75-83 |
+| **Verify** | 2 | #71, #84 |
+| Defer | 1 | #85 |
+| Skip | 5 | #86-90 |
+| N/A (removed upstream) | 3 | #68-70 (retires #40-42) |
+
+Suggested order once the npm bump lands: #72 (host dialog / #14) -> #73-74 (refusal handling) -> #79 + #75 (informational + permission-denied messages) -> #76-78 -> remainder.
 
 
 ---
