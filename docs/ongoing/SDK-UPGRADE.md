@@ -1,8 +1,10 @@
 # Claude Agent SDK Upgrade Tracker
 
-Installed: `@anthropic-ai/claude-agent-sdk@0.2.132` (declared `^0.2.132`)
+Installed: `@anthropic-ai/claude-agent-sdk@0.3.196` (declared `^0.3.196`, bumped 2026-06-30)
 Latest: `@anthropic-ai/claude-agent-sdk@0.3.196` (2026-06-30)
 Updated: 2026-06-30
+
+npm bump to 0.3.196 is **done** (clean lockfile reinstall; peers @anthropic-ai/sdk@0.107.0, @modelcontextprotocol/sdk@1.29.0, zod@4.4.3). Static + load verification passed and runtime smoke confirmed. The 0.2.133 -> 0.3.196 feature work (items #68-90) is still **pending implementation** — only the version bump and breaking-change verification landed.
 
 Covers all unapplied changes from 0.2.80 through 0.3.196.
 The 0.2.133 -> 0.3.196 delta (items #68+) was derived by diffing the published `.d.ts` surface (installed 0.2.132 vs npm 0.3.196), not a changelog, so the "since" version tags inside that range are approximate.
@@ -262,6 +264,15 @@ Suggested order once the npm bump lands: #72 (host dialog / #14) -> #73-74 (refu
 5. Implement #6-12, #14-18 backlog as bandwidth allows.
 6. Tool `duration_ms` (#52) feeds #30 toolStats — implement together.
 7. Add `oauth_org_not_allowed` error path (#61) and extend origin propagation to replay messages (#62) when touching #10.
+
+### 0.2.132 -> 0.3.196 (npm bump done 2026-06-30; feature work pending)
+1. ~~Confirm Clay references none of the removed symbols (#68-70) — grep clean, retired #40-42~~
+2. ~~**Verify** `canUseTool` callback still matches current signature (#71) — sdk-bridge loads clean after bump~~
+3. ~~Clean lockfile reinstall to `^0.3.196`; peers resolved (@anthropic-ai/sdk@0.107.0, @modelcontextprotocol/sdk@1.29.0, zod@4.4.3)~~
+4. ~~Verify: SDK loads + `query` export; client-import + server/client `node --check` pass; sdk-bridge/claude adapter/yoke load; all 7 called SDK members present; runtime smoke~~
+5. Implement P1: host dialog / OAuth (#72, lands #14), then model-refusal messages (#73-74).
+6. Implement P2: `informational` + `permission_denied` messages (#79, #75), `reloadSkills` (#76, supersedes #8), `setMcpPermissionModeOverride` (#77), `thinking_tokens` (#78), `toolAliases` (#80), `backgroundTasks` (#81).
+7. Implement P3: `commands_changed` (#82), `worker_shutting_down` (#83). **Verify** built-in tool surface renders unknown tools gracefully (#84).
 
 
 ---
