@@ -1,18 +1,22 @@
 name: PR Checks
 
-# pull_request_target reads the workflow file from the BASE branch (main),
-# so existing PRs that were opened before this workflow existed still get
-# checked on reopen / new pushes. The trade-off: pull_request_target normally
-# grants secret access to fork code, which is dangerous. This workflow is
-# safe under that model because it:
-#   - never runs `npm install` (no install-script execution),
-#   - never reads secrets,
-#   - only runs `node --check` (parse, no execute) and a pure-stdlib reader
-#     script (scripts/check-client-imports.js).
-# We must still explicitly check out the PR head SHA below — otherwise we'd
-# be checking main's code instead of the PR's.
+# These checks run on fork PRs, so they must never need secrets.
+#
+# We use `pull_request` (not `pull_request_target`) deliberately. For
+# `pull_request`, GitHub reads the workflow from the merge ref (PR head merged
+# into base), so a PR that branched before this workflow existed still gets
+# checked, and the fork's code runs with no secrets and a read-only token.
+# `pull_request_target` would hand fork code the base repo's secrets and token,
+# which is why actions/checkout now refuses to check out fork code there
+# (`allow-unsafe-pr-checkout`). Do not opt back into that flag: keep this
+# workflow secret-free instead.
+#
+# Keep it that way. In particular, never add `npm install`/`npm ci` here (it
+# would execute a fork's install scripts) and never reference `secrets.*`.
+# The checks only need the standard library: `node --check` (parse, no execute)
+# and a pure-stdlib reader script (scripts/check-client-imports.js).
 on:
-  pull_request_target:
+  pull_request:
     branches: [main]
   push:
     branches: [main]
@@ -24,23 +28,21 @@ jobs:
   checks:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout PR head (or pushed ref)
+      - name: Checkout merge ref (or pushed ref)
         uses: actions/checkout@v4
         with:
-          # On pull_request_target, default checkout is the base branch.
-          # We want to inspect the PR's actual code, so pin to the head SHA.
-          # On push events, github.event.pull_request is null and this
-          # falls back to the default ref (the pushed commit).
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          # Default for `pull_request` is the merge ref, which is what we want:
+          # it checks the code as it would land on main, not the head in
+          # isolation. On push events this falls back to the pushed commit.
           # Need history so we can fetch and read files from main below.
           fetch-depth: 0
 
       - name: Restore trusted check tooling from base
-        # PRs that predate this workflow don't have scripts/check-client-imports.js
-        # at their head — without restoring from main, the run fails on missing
-        # file rather than on real import issues. Also defends against a PR
-        # replacing the script with a no-op: we always run the version from main.
-        if: github.event_name == 'pull_request_target'
+        # Defends against a PR replacing scripts/check-client-imports.js with a
+        # no-op: we always run the version from main. (The merge ref already
+        # carries main's copy for PRs that predate the script, so this is now
+        # only about the tamper case.)
+        if: github.event_name == 'pull_request'
         run: |
           git fetch origin main --depth=1
           git checkout origin/main -- scripts/check-client-imports.js
