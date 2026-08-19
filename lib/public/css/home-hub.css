@@ -93,19 +93,6 @@
   min-height: 0;
 }
 
-.hub-pane-header {
-  flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-  height: 52px;
-  padding: 0 2px;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-  color: var(--text-muted);
-}
-
 /* Hide the user island while the hub owns the main workspace. */
 #main-area:has(#home-hub:not(.hidden)) ~ #user-island,
 #layout-body:has(#home-hub:not(.hidden)) #user-island {
@@ -212,6 +199,10 @@
   background: var(--success);
 }
 
+.home-hub-mate-dot.is-busy {
+  background: var(--accent);
+}
+
 .home-hub-mate-dot.responding {
   background: var(--accent);
 }
@@ -273,13 +264,117 @@
   color: var(--accent);
 }
 
+/* Rich identity card uses the shared icon-strip tooltip host. */
+.icon-strip-tooltip.home-mate-hover-card {
+  width: max-content;
+  max-width: min(260px, calc(100vw - 24px)) !important;
+  padding: 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  background: var(--bg);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(var(--shadow-rgb), 0.28);
+}
+
+.icon-strip-tooltip.home-mate-hover-card.visible {
+  transform: translateY(0);
+}
+
+.icon-strip-tooltip.home-mate-hover-card::before {
+  top: -6px;
+  left: 50%;
+  border: 6px solid transparent;
+  border-top: 0;
+  border-bottom-color: var(--bg);
+  transform: translateX(-50%);
+}
+
+.home-mate-tooltip {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  align-items: center;
+  gap: 9px;
+}
+
+.home-mate-tooltip-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 9px;
+  object-fit: cover;
+}
+
+.home-mate-tooltip-copy {
+  min-width: 0;
+}
+
+.home-mate-tooltip-name {
+  overflow: hidden;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-mate-tooltip-bio {
+  margin-top: 2px;
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-mate-tooltip-meta {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 5px;
+  color: var(--text-dimmer);
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.home-mate-tooltip-presence,
+.home-mate-tooltip-vendor {
+  display: inline-flex;
+  align-items: center;
+}
+
+.home-mate-tooltip-presence {
+  gap: 4px;
+}
+
+.home-mate-tooltip-presence i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--success);
+}
+
+.home-mate-tooltip-presence.is-busy i {
+  background: var(--accent);
+}
+
+.home-mate-tooltip-vendor {
+  padding: 1px 5px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 5px;
+  background: var(--bg-alt);
+}
+
 /* Embedded mate conversation */
 .home-mate-chat {
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   min-height: 0;
-  border-top: 1px solid var(--border-subtle);
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  background: var(--bg-alt);
 }
 
 .home-mate-chat-header {
@@ -288,8 +383,9 @@
   align-items: center;
   justify-content: space-between;
   min-height: 62px;
-  padding: 9px 8px;
+  padding: 9px 12px;
   border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg);
 }
 
 .home-mate-chat-identity {
@@ -360,7 +456,8 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
-  padding: 12px 0;
+  padding: 12px 4px;
+  background: var(--bg-alt);
   overflow-y: auto;
   overscroll-behavior: contain;
 }
@@ -419,27 +516,21 @@
   display: flex;
   align-items: flex-end;
   gap: 8px;
-  margin: 0 8px 8px;
-  padding: 6px 6px 6px 12px;
-  border: 1px solid var(--border-subtle);
-  border-radius: 16px;
-  background: var(--bg-alt);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.home-mate-chat-composer:focus-within {
-  border-color: var(--mate-color, var(--accent));
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--mate-color, var(--accent)) 10%, transparent);
+  margin: 0;
+  padding: 9px 10px;
+  border-top: 1px solid var(--border-subtle);
+  background: var(--bg);
 }
 
 #home-mate-chat-input {
   flex: 1 1 auto;
   min-width: 0;
   max-height: 108px;
-  padding: 5px 0;
-  border: 0;
+  padding: 7px 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 11px;
   outline: none;
-  background: transparent;
+  background: var(--bg-alt);
   color: var(--text);
   font-family: inherit;
   font-size: 13px;
@@ -448,7 +539,7 @@
 }
 
 #home-mate-chat-input:focus {
-  outline: none;
+  border-color: var(--mate-color, var(--accent));
 }
 
 #home-mate-chat-input:disabled {
@@ -486,14 +577,77 @@
   cursor: default;
 }
 
-/* Kanban board */
+/* Board application frame */
+.hub-pane-board {
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  background: var(--bg-alt);
+}
+
+.home-app-header {
+  flex: 0 0 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 52px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg);
+}
+
+.home-app-identity {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.home-app-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  background: var(--bg-alt);
+  color: var(--text-muted);
+}
+
+.home-app-mark .lucide {
+  width: 14px;
+  height: 14px;
+}
+
+.home-app-name {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.home-app-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 28px;
+  min-height: 28px;
+}
+
+.home-app-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 10px;
+  background: var(--bg-alt);
+}
+
 .home-board {
-  flex: 1;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   align-items: stretch;
   gap: 10px;
   height: 100%;
+  width: 100%;
   min-height: 0;
   overflow-y: auto;
 }
@@ -729,10 +883,6 @@
     min-height: 0;
   }
 
-  .hub-pane-header {
-    height: 44px;
-  }
-
   .home-hub-mates {
     padding-right: 44px;
   }
@@ -748,9 +898,20 @@
     min-height: 420px;
   }
 
+  .home-app-header {
+    flex-basis: 44px;
+    height: 44px;
+  }
+
   .home-board {
     grid-template-columns: repeat(3, minmax(180px, 1fr));
     overflow-x: auto;
     overflow-y: hidden;
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  .home-mate-hover-card {
+    display: none !important;
   }
 }
