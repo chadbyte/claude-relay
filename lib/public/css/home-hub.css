@@ -1,61 +1,18 @@
 /* ==========================================================================
-   Home Hub — Personalized command center & dashboard
+   Home work hub
    ========================================================================== */
 
-/* Hub covers #main-area (sidebar + chat), sits inside it with absolute.
-   Pure widget surface — Clay chat is reachable via the global FAB
-   instead of being embedded here. */
 #home-hub {
   position: absolute;
   inset: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  overflow-y: auto;
+  overflow: hidden;
   background: var(--bg);
   z-index: 200;
-  padding: 48px 24px 40px;
+  padding: 24px;
   border-top-left-radius: 8px;
-  animation: hubFadeIn 0.35s ease;
-}
-/* Close button (X / ESC) */
-.home-hub-close-btn {
-  position: absolute;
-  top: 16px;
-  right: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 2px solid var(--text-dimmer);
-  background: none;
-  color: var(--text-dimmer);
-  cursor: pointer;
-  padding: 0;
-  justify-content: center;
-  transition: border-color 0.15s, color 0.15s;
-  z-index: 5;
-}
-.home-hub-close-btn .lucide {
-  width: 18px;
-  height: 18px;
-}
-.home-hub-close-btn span {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  position: absolute;
-  top: calc(100% + 6px);
-  font-family: inherit;
-}
-.home-hub-close-btn:hover {
-  border-color: var(--text-secondary);
-  color: var(--text-secondary);
-}
-.home-hub-close-btn.hidden {
-  display: none;
+  animation: hubFadeIn 0.25s ease;
 }
 
 #home-hub.hidden {
@@ -63,366 +20,90 @@
 }
 
 @keyframes hubFadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes hubCardIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
+.home-hub-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 2px solid var(--text-dimmer);
+  border-radius: 50%;
+  background: var(--bg);
+  color: var(--text-dimmer);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+  z-index: 5;
+}
+
+.home-hub-close-btn .lucide {
+  width: 18px;
+  height: 18px;
+}
+
+.home-hub-close-btn span {
+  position: absolute;
+  top: calc(100% + 6px);
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.home-hub-close-btn:hover {
+  border-color: var(--text-secondary);
+  color: var(--text-secondary);
+}
+
+.home-hub-close-btn.hidden {
+  display: none;
 }
 
 .home-hub-inner {
+  display: flex;
   width: 100%;
-  max-width: 720px;
+  max-width: none;
+  height: 100%;
+  min-height: 0;
+}
+
+.hub-split {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 4fr 6fr;
+  gap: 16px;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.hub-pane {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
 }
 
-
-/* --- Greeting --- */
-.hub-greeting {
-  text-align: center;
-  padding: 8px 0 4px;
-}
-.hub-greeting h1 {
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--text);
-  margin: 0;
-  letter-spacing: -0.5px;
-}
-.hub-greeting p {
-  font-size: 14px;
-  color: var(--text-muted);
-  margin: 6px 0 0;
-  font-weight: 400;
-}
-/* Twemoji sizing inherited from global img.emoji in base.css */
-
-/* --- Card base --- */
-.hub-card {
-  background: var(--bg-alt);
-  border: 1px solid var(--border-subtle);
-  border-radius: 12px;
-  padding: 16px;
-}
-.hub-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-.hub-card-title {
+.hub-pane-header {
+  flex: 0 0 auto;
+  padding: 2px 2px 10px;
   font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.6px;
   color: var(--text-muted);
 }
-.hub-card-count {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--accent);
-  background: var(--accent-12);
-  padding: 2px 8px;
-  border-radius: 10px;
-}
 
-/* --- Two-column layout --- */
-.hub-columns {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  animation: hubCardIn 0.4s ease 0.08s both;
-}
-
-/* --- Upcoming tasks --- */
-.hub-upcoming-list {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.hub-upcoming-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-.hub-upcoming-item:hover {
-  background: rgba(var(--overlay-rgb), 0.06);
-}
-.hub-upcoming-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  background: var(--accent);
-}
-.hub-upcoming-time {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--text-muted);
-  min-width: 56px;
-  flex-shrink: 0;
-  font-variant-numeric: tabular-nums;
-}
-.hub-upcoming-name {
-  font-size: 13px;
-  color: var(--text);
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.hub-upcoming-project {
-  font-size: 11px;
-  color: var(--text-dimmer);
-  flex-shrink: 0;
-  max-width: 80px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.hub-upcoming-more {
-  font-size: 12px;
-  color: var(--text-dimmer);
-  text-align: center;
-  padding: 4px 0;
-}
-/* Empty state */
-.hub-upcoming-empty {
-  text-align: center;
-  padding: 16px 8px;
-}
-.hub-upcoming-empty-icon {
-  font-size: 24px;
-  margin-bottom: 8px;
-  opacity: 0.5;
-}
-.hub-upcoming-empty-text {
-  font-size: 13px;
-  color: var(--text-dimmer);
-  margin-bottom: 12px;
-}
-.hub-upcoming-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  border-radius: 8px;
-  border: 1px solid var(--border-subtle);
-  background: none;
-  color: var(--accent);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease;
-}
-.hub-upcoming-cta:hover {
-  background: var(--accent-12);
-  border-color: var(--accent);
-}
-.hub-upcoming-cta svg {
-  width: 14px;
-  height: 14px;
-}
-
-/* --- Projects summary --- */
-.hub-projects-list {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.hub-project-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-.hub-project-item:hover {
-  background: rgba(var(--overlay-rgb), 0.06);
-}
-.hub-project-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  background: var(--text-dimmer);
-  transition: background 0.3s ease;
-}
-.hub-project-dot.processing {
-  background: var(--success);
-  box-shadow: 0 0 6px rgba(80, 250, 123, 0.4);
-}
-.hub-project-icon {
-  font-size: 14px;
-  width: 20px;
-  text-align: center;
-  flex-shrink: 0;
-}
-.hub-project-name {
-  font-size: 13px;
-  color: var(--text);
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.hub-project-sessions {
-  font-size: 11px;
-  color: var(--text-dimmer);
-  background: rgba(var(--overlay-rgb), 0.06);
-  padding: 2px 7px;
-  border-radius: 8px;
-  flex-shrink: 0;
-}
-
-/* --- Week strip --- */
-.hub-week {
-  animation: hubCardIn 0.4s ease 0.16s both;
-}
-.hub-week-strip {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
-  text-align: center;
-}
-.hub-week-day {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  padding: 8px 4px;
-  border-radius: 10px;
-  cursor: default;
-  transition: background 0.15s ease;
-}
-.hub-week-day:hover {
-  background: rgba(var(--overlay-rgb), 0.04);
-}
-.hub-week-day.today {
-  background: var(--accent-12);
-}
-.hub-week-day.today .hub-week-num {
-  background: var(--accent);
-  color: var(--bg);
-  border-radius: 50%;
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.hub-week-label {
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--text-dimmer);
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-}
-.hub-week-num {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text);
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.hub-week-dots {
-  display: flex;
-  gap: 3px;
-  justify-content: center;
-  min-height: 6px;
-}
-.hub-week-dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--accent);
-}
-
-/* --- Tip Card --- */
-.hub-tip {
-  background: var(--bg-alt);
-  border: 1px solid var(--border-subtle);
-  border-radius: 12px;
-  padding: 16px 18px;
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  animation: hubCardIn 0.4s ease 0.24s both;
-}
-.hub-tip-icon {
-  flex-shrink: 0;
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  background: var(--accent-12);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-}
-.hub-tip-body {
-  flex: 1;
-  min-width: 0;
-}
-.hub-tip-label {
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--accent);
-  margin-bottom: 4px;
-}
-.hub-tip-text {
-  font-size: 13.5px;
-  line-height: 1.5;
-  color: var(--text-secondary);
-}
-.hub-tip-nav {
-  flex-shrink: 0;
-  display: flex;
-  gap: 2px;
-  align-items: center;
-}
-.hub-tip-prev,
-.hub-tip-next {
-  background: none;
-  border: none;
-  color: var(--text-dimmer);
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 6px;
-  transition: color 0.15s, background 0.15s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.hub-tip-prev:hover,
-.hub-tip-next:hover {
-  color: var(--text-muted);
-  background: rgba(var(--overlay-rgb), 0.06);
-}
-.hub-tip-prev svg,
-.hub-tip-next svg {
-  width: 14px;
-  height: 14px;
-}
-
-/* Hide user island when hub is visible */
+/* Hide the user island while the hub owns the main workspace. */
 #main-area:has(#home-hub:not(.hidden)) ~ #user-island,
 #layout-body:has(#home-hub:not(.hidden)) #user-island {
   opacity: 0;
@@ -430,217 +111,272 @@
   transition: opacity 0.2s ease;
 }
 
-/* --- Mobile --- */
-@media (max-width: 768px) {
-  #home-hub {
-    padding: 32px 16px calc(80px + var(--safe-bottom, 0px));
-  }
-  .hub-greeting h1 {
-    font-size: 22px;
-  }
-  .home-hub-inner {
-    max-width: 100%;
-  }
-  .hub-columns {
-    grid-template-columns: 1fr;
-  }
-  .hub-week-label {
-    font-size: 10px;
-  }
-  .hub-week-num {
-    font-size: 13px;
-  }
-}
-
-/* ==========================================================================
-   Home Hub — Mate Avatars (horizontal scroll)
-   ========================================================================== */
-
+/* Mate roster */
 .home-hub-mates {
+  flex: 1;
   display: flex;
-  gap: 16px;
-  padding: 0 4px 16px;
-  overflow-x: auto;
-  overflow-y: hidden;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 0;
+  padding: 0 4px 0 0;
+  overflow-y: auto;
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-
-.home-hub-mates::-webkit-scrollbar {
-  display: none;
 }
 
 .home-hub-mates.hidden {
   display: none;
 }
 
-.home-hub-mate-item {
+.hub-pane-mates .home-hub-mate-item {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 6px;
-  min-width: 64px;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  padding: 8px;
+  border-radius: 8px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+  transition: background 0.12s ease;
+}
+
+.hub-pane-mates .home-hub-mate-item:hover {
+  background: var(--bg-alt);
 }
 
 .home-hub-mate-item:active .home-hub-mate-avatar {
   transform: scale(0.92);
 }
 
+.hub-pane-mates .home-hub-mate-avatar-wrap,
+.hub-pane-mates .home-hub-mate-avatar {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+}
+
 .home-hub-mate-avatar-wrap {
   position: relative;
-  width: 48px;
-  height: 48px;
 }
 
 .home-hub-mate-avatar {
-  width: 48px;
-  height: 48px;
+  border: 2px solid rgba(var(--overlay-rgb), 0.12);
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid rgba(var(--overlay-rgb), 0.12);
   transition: transform 0.1s;
 }
 
 .home-hub-mate-dot {
   position: absolute;
-  bottom: 1px;
-  right: 1px;
+  right: 0;
+  bottom: 0;
   width: 10px;
   height: 10px;
+  border: 2px solid var(--bg);
   border-radius: 50%;
   background: var(--success);
-  border: 2px solid var(--bg);
 }
 
 .home-hub-mate-dot.responding {
   background: var(--accent);
 }
 
-.home-hub-mate-name {
-  font-size: 11px;
-  color: var(--text-muted);
-  max-width: 64px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  text-align: center;
+.home-hub-mate-mention {
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  width: 9px;
+  height: 9px;
+  border: 2px solid var(--bg);
+  border-radius: 50%;
+  background: var(--accent);
 }
-.home-hub-mate-primary .home-hub-mate-name {
+
+.home-hub-mate-text {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.hub-pane-mates .home-hub-mate-name {
+  max-width: 100%;
+  overflow: hidden;
   color: var(--text);
+  font-size: 13px;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-hub-mate-primary .home-hub-mate-name {
   font-weight: 600;
 }
+
 .home-hub-mate-primary .home-hub-mate-avatar {
   box-shadow: 0 0 0 2px #00b894;
 }
+
 .home-hub-mate-primary-star {
+  margin-left: 3px;
   color: #00b894;
   font-size: 8px;
-  margin-left: 2px;
   vertical-align: super;
 }
 
-/* ==========================================================================
-   (Certificate section removed — now handled by Trust Certificate playbook)
-   ========================================================================== */
+.home-hub-mate-bio {
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
-/* ==========================================================================
-   Home work board (kanban)
-   ========================================================================== */
+.home-hub-mate-badge {
+  flex: 0 0 auto;
+  padding: 1px 6px;
+  border-radius: 9px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.home-hub-mate-add .home-hub-mate-add-icon {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px dashed var(--border-subtle);
+  border-radius: 50%;
+  color: var(--text-muted);
+  font-size: 16px;
+}
+
+.home-hub-mate-add:hover .home-hub-mate-add-icon {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.home-hub-mate-add .home-hub-mate-name {
+  color: var(--text-muted);
+}
+
+/* Kanban board */
 .home-board {
+  flex: 1;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
   gap: 10px;
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .board-column {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  background: var(--bg);
+  height: 100%;
+  min-height: 0;
+  padding: 10px;
   border: 1px solid var(--border-subtle);
   border-radius: 10px;
-  padding: 10px;
-  min-height: 120px;
+  background: var(--bg-alt);
   transition: border-color 0.15s ease, background 0.15s ease;
 }
+
 .board-column.is-drop-target {
   border-color: var(--accent);
   background: var(--accent-12);
 }
 
 .board-column-header {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
-.board-column-title {
+
+.board-column-title,
+.board-column-count {
+  color: var(--text-muted);
   font-size: 11px;
   font-weight: 600;
+}
+
+.board-column-title {
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: var(--text-muted);
-}
-.board-column-count {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-muted);
 }
 
 .board-column-cards {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .board-card {
   position: relative;
-  background: var(--bg-alt);
+  flex: 0 0 auto;
+  padding: 8px 22px 8px 10px;
   border: 1px solid var(--border-subtle);
   border-radius: 8px;
-  padding: 8px 22px 8px 10px;
+  background: var(--bg);
   cursor: grab;
 }
+
 .board-card.is-dragging {
   opacity: 0.5;
 }
+
 .board-card.is-pending {
   border-color: var(--accent);
 }
+
 .board-card-title {
-  font-size: 13px;
   color: var(--text);
+  font-size: 13px;
   word-break: break-word;
 }
+
 .board-card-body {
-  font-size: 12px;
-  color: var(--text-muted);
   margin-top: 4px;
+  color: var(--text-muted);
+  font-size: 12px;
   word-break: break-word;
 }
+
 .board-card-meta {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
   margin-top: 6px;
 }
+
 .board-card-meta span {
-  font-size: 10px;
-  color: var(--text-muted);
-  background: var(--bg);
+  padding: 1px 6px;
   border: 1px solid var(--border-subtle);
   border-radius: 6px;
-  padding: 1px 6px;
+  background: var(--bg-alt);
+  color: var(--text-muted);
+  font-size: 10px;
 }
 
 .board-card-delete {
   position: absolute;
   top: 4px;
   right: 6px;
-  background: none;
   border: none;
+  background: none;
   color: var(--text-muted);
   font-size: 15px;
   line-height: 1;
@@ -648,6 +384,7 @@
   opacity: 0;
   transition: opacity 0.15s ease;
 }
+
 .board-card:hover .board-card-delete {
   opacity: 1;
 }
@@ -657,241 +394,161 @@
   padding-top: 8px;
   border-top: 1px solid var(--border-subtle);
 }
+
 .board-card-pending-text {
   display: block;
-  font-size: 11px;
-  color: var(--accent);
   margin-bottom: 6px;
-}
-.board-card-pending-actions {
-  display: flex;
-  gap: 6px;
-}
-.board-card-pending-actions button {
+  color: var(--accent);
   font-size: 11px;
-  padding: 3px 8px;
-  border-radius: 6px;
-  border: 1px solid var(--border-subtle);
-  background: var(--bg);
-  color: var(--text);
-  cursor: pointer;
-}
-.board-done-accept {
-  border-color: var(--accent) !important;
-  color: var(--accent) !important;
 }
 
-.board-add-btn {
-  background: none;
-  border: 1px dashed var(--border-subtle);
-  border-radius: 8px;
-  color: var(--text-muted);
-  font-size: 12px;
-  padding: 6px;
-  cursor: pointer;
-  margin-top: auto;
-}
-.board-add-btn:hover {
-  color: var(--text);
-  border-color: var(--accent);
-}
-
-.board-composer {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.board-composer-input {
-  width: 100%;
-  resize: vertical;
-  font-family: inherit;
-  font-size: 13px;
-  color: var(--text);
-  background: var(--bg-alt);
-  border: 1px solid var(--border-subtle);
-  border-radius: 8px;
-  padding: 6px 8px;
-}
+.board-card-pending-actions,
 .board-composer-actions {
   display: flex;
   gap: 6px;
 }
+
+.board-card-pending-actions button,
 .board-composer-actions button {
-  font-size: 11px;
-  padding: 4px 10px;
-  border-radius: 6px;
+  padding: 3px 8px;
   border: 1px solid var(--border-subtle);
+  border-radius: 6px;
   background: var(--bg);
   color: var(--text);
+  font-size: 11px;
   cursor: pointer;
 }
+
+.board-done-accept,
 .board-composer-add {
   border-color: var(--accent) !important;
   color: var(--accent) !important;
 }
 
-@media (max-width: 700px) {
-  .home-board {
-    grid-template-columns: 1fr;
-  }
+.board-add-btn {
+  flex: 0 0 auto;
+  margin-top: auto;
+  padding: 6px;
+  border: 1px dashed var(--border-subtle);
+  border-radius: 8px;
+  background: none;
+  color: var(--text-muted);
+  font-size: 12px;
+  cursor: pointer;
 }
 
-/* ==========================================================================
-   Home work hub — two-pane layout (mates left, board right)
-
-   Home is where work starts and ends: the mates who do the work sit next to
-   the board they take it from. These rules override the older single-column
-   hub styling above.
-   ========================================================================== */
-.home-hub-inner {
-  max-width: 1240px;
+.board-add-btn:hover {
+  border-color: var(--accent);
+  color: var(--text);
 }
 
-.hub-split {
-  display: grid;
-  grid-template-columns: minmax(260px, 340px) 1fr;
-  gap: 14px;
-  align-items: start;
-  animation: hubCardIn 0.4s ease 0.08s both;
-}
-
-.hub-pane {
+.board-composer {
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  min-width: 0;
+  gap: 6px;
 }
 
-.hub-pane-board .hub-board-card {
-  min-height: 340px;
-}
-
-/* --- Left pane: mates as a vertical roster --- */
-.home-hub-mates {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 0;
-  overflow-x: visible;
-  overflow-y: auto;
-  max-height: 320px;
-}
-
-.hub-mates-card .home-hub-mate-item {
-  flex-direction: row;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
+.board-composer-input {
   width: 100%;
   padding: 6px 8px;
+  border: 1px solid var(--border-subtle);
   border-radius: 8px;
-  transition: background 0.12s ease;
-}
-.hub-mates-card .home-hub-mate-item:hover {
   background: var(--bg);
-}
-
-.hub-mates-card .home-hub-mate-avatar-wrap,
-.hub-mates-card .home-hub-mate-avatar {
-  width: 32px;
-  height: 32px;
-  flex: 0 0 auto;
-}
-
-.home-hub-mate-text {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  flex: 1 1 auto;
-}
-
-.hub-mates-card .home-hub-mate-name {
-  font-size: 13px;
   color: var(--text);
-  max-width: 100%;
-  text-align: left;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-family: inherit;
+  font-size: 13px;
+  resize: vertical;
 }
 
-.home-hub-mate-bio {
-  font-size: 11px;
-  color: var(--text-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.home-hub-mate-badge {
-  flex: 0 0 auto;
-  font-size: 10px;
-  font-weight: 600;
-  color: #fff;
-  background: var(--accent);
-  border-radius: 9px;
-  padding: 1px 6px;
-}
-
-.home-hub-mate-mention {
-  position: absolute;
-  top: -1px;
-  right: -1px;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: var(--accent);
-  border: 2px solid var(--bg-alt);
-}
-
-.home-hub-mate-add .home-hub-mate-add-icon {
-  width: 32px;
-  height: 32px;
-  flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px dashed var(--border-subtle);
-  border-radius: 50%;
-  color: var(--text-muted);
-  font-size: 16px;
-}
-.home-hub-mate-add:hover .home-hub-mate-add-icon {
-  color: var(--accent);
-  border-color: var(--accent);
-}
-.home-hub-mate-add .home-hub-mate-name {
-  color: var(--text-muted);
-}
-
-/* --- C button badge: the only entry point to mates now --- */
+/* C button badge */
 .icon-strip-home {
   position: relative;
 }
+
 .icon-strip-home-badge {
   display: none;
 }
+
 .icon-strip-home-badge.has-unread {
-  display: block;
   position: absolute;
   top: 0;
   right: 2px;
+  display: block;
   min-width: 16px;
   padding: 0 4px;
+  border: 2px solid var(--bg);
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
   font-size: 10px;
   font-weight: 600;
   line-height: 16px;
   text-align: center;
-  color: #fff;
-  background: var(--accent);
-  border-radius: 8px;
-  border: 2px solid var(--bg);
 }
 
 @media (max-width: 900px) {
+  #home-hub {
+    padding: 16px 16px calc(76px + var(--safe-bottom, 0px));
+  }
+
   .hub-split {
     grid-template-columns: 1fr;
+    grid-template-rows: 118px minmax(0, 1fr);
+    gap: 12px;
   }
+
+  .hub-pane-mates {
+    height: 118px;
+  }
+
+  .hub-pane-header {
+    padding-bottom: 8px;
+  }
+
   .home-hub-mates {
-    max-height: none;
+    flex-direction: row;
+    gap: 10px;
+    height: 88px;
+    padding: 0 44px 0 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+  }
+
+  .home-hub-mates::-webkit-scrollbar {
+    display: none;
+  }
+
+  .hub-pane-mates .home-hub-mate-item {
+    flex: 0 0 74px;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 5px;
+    width: 74px;
+    height: 88px;
+    padding: 4px;
+  }
+
+  .hub-pane-mates .home-hub-mate-avatar-wrap,
+  .hub-pane-mates .home-hub-mate-avatar,
+  .home-hub-mate-add .home-hub-mate-add-icon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .hub-pane-mates .home-hub-mate-name {
+    text-align: center;
+  }
+
+  .home-hub-mate-bio,
+  .home-hub-mate-badge {
+    display: none;
+  }
+
+  .home-board {
+    grid-template-columns: repeat(3, minmax(180px, 1fr));
+    overflow-x: auto;
+    overflow-y: hidden;
   }
 }

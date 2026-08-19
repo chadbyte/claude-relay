@@ -175,90 +175,10 @@
   color: var(--text);
 }
 
-/* --- Hub playbook cards --- */
-.hub-playbooks {
-  animation: hubCardIn 0.4s ease 0.20s both;
-}
-.hub-playbooks-grid {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-.hub-playbook-card {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  background: rgba(var(--overlay-rgb), 0.03);
-  border: 1px solid var(--border-subtle);
-  border-radius: 10px;
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
-  flex: 1;
-  min-width: 180px;
-}
-.hub-playbook-card:hover {
-  background: rgba(var(--overlay-rgb), 0.07);
-  border-color: var(--accent);
-}
-.hub-playbook-card.completed {
-  background: rgba(76, 175, 80, 0.08);
-  border-color: rgba(76, 175, 80, 0.25);
-}
-.hub-playbook-card.completed:hover {
-  background: rgba(76, 175, 80, 0.14);
-  border-color: rgba(76, 175, 80, 0.4);
-}
-.hub-playbook-card-icon {
-  font-size: 18px;
-  flex-shrink: 0;
-}
-.hub-playbook-card-body {
-  flex: 1;
-  min-width: 0;
-}
-.hub-playbook-card-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text);
-}
-.hub-playbook-card-desc {
-  font-size: 11px;
-  color: var(--text-dimmer);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.hub-playbook-card-check {
-  color: var(--success);
-  font-size: 14px;
-  flex-shrink: 0;
-}
-
-/* --- Tip "Try it" button (inline after text) --- */
-.hub-tip-try {
-  display: inline;
-  padding: 0;
-  border: none;
-  background: none;
-  color: var(--accent);
-  font-size: inherit;
-  font-weight: 600;
-  cursor: pointer;
-  margin-left: 6px;
-  font-family: inherit;
-}
-.hub-tip-try:hover {
-  background: var(--accent-12);
-}
-
 /* --- Mobile --- */
 @media (max-width: 768px) {
   .playbook-modal {
     width: 95vw;
     border-radius: 12px;
-  }
-  .hub-playbook-card {
-    min-width: 140px;
   }
 }

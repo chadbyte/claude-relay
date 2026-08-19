@@ -535,50 +535,6 @@ body.tui-suspended #tui-resume-bar {
 }
 
 /* ============================================================
-   Home page "What's New" index (title-only list, blog-style)
-   ============================================================ */
-.hub-whats-new {
-  display: flex;
-  flex-direction: column;
-}
-.hub-whats-new-item {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  padding: 10px 4px;
-  border: none;
-  background: transparent;
-  text-align: left;
-  cursor: pointer;
-  color: var(--text);
-  border-bottom: 1px solid var(--border);
-  transition: background 120ms ease;
-  width: 100%;
-}
-.hub-whats-new-item:last-child {
-  border-bottom: none;
-}
-.hub-whats-new-item:hover {
-  background: rgba(var(--overlay-rgb), 0.04);
-}
-.hub-whats-new-item-date {
-  font-size: 11px;
-  color: var(--text-dimmer);
-  flex-shrink: 0;
-  width: 84px;
-  font-variant-numeric: tabular-nums;
-}
-.hub-whats-new-item-title {
-  margin: 0;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 1.4;
-  color: var(--text);
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-/* ============================================================
    Whats New article (blog-style reading view)
    ============================================================
    Mirrors #home-hub positioning: absolute inset:0 inside
@@ -683,4 +639,3 @@ body.tui-suspended #tui-resume-bar {
   .wna-content { padding: 32px 20px 80px; }
   .wna-title { font-size: 26px; }
 }
-
