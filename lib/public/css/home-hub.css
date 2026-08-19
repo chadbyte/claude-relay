@@ -78,7 +78,7 @@
 .hub-split {
   flex: 1;
   display: grid;
-  grid-template-columns: 3fr 7fr;
+  grid-template-columns: 4fr 6fr;
   gap: 16px;
   width: 100%;
   height: 100%;
@@ -95,7 +95,10 @@
 
 .hub-pane-header {
   flex: 0 0 auto;
-  padding: 2px 2px 10px;
+  display: flex;
+  align-items: center;
+  height: 52px;
+  padding: 0 2px;
   font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
@@ -113,16 +116,22 @@
 
 /* Mate roster */
 .home-hub-mates {
-  flex: 0 1 40%;
+  flex: 0 0 52px;
   display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-height: 0;
-  max-height: 40%;
-  padding: 0 4px 0 0;
-  overflow-y: auto;
-  overflow-x: hidden;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  height: 52px;
+  min-height: 52px;
+  padding: 5px 4px;
+  overflow-x: auto;
+  overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.home-hub-mates::-webkit-scrollbar {
+  display: none;
 }
 
 .home-hub-mates.hidden {
@@ -130,30 +139,39 @@
 }
 
 .hub-pane-mates .home-hub-mate-item {
+  flex: 0 0 40px;
   display: flex;
-  flex-direction: row;
   align-items: center;
-  gap: 10px;
-  width: 100%;
-  min-width: 0;
-  padding: 8px;
-  border-radius: 8px;
+  justify-content: center;
+  gap: 7px;
+  width: 40px;
+  height: 40px;
+  padding: 2px;
+  border: 0;
+  border-radius: 20px;
+  background: transparent;
+  color: var(--text);
+  font-family: inherit;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
-  transition: background 0.12s ease;
+  transition: width 0.18s ease, background 0.15s ease, transform 0.15s ease;
 }
 
 .hub-pane-mates .home-hub-mate-item:hover {
-  background: var(--bg-alt);
+  background: rgba(var(--overlay-rgb), 0.05);
 }
 
 .hub-pane-mates .home-hub-mate-item.active {
-  background: var(--accent-12);
+  flex-basis: auto;
+  width: auto;
+  max-width: 150px;
+  padding-right: 10px;
+  background: color-mix(in srgb, var(--home-mate-color, var(--accent)) 10%, transparent);
 }
 
 .hub-pane-mates .home-hub-mate-item.active .home-hub-mate-name {
-  color: var(--accent);
+  color: var(--text);
 }
 
 .home-hub-mate-item:active .home-hub-mate-avatar {
@@ -162,8 +180,8 @@
 
 .hub-pane-mates .home-hub-mate-avatar-wrap,
 .hub-pane-mates .home-hub-mate-avatar {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   flex: 0 0 auto;
 }
 
@@ -172,18 +190,23 @@
 }
 
 .home-hub-mate-avatar {
-  border: 2px solid rgba(var(--overlay-rgb), 0.12);
+  border: 2px solid var(--border-subtle);
   border-radius: 50%;
   object-fit: cover;
-  transition: transform 0.1s;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+}
+
+.home-hub-mate-item.active .home-hub-mate-avatar {
+  border-color: var(--home-mate-color, var(--accent));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--home-mate-color, var(--accent)) 25%, transparent);
 }
 
 .home-hub-mate-dot {
   position: absolute;
   right: 0;
   bottom: 0;
-  width: 10px;
-  height: 10px;
+  width: 9px;
+  height: 9px;
   border: 2px solid var(--bg);
   border-radius: 50%;
   background: var(--success);
@@ -195,8 +218,8 @@
 
 .home-hub-mate-mention {
   position: absolute;
-  top: -1px;
-  right: -1px;
+  top: 0;
+  left: 0;
   width: 9px;
   height: 9px;
   border: 2px solid var(--bg);
@@ -204,54 +227,32 @@
   background: var(--accent);
 }
 
-.home-hub-mate-text {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
 .hub-pane-mates .home-hub-mate-name {
-  max-width: 100%;
+  max-width: 94px;
   overflow: hidden;
   color: var(--text);
-  font-size: 13px;
+  font-size: 12px;
+  font-weight: 600;
   text-align: left;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.home-hub-mate-primary .home-hub-mate-name {
-  font-weight: 600;
-}
-
-.home-hub-mate-primary .home-hub-mate-avatar {
-  box-shadow: 0 0 0 2px #00b894;
-}
-
-.home-hub-mate-primary-star {
-  margin-left: 3px;
-  color: #00b894;
-  font-size: 8px;
-  vertical-align: super;
-}
-
-.home-hub-mate-bio {
-  overflow: hidden;
-  color: var(--text-muted);
-  font-size: 11px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .home-hub-mate-badge {
-  flex: 0 0 auto;
-  padding: 1px 6px;
-  border-radius: 9px;
-  background: var(--accent);
-  color: #fff;
-  font-size: 10px;
+  position: absolute;
+  top: -3px;
+  right: -4px;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 3px;
+  border: 2px solid var(--bg);
+  border-radius: 8px;
+  background: var(--home-mate-color, var(--accent));
+  color: var(--bg);
+  font-size: 8px;
   font-weight: 600;
+  line-height: 11px;
+  text-align: center;
 }
 
 .home-hub-mate-add .home-hub-mate-add-icon {
@@ -259,12 +260,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border: 1px dashed var(--border-subtle);
   border-radius: 50%;
   color: var(--text-muted);
-  font-size: 16px;
+  font-size: 18px;
 }
 
 .home-hub-mate-add:hover .home-hub-mate-add-icon {
@@ -272,17 +273,12 @@
   color: var(--accent);
 }
 
-.home-hub-mate-add .home-hub-mate-name {
-  color: var(--text-muted);
-}
-
 /* Embedded mate conversation */
 .home-mate-chat {
-  flex: 1 1 60%;
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   min-height: 0;
-  margin-top: 10px;
   border-top: 1px solid var(--border-subtle);
 }
 
@@ -291,15 +287,49 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 42px;
-  padding: 8px 2px;
+  min-height: 62px;
+  padding: 9px 8px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.home-mate-chat-identity {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.home-mate-chat-avatar {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--mate-color, var(--accent));
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+.home-mate-chat-identity-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
 .home-mate-chat-title {
   overflow: hidden;
   color: var(--text);
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-mate-chat-bio {
+  max-width: 280px;
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1.3;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -307,7 +337,7 @@
 .home-mate-chat-new {
   padding: 4px 8px;
   border: 1px solid var(--border-subtle);
-  border-radius: 6px;
+  border-radius: 8px;
   background: transparent;
   color: var(--text-muted);
   font-family: inherit;
@@ -316,8 +346,8 @@
 }
 
 .home-mate-chat-new:hover:not(:disabled) {
-  border-color: var(--accent);
-  color: var(--accent);
+  border-color: var(--mate-color, var(--accent));
+  color: var(--mate-color, var(--accent));
 }
 
 .home-mate-chat-new:disabled {
@@ -329,44 +359,50 @@
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
-  gap: 7px;
   min-height: 0;
-  padding: 6px 4px 10px;
+  padding: 12px 0;
   overflow-y: auto;
   overscroll-behavior: contain;
 }
 
-.home-mate-chat-row {
-  display: flex;
-  width: 100%;
+.home-mate-chat-messages.is-switching {
+  animation: homeMateMessagesIn 0.18s ease both;
 }
 
-.home-mate-chat-row-user {
-  justify-content: flex-end;
+@keyframes homeMateMessagesIn {
+  from { opacity: 0; transform: translateY(3px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.home-mate-chat-row-assistant {
-  justify-content: flex-start;
+.home-mate-chat-messages .dm-msg {
+  padding-right: 8px;
+  padding-left: 8px;
 }
 
-.home-mate-chat-bubble {
-  max-width: 85%;
-  padding: 7px 9px;
-  border-radius: 10px;
-  color: var(--text);
+.home-mate-chat-messages .dm-msg-compact {
+  padding-left: 52px;
+}
+
+.home-mate-chat-messages .dm-msg-hover-time {
+  left: 8px;
+}
+
+.home-mate-chat-messages .dm-msg-name {
+  color: var(--mate-color, var(--text));
   font-size: 13px;
-  line-height: 1.45;
-  overflow-wrap: anywhere;
 }
 
-.home-mate-chat-bubble-user {
-  border-bottom-right-radius: 3px;
-  background: var(--accent-12);
+.home-mate-chat-messages .dm-msg-time,
+.home-mate-chat-messages .dm-msg-hover-time {
+  display: none;
 }
 
-.home-mate-chat-bubble-assistant {
-  border-bottom-left-radius: 3px;
-  background: var(--bg-alt);
+.home-mate-chat-messages .dm-msg-body {
+  font-size: 13px;
+}
+
+.home-mate-chat-messages .dm-msg-avatar {
+  border-radius: 8px;
 }
 
 .home-mate-chat-empty {
@@ -378,53 +414,32 @@
   text-align: center;
 }
 
-.home-mate-chat-streaming {
-  display: flex;
-  align-items: center;
-  gap: 3px;
-  width: fit-content;
-  padding: 6px 9px;
-}
-
-.home-mate-chat-streaming span {
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: var(--text-muted);
-  animation: homeMateChatDot 1s ease-in-out infinite;
-}
-
-.home-mate-chat-streaming span:nth-child(2) {
-  animation-delay: 0.15s;
-}
-
-.home-mate-chat-streaming span:nth-child(3) {
-  animation-delay: 0.3s;
-}
-
-@keyframes homeMateChatDot {
-  0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
-  30% { opacity: 1; transform: translateY(-2px); }
-}
-
 .home-mate-chat-composer {
   flex: 0 0 auto;
   display: flex;
   align-items: flex-end;
-  gap: 6px;
-  padding-top: 9px;
-  border-top: 1px solid var(--border-subtle);
+  gap: 8px;
+  margin: 0 8px 8px;
+  padding: 6px 6px 6px 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  background: var(--bg-alt);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.home-mate-chat-composer:focus-within {
+  border-color: var(--mate-color, var(--accent));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--mate-color, var(--accent)) 10%, transparent);
 }
 
 #home-mate-chat-input {
   flex: 1 1 auto;
   min-width: 0;
-  max-height: 96px;
-  padding: 7px 9px;
-  border: 1px solid var(--border-subtle);
-  border-radius: 8px;
+  max-height: 108px;
+  padding: 5px 0;
+  border: 0;
   outline: none;
-  background: var(--bg-alt);
+  background: transparent;
   color: var(--text);
   font-family: inherit;
   font-size: 13px;
@@ -433,7 +448,7 @@
 }
 
 #home-mate-chat-input:focus {
-  border-color: var(--accent);
+  outline: none;
 }
 
 #home-mate-chat-input:disabled {
@@ -442,21 +457,32 @@
 
 #home-mate-chat-send {
   flex: 0 0 auto;
-  padding: 8px 10px;
-  border: 1px solid var(--accent);
-  border-radius: 8px;
-  background: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--mate-color, var(--accent));
   color: var(--bg);
   font-family: inherit;
-  font-size: 12px;
-  font-weight: 600;
   cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+#home-mate-chat-send .lucide {
+  width: 17px;
+  height: 17px;
+}
+
+#home-mate-chat-send:hover:not(:disabled) {
+  transform: translateY(-1px);
 }
 
 #home-mate-chat-send:disabled {
-  border-color: var(--border-subtle);
-  background: var(--bg-alt);
-  color: var(--text-dimmer);
+  opacity: 0.28;
   cursor: default;
 }
 
@@ -673,7 +699,7 @@
   border: 2px solid var(--bg);
   border-radius: 8px;
   background: var(--accent);
-  color: #fff;
+  color: var(--bg);
   font-size: 10px;
   font-weight: 600;
   line-height: 16px;
@@ -704,56 +730,17 @@
   }
 
   .hub-pane-header {
-    padding-bottom: 8px;
-  }
-
-  .home-hub-mates {
-    flex: 0 0 88px;
-    flex-direction: row;
-    gap: 10px;
-    height: 88px;
-    max-height: none;
-    padding: 0 44px 0 0;
-    overflow-x: auto;
-    overflow-y: hidden;
-    scrollbar-width: none;
-  }
-
-  .home-hub-mates::-webkit-scrollbar {
-    display: none;
-  }
-
-  .hub-pane-mates .home-hub-mate-item {
-    flex: 0 0 74px;
-    flex-direction: column;
-    justify-content: flex-start;
-    gap: 5px;
-    width: 74px;
-    height: 88px;
-    padding: 4px;
-  }
-
-  .hub-pane-mates .home-hub-mate-avatar-wrap,
-  .hub-pane-mates .home-hub-mate-avatar,
-  .home-hub-mate-add .home-hub-mate-add-icon {
-    width: 44px;
     height: 44px;
   }
 
-  .hub-pane-mates .home-hub-mate-name {
-    text-align: center;
-  }
-
-  .home-hub-mate-bio,
-  .home-hub-mate-badge {
-    display: none;
+  .home-hub-mates {
+    padding-right: 44px;
   }
 
   .home-mate-chat {
     flex: 0 0 50vh;
     height: 50vh;
     min-height: 300px;
-    margin-top: 10px;
   }
 
   .hub-pane-board {
