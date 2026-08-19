@@ -78,7 +78,7 @@
 .hub-split {
   flex: 1;
   display: grid;
-  grid-template-columns: 4fr 6fr;
+  grid-template-columns: 3fr 7fr;
   gap: 16px;
   width: 100%;
   height: 100%;
@@ -113,11 +113,12 @@
 
 /* Mate roster */
 .home-hub-mates {
-  flex: 1;
+  flex: 0 1 40%;
   display: flex;
   flex-direction: column;
   gap: 2px;
   min-height: 0;
+  max-height: 40%;
   padding: 0 4px 0 0;
   overflow-y: auto;
   overflow-x: hidden;
@@ -145,6 +146,14 @@
 
 .hub-pane-mates .home-hub-mate-item:hover {
   background: var(--bg-alt);
+}
+
+.hub-pane-mates .home-hub-mate-item.active {
+  background: var(--accent-12);
+}
+
+.hub-pane-mates .home-hub-mate-item.active .home-hub-mate-name {
+  color: var(--accent);
 }
 
 .home-hub-mate-item:active .home-hub-mate-avatar {
@@ -265,6 +274,190 @@
 
 .home-hub-mate-add .home-hub-mate-name {
   color: var(--text-muted);
+}
+
+/* Embedded mate conversation */
+.home-mate-chat {
+  flex: 1 1 60%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  margin-top: 10px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.home-mate-chat-header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 42px;
+  padding: 8px 2px;
+}
+
+.home-mate-chat-title {
+  overflow: hidden;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-mate-chat-new {
+  padding: 4px 8px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.home-mate-chat-new:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.home-mate-chat-new:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.home-mate-chat-messages {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-height: 0;
+  padding: 6px 4px 10px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.home-mate-chat-row {
+  display: flex;
+  width: 100%;
+}
+
+.home-mate-chat-row-user {
+  justify-content: flex-end;
+}
+
+.home-mate-chat-row-assistant {
+  justify-content: flex-start;
+}
+
+.home-mate-chat-bubble {
+  max-width: 85%;
+  padding: 7px 9px;
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.home-mate-chat-bubble-user {
+  border-bottom-right-radius: 3px;
+  background: var(--accent-12);
+}
+
+.home-mate-chat-bubble-assistant {
+  border-bottom-left-radius: 3px;
+  background: var(--bg-alt);
+}
+
+.home-mate-chat-empty {
+  margin: auto;
+  padding: 18px;
+  color: var(--text-dimmer);
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.home-mate-chat-streaming {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  width: fit-content;
+  padding: 6px 9px;
+}
+
+.home-mate-chat-streaming span {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  animation: homeMateChatDot 1s ease-in-out infinite;
+}
+
+.home-mate-chat-streaming span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.home-mate-chat-streaming span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes homeMateChatDot {
+  0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-2px); }
+}
+
+.home-mate-chat-composer {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  padding-top: 9px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+#home-mate-chat-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-height: 96px;
+  padding: 7px 9px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  outline: none;
+  background: var(--bg-alt);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.4;
+  resize: none;
+}
+
+#home-mate-chat-input:focus {
+  border-color: var(--accent);
+}
+
+#home-mate-chat-input:disabled {
+  opacity: 0.55;
+}
+
+#home-mate-chat-send {
+  flex: 0 0 auto;
+  padding: 8px 10px;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--bg);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#home-mate-chat-send:disabled {
+  border-color: var(--border-subtle);
+  background: var(--bg-alt);
+  color: var(--text-dimmer);
+  cursor: default;
 }
 
 /* Kanban board */
@@ -490,16 +683,24 @@
 @media (max-width: 900px) {
   #home-hub {
     padding: 16px 16px calc(76px + var(--safe-bottom, 0px));
+    overflow-y: auto;
+  }
+
+  .home-hub-inner {
+    height: auto;
+    min-height: 100%;
   }
 
   .hub-split {
     grid-template-columns: 1fr;
-    grid-template-rows: 118px minmax(0, 1fr);
+    grid-template-rows: auto auto;
     gap: 12px;
+    height: auto;
   }
 
   .hub-pane-mates {
-    height: 118px;
+    height: auto;
+    min-height: 0;
   }
 
   .hub-pane-header {
@@ -507,9 +708,11 @@
   }
 
   .home-hub-mates {
+    flex: 0 0 88px;
     flex-direction: row;
     gap: 10px;
     height: 88px;
+    max-height: none;
     padding: 0 44px 0 0;
     overflow-x: auto;
     overflow-y: hidden;
@@ -544,6 +747,18 @@
   .home-hub-mate-bio,
   .home-hub-mate-badge {
     display: none;
+  }
+
+  .home-mate-chat {
+    flex: 0 0 50vh;
+    height: 50vh;
+    min-height: 300px;
+    margin-top: 10px;
+  }
+
+  .hub-pane-board {
+    height: 60vh;
+    min-height: 420px;
   }
 
   .home-board {
