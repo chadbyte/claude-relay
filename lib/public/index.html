@@ -104,6 +104,7 @@
     <div class="icon-strip-home" title="Clay">
       <span class="icon-strip-pill"></span>
       <img class="icon-strip-logo" src="icon-banded-76.png" width="38" height="38" alt="Clay">
+      <span class="icon-strip-home-badge" id="icon-strip-home-badge"></span>
     </div>
     <div class="icon-strip-separator"></div>
     <button type="button" class="icon-strip-hint" id="icon-strip-hint-project" data-switcher-mode="project" aria-label="Switch project"></button>
@@ -132,28 +133,40 @@
           <p id="hub-greeting-date"></p>
         </div>
 
-        <div id="home-hub-mates" class="home-hub-mates hidden"></div>
-
-        <div class="hub-card hub-board-card">
-          <div class="hub-card-header">
-            <span class="hub-card-title">Board</span>
-          </div>
-          <div class="home-board" id="home-board"></div>
-        </div>
-
-        <div class="hub-columns">
-          <div class="hub-card hub-upcoming">
-            <div class="hub-card-header">
-              <span class="hub-card-title">Upcoming</span>
-              <span class="hub-card-count" id="hub-upcoming-count"></span>
+        <div class="hub-split">
+          <!-- Left: the mates who do the work -->
+          <div class="hub-pane hub-pane-mates">
+            <div class="hub-card hub-mates-card">
+              <div class="hub-card-header">
+                <span class="hub-card-title">Mates</span>
+              </div>
+              <div id="home-hub-mates" class="home-hub-mates"></div>
             </div>
-            <div class="hub-upcoming-list" id="hub-upcoming-list"></div>
-          </div>
-          <div class="hub-card hub-projects-summary">
-            <div class="hub-card-header">
-              <span class="hub-card-title">Projects</span>
+
+            <div class="hub-card hub-upcoming">
+              <div class="hub-card-header">
+                <span class="hub-card-title">Upcoming</span>
+                <span class="hub-card-count" id="hub-upcoming-count"></span>
+              </div>
+              <div class="hub-upcoming-list" id="hub-upcoming-list"></div>
             </div>
-            <div class="hub-projects-list" id="hub-projects-list"></div>
+
+            <div class="hub-card hub-projects-summary">
+              <div class="hub-card-header">
+                <span class="hub-card-title">Projects</span>
+              </div>
+              <div class="hub-projects-list" id="hub-projects-list"></div>
+            </div>
+          </div>
+
+          <!-- Right: the board where work starts and ends -->
+          <div class="hub-pane hub-pane-board">
+            <div class="hub-card hub-board-card">
+              <div class="hub-card-header">
+                <span class="hub-card-title">Board</span>
+              </div>
+              <div class="home-board" id="home-board"></div>
+            </div>
           </div>
         </div>
 

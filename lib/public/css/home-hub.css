@@ -735,3 +735,163 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ==========================================================================
+   Home work hub — two-pane layout (mates left, board right)
+
+   Home is where work starts and ends: the mates who do the work sit next to
+   the board they take it from. These rules override the older single-column
+   hub styling above.
+   ========================================================================== */
+.home-hub-inner {
+  max-width: 1240px;
+}
+
+.hub-split {
+  display: grid;
+  grid-template-columns: minmax(260px, 340px) 1fr;
+  gap: 14px;
+  align-items: start;
+  animation: hubCardIn 0.4s ease 0.08s both;
+}
+
+.hub-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.hub-pane-board .hub-board-card {
+  min-height: 340px;
+}
+
+/* --- Left pane: mates as a vertical roster --- */
+.home-hub-mates {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0;
+  overflow-x: visible;
+  overflow-y: auto;
+  max-height: 320px;
+}
+
+.hub-mates-card .home-hub-mate-item {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: 8px;
+  transition: background 0.12s ease;
+}
+.hub-mates-card .home-hub-mate-item:hover {
+  background: var(--bg);
+}
+
+.hub-mates-card .home-hub-mate-avatar-wrap,
+.hub-mates-card .home-hub-mate-avatar {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+}
+
+.home-hub-mate-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.hub-mates-card .home-hub-mate-name {
+  font-size: 13px;
+  color: var(--text);
+  max-width: 100%;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.home-hub-mate-bio {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.home-hub-mate-badge {
+  flex: 0 0 auto;
+  font-size: 10px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--accent);
+  border-radius: 9px;
+  padding: 1px 6px;
+}
+
+.home-hub-mate-mention {
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--bg-alt);
+}
+
+.home-hub-mate-add .home-hub-mate-add-icon {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed var(--border-subtle);
+  border-radius: 50%;
+  color: var(--text-muted);
+  font-size: 16px;
+}
+.home-hub-mate-add:hover .home-hub-mate-add-icon {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.home-hub-mate-add .home-hub-mate-name {
+  color: var(--text-muted);
+}
+
+/* --- C button badge: the only entry point to mates now --- */
+.icon-strip-home {
+  position: relative;
+}
+.icon-strip-home-badge {
+  display: none;
+}
+.icon-strip-home-badge.has-unread {
+  display: block;
+  position: absolute;
+  top: 0;
+  right: 2px;
+  min-width: 16px;
+  padding: 0 4px;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 16px;
+  text-align: center;
+  color: #fff;
+  background: var(--accent);
+  border-radius: 8px;
+  border: 2px solid var(--bg);
+}
+
+@media (max-width: 900px) {
+  .hub-split {
+    grid-template-columns: 1fr;
+  }
+  .home-hub-mates {
+    max-height: none;
+  }
+}

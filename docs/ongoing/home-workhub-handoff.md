@@ -335,6 +335,10 @@ Left pane changes in `app-home-hub.js`:
    (`mates-prompts.js`).
 4. Home layout + mate relocation: two-pane hub, Clay in the mates list,
    strip removal, C-button badge aggregation, mobile follow-up.
+   — DONE 2026-08-19. Deviation: the DM picker (behind the sidebar `+`)
+   still lists mates, because it also owns delete-mate and re-add-builtin.
+   Mates are out of the icon strip, which is the visible change; folding
+   those two actions into the home pane is follow-up work.
 5. Completion confirm UI + end-to-end pass of the loop: create card ->
    assign mate -> mate works -> propose done -> confirm -> done column.
 
