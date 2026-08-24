@@ -324,6 +324,25 @@
     display: none !important;
   }
 
+  .title-bar-content {
+    height: calc(48px + var(--safe-top));
+    padding: var(--safe-top) 16px 0;
+  }
+
+  /* The inline title editor must own the header while the keyboard is open.
+     Leaving the other controls visible made its usable width nearly zero. */
+  .title-bar-content.session-renaming .status,
+  .title-bar-content.session-renaming #header-left > :not(.header-rename-input) {
+    display: none !important;
+  }
+
+  .title-bar-content.session-renaming .header-rename-input {
+    flex: 1 1 100%;
+    width: 100%;
+    min-height: 36px;
+    font-size: 16px;
+  }
+
   #sidebar-column {
     width: 0 !important;
     min-width: 0 !important;

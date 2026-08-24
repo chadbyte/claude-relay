@@ -5,10 +5,19 @@
 #messages {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
   padding: 20px 0 12px;
   position: relative;
+}
+
+/* Rich message content can contain wide tables, diagrams, or generated HTML.
+   Keep that content inside the chat scroller; nested code blocks still own
+   their intentional horizontal scrolling. */
+#messages > * {
+  min-width: 0;
+  max-width: 100%;
 }
 
 /* --- Remote cursors (Figma-style) --- */

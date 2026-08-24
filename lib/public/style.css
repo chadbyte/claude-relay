@@ -1,12 +1,12 @@
 @import url("css/base.css");
 @import url("css/icon-strip.css");
-@import url("css/title-bar.css");
+@import url("css/title-bar.css?v=20260824");
 @import url("css/pane.css");
 @import url("css/worker-proposal.css");
 @import url("css/sidebar.css");
 @import url("css/overlays.css");
 @import url("css/menus.css");
-@import url("css/messages.css?v=20260407");
+@import url("css/messages.css?v=20260824");
 @import url("css/rewind.css");
 @import url("css/input.css");
 @import url("css/filebrowser.css");
@@ -35,3 +35,4 @@
 @import url("css/debate.css");
 @import url("css/notifications-center.css");
 @import url("css/tui-attention.css");
+@import url("css/pwa-mobile.css?v=20260824f");

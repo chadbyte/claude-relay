@@ -1,0 +1,17 @@
+/* In an iOS Home Screen app, a 100%-tall root can be measured against the
+   shortened safe-area viewport. Use the physical viewport for the root while
+   retaining safe-area padding on controls inside the app. */
+@media (max-width: 768px) {
+  html.pwa-standalone,
+  html.pwa-standalone body {
+    height: 100vh;
+  }
+}
+
+@media (max-width: 768px) and (display-mode: standalone),
+       (max-width: 768px) and (display-mode: fullscreen) {
+  html,
+  body {
+    height: 100vh;
+  }
+}
