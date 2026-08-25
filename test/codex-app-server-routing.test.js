@@ -1,7 +1,7 @@
 var test = require("node:test");
 var assert = require("node:assert");
 
-var { CodexAppServer } = require("../lib/yoke/codex-app-server");
+var { CodexAppServer, buildSpawnSpec } = require("../lib/yoke/codex-app-server");
 
 function makeServer() {
   var server = new CodexAppServer("/nonexistent/codex", {});
@@ -80,4 +80,37 @@ test("rejects an unroutable Codex request instead of dropping it", function() {
   assert.strictEqual(server.written.length, 1);
   assert.strictEqual(server.written[0].id, 7);
   assert.ok(server.written[0].error);
+});
+
+test("builds an OS-user Codex spawn without leaking the daemon environment", function() {
+  var previousSecret = process.env.CLAY_TEST_DAEMON_SECRET;
+  process.env.CLAY_TEST_DAEMON_SECRET = "must-not-leak";
+  var wrappedOptions = null;
+  try {
+    var spec = buildSpawnSpec("/usr/bin/codex", ["app-server"], {
+      cwd: "/workspace",
+      env: { OPENAI_API_KEY: "user-key" },
+      osUserInfo: {
+        uid: 1201,
+        gid: 1202,
+        home: "/home/alice",
+        user: "alice",
+        shell: "/bin/bash",
+      },
+    }, function(command, args, options) {
+      wrappedOptions = options;
+      return { command: command, args: args, options: options };
+    });
+
+    assert.strictEqual(spec.command, "/usr/bin/codex");
+    assert.strictEqual(wrappedOptions.uid, 1201);
+    assert.strictEqual(wrappedOptions.gid, 1202);
+    assert.strictEqual(wrappedOptions.env.HOME, "/home/alice");
+    assert.strictEqual(wrappedOptions.env.USER, "alice");
+    assert.strictEqual(wrappedOptions.env.OPENAI_API_KEY, "user-key");
+    assert.strictEqual(wrappedOptions.env.CLAY_TEST_DAEMON_SECRET, undefined);
+  } finally {
+    if (previousSecret === undefined) delete process.env.CLAY_TEST_DAEMON_SECRET;
+    else process.env.CLAY_TEST_DAEMON_SECRET = previousSecret;
+  }
 });
