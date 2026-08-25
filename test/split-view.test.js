@@ -102,10 +102,12 @@ test("worker delegation notice joins the composer without a gap", function () {
 
 test("split pane clients leave notification banners to the parent shell", function () {
   var notificationsSource = fs.readFileSync(path.join(__dirname, "../lib/public/modules/app-notifications.js"), "utf8");
+  var paneCss = fs.readFileSync(path.join(__dirname, "../lib/public/css/pane.css"), "utf8");
   var initStart = notificationsSource.indexOf("export function initAppNotifications()");
   var initEnd = notificationsSource.indexOf("// ========================================================", initStart);
   var initSource = notificationsSource.slice(initStart, initEnd);
 
   assert.match(initSource, /if \(store\.get\('paneMode'\)\) return;/);
   assert.ok(initSource.indexOf("paneMode") < initSource.indexOf('document.createElement("div")'));
+  assert.match(paneCss, /body\.pane-mode \.notif-banner-container\s*\{[^}]*display:\s*none !important/s);
 });
