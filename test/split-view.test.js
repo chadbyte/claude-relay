@@ -109,3 +109,11 @@ test("split pane clients leave notification banners to the parent shell", functi
   assert.match(initSource, /if \(store\.get\('paneMode'\)\) return;/);
   assert.ok(initSource.indexOf("paneMode") < initSource.indexOf('document.createElement("div")'));
 });
+
+test("split pane clients prepare web links before browser navigation", function () {
+  var bridgeSource = fs.readFileSync(path.join(__dirname, "../lib/public/modules/pane-bridge.js"), "utf8");
+
+  assert.match(bridgeSource, /document\.addEventListener\("click", preparePaneLink, true\)/);
+  assert.match(bridgeSource, /document\.addEventListener\("auxclick", preparePaneLink, true\)/);
+  assert.match(bridgeSource, /forceExternalLinkToNewTab\(anchor, window\.location\.href\)/);
+});
