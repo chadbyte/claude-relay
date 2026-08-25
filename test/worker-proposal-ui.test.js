@@ -32,3 +32,27 @@ test("Worker proposal card keeps responsive controls inside split panes", functi
   assert.match(source, /@media \(max-width: 720px\)/);
   assert.match(source, /grid-template-columns: 1fr 1fr/);
 });
+
+test("title bar identifies the add Worker action with a robot and text", function () {
+  var html = fs.readFileSync(path.join(root, "lib/public/index.html"), "utf8");
+  var css = fs.readFileSync(path.join(root, "lib/public/css/menus.css"), "utf8");
+  assert.match(html, /id="header-add-worker-btn"[^>]*aria-label="Add AI Worker"/);
+  assert.match(html, /data-lucide="bot"/);
+  assert.match(html, /header-worker-add-badge[^>]*><i data-lucide="plus"/);
+  assert.match(html, /header-worker-label/);
+  assert.match(css, /\.header-worker-label/);
+});
+
+test("title bar groups session controls and places Worker before context usage", function () {
+  var html = fs.readFileSync(path.join(root, "lib/public/index.html"), "utf8");
+  var panels = fs.readFileSync(path.join(root, "lib/public/modules/app-panels.js"), "utf8");
+  var renameAt = html.indexOf('id="header-rename-btn"');
+  var fullAccessAt = html.indexOf('id="header-full-access-btn"');
+  var statusAt = html.indexOf('<div class="status">');
+  var workerAt = html.indexOf('id="header-add-worker-btn"');
+
+  assert.ok(renameAt > 0 && renameAt < fullAccessAt);
+  assert.ok(workerAt > statusAt);
+  assert.match(panels, /workerBtn\.nextSibling/);
+  assert.match(panels, /statusArea\.insertBefore\(hCtxEl, contextAnchor\)/);
+});
