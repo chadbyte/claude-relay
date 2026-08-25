@@ -157,6 +157,11 @@ test("write_note contract treats the board as a scarce user-facing surface", fun
   assert.match(tool.description, /Never create a note merely because work is important/i);
   assert.match(tool.description, /completed work, implementation details, test results/i);
   assert.match(tool.description, /When uncertain, do not write/i);
+  assert.match(tool.description, /Important exception for deferred defects/i);
+  assert.match(tool.description, /outside the current session goal/i);
+  assert.match(tool.description, /observable evidence, affected component, likely impact, and a clear next action/i);
+  assert.match(tool.description, /Do not wait for the user to ask/i);
+  assert.match(tool.description, /speculation, general cleanup ideas, or problems you fixed/i);
   assert.match(tool.description, /abuse guard, not a target/i);
 });
 
@@ -205,6 +210,9 @@ test("sticky-note prompt announces an empty board and proactive policy", functio
   assert.match(prompt, /user-facing artifact/);
   assert.match(prompt, /Default to not writing/);
   assert.match(prompt, /glad to find it on the board a week later/);
+  assert.match(prompt, /Important exception for deferred defects/);
+  assert.match(prompt, /outside the current session goal/);
+  assert.match(prompt, /Do not wait for the user to ask/);
   assert.ok(prompt.endsWith(notesModule.PROACTIVE_POLICY));
 });
 
