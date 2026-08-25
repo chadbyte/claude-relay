@@ -54,6 +54,36 @@ test("pushMessage retires a query handle that rejects delivery", function() {
   assert.strictEqual(session.messageQueue, null);
 });
 
+test("mention sessions preserve the mapped Linux user", async function() {
+  var capturedOptions = null;
+  var handle = createEndingHandle([]);
+  var bridge = createSDKBridge({
+    cwd: process.cwd(),
+    sessionManager: {},
+    adapter: {
+      vendor: "codex",
+      createQuery: function(options) {
+        capturedOptions = options;
+        return Promise.resolve(handle);
+      },
+    },
+    send: function() {},
+  });
+
+  var mentionSession = await bridge.createMentionSession({
+    linuxUser: "clay-alice",
+    claudeMd: "",
+    initialContext: "context",
+    initialMessage: "question",
+    onDelta: function() {},
+    onDone: function() {},
+    onError: function() {},
+  });
+
+  assert.ok(mentionSession);
+  assert.strictEqual(capturedOptions.linuxUser, "clay-alice");
+});
+
 test("pushMessage retires a query handle that throws during delivery", function() {
   var bridge = createBridge();
   var query = {
