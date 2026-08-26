@@ -46,6 +46,50 @@ test("YOKE registry returns null for an unknown vendor", function() {
   assert.strictEqual(yoke.getVendorInfo("nope"), null);
 });
 
+test("adapter startup logs one registration summary instead of creation per vendor", async function() {
+  var originalLog = console.log;
+  var logs = [];
+  console.log = function(message) {
+    logs.push(String(message));
+  };
+  var created;
+  try {
+    created = yoke.createAdapters({
+      cwd: process.cwd(),
+      slug: "log-test",
+      _installed: { codex: true },
+    });
+  } finally {
+    console.log = originalLog;
+  }
+  assert.deepStrictEqual(logs, ["[yoke] Adapters registered for log-test: codex"]);
+  assert.strictEqual(logs.some(function(line) { return line.indexOf("Adapter created: codex") !== -1; }), false);
+  await created.adapters.codex.shutdown();
+});
+
+test("shared Claude creation is logged once across project registrations", function() {
+  var originalLog = console.log;
+  var logs = [];
+  console.log = function(message) {
+    logs.push(String(message));
+  };
+  try {
+    yoke.createAdapters({ cwd: process.cwd(), slug: "shared-a", _installed: { claude: true } });
+    yoke.createAdapters({ cwd: process.cwd(), slug: "shared-b", _installed: { claude: true } });
+  } finally {
+    console.log = originalLog;
+  }
+  assert.strictEqual(logs.filter(function(line) {
+    return line === "[yoke] Shared adapter created: claude";
+  }).length, 1);
+  assert.deepStrictEqual(logs.filter(function(line) {
+    return line.indexOf("[yoke] Adapters registered for shared-") === 0;
+  }), [
+    "[yoke] Adapters registered for shared-a: claude",
+    "[yoke] Adapters registered for shared-b: claude",
+  ]);
+});
+
 test("default vendor follows the declared cross-vendor preference order", function() {
   assert.strictEqual(yoke.resolveDefaultVendor({ kiro: {} }), "kiro");
   assert.strictEqual(yoke.resolveDefaultVendor({ kiro: {}, opencode: {} }), "opencode");
