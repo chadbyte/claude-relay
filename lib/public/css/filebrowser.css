@@ -960,7 +960,7 @@
     width: 50%;
     max-width: 720px;
     min-width: 360px;
-    border-right: 1px solid var(--border);
+    border-left: 1px solid var(--border);
     background: var(--bg);
     display: flex;
     flex-direction: column;

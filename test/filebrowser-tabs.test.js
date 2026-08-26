@@ -22,6 +22,15 @@ test("document viewer reset clears every tab before full teardown", function() {
   assert.match(reset, /teardownFileViewer\(\);/);
 });
 
+test("document viewer docks on the right side of the workspace", function() {
+  var browser = fs.readFileSync(path.join(__dirname, "../lib/public/modules/filebrowser.js"), "utf8");
+  var css = fs.readFileSync(path.join(__dirname, "../lib/public/css/filebrowser.css"), "utf8");
+  var init = browser.slice(browser.indexOf("export function initFileBrowser"), browser.indexOf("// Load material file icons"));
+  assert.match(init, /mainPanels\.appendChild\(ctx\.fileViewerEl\)/);
+  assert.doesNotMatch(init, /mainPanels\.insertBefore/);
+  assert.match(css, /#file-viewer\s*\{[^}]*border-left:\s*1px solid var\(--border\)/s);
+});
+
 test("split and pane markdown presents use the parent-owned viewer path", function() {
   var messages = fs.readFileSync(path.join(__dirname, "../lib/public/modules/app-messages.js"), "utf8");
   var bridge = fs.readFileSync(path.join(__dirname, "../lib/public/modules/pane-bridge.js"), "utf8");
