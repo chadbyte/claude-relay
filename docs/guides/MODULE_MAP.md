@@ -85,7 +85,7 @@ YOKE is the vendor-agnostic interface layer. Each adapter implements the same co
 | `yoke/codex-app-server.js` | Codex `app-server` child process manager. JSON-RPC 2.0 over stdin/stdout, request ID tracking, event routing |
 | `yoke/adapters/acp.js` | Shared default YOKE adapter for ACP agents. Vendor drivers may augment or replace lifecycle behavior so ACP never limits the YOKE contract |
 | `yoke/adapters/antigravity.js` | Antigravity CLI integration using Google's official bidirectional stream-JSON protocol for sessions, models, effort, tools, results, and usage |
-| `yoke/acp-agent-profiles.js` + `yoke/acp-driver-runtime.js` | OpenCode process metadata plus composable vendor hooks for initialization, sessions, permissions, events, results, and optional YOKE methods |
+| `yoke/acp-agent-profiles.js` + `yoke/acp-driver-runtime.js` | OpenCode, Kimi Code, Grok Build, GitHub Copilot CLI, Qwen Code, and Junie CLI process metadata plus composable vendor hooks for initialization, sessions, permissions, events, results, and optional YOKE methods |
 | `yoke/acp-query-handle.js` + `yoke/acp-event-normalizer.js` | Shared ACP session lifecycle, permission handling, and YOKE event normalization |
 | `yoke/adapters/kiro.js` | Kiro adapter using `kiro-cli acp` (Agent Client Protocol). Dynamic model catalog, event flattening (session/update), permission routing, session resume |
 | `yoke/acp-process-manager.js` | Vendor-neutral ACP child process manager. JSON-RPC 2.0 over stdin/stdout, request ID tracking, session-aware event routing |

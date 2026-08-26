@@ -21,6 +21,21 @@ test("installed vendor selection falls back to Codex", async function () {
 
 test("installed vendor selection follows remaining priority and handles none", async function () {
   var vendorPriority = await loadVendorPriority();
+  assert.strictEqual(vendorPriority.firstInstalledVendor(["qwen", "kimi", "grok"]), "grok");
+  assert.strictEqual(vendorPriority.firstInstalledVendor(["qwen", "copilot"]), "copilot");
+  assert.strictEqual(vendorPriority.firstInstalledVendor(["kiro", "junie"]), "junie");
   assert.strictEqual(vendorPriority.firstInstalledVendor(["kiro", "opencode"]), "opencode");
   assert.strictEqual(vendorPriority.firstInstalledVendor([]), "");
+});
+
+test("only vendors without direct use testing are marked experimental", async function () {
+  var vendorPriority = await loadVendorPriority();
+  var stable = ["claude", "codex", "kiro"];
+  var experimental = ["grok", "kimi", "copilot", "qwen", "junie", "antigravity", "opencode"];
+  for (var i = 0; i < stable.length; i++) {
+    assert.strictEqual(vendorPriority.isExperimentalVendor(stable[i]), false);
+  }
+  for (var j = 0; j < experimental.length; j++) {
+    assert.strictEqual(vendorPriority.isExperimentalVendor(experimental[j]), true);
+  }
 });

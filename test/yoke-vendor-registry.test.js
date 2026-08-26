@@ -4,7 +4,7 @@ var assert = require("node:assert");
 var yoke = require("../lib/yoke");
 var createKiroAdapter = require("../lib/yoke/adapters/kiro").createKiroAdapter;
 
-var SUPPORTED_VENDORS = ["claude", "codex", "antigravity", "opencode", "kiro"];
+var SUPPORTED_VENDORS = ["claude", "codex", "grok", "kimi", "copilot", "qwen", "junie", "antigravity", "opencode", "kiro"];
 
 function FakeAcpServer() {
   this.started = false;
@@ -68,6 +68,11 @@ test("Kiro remains unavailable for OS-user isolation", function() {
 test("subprocess vendors remain unavailable for OS-user isolation", function() {
   assert.strictEqual(yoke.getVendorInfo("antigravity").osUserIsolation, false);
   assert.strictEqual(yoke.getVendorInfo("opencode").osUserIsolation, false);
+  assert.strictEqual(yoke.getVendorInfo("kimi").osUserIsolation, false);
+  assert.strictEqual(yoke.getVendorInfo("grok").osUserIsolation, false);
+  assert.strictEqual(yoke.getVendorInfo("copilot").osUserIsolation, false);
+  assert.strictEqual(yoke.getVendorInfo("qwen").osUserIsolation, false);
+  assert.strictEqual(yoke.getVendorInfo("junie").osUserIsolation, false);
 });
 
 test("Kiro capabilities do not promise stubbed controls", async function() {

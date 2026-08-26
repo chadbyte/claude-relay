@@ -682,6 +682,12 @@
 .mate-vendor-label {
   pointer-events: none;
 }
+.mate-vendor-btn.experimental::after {
+  content: "🧪";
+  font-size: 9px;
+  line-height: 1;
+  font-weight: 400;
+}
 .mate-vendor-btn:not(.active) .mate-vendor-label { display: none; }
 
 /* Collapse button inside mate header: white to match header style */

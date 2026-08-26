@@ -790,6 +790,7 @@
   opacity: 0.35;
   cursor: default;
 }
+.vendor-toggle-btn.disabled:not(.active) { display: none; }
 .vendor-toggle-icon {
   width: 16px;
   height: 16px;
@@ -798,6 +799,17 @@
 }
 .vendor-toggle-label {
   pointer-events: none;
+}
+.vendor-toggle-btn.experimental::after,
+.vendor-experimental-badge {
+  content: "🧪";
+  font-size: 10px;
+  line-height: 1;
+  font-weight: 400;
+  filter: saturate(0.85);
+}
+.vendor-experimental-badge {
+  margin-left: auto;
 }
 @media (min-width: 901px) {
   .vendor-toggle-btn:not(.active) .vendor-toggle-label { display: none; }

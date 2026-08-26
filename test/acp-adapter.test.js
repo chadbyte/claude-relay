@@ -100,6 +100,41 @@ test("OpenCode profile uses its official ACP entry point", function() {
   assert.deepStrictEqual(getProfile("opencode").args, ["acp"]);
 });
 
+test("new ACP profiles use their official supervised entry points", function() {
+  assert.deepStrictEqual(getProfile("kimi").args, ["acp"]);
+  assert.deepStrictEqual(getProfile("grok").args, ["--no-auto-update", "--permission-mode", "ask", "agent", "stdio"]);
+  assert.deepStrictEqual(getProfile("copilot").args, ["--acp"]);
+  assert.deepStrictEqual(getProfile("qwen").args, ["--acp", "--approval-mode", "default"]);
+  assert.deepStrictEqual(getProfile("junie").args, ["--acp", "true"]);
+});
+
+test("new ACP vendor factories satisfy the shared YOKE contract", function() {
+  var vendors = ["kimi", "grok", "copilot", "qwen", "junie"];
+  for (var i = 0; i < vendors.length; i++) {
+    var adapter = require("../lib/yoke").createAdapter({ vendor: vendors[i], cwd: process.cwd() });
+    assert.strictEqual(adapter.vendor, vendors[i]);
+    assert.strictEqual(typeof adapter.createQuery, "function");
+  }
+});
+
+["kimi", "copilot", "junie"].forEach(function(vendor) {
+  test(vendor + " ACP profile replaces an exposed unsafe mode before prompting", async function() {
+    FakeManager.instances = [];
+    var adapter = createAcpAdapter(vendor, adapterOptions(getProfile(vendor)));
+    await adapter.init();
+    var handle = await adapter.createQuery({ cwd: process.cwd(), model: "auto" });
+    handle.pushMessage("permission mode test");
+    for await (var event of handle) {
+      if (event.yokeType === "result") break;
+    }
+    assert.ok(FakeManager.instances[0].calls.some(function(call) {
+      return call.method === "session/set_config_option" && call.params.configId === "mode" && call.params.value === "default";
+    }));
+    handle.close();
+    await adapter.shutdown();
+  });
+});
+
 test("OpenCode derives session resume support from the ACP handshake", async function() {
   FakeManager.instances = [];
   var options = adapterOptions(getProfile("opencode"));
