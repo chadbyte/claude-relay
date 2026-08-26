@@ -82,3 +82,9 @@ test("Fable selection is optimistic, acknowledged, and rolled back on failure", 
   assert.strictEqual(f.getState().currentModel, "sonnet");
   assert.strictEqual(f.getState().modelSelectionError, "Fable is unavailable");
 });
+
+test("model picker does not impose a first-message lock", function() {
+  var source = fs.readFileSync(path.join(__dirname, "../lib/public/modules/model-picker.js"), "utf8");
+  assert.doesNotMatch(source, /Locked after first message/);
+  assert.doesNotMatch(source, /midSessionModelSwitch/);
+});
