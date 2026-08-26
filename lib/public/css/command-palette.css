@@ -434,6 +434,7 @@
    on hover/active, and a 4-direction drop-shadow + white glow on the
    emoji img for readability on either background. */
 .project-switcher-item .cmd-palette-item-icon {
+  position: relative;
   width: 44px;
   height: 44px;
   font-size: 28px;
@@ -446,6 +447,26 @@
   color: var(--text-secondary);
   flex-shrink: 0;
   transition: background 0.15s, color 0.15s;
+}
+.project-switcher-external-badge {
+  position: absolute;
+  right: -5px;
+  bottom: -5px;
+  width: 17px;
+  height: 17px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--bg);
+  border-radius: 50%;
+  background: var(--warning);
+  color: var(--bg);
+  pointer-events: none;
+}
+.project-switcher-item .cmd-palette-item-icon .project-switcher-external-badge .lucide {
+  width: 9px;
+  height: 9px;
+  stroke-width: 2.8;
 }
 .project-switcher-item .cmd-palette-item-icon .lucide {
   width: 22px;
@@ -515,8 +536,7 @@
   letter-spacing: 0.5px;
 }
 
-/* Disabled tile (e.g. worktree with worktreeAccessible: false). Not a
-   valid switch target, so skip highlight, skip click, visually dim. */
+/* Disabled tiles are skipped by keyboard and pointer selection. */
 .project-switcher-item.disabled {
   opacity: 0.35;
   cursor: not-allowed;

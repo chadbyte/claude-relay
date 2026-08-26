@@ -1257,19 +1257,26 @@
   z-index: 1;
 }
 
-/* Disabled/inaccessible worktree */
-.icon-strip-wt-item.wt-disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
+/* Worktree registered outside the main project folder. It remains usable;
+   the badge communicates location without treating it as an error. */
+.worktree-external-badge {
+  position: absolute;
+  right: 5px;
+  bottom: 1px;
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2px solid var(--sidebar-bg);
+  background: var(--warning);
+  color: var(--bg);
+  z-index: 3;
+  pointer-events: none;
 }
 
-.icon-strip-wt-item.wt-disabled::after {
-  content: "\1F6AB";
-  position: absolute;
-  font-size: 14px;
-  z-index: 3;
-  filter: grayscale(0.3);
-}
+.worktree-external-badge .lucide { width: 8px; height: 8px; stroke-width: 2.8; }
 
 /* Group add button */
 .icon-strip-group-add {
@@ -1420,10 +1427,19 @@ select.wt-modal-input {
   opacity: 0.85;
 }
 
-.mobile-project-item.wt-disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
+.mobile-worktree-external-badge {
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--warning) 14%, transparent);
+  color: var(--warning);
+  flex-shrink: 0;
 }
+
+.mobile-worktree-external-badge .lucide { width: 12px; height: 12px; stroke-width: 2.4; }
 
 .mobile-folder-chevron {
   font-size: 8px;
