@@ -702,6 +702,41 @@ body.dm-mode #header-add-worker-btn { display: none; }
   color: var(--text-dimmer);
   font-style: italic;
 }
+.config-model-state {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 280px;
+  padding: 10px 14px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  white-space: normal;
+}
+.config-model-state > div { flex: 1; min-width: 0; }
+.config-model-state-title { color: var(--text); font-weight: 600; }
+.config-model-state-detail { margin-top: 2px; color: var(--text-muted); line-height: 1.35; }
+.config-model-spinner {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: config-model-spin 0.8s linear infinite;
+}
+@keyframes config-model-spin { to { transform: rotate(360deg); } }
+.config-model-retry {
+  flex: 0 0 auto;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 4px 8px;
+  background: var(--surface-raised);
+  color: var(--text-secondary);
+  font: inherit;
+  cursor: pointer;
+}
+.config-model-retry:hover { color: var(--text); border-color: var(--text-muted); }
+.config-radio-item.pending { color: var(--accent); opacity: 0.75; }
 
 /* Segmented control for effort */
 .config-segmented {
