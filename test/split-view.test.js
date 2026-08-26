@@ -119,3 +119,27 @@ test("split pane clients prepare web links before browser navigation", function 
   assert.match(bridgeSource, /document\.addEventListener\("auxclick", preparePaneLink, true\)/);
   assert.match(bridgeSource, /forceExternalLinkToNewTab\(anchor, window\.location\.href\)/);
 });
+
+test("session actions replace the dedicated worker button and stay out of split panes", function () {
+  var html = fs.readFileSync(path.join(__dirname, "../lib/public/index.html"), "utf8");
+  var actionsSource = fs.readFileSync(path.join(__dirname, "../lib/public/modules/session-actions.js"), "utf8");
+
+  assert.match(html, /id="header-session-actions-btn"/);
+  assert.doesNotMatch(html, /id="header-add-worker-btn"/);
+  assert.match(actionsSource, /!!state\.splitPanes/);
+  assert.match(actionsSource, /state\.paneMode/);
+  assert.match(actionsSource, /Add AI Worker/);
+  assert.match(actionsSource, /Continue in another agent/);
+  assert.match(actionsSource, /handoff_session_options/);
+  assert.match(actionsSource, /Reasoning effort/);
+  assert.match(actionsSource, /model: modelSelect\.value/);
+});
+
+test("split pane permission control is anchored beside the session title", function () {
+  var splitSource = fs.readFileSync(path.join(__dirname, "../lib/public/modules/split-view.js"), "utf8");
+  var paneCss = fs.readFileSync(path.join(__dirname, "../lib/public/css/pane.css"), "utf8");
+
+  assert.match(splitSource, /header\.insertBefore\(fullAccess, ctxChip\)/);
+  assert.match(paneCss, /\.split-pane-title\s*\{[^}]*flex:\s*0 1 auto/s);
+  assert.match(paneCss, /\.split-pane-context\s*\{[^}]*margin-left:\s*auto/s);
+});

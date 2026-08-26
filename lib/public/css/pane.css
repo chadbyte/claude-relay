@@ -100,7 +100,8 @@ body.pane-mode #input-area {
 }
 
 .split-pane-title {
-  flex: 1;
+  flex: 0 1 auto;
+  max-width: 46%;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -283,10 +284,15 @@ button.split-pair-role:hover { filter: brightness(1.25); }
   color: var(--text-dimmer);
   cursor: pointer;
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 .split-pane-context.has-data {
   display: inline-flex;
+}
+
+.split-pane-context:not(.has-data) + .split-pane-close {
+  margin-left: auto;
 }
 
 .split-pane-context:hover {

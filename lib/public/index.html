@@ -30,7 +30,7 @@
 (function(){try{var k="clay-theme-vars",v=localStorage.getItem(k),r=document.documentElement;if(v){var o=JSON.parse(v),p;for(p in o)r.style.setProperty(p,o[p]);var vt=localStorage.getItem(k.replace("-vars","-variant"));if(vt==="light"){r.classList.add("light-theme");r.classList.remove("dark-theme")}else{r.classList.add("dark-theme");r.classList.remove("light-theme")}var m=document.querySelector('meta[name="theme-color"]');if(m&&o["--bg"])m.setAttribute("content",o["--bg"])}else{var sl=window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches;if(sl){r.classList.add("light-theme");r.classList.remove("dark-theme")}}}catch(e){}})();
 </script>
 <script>if(window.navigator.standalone||window.matchMedia("(display-mode:standalone)").matches){document.documentElement.classList.add("pwa-standalone")}</script>
-<link rel="stylesheet" href="style.css?v=20260824f">
+<link rel="stylesheet" href="style.css?v=20260826a">
 <style>
 @media(max-width:768px){
   /* User messages: vertical stack, avatar on top, right-aligned */
@@ -388,12 +388,8 @@
         <div id="ralph-sticky" class="hidden"></div>
         <div id="debate-sticky" class="hidden"></div>
         <div class="status">
-          <button id="header-add-worker-btn" type="button" aria-label="Add AI Worker" title="Add an AI Worker — this session becomes the Driver of a pair">
-            <span class="header-worker-icon" aria-hidden="true">
-              <i data-lucide="bot"></i>
-              <span class="header-worker-add-badge"><i data-lucide="plus"></i></span>
-            </span>
-            <span class="header-worker-label">Add Worker</span>
+          <button id="header-session-actions-btn" type="button" aria-label="Session actions" title="Session actions" aria-haspopup="menu" aria-expanded="false">
+            <i data-lucide="ellipsis"></i>
           </button>
           <button type="button" id="header-tui-font-btn" class="header-tui-font-btn hidden" title="Terminal font" aria-label="Terminal font">
             <i data-lucide="type"></i>
@@ -2364,7 +2360,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@xterm/addon-fit@0/lib/addon-fit.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@xterm/addon-web-links@0/lib/addon-web-links.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@xterm/addon-webgl@0/lib/addon-webgl.min.js"></script>
-<script type="module" src="app.js?v=20260824g"></script>
+<script type="module" src="app.js?v=20260826a"></script>
 <div id="pwa-install-modal" class="pwa-modal hidden">
   <div class="pwa-modal-backdrop"></div>
   <div class="pwa-modal-card">

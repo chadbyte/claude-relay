@@ -43,62 +43,6 @@
 #header-rename-btn:hover { color: var(--text-secondary); background: rgba(var(--overlay-rgb),0.04); border-color: var(--border); }
 #header-rename-btn .lucide { width: 13px; height: 13px; }
 
-#header-add-worker-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  width: auto;
-  height: 28px;
-  border: 1px solid color-mix(in srgb, var(--accent2) 28%, var(--border));
-  background: var(--accent2-8);
-  color: var(--accent2);
-  cursor: pointer;
-  border-radius: 8px;
-  flex-shrink: 0;
-  padding: 0 9px 0 7px;
-  margin-left: 0;
-  font-family: inherit;
-  font-size: 11px;
-  font-weight: 700;
-  line-height: 1;
-  white-space: nowrap;
-  transition: color 0.15s, background 0.15s, border-color 0.15s;
-}
-#header-add-worker-btn:hover {
-  color: var(--accent2-hover);
-  background: var(--accent2-15);
-  border-color: color-mix(in srgb, var(--accent2) 48%, var(--border));
-}
-.header-worker-icon {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-}
-.header-worker-icon > .lucide { width: 15px; height: 15px; }
-.header-worker-add-badge {
-  position: absolute;
-  right: -4px;
-  bottom: -3px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: var(--accent2);
-  color: var(--bg);
-  box-shadow: 0 0 0 2px var(--bg);
-}
-.header-worker-add-badge .lucide { width: 7px; height: 7px; stroke-width: 3; }
-.header-worker-label { letter-spacing: 0.01em; }
-#header-add-worker-btn.hidden { display: none; }
-body.dm-mode #header-add-worker-btn { display: none; }
-
 /* "Close terminal" button for a live TUI session. Matches the session-control
    chrome; reds out on hover since it stops the running agent while preserving
    the resumable session. */

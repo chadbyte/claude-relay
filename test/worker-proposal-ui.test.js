@@ -33,26 +33,24 @@ test("Worker proposal card keeps responsive controls inside split panes", functi
   assert.match(source, /grid-template-columns: 1fr 1fr/);
 });
 
-test("title bar identifies the add Worker action with a robot and text", function () {
+test("title bar moves Worker creation into the labeled session actions menu", function () {
   var html = fs.readFileSync(path.join(root, "lib/public/index.html"), "utf8");
-  var css = fs.readFileSync(path.join(root, "lib/public/css/menus.css"), "utf8");
-  assert.match(html, /id="header-add-worker-btn"[^>]*aria-label="Add AI Worker"/);
-  assert.match(html, /data-lucide="bot"/);
-  assert.match(html, /header-worker-add-badge[^>]*><i data-lucide="plus"/);
-  assert.match(html, /header-worker-label/);
-  assert.match(css, /\.header-worker-label/);
+  var actions = fs.readFileSync(path.join(root, "lib/public/modules/session-actions.js"), "utf8");
+  assert.match(html, /id="header-session-actions-btn"[^>]*aria-label="Session actions"/);
+  assert.doesNotMatch(html, /id="header-add-worker-btn"/);
+  assert.match(actions, /actionRow\("bot", "Add AI Worker"/);
+  assert.match(actions, /openPairDialog/);
 });
 
-test("title bar groups session controls and places Worker before context usage", function () {
+test("title bar groups session controls and places context usage before session actions", function () {
   var html = fs.readFileSync(path.join(root, "lib/public/index.html"), "utf8");
   var panels = fs.readFileSync(path.join(root, "lib/public/modules/app-panels.js"), "utf8");
   var renameAt = html.indexOf('id="header-rename-btn"');
   var fullAccessAt = html.indexOf('id="header-full-access-btn"');
   var statusAt = html.indexOf('<div class="status">');
-  var workerAt = html.indexOf('id="header-add-worker-btn"');
+  var actionsAt = html.indexOf('id="header-session-actions-btn"');
 
   assert.ok(renameAt > 0 && renameAt < fullAccessAt);
-  assert.ok(workerAt > statusAt);
-  assert.match(panels, /workerBtn\.nextSibling/);
-  assert.match(panels, /statusArea\.insertBefore\(hCtxEl, contextAnchor\)/);
+  assert.ok(actionsAt > statusAt);
+  assert.match(panels, /statusArea\.insertBefore\(hCtxEl, statusArea\.firstChild\)/);
 });
