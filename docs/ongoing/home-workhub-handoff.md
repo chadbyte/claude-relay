@@ -411,10 +411,15 @@ D. Board on the contract — REVISED per principles 8+9: the board becomes
 E. Tool LLM access + authoring flow: `api.llm.complete({system, prompt,
    model?})` in the logic api — host-mediated like storage RPC, gated by
    a manifest `permissions: ["llm"]` declaration, attributed/logged per
-   tool. Provider stage 1: one-shot queries through the yoke adapters
-   (no new config). Stage 2 (later): per-user BYOK key store,
-   server-side only, enabling direct API calls with explicit small
-   models for atomic tools. Then the authoring flow: a mate creates
+   tool. VENDOR-NEUTRAL by construction (2026-08-20): api.llm is a yoke
+   consumer, never a vendor SDK consumer — a capsule cannot name a
+   vendor. `model` is a capability alias ("fast" | "standard" |
+   "deep"), resolved per user to whatever vendor/model their yoke
+   adapters and (later) BYOK keys provide. Provider stage 1: one-shot
+   queries through the installed yoke adapters (claude/codex/kiro, no
+   new config). Stage 2 (later): per-user BYOK key store, server-side
+   only, plugging additional providers into the same alias resolution
+   so atomic tools get small cheap models without vendor lock. Then the authoring flow: a mate creates
    manifest+logic.js+ui tree in conversation and mounts it into the
    dock — reference demo: an atomic KO<->EN translator with minimal
    context and stored history.
