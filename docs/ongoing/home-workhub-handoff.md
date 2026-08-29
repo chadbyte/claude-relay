@@ -357,7 +357,22 @@ pass. No full suite was run.
 Stage 8 — Mate backstage: make Knowledge, Memory, and Mate management coherent
 secondary surfaces reached from the current Mate overflow and rendered in the
 Workbench when appropriate. They must not become permanent sidebar destinations.
-— NOT STARTED.
+— DONE 2026-08-30. Memory, Knowledge, and Mate settings now open as ephemeral
+backstage views inside the existing Workbench. Memory and Knowledge retain the
+owned, read-only Home protocols; settings reuses the existing profile edit and
+custom-confirmed remove/delete flows. The Capsule tabs and mounted runtime remain
+available behind the backstage view, while its lifecycle state never becomes an
+`activeToolId` or changes the saved Capsule preference. Returning restores focus
+to an immediately captured underlying Library or active Capsule target, without
+waiting for a dock-preference echo. Escape returns from a topmost backstage view
+without consuming dialog/menu Escape or changing focused-Workbench behavior;
+closing the Workbench restores a visible Home control. Late responses update
+only the backstage body so they neither cross Mate/section boundaries nor
+discard keyboard focus. Debate keeps its existing Home-to-debate transition.
+Narrow layouts use the full-screen Workbench and persistently close the sidebar
+drawer. Focused Stage 8 and adjacent Home tests pass (61/61); all 118 client
+module imports resolve, targeted syntax audits pass, and the Stage 8 surface and
+extracted client modules remain under 500 lines. No full suite was run.
 
 Stage 9 — visual QA and remaining polish: finish board card/column polish,
 generate the muted avatar palette at the source, and verify keyboard/focus/ESC,

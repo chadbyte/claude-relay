@@ -143,6 +143,7 @@ test("Mate and new-conversation actions live in the Home sidebar", function () {
   assert.match(homeSidebarSource, /openHomeMateActions/);
   assert.match(chatSource, /"Memory"/);
   assert.match(chatSource, /"Knowledge"/);
+  assert.match(chatSource, /"Mate settings"/);
   assert.match(chatSource, /"Start debate"/);
 });
 
