@@ -64,6 +64,14 @@ clay-kernel/docs/ARCHITECTURE.md — L+S+D, "augmentation not mediation").
    strings embedded in JS (tool-examples.js is to be retired in favor
    of a lib/capsules/scratchpad/ folder). WS tool_install is merely a
    convenience that writes the folder.
+10. Capsules belong to the USER, never to a mate (added 2026-08-20). A
+    tool is workspace property: every mate of that user sees the same
+    installed set through clay_tool_list, and tool storage is scoped
+    user x tool — mates share one tool's data and collaborate in it.
+    Who did what is expressed by attribution (callerId), not by
+    ownership. Contrast: a mate's Memory/Knowledge are mate properties,
+    not capsules — that is the boundary between "belongs to the mate"
+    and "belongs to the workspace".
 
 ## Vision
 
