@@ -1,8 +1,48 @@
 # Home Work Hub: Mates + Kanban (Handoff)
 
-Status: planning locked for phase 1, implementation not started
+Status: phase 1 steps 1-2-4 shipped on feat/home-board (PR #407);
+principles v2 below locked 2026-08-19, tool platform not started
 Date: 2026-08-19
 Owner: Chad
+
+## Principles v2 — the mate access surface (locked 2026-08-19)
+
+This supersedes "home = mates + kanban". The home screen is the mate's
+access surface, modeled on clayOS capsules (see ~/clayOS/README.md and
+clay-kernel/docs/ARCHITECTURE.md — L+S+D, "augmentation not mediation").
+
+1. Mates live at home. Mate DM is abolished: no separate screen, no WS
+   swap, no project-style chat session UI for mates. The only surface is
+   the home conversation pane (the home_mate_* relay, already shipped).
+2. Left pane = conversation with the mate. Right pane = the tools the
+   mate controls. The kanban board is the built-in, first-class tool —
+   the first resident of a tool dock, not the definition of the pane.
+3. Every tool follows the capsule contract, translated to Clay:
+   - Logic: headless state + actions. Built-ins may own server logic
+     (board.js invariants); user/mate-created tools run their logic.js
+     in a sandboxed Web Worker — no DOM, no arbitrary server code. The
+     server provides generic scoped APIs only (per-tool nedb storage,
+     event broadcast).
+   - Skills: manifest-declared markdown + the universal MCP surface
+     that teaches the mate when/how to drive the tool.
+   - Display: a DECLARATIVE component tree (fixed vocabulary: list,
+     card, table, input, button, select, ...), rendered by the host
+     with native Clay DOM and CSS variables. Tools ship no HTML.
+     Consistency is structural, not disciplinary. One escape hatch: an
+     `embed` component rendered in a sandboxed iframe for custom
+     visuals; embed internals are invisible to mate control.
+4. Two driver seats, one steering wheel. Every input converges on an
+   action; human clicks and mate tool-calls run the same action path.
+   The universal MCP surface is small and fixed:
+   tool_snapshot / tool_act / tool_set / tool_storage_*.
+   Per-tool nuance comes from the tool's Skills markdown, not new tools.
+5. Without Display, Skills go dark: a tool not mounted in the dock is
+   removed from the mate's tool surface.
+6. Every action is observable and attributed (caller = "user" | mateId),
+   and human interactions stream to the mate as context.
+7. Ruby/WASM (clayOS's boundary) is explicitly NOT adopted here: the
+   declarative-UI + worker-sandboxed-logic split provides the isolation
+   with a web-native stack that LLMs author reliably.
 
 ## Vision
 
@@ -322,6 +362,27 @@ Left pane changes in `app-home-hub.js`:
   tab already routes to `showHomeHub()`.
 
 ### Build order (each step lands green on its own)
+
+### Roadmap v2 (tool platform, follows principles v2)
+
+A. Tool dock + DM demolition: the right pane becomes a dock hosting N
+   tools (board first); remove remaining mate-DM entry points (mobile
+   chip rail routing to openDm, DM picker mate section, set_mate_dm
+   path for mates) so principle 1 is true in code, not just at home.
+B. Tool contract skeleton: manifest format, declarative UI renderer
+   (component vocabulary v1) with Clay-native rendering, worker-
+   sandboxed logic runtime with state+actions, per-tool scoped nedb
+   storage on the server.
+C. Universal mate control: tool_snapshot / tool_act / tool_set /
+   tool_storage_* MCP tools, Skills attachment from manifests,
+   action attribution + human-interaction stream to the mate.
+D. Board on the contract: expose the board through the same tool_*
+   surface (native renderer stays; its actions and snapshot join the
+   universal protocol). This absorbs the old "step 3: board MCP tools".
+E. Tool authoring flow: a mate creates manifest+logic.js+ui tree in
+   conversation and mounts it into the dock.
+
+### Build order phase 1 (original, superseded by roadmap v2 above)
 
 1. Server storage + WS: nedb dep, `board.js`, `server-board.js`, forward
    list, ws-schema docs, unit tests for `board.js` invariants (columns,
