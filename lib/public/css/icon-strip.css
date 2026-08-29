@@ -206,10 +206,10 @@
 }
 
 .icon-strip-item.active::before {
-  background: var(--bg);
+  background: color-mix(in srgb, var(--brand-indigo) 6%, var(--bg));
   box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--link) 62%, var(--border)),
-    0 1px 3px rgba(var(--shadow-rgb), 0.16);
+    0 5px 14px color-mix(in srgb, var(--brand-indigo) 28%, transparent),
+    0 1px 3px rgba(var(--shadow-rgb), 0.14);
 }
 
 .icon-strip-item.active {

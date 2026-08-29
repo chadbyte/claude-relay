@@ -18,13 +18,16 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Banner */
+/* Identity header */
 .profile-banner {
   height: 52px;
   position: relative;
   transition: background 0.2s ease;
   border-radius: 14px 14px 0 0;
   z-index: 1;
+  background: var(--bg);
+  border-top: 3px solid var(--profile-accent, #5857fc);
+  border-bottom: 1px solid var(--border);
 }
 
 .profile-close-btn {
@@ -34,8 +37,8 @@
   width: 24px;
   height: 24px;
   border: none;
-  background: rgba(0, 0, 0, 0.3);
-  color: #fff;
+  background: var(--bg-alt);
+  color: var(--text-muted);
   border-radius: 50%;
   font-size: 16px;
   line-height: 1;
@@ -47,7 +50,8 @@
 }
 
 .profile-close-btn:hover {
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--bg-hover, var(--bg-alt));
+  color: var(--text);
 }
 
 /* Avatar row (overlaps banner) */
@@ -65,7 +69,7 @@
 .profile-popover-avatar {
   width: 60px;
   height: 60px;
-  border-radius: 50%;
+  border-radius: 17px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -79,30 +83,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 50%;
-}
-
-/* Shuffle button next to Avatar label */
-.profile-shuffle-btn {
-  background: none;
-  border: none;
-  padding: 0;
-  margin-left: 4px;
-  cursor: pointer;
-  color: var(--text-muted);
-  vertical-align: middle;
-  transition: color 0.15s;
-  display: inline-flex;
-  align-items: center;
-}
-
-.profile-shuffle-btn .lucide {
-  width: 12px;
-  height: 12px;
-}
-
-.profile-shuffle-btn:hover {
-  color: var(--text);
+  border-radius: 14px;
 }
 
 .profile-name-display {
@@ -202,66 +183,140 @@
   border-color: var(--accent);
 }
 
-/* Avatar style grid */
-.profile-avatar-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
-}
-
-.profile-avatar-option {
-  width: 100%;
-  aspect-ratio: 1;
-  border-radius: 10px;
-  border: 2px solid var(--border);
+/* Clay Imprint identity control */
+.profile-imprint-panel {
+  border: 1px solid var(--border);
+  border-radius: 12px;
   background: var(--bg);
-  cursor: pointer;
-  padding: 3px;
-  overflow: hidden;
+  padding: 9px;
+}
+
+.profile-imprint-preview {
   display: flex;
   align-items: center;
-  justify-content: center;
-  transition: border-color 0.15s, transform 0.1s;
+  gap: 10px;
+  min-height: 54px;
 }
 
-.profile-avatar-option img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  border-radius: 6px;
+.profile-imprint-preview img {
+  width: 50px;
+  height: 50px;
+  border-radius: 13px;
+  flex: 0 0 auto;
 }
 
-.profile-avatar-option:hover {
-  border-color: var(--text-muted);
-  transform: scale(1.05);
-}
-
-.profile-avatar-option.profile-avatar-option-active {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent);
-}
-
-/* Avatar upload button */
-.profile-avatar-upload .profile-avatar-upload-icon {
+.profile-imprint-preview span {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  color: var(--text-muted);
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
-.profile-avatar-upload .profile-avatar-upload-icon svg {
-  width: 24px;
-  height: 24px;
-}
-.profile-avatar-upload:hover .profile-avatar-upload-icon {
+
+.profile-imprint-preview strong {
   color: var(--text);
+  font-size: 12px;
+  font-weight: 650;
 }
+
+.profile-imprint-preview small {
+  color: var(--text-dimmer);
+  font-size: 10px;
+}
+
+.profile-imprint-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.profile-imprint-actions button {
+  min-width: 0;
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--bg-alt);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.profile-imprint-actions button:hover {
+  color: var(--text);
+  border-color: var(--text-muted);
+}
+
+.profile-imprint-actions button.is-active {
+  color: var(--text);
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.profile-imprint-actions button .lucide {
+  width: 11px;
+  height: 11px;
+}
+
+.profile-avatar-upload {
+  grid-column: 1 / -1;
+}
+
+.profile-mate-mark-actions .profile-avatar-upload {
+  grid-column: auto;
+}
+
+.profile-avatar-upload.is-active::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
 .profile-avatar-custom-preview {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 6px;
+  border-radius: 12px;
+}
+
+.profile-use-imprint.is-active::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.profile-imprint-actions button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.profile-imprint-actions button:active {
+  transform: translateY(1px);
+}
+
+.profile-imprint-actions button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.profile-imprint-actions button:disabled:hover {
+  border-color: var(--border);
+  color: var(--text-muted);
+}
+
+.profile-imprint-actions button.is-active:hover {
+  color: var(--text);
 }
 
 /* Avatar positioner overlay */
@@ -297,7 +352,7 @@
   color: var(--text-muted);
   font-size: 20px;
   cursor: pointer;
-  border-radius: 50%;
+  border-radius: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -313,7 +368,7 @@
   color: var(--text);
 }
 .avatar-positioner-viewport {
-  border-radius: 50%;
+  border-radius: 26%;
   overflow: hidden;
   position: relative;
   cursor: grab;
@@ -368,30 +423,3 @@
 .avatar-positioner-btn-done:hover {
   filter: brightness(1.1);
 }
-
-/* Color swatch grid */
-.profile-color-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.profile-color-swatch {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  border: 2px solid transparent;
-  cursor: pointer;
-  transition: transform 0.15s, border-color 0.15s;
-  padding: 0;
-}
-
-.profile-color-swatch:hover {
-  transform: scale(1.15);
-}
-
-.profile-color-swatch.profile-color-active {
-  border-color: #fff;
-  box-shadow: 0 0 0 2px var(--accent);
-}
-

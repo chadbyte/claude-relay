@@ -342,7 +342,7 @@
   flex-shrink: 0;
   width: 56px;
   height: 56px;
-  border-radius: 50%;
+  border-radius: 26%;
   overflow: hidden;
   border: 1px solid rgba(var(--overlay-rgb), 0.1);
   background: var(--bg);

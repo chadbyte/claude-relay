@@ -1,0 +1,46 @@
+/* Clay Imprints use one consistent, pressed-square silhouette everywhere. */
+.activity-inline-avatar,
+.ask-mate-avatar,
+.client-avatar,
+.debate-info-avatar,
+.debate-panel-item-avatar,
+.debate-panelist-avatar,
+.debate-speaker-avatar,
+.delegated-card-avatar,
+.dm-bubble-avatar,
+.dm-header-avatar,
+.dm-msg-avatar,
+.dm-picker-mates-marquee-avatar,
+.dm-user-picker-avatar,
+.home-chat-avatar,
+.home-hub-mate-avatar,
+.icon-strip-me-avatar,
+.icon-strip-user-avatar,
+.input-mention-chip-avatar,
+.mate-collapsed-avatar,
+.mate-mobile-avatar,
+.mate-profile-avatar,
+.mate-sidebar-avatar,
+.mention-avatar,
+.mention-item-avatar,
+.mobile-chat-chip-avatar,
+.notif-banner-avatar,
+.profile-avatar-custom-preview,
+.profile-popover-avatar-img,
+.project-switcher-avatar,
+.remote-cursor-avatar,
+.rewind-avatar,
+.session-presence-avatar,
+.sidebar-presence-avatar,
+.us-account-avatar,
+.us-account-avatar-img,
+.user-island-avatar,
+.user-island-avatar img {
+  border-radius: 26% !important;
+}
+
+.session-presence-avatar,
+.sidebar-presence-avatar,
+.client-avatar {
+  box-shadow: 0 0 0 1px rgba(var(--overlay-rgb), 0.12);
+}

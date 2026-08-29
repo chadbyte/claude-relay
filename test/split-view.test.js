@@ -128,8 +128,8 @@ test("session actions replace the dedicated worker button and stay out of split 
   assert.doesNotMatch(html, /id="header-add-worker-btn"/);
   assert.match(actionsSource, /!!state\.splitPanes/);
   assert.match(actionsSource, /state\.paneMode/);
-  assert.match(actionsSource, /Add AI Worker/);
-  assert.match(actionsSource, /Continue in another agent/);
+  assert.match(actionsSource, /Add AI worker/);
+  assert.match(actionsSource, /Send context to another agent/);
   assert.match(actionsSource, /handoff_session_options/);
   assert.match(actionsSource, /Reasoning effort/);
   assert.match(actionsSource, /model: modelSelect\.value/);

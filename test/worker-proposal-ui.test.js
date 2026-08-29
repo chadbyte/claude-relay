@@ -40,11 +40,11 @@ test("title bar moves Worker creation into the labeled session actions menu", fu
   var actions = fs.readFileSync(path.join(root, "lib/public/modules/session-actions.js"), "utf8");
   assert.match(html, /id="header-session-actions-btn"[^>]*aria-label="Session actions"/);
   assert.doesNotMatch(html, /id="header-add-worker-btn"/);
-  assert.match(actions, /actionRow\("bot", "Add AI Worker"/);
+  assert.match(actions, /actionRow\("bot", "Add AI worker"/);
   assert.match(actions, /openPairDialog/);
 });
 
-test("title bar groups session controls and places context usage before session actions", function () {
+test("title bar presents a labeled session actions button in the status area", function () {
   var html = fs.readFileSync(path.join(root, "lib/public/index.html"), "utf8");
   var panels = fs.readFileSync(path.join(root, "lib/public/modules/app-panels.js"), "utf8");
   var renameAt = html.indexOf('id="header-rename-btn"');
@@ -54,5 +54,6 @@ test("title bar groups session controls and places context usage before session 
 
   assert.ok(renameAt > 0 && renameAt < fullAccessAt);
   assert.ok(actionsAt > statusAt);
+  assert.match(html, /id="header-session-actions-btn"[^>]*>[\s\S]*Add AI worker[\s\S]*session-actions-trigger-chevron/);
   assert.match(panels, /statusArea\.insertBefore\(hCtxEl, statusArea\.firstChild\)/);
 });

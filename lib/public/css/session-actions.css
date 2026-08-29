@@ -2,23 +2,29 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
+  gap: 6px;
+  width: auto;
   height: 28px;
-  padding: 0;
-  border: 1px solid transparent;
+  margin: 0;
+  padding: 0 9px;
+  border: 1px solid var(--border-subtle);
   border-radius: 8px;
-  background: transparent;
-  color: var(--text-dimmer);
+  background: color-mix(in srgb, var(--brand-indigo) 5%, var(--bg));
+  color: var(--text-secondary);
   cursor: pointer;
   flex-shrink: 0;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 650;
+  white-space: nowrap;
   transition: color 0.15s, background 0.15s, border-color 0.15s;
 }
 
 #header-session-actions-btn:hover,
 #header-session-actions-btn[aria-expanded="true"] {
   color: var(--text);
-  background: rgba(var(--overlay-rgb), 0.05);
-  border-color: var(--border);
+  background: color-mix(in srgb, var(--brand-indigo) 9%, var(--bg));
+  border-color: color-mix(in srgb, var(--brand-indigo) 32%, var(--border));
 }
 
 #header-session-actions-btn:focus { outline: none; }
@@ -28,12 +34,26 @@
 }
 
 #header-session-actions-btn.hidden { display: none; }
-#header-session-actions-btn .lucide { width: 16px; height: 16px; }
+#header-session-actions-btn .lucide:first-child {
+  width: 14px;
+  height: 14px;
+  color: color-mix(in srgb, var(--brand-indigo) 78%, var(--text));
+}
+
+#header-session-actions-btn .session-actions-trigger-chevron {
+  width: 13px;
+  height: 13px;
+  transition: transform 0.16s ease;
+}
+
+#header-session-actions-btn[aria-expanded="true"] .session-actions-trigger-chevron {
+  transform: rotate(180deg);
+}
 
 .session-actions-menu {
   position: fixed;
   z-index: 10020;
-  width: 286px;
+  width: min(300px, calc(100vw - 16px));
   padding: 6px;
   border: 1px solid var(--border);
   border-radius: 12px;
@@ -63,6 +83,17 @@
 }
 
 .session-actions-row:hover { background: var(--bg-alt); }
+.session-actions-row.is-primary {
+  background: color-mix(in srgb, var(--brand-indigo) 6%, transparent);
+}
+.session-actions-row.is-primary:hover {
+  background: color-mix(in srgb, var(--brand-indigo) 10%, transparent);
+}
+.session-actions-row.is-primary .session-actions-row-icon {
+  border-color: transparent;
+  background: var(--brand-indigo);
+  color: var(--brand-paper);
+}
 .session-actions-row:disabled { cursor: default; opacity: 0.42; }
 .session-actions-row:disabled:hover { background: transparent; }
 
