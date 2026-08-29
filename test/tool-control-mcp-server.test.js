@@ -36,7 +36,7 @@ function harness(timeoutMs) {
   var handlers = {
     list: function () {
       return toolsHandler.installedManifests("default").map(function (manifest) {
-        return { id: manifest.id, name: manifest.name, runtime: manifest.runtime, skills: manifest.skills || "" };
+        return { id: manifest.id, name: manifest.name, runtime: manifest.runtime, permissions: manifest.permissions || [], skills: manifest.skills || "" };
       });
     },
     snapshot: function (toolId) {
@@ -48,6 +48,8 @@ function harness(timeoutMs) {
     set: function (toolId, controlId, value) {
       return toolsHandler.controlForMate("default", mateId, toolId, "set", { controlId: controlId, value: value });
     },
+    install: function (input) { return toolsHandler.installForMate("default", input); },
+    uninstall: function (toolId) { return toolsHandler.removeForMate("default", toolId); },
   };
   return { sockets: sockets, board: boardHandler, tools: toolsHandler, defs: getToolDefs(handlers) };
 }
@@ -61,15 +63,42 @@ async function result(definition, args) {
   return { response: response, value: response.isError ? null : JSON.parse(response.content[0].text) };
 }
 
-test("mate tool MCP exposes the fixed four-tool surface and installed skills", async function () {
+test("mate tool MCP exposes driving and approved authoring tools with installed skills", async function () {
   var ctx = harness();
   assert.deepStrictEqual(ctx.defs.map(function (definition) { return definition.name; }), [
-    "clay_tool_list", "clay_tool_snapshot", "clay_tool_act", "clay_tool_set",
+    "clay_tool_list", "clay_tool_snapshot", "clay_tool_act", "clay_tool_set", "clay_tool_install", "clay_tool_uninstall",
   ]);
   var listed = await result(tool(ctx.defs, "clay_tool_list"), {});
   assert.ok(listed.value.some(function (item) { return item.id === "board" && item.runtime === "server"; }));
   var scratchpad = listed.value.filter(function (item) { return item.id === "scratchpad"; })[0];
   assert.match(scratchpad.skills, /clay_tool_set/);
+  var translator = listed.value.filter(function (item) { return item.id === "translator"; })[0];
+  assert.deepStrictEqual(translator.permissions, ["llm"]);
+});
+
+test("mate capsule install uses registry validation and broadcasts live changes", async function () {
+  var ctx = harness();
+  var sent = [];
+  ctx.sockets.push({ readyState: 1, send: function (payload) { sent.push(JSON.parse(payload)); } });
+  var installed = await result(tool(ctx.defs, "clay_tool_install"), {
+    manifest: { id: "mate-widget", name: "Mate Widget", runtime: "worker" },
+    uiTree: { type: "stack", children: [{ type: "text", props: { text: "Ready" } }] },
+    logicSource: "var tool = { initialState: {}, actions: {} };",
+  });
+  assert.strictEqual(installed.value.manifest.id, "mate-widget");
+  assert.strictEqual(sent[0].type, "tool_installed");
+
+  var rejected = await result(tool(ctx.defs, "clay_tool_install"), {
+    manifest: { id: "mate-server", name: "Mate Server", runtime: "server" },
+    uiTree: { type: "stack" },
+    logicSource: "var tool = { initialState: {}, actions: {} };",
+  });
+  assert.strictEqual(rejected.response.isError, true);
+  assert.match(rejected.response.content[0].text, /cannot be installed over WebSocket/);
+
+  var removed = await result(tool(ctx.defs, "clay_tool_uninstall"), { toolId: "mate-widget" });
+  assert.strictEqual(removed.value.removed, true);
+  assert.strictEqual(sent[1].type, "tool_removed");
 });
 
 test("board MCP actions preserve mate done rules and record attribution", async function () {
@@ -119,6 +148,23 @@ test("tool_install rejects a server-runtime manifest over WebSocket", async func
   }
   assert.strictEqual(sent[0].type, "tools_error");
   assert.match(sent[0].message, /cannot be installed over WebSocket/);
+});
+
+test("server LLM bridge rejects capsules without llm permission", async function () {
+  var ctx = harness();
+  ctx.tools.installedManifests("default");
+  var sent = [];
+  var ws = { readyState: 1, send: function (payload) { sent.push(JSON.parse(payload)); } };
+  ctx.tools.handleMessage(ws, {
+    type: "tool_llm_op",
+    toolId: "scratchpad",
+    requestId: "llm-1",
+    args: { prompt: "hello", model: "fast" },
+  });
+  for (var i = 0; i < 50 && sent.length === 0; i++) await new Promise(function (resolve) { setTimeout(resolve, 5); });
+  assert.strictEqual(sent[0].type, "tools_error");
+  assert.strictEqual(sent[0].requestId, "llm-1");
+  assert.match(sent[0].message, /does not have the llm permission/);
 });
 
 test("browser tool control fails clearly without an open home screen", async function () {

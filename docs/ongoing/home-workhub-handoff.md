@@ -500,6 +500,53 @@ current project session with the selected home mate as moderator; this keeps
 the established setup/start flow and makes the resulting debate visible.
 Sticky Notes, Scheduled Tasks, MCP Servers, and Skills have no home utility.
 
+### Phase E notes
+
+Worker capsules may declare `permissions: ["llm"]` and call
+`api.llm.complete({ system?, prompt, model? })`. The model value is a
+capability alias only (`fast`, `standard`, or `deep`, defaulting to `fast`);
+the worker host and server both enforce the manifest permission, and the
+server rejects every other model value. LLM actions have a 90-second worker
+action budget, and mate control uses the same 90-second budget instead of
+Phase C's normal 15-second browser-control limit. Each completion uses a
+correlated 60-second RPC from worker to browser host to `server-tools.js`,
+and server logs include the capsule ID and caller ID.
+
+The server resolves the user's first installed YOKE adapter with
+`resolveDefaultVendor` and performs a direct one-shot adapter query outside
+the project session manager. It passes `skipProjectInstructions: true` and
+`skipSkills: true`, so an atomic capsule sees only its fixed system prompt
+and input. Claude maps
+fast/standard/deep to haiku/sonnet/opus and receives
+`persistSession: false` through both in-process and OS-user worker paths.
+Codex maps to gpt-5.4-mini/gpt-5.6-terra/gpt-5.6-sol. Antigravity maps to
+flash/default/pro. Other adapters select a matching small or strong model
+from their advertised catalog, with the adapter default for standard.
+
+Leak risk: Claude's no-session-persistence option prevents these calls from
+writing `~/.claude/projects` transcripts, so they cannot become the helper
+sessions described in Known mate defects §1. Non-Claude YOKE adapters do not
+currently expose a common persistence-disable primitive. They still bypass
+Clay's session manager and therefore do not enter Clay's project session
+list, but their underlying CLI/provider may retain its own ephemeral thread
+metadata. That residual provider-local retention is the remaining risk.
+
+The `clay-tools` MCP server now also exposes `clay_tool_install` and
+`clay_tool_uninstall`. Neither is auto-approved in the SDK whitelist or the
+managed Claude hook list. The install description is self-contained: it
+defines manifest fields and permissions, the complete UI vocabulary,
+dot-path bindings and `$item.*` templates, the worker `var tool` action
+contract, storage and LLM APIs, caller attribution, and the no-DOM/no-import
+constraints. Installs still use the registry's validation and worker-only
+runtime rule, then broadcast `tool_installed` so an open dock adds the tab
+without reload.
+
+`lib/capsules/translator/` is the reference LLM capsule. It declares the
+LLM permission, translates Korean and English with a minimal fixed prompt,
+and persists latest-first history through scoped capsule storage. Existing
+Phase D users receive only this new built-in during the v2 seed migration,
+so previously deleted board or scratchpad folders remain deleted.
+
 ### Build order phase 1 (original, superseded by roadmap v2 above)
 
 1. Server storage + WS: nedb dep, `board.js`, `server-board.js`, forward

@@ -21,7 +21,7 @@ function validTool(id) {
 
 function userToolIds(userCtx) {
   return registry.listTools(userCtx).filter(function (item) {
-    return item.id !== "board" && item.id !== "scratchpad";
+    return item.id !== "board" && item.id !== "scratchpad" && item.id !== "translator";
   }).map(function (item) { return item.id; });
 }
 
@@ -75,8 +75,23 @@ test("built-in capsule folders seed once and user deletion stays durable", funct
   var first = registry.listTools(userCtx);
   assert.ok(first.some(function (item) { return item.id === "board" && item.runtime === "server"; }));
   assert.ok(first.some(function (item) { return item.id === "scratchpad" && item.runtime === "worker"; }));
+  var translator = registry.getTool(userCtx, "translator");
+  assert.ok(translator);
+  assert.deepStrictEqual(translator.manifest.permissions, ["llm"]);
+  assert.match(translator.logicSource, /api\.llm\.complete/);
   registry.removeTool(userCtx, "scratchpad");
   assert.ok(!registry.listTools(userCtx).some(function (item) { return item.id === "scratchpad"; }));
+});
+
+test("v2 seed migration adds translator without restoring deleted older capsules", function () {
+  var userCtx = ctx("builtin-upgrade");
+  var root = registry.resolveToolsRoot(userCtx);
+  fs.mkdirSync(root, { recursive: true });
+  fs.writeFileSync(path.join(root, ".capsules-v1"), "board\nscratchpad\n");
+  var listed = registry.listTools(userCtx);
+  assert.ok(listed.some(function (item) { return item.id === "translator"; }));
+  assert.ok(!listed.some(function (item) { return item.id === "board"; }));
+  assert.ok(!listed.some(function (item) { return item.id === "scratchpad"; }));
 });
 
 test("tool install rejects server runtime", function () {
