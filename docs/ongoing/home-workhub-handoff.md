@@ -312,7 +312,18 @@ Stage 5 — conversation foundation: add user-filtered Mate session list and
 explicit session-open protocol paths; add the user-scoped Home surface
 preference; restore the last Mate and exact active session per Mate after a
 reload without regressing same-tab mounted resume. The session protocol must
-ship before recent conversations become visible. — NOT STARTED.
+ship before recent conversations become visible. — DONE 2026-08-30. Added
+`home_mate_sessions_list` / `home_mate_sessions_state` and explicit
+`home_mate_session_open` paths with strict per-user ownership filtering. Home
+now stores `{ activeMateId, activeSessionByMate, sidebarCollapsed }` separately
+from the dock preference, using durable CLI session IDs when available and a
+temporary local reference only for unsent blank conversations. Reload restores
+the preferred Mate and that Mate's exact conversation; a stale reference falls
+back safely to the most recent owned conversation. Minimize/project return
+still resumes the already-mounted Home DOM without reopening or resetting its
+draft, scroll, stream, or Workbench. Focused Stage 5 protocol, preference, and
+restoration tests pass; client import resolution and changed-file syntax audits
+also pass.
 
 Stage 6 — minimal Home sidebar: add the flat 232–248px frame with New
 conversation, Capsules, current Mate/switcher, four to six recent conversations,
