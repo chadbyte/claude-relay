@@ -35,11 +35,9 @@ function harness(timeoutMs) {
   var mateId = "mate_test";
   var handlers = {
     list: function () {
-      return [{ id: "board", name: "Board", native: true, skills: "Use proposeDone." }].concat(
-        toolsHandler.installedManifests("default").map(function (manifest) {
-          return { id: manifest.id, name: manifest.name, native: false, skills: manifest.skills || "" };
-        })
-      );
+      return toolsHandler.installedManifests("default").map(function (manifest) {
+        return { id: manifest.id, name: manifest.name, runtime: manifest.runtime, skills: manifest.skills || "" };
+      });
     },
     snapshot: function (toolId) {
       return toolsHandler.controlForMate("default", mateId, toolId, "snapshot", {});
@@ -69,7 +67,7 @@ test("mate tool MCP exposes the fixed four-tool surface and installed skills", a
     "clay_tool_list", "clay_tool_snapshot", "clay_tool_act", "clay_tool_set",
   ]);
   var listed = await result(tool(ctx.defs, "clay_tool_list"), {});
-  assert.strictEqual(listed.value[0].id, "board");
+  assert.ok(listed.value.some(function (item) { return item.id === "board" && item.runtime === "server"; }));
   var scratchpad = listed.value.filter(function (item) { return item.id === "scratchpad"; })[0];
   assert.match(scratchpad.skills, /clay_tool_set/);
 });
@@ -99,11 +97,28 @@ test("board MCP actions preserve mate done rules and record attribution", async 
 
   var proposed = await result(tool(ctx.defs, "clay_tool_act"), {
     toolId: "board",
-    actionId: "proposeDone",
+    actionId: "propose_done",
     args: { cardId: created.value.result._id },
   });
   assert.strictEqual(proposed.value.result.pendingDone, true);
   assert.strictEqual(proposed.value.result.createdBy, "mate_test");
+});
+
+test("tool_install rejects a server-runtime manifest over WebSocket", async function () {
+  var ctx = harness();
+  var sent = [];
+  var ws = { readyState: 1, send: function (payload) { sent.push(JSON.parse(payload)); } };
+  ctx.tools.handleMessage(ws, {
+    type: "tool_install",
+    manifest: { id: "unsafe-server", name: "Unsafe", runtime: "server" },
+    logicSource: "var tool = { initialState: {}, actions: {} };",
+    uiTree: { type: "stack" },
+  });
+  for (var i = 0; i < 50 && sent.length === 0; i++) {
+    await new Promise(function (resolve) { setTimeout(resolve, 5); });
+  }
+  assert.strictEqual(sent[0].type, "tools_error");
+  assert.match(sent[0].message, /cannot be installed over WebSocket/);
 });
 
 test("browser tool control fails clearly without an open home screen", async function () {

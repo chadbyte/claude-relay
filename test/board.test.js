@@ -8,6 +8,7 @@ var testRoot = fs.mkdtempSync(path.join(os.tmpdir(), "clay-board-test-"));
 process.env.CLAY_HOME = testRoot;
 
 var createBoardManager = require("../lib/board").createBoardManager;
+var resolveToolsRoot = require("../lib/tools-registry").resolveToolsRoot;
 
 test.after(function () {
   fs.rmSync(testRoot, { recursive: true, force: true });
@@ -36,6 +37,7 @@ test("board create and list roundtrip preserves the card model", async function 
   assert.strictEqual(cards[0].createdBy, "user");
   assert.strictEqual(cards[0].pendingDone, false);
   assert.strictEqual(cards[0].order, 1);
+  assert.ok(fs.existsSync(path.join(resolveToolsRoot({ userId: "roundtrip", multiUser: true }), "board", "data.db")));
 });
 
 test("board update allows only mutable fields", async function () {

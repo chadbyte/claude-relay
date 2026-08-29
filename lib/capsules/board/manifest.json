@@ -1,0 +1,8 @@
+{
+  "id": "board",
+  "name": "Board",
+  "lucideIcon": "columns-3",
+  "version": 1,
+  "runtime": "server",
+  "skills": "The board has todo, doing, and done columns. Use create to add work, update to change card fields, and move to change columns. Assignee is null or a mate ID. A mate cannot create or move a card directly into done; use propose_done when the work is complete, then the user confirms it."
+}

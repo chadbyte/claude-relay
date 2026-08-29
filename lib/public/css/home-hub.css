@@ -430,6 +430,40 @@
   white-space: nowrap;
 }
 
+.home-mate-chat-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.home-mate-chat-utility,
+.home-mate-property-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.home-mate-chat-utility:hover,
+.home-mate-property-close:hover {
+  border-color: var(--border-subtle);
+  background: var(--bg-alt);
+  color: var(--text);
+}
+
+.home-mate-chat-utility .lucide,
+.home-mate-property-close .lucide {
+  width: 15px;
+  height: 15px;
+}
+
 .home-mate-chat-new {
   padding: 4px 8px;
   border: 1px solid var(--border-subtle);
@@ -449,6 +483,99 @@
 .home-mate-chat-new:disabled {
   opacity: 0.45;
   cursor: default;
+}
+
+.home-mate-property-overlay {
+  position: fixed;
+  z-index: 1200;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.home-mate-property-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: color-mix(in srgb, var(--bg) 76%, transparent);
+  cursor: default;
+}
+
+.home-mate-property-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(520px, 100%);
+  max-height: min(640px, 82vh);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--bg);
+  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.28);
+}
+
+.home-mate-property-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.home-mate-property-title,
+.home-mate-property-file {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.home-mate-property-title {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.home-mate-property-body {
+  overflow: auto;
+  padding: 14px;
+}
+
+.home-mate-property-summary,
+.home-mate-property-item,
+.home-mate-property-file {
+  padding: 10px 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  background: var(--bg-alt);
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.home-mate-property-item,
+.home-mate-property-file {
+  margin-top: 8px;
+}
+
+.home-mate-property-item p {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+}
+
+.home-mate-property-file .lucide {
+  flex: 0 0 auto;
+  width: 15px;
+  height: 15px;
+  color: var(--text-muted);
+}
+
+.home-mate-property-empty {
+  padding: 28px;
+  color: var(--text-muted);
+  font-size: 12px;
+  text-align: center;
 }
 
 .home-mate-chat-messages {

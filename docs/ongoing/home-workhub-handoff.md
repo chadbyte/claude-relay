@@ -72,8 +72,8 @@ available to both driver seats?
    (data.db) — deleting the folder removes code AND data; sharing a
    capsule is copying a folder. Built-ins follow the same rule: the
    board ships as a repo folder (lib/capsules/board/), not as source
-   strings embedded in JS (tool-examples.js is to be retired in favor
-   of a lib/capsules/scratchpad/ folder). WS tool_install is merely a
+   strings embedded in JS (the scratchpad also lives in
+   lib/capsules/scratchpad/). WS tool_install is merely a
    convenience that writes the folder.
 10. Capsules belong to the USER, never to a mate (added 2026-08-20). A
     tool is workspace property: every mate of that user sees the same
@@ -423,7 +423,7 @@ D. Board on the contract — REVISED per principles 8+9: the board becomes
    add board/board-card nodes to the renderer vocabulary with
    home-board.js as their reference renderer. Also per principle 9:
    registry becomes a directory scan (drop-in install), scratchpad
-   moves from tool-examples.js strings to lib/capsules/scratchpad/,
+   moves from embedded strings to lib/capsules/scratchpad/,
    and built-in capsule folders are seeded into the user's tools root
    on first run (copy, so user data stays in the user's folder).
    This absorbs the old "step 3: board MCP tools".
@@ -469,6 +469,36 @@ server path, so it remains available without a browser. Board actions call
 the board manager with the mate ID as actor: create, update, and move retain
 the board invariants, moving to done is rejected, and `proposeDone` is the
 mate completion path. Board changes are broadcast with caller attribution.
+
+### Phase D notes
+
+Capsules are directory-scanned from each user's tools root. On the first
+scan, Clay copies the repo capsules from `lib/capsules/` behind a versioned
+marker; after that, deleting a copied folder remains an uninstall. A valid
+folder contains `manifest.json` and `ui.json`, plus `logic.js` for the
+default `runtime: "worker"`. Invalid folders stay visible in `tools_state`
+as `{ id, error }` entries instead of disappearing silently.
+Capsule storage also lives in that directory as `data.db`; the board moves
+there with a read-through migration from its legacy board datastore path.
+
+`runtime: "server"` is reserved for shipped built-ins and cannot be
+installed through the WebSocket installer. Server capsules resolve through
+the fixed adapter map in `capsules-server-logic.js`; no folder supplies
+server JavaScript. The board adapter calls `board.js` with the mate ID as
+actor and exposes `create`, `update`, `move`, and `propose_done`. Worker
+capsules retain the Phase C browser round trip.
+
+The board dock entry now comes from `lib/capsules/board/manifest.json` and
+its `{ type: "board" }` UI tree. `tool-renderer.js` delegates the `board`
+and `board-card` vocabulary nodes to `home-board.js`, which remains the
+reference renderer and keeps the existing `board_*` live-update and drag
+paths.
+
+The home mate header exposes only read-only Memory and Knowledge viewers,
+plus Debate. Debate closes Home and opens the existing debate wizard in the
+current project session with the selected home mate as moderator; this keeps
+the established setup/start flow and makes the resulting debate visible.
+Sticky Notes, Scheduled Tasks, MCP Servers, and Skills have no home utility.
 
 ### Build order phase 1 (original, superseded by roadmap v2 above)
 

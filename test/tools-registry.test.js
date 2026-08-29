@@ -19,6 +19,12 @@ function validTool(id) {
   };
 }
 
+function userToolIds(userCtx) {
+  return registry.listTools(userCtx).filter(function (item) {
+    return item.id !== "board" && item.id !== "scratchpad";
+  }).map(function (item) { return item.id; });
+}
+
 test("tool registry rejects unsafe IDs and unknown UI nodes", function () {
   assert.throws(function () { registry.installTool(ctx("validation"), validTool("../escape")); }, /lowercase slug/);
   var badUi = validTool("bad-ui");
@@ -30,7 +36,7 @@ test("tool install, list, get, and remove roundtrip", function () {
   var userCtx = ctx("roundtrip");
   var installed = registry.installTool(userCtx, validTool("roundtrip-tool"));
   assert.strictEqual(installed.manifest.id, "roundtrip-tool");
-  assert.deepStrictEqual(registry.listTools(userCtx).map(function (item) { return item.id; }), ["roundtrip-tool"]);
+  assert.deepStrictEqual(userToolIds(userCtx), ["roundtrip-tool"]);
   assert.match(registry.getTool(userCtx, "roundtrip-tool").logicSource, /initialState/);
   assert.strictEqual(registry.removeTool(userCtx, "roundtrip-tool"), true);
   assert.strictEqual(registry.getTool(userCtx, "roundtrip-tool"), null);
@@ -38,6 +44,43 @@ test("tool install, list, get, and remove roundtrip", function () {
 
 test("tool registry isolates users", function () {
   registry.installTool(ctx("first-user"), validTool("private-tool"));
-  assert.strictEqual(registry.listTools(ctx("first-user")).length, 1);
-  assert.strictEqual(registry.listTools(ctx("second-user")).length, 0);
+  assert.deepStrictEqual(userToolIds(ctx("first-user")), ["private-tool"]);
+  assert.deepStrictEqual(userToolIds(ctx("second-user")), []);
+});
+
+test("registry scans dropped folders, reports invalid folders, and sees deletion", function () {
+  var userCtx = ctx("folder-scan");
+  registry.listTools(userCtx);
+  var root = registry.resolveToolsRoot(userCtx);
+  var dropped = path.join(root, "dropped-tool");
+  fs.mkdirSync(dropped, { recursive: true });
+  fs.writeFileSync(path.join(dropped, "manifest.json"), JSON.stringify({ id: "dropped-tool", name: "Dropped" }));
+  fs.writeFileSync(path.join(dropped, "logic.js"), validTool("dropped-tool").logicSource);
+  fs.writeFileSync(path.join(dropped, "ui.json"), JSON.stringify(validTool("dropped-tool").uiTree));
+  assert.ok(registry.listTools(userCtx).some(function (item) { return item.id === "dropped-tool" && !item.error; }));
+
+  var invalid = path.join(root, "broken-tool");
+  fs.mkdirSync(invalid, { recursive: true });
+  fs.writeFileSync(path.join(invalid, "manifest.json"), "{not json");
+  fs.writeFileSync(path.join(invalid, "ui.json"), JSON.stringify({ type: "stack" }));
+  var broken = registry.listTools(userCtx).filter(function (item) { return item.id === "broken-tool"; })[0];
+  assert.ok(broken.error);
+
+  fs.rmSync(dropped, { recursive: true, force: true });
+  assert.ok(!registry.listTools(userCtx).some(function (item) { return item.id === "dropped-tool"; }));
+});
+
+test("built-in capsule folders seed once and user deletion stays durable", function () {
+  var userCtx = ctx("builtin-seed");
+  var first = registry.listTools(userCtx);
+  assert.ok(first.some(function (item) { return item.id === "board" && item.runtime === "server"; }));
+  assert.ok(first.some(function (item) { return item.id === "scratchpad" && item.runtime === "worker"; }));
+  registry.removeTool(userCtx, "scratchpad");
+  assert.ok(!registry.listTools(userCtx).some(function (item) { return item.id === "scratchpad"; }));
+});
+
+test("tool install rejects server runtime", function () {
+  var serverTool = validTool("unsafe-server");
+  serverTool.manifest.runtime = "server";
+  assert.throws(function () { registry.installTool(ctx("server-runtime"), serverTool); }, /cannot be installed over WebSocket/);
 });
