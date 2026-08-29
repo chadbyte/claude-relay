@@ -54,6 +54,16 @@ clay-kernel/docs/ARCHITECTURE.md — L+S+D, "augmentation not mediation").
    `board-card` (draggable card) nodes; home-board.js becomes the
    reference renderer for those nodes, and the board ships as
    manifest + ui.json + server logic like any capsule.
+9. A capsule is literally a folder (added 2026-08-20). Install/remove =
+   add/delete one directory; the filesystem is the source of truth and
+   the registry is a directory scan. Everything the capsule is lives
+   inside its folder: manifest.json, ui.json, logic.js, and its data
+   (data.db) — deleting the folder removes code AND data; sharing a
+   capsule is copying a folder. Built-ins follow the same rule: the
+   board ships as a repo folder (lib/capsules/board/), not as source
+   strings embedded in JS (tool-examples.js is to be retired in favor
+   of a lib/capsules/scratchpad/ folder). WS tool_install is merely a
+   convenience that writes the folder.
 
 ## Vision
 
@@ -387,12 +397,17 @@ B. Tool contract skeleton: manifest format, declarative UI renderer
 C. Universal mate control: tool_snapshot / tool_act / tool_set /
    tool_storage_* MCP tools, Skills attachment from manifests,
    action attribution + human-interaction stream to the mate.
-D. Board on the contract — REVISED per principle 8: the board becomes a
-   real capsule (manifest + ui.json + logic with runtime: "server").
-   Generalize phase C's board direct path into the server-runtime
-   execution path any trusted built-in can use; add board/board-card
-   nodes to the renderer vocabulary with home-board.js as their
-   reference renderer. This absorbs the old "step 3: board MCP tools".
+D. Board on the contract — REVISED per principles 8+9: the board becomes
+   a real capsule folder (lib/capsules/board/ with manifest + ui.json +
+   logic, runtime: "server"). Generalize phase C's board direct path
+   into the server-runtime execution path any trusted built-in can use;
+   add board/board-card nodes to the renderer vocabulary with
+   home-board.js as their reference renderer. Also per principle 9:
+   registry becomes a directory scan (drop-in install), scratchpad
+   moves from tool-examples.js strings to lib/capsules/scratchpad/,
+   and built-in capsule folders are seeded into the user's tools root
+   on first run (copy, so user data stays in the user's folder).
+   This absorbs the old "step 3: board MCP tools".
 E. Tool LLM access + authoring flow: `api.llm.complete({system, prompt,
    model?})` in the logic api — host-mediated like storage RPC, gated by
    a manifest `permissions: ["llm"]` declaration, attributed/logged per
