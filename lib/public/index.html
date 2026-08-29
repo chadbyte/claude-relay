@@ -51,6 +51,15 @@
 </head>
 <body>
 <div id="layout">
+  <div id="home-bar" aria-label="Home navigation">
+    <div class="home-bar-left">
+      <img class="home-bar-symbol" src="clay-studio-symbol.png" width="28" height="28" alt="Clay Studio">
+      <button id="home-projects-btn" type="button" aria-haspopup="dialog" aria-expanded="false">Projects <i data-lucide="chevron-down"></i></button>
+    </div>
+    <div id="home-bar-actions" class="home-bar-actions">
+      <button id="home-search-btn" type="button" title="Search (⌘K)" aria-label="Search"><i data-lucide="search"></i></button>
+    </div>
+  </div>
   <!-- === Top Bar (full width, forms reverse-ㄱ with icon strip) === -->
   <div id="top-bar">
     <div class="top-bar-left-pills">
@@ -123,10 +132,6 @@
   <!-- === Main Area (sidebar + resize-handle + main-column) === -->
   <div id="main-area">
     <div id="home-hub" class="hidden">
-      <button id="home-hub-close" class="home-hub-close-btn hidden">
-        <i data-lucide="x"></i>
-        <span>ESC</span>
-      </button>
       <div class="home-hub-inner">
         <div class="hub-split">
           <div class="hub-pane hub-pane-mates">

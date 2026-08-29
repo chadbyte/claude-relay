@@ -6,7 +6,9 @@ var test = require("node:test");
 var root = path.join(__dirname, "..");
 var indexSource = fs.readFileSync(path.join(root, "lib/public/index.html"), "utf8");
 var appSource = fs.readFileSync(path.join(root, "lib/public/app.js"), "utf8");
+var serverSource = fs.readFileSync(path.join(root, "lib/server.js"), "utf8");
 var hubSource = fs.readFileSync(path.join(root, "lib/public/modules/app-home-hub.js"), "utf8");
+var shellSource = fs.readFileSync(path.join(root, "lib/public/modules/home-shell.js"), "utf8");
 var chatSource = fs.readFileSync(path.join(root, "lib/public/modules/home-mate-chat.js"), "utf8");
 var dmSource = fs.readFileSync(path.join(root, "lib/public/modules/app-dm.js"), "utf8");
 var cssSource = fs.readFileSync(path.join(root, "lib/public/css/home-hub.css"), "utf8");
@@ -14,10 +16,31 @@ var matesCssSource = fs.readFileSync(path.join(root, "lib/public/css/mates.css")
 var avatarCssSource = fs.readFileSync(path.join(root, "lib/public/css/avatar-imprints.css"), "utf8");
 
 test("home markup uses the selected-mate switcher and unified chat stage", function () {
+  assert.match(indexSource, /id="home-bar"/);
+  assert.match(indexSource, /id="home-projects-btn"/);
   assert.match(indexSource, /id="home-mate-switcher"/);
   assert.match(indexSource, /class="home-mate-chat-stage"/);
   assert.match(indexSource, /id="home-mate-chat-suggestions"/);
   assert.doesNotMatch(indexSource, /id="home-hub-mates"/);
+});
+
+test("home shell toggles reversible chrome and projects chooser affordances", function () {
+  assert.match(shellSource, /classList\.add\("home-active"\)/);
+  assert.match(shellSource, /classList\.remove\("home-active"\)/);
+  assert.match(shellSource, /Resume /);
+  assert.match(shellSource, /home-projects-filter/);
+  assert.match(shellSource, /home-project-row-dot/);
+  assert.match(shellSource, /openAddProjectModal\(\)/);
+  assert.match(shellSource, /\["notif-center-btn", "user-settings-btn"\]/);
+  assert.match(cssSource, /body\.home-active #top-bar,[\s\S]*body\.home-active #icon-strip,[\s\S]*body\.home-active #sidebar-column/);
+  assert.match(cssSource, /body\.home-active \.title-bar-content/);
+  assert.match(appSource, /if \(!newSlug\) \{\s*showHomeHub\(true\);\s*return;/);
+  assert.match(appSource, /if \(!slugMatch\) \{\s*showHomeHub\(true\);/);
+  assert.match(appSource, /document\.body\.dataset\.homeProjectSlug/);
+  assert.match(serverSource, /data-home-project-slug/);
+  assert.doesNotMatch(indexSource, /home-hub-close/);
+  assert.doesNotMatch(hubSource, /hubCloseBtn/);
+  assert.doesNotMatch(appSource, /isHomeHubVisible\(\) && store\.get\('currentSlug'\)/);
 });
 
 test("home mate switcher preserves management and status affordances", function () {

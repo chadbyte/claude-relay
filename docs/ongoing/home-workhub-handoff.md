@@ -146,7 +146,12 @@ Stage 2 — home shell + root (spec items 1, 2): `/` opens home, project
 chrome (icon strip, sidebar, title bar, centered search) hidden on
 home, quiet home bar (Clay identity, Projects chooser, search/
 notifications/account), ESC semantics, C button navigates home,
-deep links unchanged. — NOT STARTED.
+deep links unchanged. — DONE 2026-08-29. Added reversible `body.home-active`
+chrome suppression, a Projects chooser (resume, filtering, activity state,
+and New project), and root/popstate restoration between `/` and project routes.
+The root shell keeps the last accessible project connected in the background,
+the home bar reuses the live notification and user-account controls, and search
+opens the existing command palette. The mobile tab bar remains available.
 
 Stage 3 — dock three states (spec items 7, 9): conversation / split
 (draggable divider, tool-sized width) / tool focus; state remembered
