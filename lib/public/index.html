@@ -51,18 +51,6 @@
 </head>
 <body>
 <div id="layout">
-  <div id="home-bar" aria-label="Home navigation">
-    <div class="home-bar-left">
-      <img class="home-bar-symbol" src="clay-studio-symbol.png" width="28" height="28" alt="Clay Studio">
-      <button id="home-projects-btn" type="button" aria-haspopup="dialog" aria-expanded="false">Projects <i data-lucide="chevron-down"></i></button>
-    </div>
-    <div id="home-bar-actions" class="home-bar-actions">
-      <button id="home-tools-btn" type="button" aria-expanded="false" aria-controls="home-tool-workbench">
-        <i data-lucide="panel-right"></i><span id="home-tools-label">Tools</span><span id="home-tools-activity" aria-hidden="true"></span>
-      </button>
-      <button id="home-search-btn" type="button" title="Search (⌘K)" aria-label="Search"><i data-lucide="search"></i></button>
-    </div>
-  </div>
   <!-- === Top Bar (full width, forms reverse-ㄱ with icon strip) === -->
   <div id="top-bar">
     <div class="top-bar-left-pills">
@@ -141,7 +129,15 @@
             <div id="home-mate-chat" class="home-mate-chat">
               <div class="home-mate-chat-header" id="home-mate-chat-header">
                 <div id="home-mate-switcher" class="home-mate-switcher"></div>
-                <div id="home-mate-chat-actions" class="home-mate-chat-actions"></div>
+                <div class="home-mate-chat-controls">
+                  <div id="home-mate-chat-actions" class="home-mate-chat-actions"></div>
+                  <button id="home-tools-btn" class="home-tools-trigger" type="button" aria-expanded="false" aria-controls="home-tool-workbench">
+                    <i data-lucide="panel-right"></i><span id="home-tools-label">Tools</span><span id="home-tools-activity" aria-hidden="true"></span>
+                  </button>
+                  <button id="home-minimize-btn" class="home-minimize-trigger" type="button" title="Minimize home" aria-label="Minimize home">
+                    <i data-lucide="minus"></i>
+                  </button>
+                </div>
               </div>
               <div class="home-mate-chat-stage">
                 <div class="home-mate-chat-messages" id="home-mate-chat-messages"></div>

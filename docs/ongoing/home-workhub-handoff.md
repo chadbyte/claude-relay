@@ -99,6 +99,11 @@ Claude — a calm place you live in, not a dashboard you visit.
    last, recents as text rows, search, new), and search/notifications/
    account on the right. Cmd+K works everywhere. ESC never leaves home
    (it only closes modals/overlays); the X/ESC close affordance dies.
+   **Correction (2026-08-20): the home bar is retired.** Home shows only
+   conversation and the dock. Tools lives in the conversation-local header;
+   The local minimize control returns to the current project without tearing
+   down home; clicking Clay Home restores the exact suspended surface. Cmd+K,
+   browser Back, and mobile tabs remain available.
 3. Mate color is REMOVED from the design language entirely. No colored
    rings/badges/buttons/accents anywhere. Avatar color is contained
    identity only; long-term the generated-avatar palette itself goes
@@ -119,7 +124,7 @@ Claude — a calm place you live in, not a dashboard you visit.
    the composer docks to the column bottom and the suggestions vanish.
 7. The dock is a collapsible work surface with three states, remembered
    server-side (open/closed, width, active tool): conversation (chat
-   fills the stage; a quiet Tools control in the home bar), split
+   fills the stage; a quiet Tools control in its local header), split
    (right workbench, draggable divider, tool-sized width ~clamp(520px,
    46vw, 760px)), and tool focus (tool takes the stage, "return to
    conversation" restores). First run = conversation state. Suggestion
@@ -165,6 +170,17 @@ project WebSocket preference path. Hidden board/tool changes mark the Tools
 control without opening it. Wide screens split, intermediate screens use a
 dismissible 65vw overlay, and mobile stacks the tool below the conversation.
 The board suggestion opens Board before preserving its existing message send.
+
+Stage 3.5 — home-local order: the replacement home bar and its Projects
+chooser were removed. Home now contains only the full-height conversation and
+the optional dock; Tools moved to the far right of the conversation's local
+header with its last-tool label and hidden-activity dot intact. Cmd+K remains a
+global shortcut and lists projects through the root page's accessible-project
+background connection; Back and mobile tabs remain the other project-return
+paths. A later refinement added a quiet local minimize button: it returns to
+the current project while leaving the conversation DOM, draft, scroll, stream,
+and dock state mounted, and Clay Home resumes that suspended point. — DONE
+2026-08-20.
 
 Stage 4 — board polish + palette (remaining spec item 8 + round-1 leftovers):
 finish card-level board polish and generate the muted avatar palette at the

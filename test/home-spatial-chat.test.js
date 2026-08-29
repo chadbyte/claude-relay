@@ -7,33 +7,46 @@ var root = path.join(__dirname, "..");
 var indexSource = fs.readFileSync(path.join(root, "lib/public/index.html"), "utf8");
 var appSource = fs.readFileSync(path.join(root, "lib/public/app.js"), "utf8");
 var serverSource = fs.readFileSync(path.join(root, "lib/server.js"), "utf8");
+var projectsSource = fs.readFileSync(path.join(root, "lib/public/modules/app-projects.js"), "utf8");
 var hubSource = fs.readFileSync(path.join(root, "lib/public/modules/app-home-hub.js"), "utf8");
+var connectionSource = fs.readFileSync(path.join(root, "lib/public/modules/app-connection.js"), "utf8");
 var shellSource = fs.readFileSync(path.join(root, "lib/public/modules/home-shell.js"), "utf8");
 var dockSource = fs.readFileSync(path.join(root, "lib/public/modules/home-dock.js"), "utf8");
 var dockResizeSource = fs.readFileSync(path.join(root, "lib/public/modules/home-dock-resize.js"), "utf8");
 var chatSource = fs.readFileSync(path.join(root, "lib/public/modules/home-mate-chat.js"), "utf8");
+var paletteSource = fs.readFileSync(path.join(root, "lib/public/modules/command-palette.js"), "utf8");
 var dmSource = fs.readFileSync(path.join(root, "lib/public/modules/app-dm.js"), "utf8");
 var cssSource = fs.readFileSync(path.join(root, "lib/public/css/home-hub.css"), "utf8");
 var matesCssSource = fs.readFileSync(path.join(root, "lib/public/css/mates.css"), "utf8");
 var avatarCssSource = fs.readFileSync(path.join(root, "lib/public/css/avatar-imprints.css"), "utf8");
+var homeMarkup = indexSource.slice(indexSource.indexOf('<div id="home-hub"'), indexSource.indexOf('<div id="whats-new-article"'));
 
 test("home markup uses the selected-mate switcher and unified chat stage", function () {
-  assert.match(indexSource, /id="home-bar"/);
-  assert.match(indexSource, /id="home-projects-btn"/);
   assert.match(indexSource, /id="home-mate-switcher"/);
   assert.match(indexSource, /class="home-mate-chat-stage"/);
   assert.match(indexSource, /id="home-mate-chat-suggestions"/);
+  assert.match(homeMarkup, /class="home-mate-chat-controls"[\s\S]*id="home-tools-btn"/);
+  assert.match(homeMarkup, /id="home-tools-btn"[\s\S]*id="home-minimize-btn"/);
+  assert.doesNotMatch(indexSource, /id="home-bar"|id="home-projects-btn"|id="home-search-btn"/);
+  assert.doesNotMatch(cssSource, /#home-bar|\.home-bar-|\.home-projects-|#home-projects-btn/);
+  assert.doesNotMatch(homeMarkup, /notif-center-btn|user-settings-btn|home-bar/);
   assert.doesNotMatch(indexSource, /id="home-hub-mates"/);
 });
 
-test("home shell toggles reversible chrome and projects chooser affordances", function () {
+test("home minimizes and resumes without resetting its mounted work", function () {
+  assert.match(hubSource, /homeHubSuspended/);
+  assert.match(hubSource, /export function minimizeHomeHub\(\)/);
+  assert.match(hubSource, /route = "\/p\/" \+ slug \+ "\/"/);
+  assert.match(hubSource, /if \(!resume\) \{[\s\S]*requestTools\(\)[\s\S]*renderDock\(\)/);
+  assert.doesNotMatch(hubSource, /resetHomeDockFocus|closeHomeChat/);
+  assert.match(connectionSource, /resumeHomeChat\(\)/);
+  assert.match(chatSource, /export function resumeHomeChat\(\)/);
+});
+
+test("home shell only toggles reversible project chrome", function () {
   assert.match(shellSource, /classList\.add\("home-active"\)/);
   assert.match(shellSource, /classList\.remove\("home-active"\)/);
-  assert.match(shellSource, /Resume /);
-  assert.match(shellSource, /home-projects-filter/);
-  assert.match(shellSource, /home-project-row-dot/);
-  assert.match(shellSource, /openAddProjectModal\(\)/);
-  assert.match(shellSource, /\["notif-center-btn", "user-settings-btn"\]/);
+  assert.doesNotMatch(shellSource, /getCachedProjects|openAddProjectModal|switchProject|home-project|home-bar|notif-center-btn|user-settings-btn/);
   assert.match(cssSource, /body\.home-active #top-bar,[\s\S]*body\.home-active #icon-strip,[\s\S]*body\.home-active #sidebar-column/);
   assert.match(cssSource, /body\.home-active \.title-bar-content/);
   assert.match(appSource, /if \(!newSlug\) \{\s*showHomeHub\(true\);\s*return;/);
@@ -43,6 +56,18 @@ test("home shell toggles reversible chrome and projects chooser affordances", fu
   assert.doesNotMatch(indexSource, /home-hub-close/);
   assert.doesNotMatch(hubSource, /hubCloseBtn/);
   assert.doesNotMatch(appSource, /isHomeHubVisible\(\) && store\.get\('currentSlug'\)/);
+});
+
+test("Cmd+K remains a global project exit from a direct home load", function () {
+  assert.match(paletteSource, /document\.addEventListener\("keydown"[\s\S]*\(e\.metaKey \|\| e\.ctrlKey\) && e\.key === "k"/);
+  assert.match(paletteSource, /fetch\("\/api\/palette\/search"/);
+  assert.match(paletteSource, /ctx\.projectList \? ctx\.projectList\(\) : \[\]/);
+  assert.match(paletteSource, /cmd-palette-group-label">Projects/);
+  assert.match(paletteSource, /entry\.type === "project"[\s\S]*ctx\.switchProject\(entry\.data\.slug\)/);
+  assert.match(projectsSource, /if \(isHomeHubVisible\(\)\) \{[\s\S]*hideHomeHub\(\)/);
+  assert.match(serverSource, /Root path — render home while keeping the last accessible project connected/);
+  assert.match(serverSource, /Fall back to first accessible project/);
+  assert.match(serverSource, /data-home-project-slug/);
 });
 
 test("home dock exposes conversation, split, and focused tool states", function () {
@@ -113,6 +138,8 @@ test("home chat CSS centers the transcript and keeps one composer surface", func
   assert.match(cssSource, /\.home-chat-message-user \.home-chat-message-content\s*\{[\s\S]*?max-width: 75%/);
   assert.match(cssSource, /\.home-mate-chat-composer\s*\{[\s\S]*?border-radius: 22px/);
   assert.match(cssSource, /\.home-mate-chat\.is-empty \.home-mate-chat-stage/);
+  assert.match(cssSource, /\.home-mate-chat\.is-empty \.home-mate-chat-stage\s*\{[\s\S]*?padding-bottom: 18%/);
+  assert.match(cssSource, /#home-hub\s*\{[\s\S]*?padding: calc\(14px \+ var\(--safe-top\)\) 24px 24px/);
 });
 
 test("home app imports the renamed switcher renderer", function () {
