@@ -137,13 +137,7 @@ body.pane-mode #input-area {
 .split-pair-role-driver { color: var(--accent); background: color-mix(in srgb, var(--accent) 13%, transparent); }
 .split-pair-role-worker { color: var(--text-secondary); background: var(--bg-alt); }
 
-/* Role badges are buttons: Driver click clears roles, Worker click takes over. */
-button.split-pair-role {
-  border: 0;
-  cursor: pointer;
-  font-family: inherit;
-}
-button.split-pair-role:hover { filter: brightness(1.25); }
+/* Pair roles are status labels. Control remains with the Driver through MCP. */
 
 /* Ad-hoc splits: role assignment in each pane header. ALWAYS fully
    visible; hover/opacity gating made the control undiscoverable. */
