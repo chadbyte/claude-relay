@@ -84,6 +84,54 @@ available to both driver seats?
     not capsules — that is the boundary between "belongs to the mate"
     and "belongs to the workspace".
 
+## Home spatial model v3 (locked 2026-08-20, via design rounds with Codex)
+
+Governing idea: home contains people and intentions; projects and tools
+appear only when deliberately invited in. Home must feel like ChatGPT /
+Claude — a calm place you live in, not a dashboard you visit.
+
+1. Home is the app's ROOT, not a mode. `/` opens home; new users land
+   on home with Clay selected. Project deep links (`/p/<slug>/`) keep
+   working. The C button navigates to home; browser back returns.
+2. On home, ALL project chrome disappears: icon strip, sidebar, title
+   bar, centered search. A quiet home bar replaces it: Clay symbol
+   (identity, not a button), a Projects button (calm chooser: resume
+   last, recents as text rows, search, new), and search/notifications/
+   account on the right. Cmd+K works everywhere. ESC never leaves home
+   (it only closes modals/overlays); the X/ESC close affordance dies.
+3. Mate color is REMOVED from the design language entirely. No colored
+   rings/badges/buttons/accents anywhere. Avatar color is contained
+   identity only; long-term the generated-avatar palette itself goes
+   muted at the source (no CSS saturation filters — they damage custom
+   avatars).
+4. The mate rail is replaced by a selected-mate control (avatar + name
+   + presence + chevron) atop the conversation; clicking opens a
+   switcher popover (rows: avatar, name, one-line bio, presence,
+   unread; New mate at the bottom). One colorful avatar on the resting
+   screen, not a launcher row.
+5. Chat is the stage. Two-voice renderer (home only; human DMs keep
+   dm-render.js): assistant = plain text on the canvas, no bubble/
+   avatar/name; user = soft neutral right-aligned bubble; timestamps on
+   hover. Centered transcript max ~720px; floating pill composer.
+6. First-open gimmick: with an empty conversation, the greeting and a
+   small composer sit CENTERED in the stage (name + short line derived
+   from the bio + 2-3 muted suggestion chips); after the first message
+   the composer docks to the column bottom and the suggestions vanish.
+7. The dock is a collapsible work surface with three states, remembered
+   server-side (open/closed, width, active tool): conversation (chat
+   fills the stage; a quiet Tools control in the home bar), split
+   (right workbench, draggable divider, tool-sized width ~clamp(520px,
+   46vw, 760px)), and tool focus (tool takes the stage, "return to
+   conversation" restores). First run = conversation state. Suggestion
+   chips like "add a card" open the dock to the right tool.
+8. Flattening rule: one visible edge per level. No outer dock card —
+   a single divider separates conversation and workbench; board columns
+   are whitespace-separated with cards as the only raised surfaces;
+   dock tabs are icon+text with one understated active indicator.
+9. Collapsed dock shows one neutral Tools/last-tool button with a
+   subtle activity dot on hidden changes; mate actions never force the
+   dock open (a quiet "updated Board · View" notice is acceptable).
+
 ## Vision
 
 Clay is redefined from a coding agent (execution only) into a workspace that
