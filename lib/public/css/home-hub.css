@@ -603,6 +603,34 @@
   min-width: 0;
 }
 
+.home-dock-switcher {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.home-dock-tool {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 7px 3px 3px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.home-dock-tool:hover {
+  background: var(--bg-alt);
+}
+
+.home-dock-tool.active {
+  border-color: var(--border-subtle);
+  background: var(--bg-alt);
+}
+
 .home-app-mark {
   display: flex;
   align-items: center;
