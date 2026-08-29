@@ -167,6 +167,25 @@ test("server LLM bridge rejects capsules without llm permission", async function
   assert.match(sent[0].message, /does not have the llm permission/);
 });
 
+test("storage failures reply on the correlated tool_storage_result channel", async function () {
+  var ctx = harness();
+  ctx.tools.installedManifests("default");
+  var sent = [];
+  var ws = { readyState: 1, send: function (payload) { sent.push(JSON.parse(payload)); } };
+  ctx.tools.handleMessage(ws, {
+    type: "tool_storage_op",
+    toolId: "scratchpad",
+    op: "unknown-op",
+    seq: "scratchpad:1:7",
+    args: {},
+  });
+  for (var i = 0; i < 50 && sent.length === 0; i++) await new Promise(function (resolve) { setTimeout(resolve, 5); });
+  assert.strictEqual(sent[0].type, "tool_storage_result");
+  assert.strictEqual(sent[0].seq, "scratchpad:1:7");
+  assert.match(sent[0].error, /Unknown storage operation/);
+  assert.ok(!sent.some(function (message) { return message.type === "tools_error"; }));
+});
+
 test("browser tool control fails clearly without an open home screen", async function () {
   var ctx = harness();
   ctx.tools.installedManifests("default");
