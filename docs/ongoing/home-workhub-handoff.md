@@ -156,11 +156,20 @@ opens the existing command palette. The mobile tab bar remains available.
 Stage 3 — dock three states (spec items 7, 9): conversation / split
 (draggable divider, tool-sized width) / tool focus; state remembered
 server-side; collapsed dock = one Tools button with activity dot;
-suggestion chips open the dock to the right tool. — NOT STARTED.
+suggestion chips open the dock to the right tool. — DONE 2026-08-29.
+The conversation now owns the full stage by default. Opening Tools reveals a
+flat right workbench with icon-and-text tabs, one divider, constrained pointer
+and keyboard resizing, and a full-stage focus state with an explicit return.
+The server stores `{ dockOpen, dockWidth, activeToolId }` per user over the
+project WebSocket preference path. Hidden board/tool changes mark the Tools
+control without opening it. Wide screens split, intermediate screens use a
+dismissible 65vw overlay, and mobile stacks the tool below the conversation.
+The board suggestion opens Board before preserving its existing message send.
 
-Stage 4 — flattening + palette (spec item 8 + round-1 leftovers): dock
-and board one-edge-per-level flattening; muted generated-avatar palette
-at the source (no CSS filters). — NOT STARTED.
+Stage 4 — board polish + palette (remaining spec item 8 + round-1 leftovers):
+finish card-level board polish and generate the muted avatar palette at the
+source (no CSS filters). The dock frame, tabs, and board column containers were
+already flattened in Stage 3. — NOT STARTED.
 
 Working agreement: the dev server serves this worktree live, so during
 a stage the UI can look half-built; judge visuals only at stage-commit
@@ -430,7 +439,7 @@ enforcement lives in `board.js` so no client or tool path can bypass it.
 
 ### New client module
 
-`lib/public/modules/home-board.js` — renders the kanban into the right pane,
+`lib/public/modules/home-board.js` — renders the kanban in the tool workbench,
 three fixed columns, card create/edit inline, drag between columns (user
 moves), pending-done confirm chip. State in `store` (`boardCards`), WS via
 `ws-ref.js`, handlers dispatched from `app-messages.js`
@@ -444,10 +453,9 @@ mate DM connection too.
 
 ### Home hub layout rework
 
-`#home-hub` gains a two-pane inner layout: left `.hub-pane-mates`, right
-`.hub-pane-board`. Existing hub content (greeting/weather, upcoming, tips,
-what's new, projects) compacts into the left pane above/below the mates
-list; exact arrangement is an implementation-time call (open question 2).
+This early fixed-pane proposal was superseded by spatial model v3: conversation
+owns the stage by default, while tools open in the collapsible right workbench.
+The older greeting/weather/project-dashboard composition is no longer planned.
 
 Left pane changes in `app-home-hub.js`:
 

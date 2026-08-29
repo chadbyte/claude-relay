@@ -9,6 +9,8 @@ var appSource = fs.readFileSync(path.join(root, "lib/public/app.js"), "utf8");
 var serverSource = fs.readFileSync(path.join(root, "lib/server.js"), "utf8");
 var hubSource = fs.readFileSync(path.join(root, "lib/public/modules/app-home-hub.js"), "utf8");
 var shellSource = fs.readFileSync(path.join(root, "lib/public/modules/home-shell.js"), "utf8");
+var dockSource = fs.readFileSync(path.join(root, "lib/public/modules/home-dock.js"), "utf8");
+var dockResizeSource = fs.readFileSync(path.join(root, "lib/public/modules/home-dock-resize.js"), "utf8");
 var chatSource = fs.readFileSync(path.join(root, "lib/public/modules/home-mate-chat.js"), "utf8");
 var dmSource = fs.readFileSync(path.join(root, "lib/public/modules/app-dm.js"), "utf8");
 var cssSource = fs.readFileSync(path.join(root, "lib/public/css/home-hub.css"), "utf8");
@@ -41,6 +43,26 @@ test("home shell toggles reversible chrome and projects chooser affordances", fu
   assert.doesNotMatch(indexSource, /home-hub-close/);
   assert.doesNotMatch(hubSource, /hubCloseBtn/);
   assert.doesNotMatch(appSource, /isHomeHubVisible\(\) && store\.get\('currentSlug'\)/);
+});
+
+test("home dock exposes conversation, split, and focused tool states", function () {
+  assert.match(indexSource, /id="home-tools-btn"/);
+  assert.match(indexSource, /id="home-dock-divider"/);
+  assert.match(indexSource, /Return to conversation/);
+  assert.match(dockSource, /dock-split/);
+  assert.match(dockSource, /dock-focus/);
+  assert.match(dockSource, /dockOpen: false/);
+  assert.match(dockSource, /home_dock_get/);
+  assert.match(dockSource, /home_dock_set/);
+  assert.match(dockResizeSource, /available - 480/);
+  assert.match(dockResizeSource, /window\.innerWidth \* 0\.58/);
+  assert.doesNotMatch(indexSource + cssSource, /hub-split|hub-pane-board|home-app-frame/);
+  assert.doesNotMatch(dockSource, /localStorage/);
+});
+
+test("board suggestion opens the dock without replacing its message send", function () {
+  assert.match(chatSource, /text === "Add a card to the board"\) openHomeDock\("board"\)/);
+  assert.match(chatSource, /submitMessage\(\)/);
 });
 
 test("home mate switcher preserves management and status affordances", function () {

@@ -57,6 +57,9 @@
       <button id="home-projects-btn" type="button" aria-haspopup="dialog" aria-expanded="false">Projects <i data-lucide="chevron-down"></i></button>
     </div>
     <div id="home-bar-actions" class="home-bar-actions">
+      <button id="home-tools-btn" type="button" aria-expanded="false" aria-controls="home-tool-workbench">
+        <i data-lucide="panel-right"></i><span id="home-tools-label">Tools</span><span id="home-tools-activity" aria-hidden="true"></span>
+      </button>
       <button id="home-search-btn" type="button" title="Search (⌘K)" aria-label="Search"><i data-lucide="search"></i></button>
     </div>
   </div>
@@ -133,8 +136,8 @@
   <div id="main-area">
     <div id="home-hub" class="hidden">
       <div class="home-hub-inner">
-        <div class="hub-split">
-          <div class="hub-pane hub-pane-mates">
+        <div id="home-workspace" class="home-workspace">
+          <div id="home-conversation-region" class="home-conversation-region">
             <div id="home-mate-chat" class="home-mate-chat">
               <div class="home-mate-chat-header" id="home-mate-chat-header">
                 <div id="home-mate-switcher" class="home-mate-switcher"></div>
@@ -150,13 +153,19 @@
               </div>
             </div>
           </div>
-          <div class="hub-pane hub-pane-board">
-            <div class="home-app-header">
-              <div class="home-app-identity" id="home-dock-switcher"></div>
-              <div class="home-app-actions" aria-hidden="true"></div>
+          <div id="home-dock-backdrop" class="home-dock-backdrop"></div>
+          <div id="home-dock-divider" class="home-dock-divider" role="separator" aria-label="Resize tool workbench" aria-orientation="vertical" tabindex="0"></div>
+          <section id="home-tool-workbench" class="home-tool-workbench" aria-label="Tools">
+            <div class="home-dock-header">
+              <button id="home-dock-return" class="home-dock-return" type="button"><i data-lucide="arrow-left"></i><span>Return to conversation</span></button>
+              <div class="home-dock-switcher" id="home-dock-switcher"></div>
+              <div class="home-dock-actions">
+                <button id="home-dock-focus" type="button" title="Focus tool" aria-label="Focus tool"><i data-lucide="maximize-2"></i></button>
+                <button id="home-dock-collapse" type="button" title="Collapse tools" aria-label="Collapse tools"><i data-lucide="panel-right-close"></i></button>
+              </div>
             </div>
-            <div class="home-app-content" id="home-dock-content"></div>
-          </div>
+            <div class="home-dock-content" id="home-dock-content"></div>
+          </section>
         </div>
       </div>
     </div>
