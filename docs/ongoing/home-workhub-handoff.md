@@ -132,6 +132,35 @@ Claude — a calm place you live in, not a dashboard you visit.
    subtle activity dot on hidden changes; mate actions never force the
    dock open (a quiet "updated Board · View" notice is acceptable).
 
+### Spatial model v3 — execution stages and status
+
+Stage 1 — conversation experience (spec items 3, 4, 5, 6 + header
+simplification): mate-color purge on home, avatar rail -> selected-mate
+switcher popover, two-voice renderer (dm-render.js stays human-DM only),
+cohesive pill composer, centered empty-state greeting + composer that
+docks after the first message, utilities under one labeled overflow
+menu, chat panel box removed. — DONE 2026-08-20, commit 3407ef8,
+tests 454/454. Visual QA by Chad pending.
+
+Stage 2 — home shell + root (spec items 1, 2): `/` opens home, project
+chrome (icon strip, sidebar, title bar, centered search) hidden on
+home, quiet home bar (Clay identity, Projects chooser, search/
+notifications/account), ESC semantics, C button navigates home,
+deep links unchanged. — NOT STARTED.
+
+Stage 3 — dock three states (spec items 7, 9): conversation / split
+(draggable divider, tool-sized width) / tool focus; state remembered
+server-side; collapsed dock = one Tools button with activity dot;
+suggestion chips open the dock to the right tool. — NOT STARTED.
+
+Stage 4 — flattening + palette (spec item 8 + round-1 leftovers): dock
+and board one-edge-per-level flattening; muted generated-avatar palette
+at the source (no CSS filters). — NOT STARTED.
+
+Working agreement: the dev server serves this worktree live, so during
+a stage the UI can look half-built; judge visuals only at stage-commit
+checkpoints (hard refresh).
+
 ## Vision
 
 Clay is redefined from a coding agent (execution only) into a workspace that
