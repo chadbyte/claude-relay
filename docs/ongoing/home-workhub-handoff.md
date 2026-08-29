@@ -11,6 +11,17 @@ This supersedes "home = mates + kanban". The home screen is the mate's
 access surface, modeled on clayOS capsules (see ~/clayOS/README.md and
 clay-kernel/docs/ARCHITECTURE.md — L+S+D, "augmentation not mediation").
 
+Why capsules exist (2026-08-20): mates reach for a capsule when they
+need what conversation cannot provide — deterministic computation
+(same input, same result: invariants, transforms, atomic LLM calls
+with fixed minimal context) and accumulating user-specific data
+(today's entries are tomorrow's foundation). Each installed capsule
+raises the capability of the human AND the mates at once (Display for
+the human, Skills for the mate), so the workspace's capability grows
+monotonically while conversations come and go. This is the test for
+"should this be a capsule": does it make determinism or accumulation
+available to both driver seats?
+
 1. Mates live at home. Mate DM is abolished: no separate screen, no WS
    swap, no project-style chat session UI for mates. The only surface is
    the home conversation pane (the home_mate_* relay, already shipped).
