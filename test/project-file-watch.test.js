@@ -5,27 +5,10 @@ var os = require("os");
 var path = require("path");
 var attachFileWatch = require("../lib/project-file-watch").attachFileWatch;
 
-function waitFor(check, timeoutMs) {
-  var started = Date.now();
-  return new Promise(function (resolve, reject) {
-    function poll() {
-      if (check()) {
-        resolve();
-        return;
-      }
-      if (Date.now() - started >= timeoutMs) {
-        reject(new Error("Timed out waiting for file watcher event"));
-        return;
-      }
-      setTimeout(poll, 20);
-    }
-    poll();
-  });
-}
-
 function createFixture(t) {
   var cwd = fs.mkdtempSync(path.join(os.tmpdir(), "clay-file-watch-"));
   var messages = new Map();
+  var messageWaiters = new Map();
   var watcher = attachFileWatch({
     cwd: cwd,
     send: function () {},
@@ -33,6 +16,13 @@ function createFixture(t) {
       var list = messages.get(client) || [];
       list.push(message);
       messages.set(client, list);
+      var waiters = messageWaiters.get(client) || [];
+      for (var i = waiters.length - 1; i >= 0; i--) {
+        if (!waiters[i].check(message)) continue;
+        var resolve = waiters[i].resolve;
+        waiters.splice(i, 1);
+        resolve(message);
+      }
     },
     safePath: function (root, relPath) {
       var resolved = path.resolve(root, relPath);
@@ -48,7 +38,18 @@ function createFixture(t) {
     watcher.stopAllDirWatches();
     fs.rmSync(cwd, { recursive: true, force: true });
   });
-  return { cwd: cwd, messages: messages, watcher: watcher };
+  function waitForMessage(client, check) {
+    var existing = messages.get(client) || [];
+    for (var i = 0; i < existing.length; i++) {
+      if (check(existing[i])) return Promise.resolve(existing[i]);
+    }
+    return new Promise(function (resolve) {
+      var waiters = messageWaiters.get(client) || [];
+      waiters.push({ check: check, resolve: resolve });
+      messageWaiters.set(client, waiters);
+    });
+  }
+  return { cwd: cwd, messages: messages, watcher: watcher, waitForMessage: waitForMessage };
 }
 
 function replaceFile(cwd, name, content) {
@@ -57,42 +58,38 @@ function replaceFile(cwd, name, content) {
   fs.renameSync(tempPath, path.join(cwd, name));
 }
 
-test("file watch survives repeated atomic replacements", async function (t) {
+test("file watch survives repeated atomic replacements", { timeout: 15000 }, async function (t) {
   var fixture = createFixture(t);
   var client = {};
   fs.writeFileSync(path.join(fixture.cwd, "document.md"), "one", "utf8");
-  fixture.watcher.startFileWatch(client, "document.md");
+  assert.strictEqual(await fixture.watcher.startFileWatch(client, "document.md"), true);
 
+  var two = fixture.waitForMessage(client, function (message) { return message.content === "two"; });
   replaceFile(fixture.cwd, "document.md", "two");
-  await waitFor(function () {
-    return (fixture.messages.get(client) || []).some(function (message) {
-      return message.content === "two";
-    });
-  }, 3000);
+  await two;
 
+  var three = fixture.waitForMessage(client, function (message) { return message.content === "three"; });
   replaceFile(fixture.cwd, "document.md", "three");
-  await waitFor(function () {
-    return (fixture.messages.get(client) || []).some(function (message) {
-      return message.content === "three";
-    });
-  }, 3000);
+  await three;
 });
 
-test("file watches remain isolated per browser client", async function (t) {
+test("file watches remain isolated per browser client", { timeout: 15000 }, async function (t) {
   var fixture = createFixture(t);
   var firstClient = {};
   var secondClient = {};
   fs.writeFileSync(path.join(fixture.cwd, "first.md"), "first", "utf8");
   fs.writeFileSync(path.join(fixture.cwd, "second.md"), "second", "utf8");
-  fixture.watcher.startFileWatch(firstClient, "first.md");
-  fixture.watcher.startFileWatch(secondClient, "second.md");
+  var ready = await Promise.all([
+    fixture.watcher.startFileWatch(firstClient, "first.md"),
+    fixture.watcher.startFileWatch(secondClient, "second.md"),
+  ]);
+  assert.deepStrictEqual(ready, [true, true]);
 
+  var firstUpdate = fixture.waitForMessage(firstClient, function (message) { return message.path === "first.md"; });
+  var secondUpdate = fixture.waitForMessage(secondClient, function (message) { return message.path === "second.md"; });
   fs.writeFileSync(path.join(fixture.cwd, "first.md"), "first updated", "utf8");
   fs.writeFileSync(path.join(fixture.cwd, "second.md"), "second updated", "utf8");
-  await waitFor(function () {
-    return (fixture.messages.get(firstClient) || []).length > 0 &&
-      (fixture.messages.get(secondClient) || []).length > 0;
-  }, 3000);
+  await Promise.all([firstUpdate, secondUpdate]);
 
   assert.deepStrictEqual((fixture.messages.get(firstClient) || []).map(function (message) {
     return message.path;

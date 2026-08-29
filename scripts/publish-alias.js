@@ -17,11 +17,11 @@ var pkg = {
   name: "claude-relay",
   version: version,
   description: "Alias for clay-server — Web UI for Claude Code.",
-  bin: { "claude-relay": "./bin/cli.js" },
+  bin: { "claude-relay": "bin/cli.js" },
   dependencies: { "clay-server": version },
   keywords: ["claude", "claude-code", "cli", "mobile", "remote", "relay", "web-ui", "tailscale"],
-  repository: { type: "git", url: "git+https://github.com/chadbyte/claude-relay.git" },
-  homepage: "https://github.com/chadbyte/claude-relay#readme",
+  repository: { type: "git", url: "git+https://github.com/chadbyte/clay.git" },
+  homepage: "https://github.com/chadbyte/clay#readme",
   author: "Chad",
   license: "MIT"
 }

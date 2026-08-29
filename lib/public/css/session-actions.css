@@ -1,0 +1,135 @@
+#header-session-actions-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: auto;
+  height: 28px;
+  margin: 0;
+  padding: 0 9px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--brand-indigo) 5%, var(--bg));
+  color: var(--text-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 650;
+  white-space: nowrap;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+
+#header-session-actions-btn:hover,
+#header-session-actions-btn[aria-expanded="true"] {
+  color: var(--text);
+  background: color-mix(in srgb, var(--brand-indigo) 9%, var(--bg));
+  border-color: color-mix(in srgb, var(--brand-indigo) 32%, var(--border));
+}
+
+#header-session-actions-btn:focus { outline: none; }
+#header-session-actions-btn:focus-visible {
+  border-color: color-mix(in srgb, var(--link) 48%, var(--border));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--link) 18%, transparent);
+}
+
+#header-session-actions-btn.hidden { display: none; }
+#header-session-actions-btn .lucide:first-child {
+  width: 14px;
+  height: 14px;
+  color: color-mix(in srgb, var(--brand-indigo) 78%, var(--text));
+}
+
+#header-session-actions-btn .session-actions-trigger-chevron {
+  width: 13px;
+  height: 13px;
+  transition: transform 0.16s ease;
+}
+
+#header-session-actions-btn[aria-expanded="true"] .session-actions-trigger-chevron {
+  transform: rotate(180deg);
+}
+
+.session-actions-menu {
+  position: fixed;
+  z-index: 10020;
+  width: min(300px, calc(100vw - 16px));
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  box-shadow: 0 14px 38px rgba(var(--shadow-rgb), 0.32), 0 2px 8px rgba(var(--shadow-rgb), 0.2);
+  backdrop-filter: blur(18px);
+}
+
+.session-actions-row {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.session-actions-row {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) 16px;
+  align-items: center;
+  gap: 8px;
+  min-height: 54px;
+  padding: 7px 8px;
+  border-radius: 8px;
+}
+
+.session-actions-row:hover { background: var(--bg-alt); }
+.session-actions-row.is-primary {
+  background: color-mix(in srgb, var(--brand-indigo) 6%, transparent);
+}
+.session-actions-row.is-primary:hover {
+  background: color-mix(in srgb, var(--brand-indigo) 10%, transparent);
+}
+.session-actions-row.is-primary .session-actions-row-icon {
+  border-color: transparent;
+  background: var(--brand-indigo);
+  color: var(--brand-paper);
+}
+.session-actions-row:disabled { cursor: default; opacity: 0.42; }
+.session-actions-row:disabled:hover { background: transparent; }
+
+.session-actions-row-icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  background: rgba(var(--overlay-rgb), 0.035);
+  color: color-mix(in srgb, var(--accent2) 38%, var(--text-secondary));
+}
+
+.session-actions-row-icon .lucide { width: 15px; height: 15px; }
+.session-actions-row-copy { display: flex; min-width: 0; flex-direction: column; gap: 2px; }
+.session-actions-row-copy strong { font-size: 12px; font-weight: 750; }
+.session-actions-row-copy > span { color: var(--text-muted); font-size: 11px; line-height: 1.35; }
+.session-actions-row-chevron { color: var(--text-muted); }
+.session-actions-row-chevron .lucide { width: 13px; height: 13px; }
+
+.handoff-modal { width: min(420px, calc(100vw - 32px)); }
+.handoff-modal-desc { margin: -10px 0 14px; color: var(--text-dimmer); font-size: 12px; line-height: 1.45; }
+.handoff-modal-source {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 9px;
+  background: var(--bg-alt);
+}
+.handoff-modal-source > img { width: 26px; height: 26px; object-fit: contain; border-radius: 6px; }
+.handoff-modal-source > span { display: grid; min-width: 0; gap: 1px; }
+.handoff-modal-source strong { overflow: hidden; color: var(--text); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.handoff-modal-source span span { color: var(--text-dimmer); font-size: 10px; }
+.handoff-modal-field + .handoff-modal-field { margin-top: 10px; }
+.handoff-modal-field .wt-modal-label { margin-top: 0; }

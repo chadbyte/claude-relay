@@ -23,7 +23,7 @@
 graph TD
     subgraph clay ["Clay Server (daemon)"]
         direction TB
-        YOKE["YOKE Multi-Vendor<br/>Claude | Codex | Gemini"]
+        YOKE["YOKE Multi-Vendor<br/>Claude | Codex | Antigravity"]
         MCP_IN["In-app MCP Servers<br/>clay-browser, clay-debate, email"]
         SKILLS["Skills<br/>clay-mate-interview<br/>clay-debate-setup<br/>clay-ralph"]
     end

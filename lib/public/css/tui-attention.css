@@ -282,7 +282,7 @@ body.tui-suspended #tui-resume-bar {
 .tui-modal {
   width: min(960px, 100%);
   height: min(640px, 100%);
-  background: #000;
+  background: var(--bg);
   border-radius: 12px;
   overflow: hidden;
   display: flex;

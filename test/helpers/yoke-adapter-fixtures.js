@@ -16,6 +16,7 @@ function emptyAsyncQuery() {
     setPermissionMode: function() { return Promise.resolve(); },
     stopTask: function() { return Promise.resolve(); },
     getContextUsage: function() { return Promise.resolve(null); },
+    endInput: function() {},
     close: function() {},
   };
 }
@@ -137,7 +138,7 @@ function createFixtures() {
           var result = await server.send("initialize", {
             clientInfo: { name: "clay-contract-harness", title: "Clay Contract Harness", version: "1.0.0" },
             capabilities: { experimentalApi: true },
-          }, 10000);
+          }, 30000);
           if (!result || !result.userAgent) throw new Error("Codex initialize response is missing userAgent");
           server.notify("initialized", {});
           var thread = await server.send("thread/start", {
@@ -146,7 +147,7 @@ function createFixtures() {
             approvalPolicy: "on-request",
             cwd: process.cwd(),
             skipGitRepoCheck: true,
-          }, 10000);
+          }, 30000);
           if (!thread || !thread.thread || !thread.thread.id) {
             throw new Error("Codex thread/start response is missing a thread id");
           }

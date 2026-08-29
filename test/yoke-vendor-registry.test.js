@@ -4,7 +4,7 @@ var assert = require("node:assert");
 var yoke = require("../lib/yoke");
 var createKiroAdapter = require("../lib/yoke/adapters/kiro").createKiroAdapter;
 
-var SUPPORTED_VENDORS = ["claude", "codex", "kiro"];
+var SUPPORTED_VENDORS = ["claude", "codex", "grok", "kimi", "copilot", "qwen", "junie", "antigravity", "opencode", "kiro"];
 
 function FakeAcpServer() {
   this.started = false;
@@ -46,10 +46,56 @@ test("YOKE registry returns null for an unknown vendor", function() {
   assert.strictEqual(yoke.getVendorInfo("nope"), null);
 });
 
-test("default vendor prefers Claude, then Codex, then Kiro", function() {
+test("adapter startup logs one registration summary instead of creation per vendor", async function() {
+  var originalLog = console.log;
+  var logs = [];
+  console.log = function(message) {
+    logs.push(String(message));
+  };
+  var created;
+  try {
+    created = yoke.createAdapters({
+      cwd: process.cwd(),
+      slug: "log-test",
+      _installed: { codex: true },
+    });
+  } finally {
+    console.log = originalLog;
+  }
+  assert.deepStrictEqual(logs, ["[yoke] Adapters registered for log-test: codex"]);
+  assert.strictEqual(logs.some(function(line) { return line.indexOf("Adapter created: codex") !== -1; }), false);
+  await created.adapters.codex.shutdown();
+});
+
+test("shared Claude creation is logged once across project registrations", function() {
+  var originalLog = console.log;
+  var logs = [];
+  console.log = function(message) {
+    logs.push(String(message));
+  };
+  try {
+    yoke.createAdapters({ cwd: process.cwd(), slug: "shared-a", _installed: { claude: true } });
+    yoke.createAdapters({ cwd: process.cwd(), slug: "shared-b", _installed: { claude: true } });
+  } finally {
+    console.log = originalLog;
+  }
+  assert.strictEqual(logs.filter(function(line) {
+    return line === "[yoke] Shared adapter created: claude";
+  }).length, 1);
+  assert.deepStrictEqual(logs.filter(function(line) {
+    return line.indexOf("[yoke] Adapters registered for shared-") === 0;
+  }), [
+    "[yoke] Adapters registered for shared-a: claude",
+    "[yoke] Adapters registered for shared-b: claude",
+  ]);
+});
+
+test("default vendor follows the declared cross-vendor preference order", function() {
   assert.strictEqual(yoke.resolveDefaultVendor({ kiro: {} }), "kiro");
+  assert.strictEqual(yoke.resolveDefaultVendor({ kiro: {}, opencode: {} }), "opencode");
+  assert.strictEqual(yoke.resolveDefaultVendor({ kiro: {}, opencode: {}, antigravity: {} }), "antigravity");
   assert.strictEqual(yoke.resolveDefaultVendor({ kiro: {}, codex: {} }), "codex");
-  assert.strictEqual(yoke.resolveDefaultVendor({ kiro: {}, codex: {}, claude: {} }), "claude");
+  assert.strictEqual(yoke.resolveDefaultVendor({ kiro: {}, opencode: {}, antigravity: {}, codex: {}, claude: {} }), "claude");
   assert.strictEqual(yoke.resolveDefaultVendor([]), "claude");
 });
 
@@ -61,6 +107,16 @@ test("every YOKE vendor supports GUI sessions", function() {
 
 test("Kiro remains unavailable for OS-user isolation", function() {
   assert.strictEqual(yoke.getVendorInfo("kiro").osUserIsolation, false);
+});
+
+test("subprocess vendors remain unavailable for OS-user isolation", function() {
+  assert.strictEqual(yoke.getVendorInfo("antigravity").osUserIsolation, false);
+  assert.strictEqual(yoke.getVendorInfo("opencode").osUserIsolation, false);
+  assert.strictEqual(yoke.getVendorInfo("kimi").osUserIsolation, false);
+  assert.strictEqual(yoke.getVendorInfo("grok").osUserIsolation, false);
+  assert.strictEqual(yoke.getVendorInfo("copilot").osUserIsolation, false);
+  assert.strictEqual(yoke.getVendorInfo("qwen").osUserIsolation, false);
+  assert.strictEqual(yoke.getVendorInfo("junie").osUserIsolation, false);
 });
 
 test("Kiro capabilities do not promise stubbed controls", async function() {
@@ -88,6 +144,8 @@ test("clampEffort keeps supported levels and maps unsupported ones to the neares
 
 test("clampEffort returns undefined for no-effort vendors and junk input", function() {
   assert.strictEqual(yoke.clampEffort("kiro", "high"), undefined);
+  assert.strictEqual(yoke.clampEffort("antigravity", "high"), "high");
+  assert.strictEqual(yoke.clampEffort("opencode", "high"), undefined);
   assert.strictEqual(yoke.clampEffort("claude", "turbo"), undefined);
   assert.strictEqual(yoke.clampEffort("claude", ""), undefined);
   assert.strictEqual(yoke.clampEffort("unknown-vendor", "high"), undefined);

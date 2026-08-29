@@ -3,13 +3,13 @@ var assert = require("node:assert");
 var fs = require("node:fs");
 var path = require("node:path");
 
-test("rendered Markdown exposes a separate formatting copy action", function () {
+test("Markdown exposes a separate formatting copy action in source and preview views", function () {
   var html = fs.readFileSync(path.join(__dirname, "../lib/public/index.html"), "utf8");
   var fileBrowser = fs.readFileSync(path.join(__dirname, "../lib/public/modules/filebrowser.js"), "utf8");
   assert.match(html, /id="file-viewer-copy-formatted"[^>]*title="Copy Markdown formatting"/);
   assert.match(fileBrowser, /copyMarkdownFormatting\(currentContent\)/);
   assert.match(fileBrowser, /formattedCopyBtn\.classList\.remove\("hidden"\)/);
-  assert.match(fileBrowser, /formattedCopyBtn\.classList\.add\("hidden"\)/);
+  assert.doesNotMatch(fileBrowser, /if \(!isRendered \|\| !currentIsMarkdown\) return;[\s\S]{0,120}copyMarkdownFormatting/);
 });
 
 test("Markdown formatting copy writes clean semantic clipboard flavors", function () {

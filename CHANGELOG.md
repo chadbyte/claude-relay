@@ -1,3 +1,452 @@
+# [3.8.0-beta.2](https://github.com/chadbyte/clay/compare/v3.8.0-beta.1...v3.8.0-beta.2) (2026-08-29)
+
+
+### Features
+
+* **ui:** unify avatar identity and session actions ([#460](https://github.com/chadbyte/clay/issues/460)) ([7b04d0c](https://github.com/chadbyte/clay/commit/7b04d0ce66032b6df4d6ec5a40c5f3bcafcfcc98))
+
+# [3.8.0-beta.1](https://github.com/chadbyte/clay/compare/v3.7.0...v3.8.0-beta.1) (2026-08-29)
+
+
+### Features
+
+* **imagegen:** save generated images to project ([232eaac](https://github.com/chadbyte/clay/commit/232eaac8bf21acfb24b5c38acda747c055ecedff))
+* **imagegen:** save generated images to project ([#459](https://github.com/chadbyte/clay/issues/459)) ([2eed480](https://github.com/chadbyte/clay/commit/2eed480f2733367f5cc9112946289ee550eeb17b))
+
+# [3.7.0](https://github.com/chadbyte/clay/compare/v3.6.0...v3.7.0) (2026-08-29)
+
+
+### Bug Fixes
+
+* **terminal:** limit dark theme to terminal canvas ([c98bc1a](https://github.com/chadbyte/clay/commit/c98bc1a015b56643faa32fc215643c1be60bc17b))
+
+
+### Features
+
+* **codex:** show image generation progress ([8b2a199](https://github.com/chadbyte/clay/commit/8b2a199961f8b4ca305abd1ce879865020723aef))
+* **codex:** support inline image generation ([71282a6](https://github.com/chadbyte/clay/commit/71282a62e65087e730bd31c98c2d23a231308f9a))
+* **filebrowser:** add file downloads ([518c7fa](https://github.com/chadbyte/clay/commit/518c7fa5fb20f3f4e9e27ccca131b2bf29128127))
+* **ui:** enhance file browser and lock terminal theme ([838b20a](https://github.com/chadbyte/clay/commit/838b20a3eb148c5a4b6739146abb13aa0b2214f9))
+* **ui:** enhance file browser and terminal theming ([#456](https://github.com/chadbyte/clay/issues/456)) ([86552c6](https://github.com/chadbyte/clay/commit/86552c67826a08903be662ff75f6b2970bab281a))
+
+# [3.7.0-beta.2](https://github.com/chadbyte/clay/compare/v3.7.0-beta.1...v3.7.0-beta.2) (2026-08-29)
+
+
+### Bug Fixes
+
+* **terminal:** limit dark theme to terminal canvas ([c98bc1a](https://github.com/chadbyte/clay/commit/c98bc1a015b56643faa32fc215643c1be60bc17b))
+
+
+### Features
+
+* **filebrowser:** add file downloads ([518c7fa](https://github.com/chadbyte/clay/commit/518c7fa5fb20f3f4e9e27ccca131b2bf29128127))
+* **ui:** enhance file browser and lock terminal theme ([838b20a](https://github.com/chadbyte/clay/commit/838b20a3eb148c5a4b6739146abb13aa0b2214f9))
+* **ui:** enhance file browser and terminal theming ([#456](https://github.com/chadbyte/clay/issues/456)) ([86552c6](https://github.com/chadbyte/clay/commit/86552c67826a08903be662ff75f6b2970bab281a))
+
+# [3.7.0-beta.1](https://github.com/chadbyte/clay/compare/v3.6.0...v3.7.0-beta.1) (2026-08-28)
+
+
+### Features
+
+* **codex:** show image generation progress ([8b2a199](https://github.com/chadbyte/clay/commit/8b2a199961f8b4ca305abd1ce879865020723aef))
+* **codex:** support inline image generation ([71282a6](https://github.com/chadbyte/clay/commit/71282a62e65087e730bd31c98c2d23a231308f9a))
+
+# [3.6.0](https://github.com/chadbyte/clay/compare/v3.5.1...v3.6.0) (2026-08-27)
+
+
+### Features
+
+* **brand:** establish Clay Studio identity ([73fd417](https://github.com/chadbyte/clay/commit/73fd4177090b5e6429ad0742190c9e5c47b6092d))
+* **document-viewer:** add SVG preview mode ([d44335d](https://github.com/chadbyte/clay/commit/d44335d4d2b3f081bf824b1c507ba9ecda51e89c))
+* **document-viewer:** add VS Code-style preview tabs ([10d6919](https://github.com/chadbyte/clay/commit/10d6919f900759e6176e94de3a64a97ea34d51bb))
+* **os-users:** add compatibility diagnostics ([715d502](https://github.com/chadbyte/clay/commit/715d5025edd7d388fb0ee12928b6390d54b81875))
+* **theme:** add Clay Studio default themes ([403080d](https://github.com/chadbyte/clay/commit/403080ddd1b666955b9893a2d1350c93a7e9af48))
+
+# [3.6.0-beta.2](https://github.com/chadbyte/clay/compare/v3.6.0-beta.1...v3.6.0-beta.2) (2026-08-27)
+
+
+### Features
+
+* **brand:** establish Clay Studio identity ([73fd417](https://github.com/chadbyte/clay/commit/73fd4177090b5e6429ad0742190c9e5c47b6092d))
+* **theme:** add Clay Studio default themes ([403080d](https://github.com/chadbyte/clay/commit/403080ddd1b666955b9893a2d1350c93a7e9af48))
+
+# [3.6.0-beta.1](https://github.com/chadbyte/clay/compare/v3.5.1...v3.6.0-beta.1) (2026-08-27)
+
+
+### Features
+
+* **document-viewer:** add SVG preview mode ([d44335d](https://github.com/chadbyte/clay/commit/d44335d4d2b3f081bf824b1c507ba9ecda51e89c))
+* **document-viewer:** add VS Code-style preview tabs ([10d6919](https://github.com/chadbyte/clay/commit/10d6919f900759e6176e94de3a64a97ea34d51bb))
+* **os-users:** add compatibility diagnostics ([715d502](https://github.com/chadbyte/clay/commit/715d5025edd7d388fb0ee12928b6390d54b81875))
+
+## [3.5.1](https://github.com/chadbyte/clay/compare/v3.5.0...v3.5.1) (2026-08-27)
+
+
+### Bug Fixes
+
+* **session:** persist active Worker identity immediately ([15d8996](https://github.com/chadbyte/clay/commit/15d8996b9c4bb665761a28c055d07f958bbe52f9))
+
+## [3.5.1-beta.1](https://github.com/chadbyte/clay/compare/v3.5.0...v3.5.1-beta.1) (2026-08-27)
+
+
+### Bug Fixes
+
+* **session:** persist active Worker identity immediately ([15d8996](https://github.com/chadbyte/clay/commit/15d8996b9c4bb665761a28c055d07f958bbe52f9))
+
+# [3.5.0](https://github.com/chadbyte/clay/compare/v3.4.0...v3.5.0) (2026-08-27)
+
+
+### Bug Fixes
+
+* **sessions:** restore split view after daemon restart ([62e024a](https://github.com/chadbyte/clay/commit/62e024a8d46a3a5a042797eb617551f755acd375))
+* **ui:** dock document viewer on the right ([f649210](https://github.com/chadbyte/clay/commit/f649210f452336f8f26af802c80c383efee98a31))
+
+
+### Features
+
+* **session:** add handoff source history tool ([1d09e47](https://github.com/chadbyte/clay/commit/1d09e47367a6071a5471c6c4b1215b45e0c53466))
+
+# [3.5.0-beta.3](https://github.com/chadbyte/clay/compare/v3.5.0-beta.2...v3.5.0-beta.3) (2026-08-26)
+
+
+### Bug Fixes
+
+* **ui:** dock document viewer on the right ([f649210](https://github.com/chadbyte/clay/commit/f649210f452336f8f26af802c80c383efee98a31))
+
+# [3.5.0-beta.2](https://github.com/chadbyte/clay/compare/v3.5.0-beta.1...v3.5.0-beta.2) (2026-08-26)
+
+
+### Bug Fixes
+
+* **sessions:** restore split view after daemon restart ([62e024a](https://github.com/chadbyte/clay/commit/62e024a8d46a3a5a042797eb617551f755acd375))
+
+# [3.5.0-beta.1](https://github.com/chadbyte/clay/compare/v3.4.0...v3.5.0-beta.1) (2026-08-26)
+
+
+### Features
+
+* **session:** add handoff source history tool ([1d09e47](https://github.com/chadbyte/clay/commit/1d09e47367a6071a5471c6c4b1215b45e0c53466))
+
+# [3.4.0](https://github.com/chadbyte/clay/compare/v3.3.1...v3.4.0) (2026-08-26)
+
+
+### Bug Fixes
+
+* **codex:** handle session writer conflicts ([247483b](https://github.com/chadbyte/clay/commit/247483b4a25e64d24ed8cef40ec02f9be2390682))
+* **daemon:** create IPC socket before project registration ([6329f12](https://github.com/chadbyte/clay/commit/6329f12be3edf104d6cb3cd6543a0458b9403731))
+* **debate:** prevent proposal failures from stopping daemon ([05ee090](https://github.com/chadbyte/clay/commit/05ee090b70bfd291a80b1081c77daf94f422bda6))
+* **files:** make file watching resilient ([cfaa188](https://github.com/chadbyte/clay/commit/cfaa188cf1a1d25f1484758a42996f7d8114155b))
+* **kiro:** widen ACP initialize timeout to 90s ([38f6def](https://github.com/chadbyte/clay/commit/38f6def1ef55831a2913b56d28690ef8df4263b0))
+* **mobile:** correct PWA chat layout ([#420](https://github.com/chadbyte/clay/issues/420)) ([159ee82](https://github.com/chadbyte/clay/commit/159ee8200c61e53324dc8ad93972043c230cf079))
+* **models:** harden model discovery and selection ([bc01d84](https://github.com/chadbyte/clay/commit/bc01d8452645746e4e9822c2ab153fee4b775f09))
+* **models:** isolate model state per session and vendor ([db4b062](https://github.com/chadbyte/clay/commit/db4b06221cad1575bf3f77791e0c02a83f0bfadd))
+* **sessions:** prefer installed vendors for blank sessions ([a7bbd50](https://github.com/chadbyte/clay/commit/a7bbd50a0552439ff4c4cb4ae690c74967506692))
+* **sessions:** publish installed vendors before warmup ([cbda521](https://github.com/chadbyte/clay/commit/cbda521da16a4f312c355119813caf733bf49c24))
+* **sessions:** report interrupted worker turns as interrupted ([87dac13](https://github.com/chadbyte/clay/commit/87dac13853529bbbd46c99548befb1663e1fe8ac))
+* **sessions:** reset queued-turn state on result-less turn endings ([17bba30](https://github.com/chadbyte/clay/commit/17bba30f53add46c5353ad1443e49b934e2ff931))
+* **ui:** clear activity dots when tools take over ([8fb8ffd](https://github.com/chadbyte/clay/commit/8fb8ffdae0ecfbb07df6e3f96e2516a7c7252e52))
+* **ui:** match delegation notice border to input focus state ([965f873](https://github.com/chadbyte/clay/commit/965f873c8322b009b37c9194aa5388fcf4c143fa))
+* **ui:** open pane web links in new tabs ([77b0bad](https://github.com/chadbyte/clay/commit/77b0bad1b5f9ac52ac7a53e0fcd190df84478436))
+* **ui:** show connecting wording and quiet pane connection overlay ([567a8d6](https://github.com/chadbyte/clay/commit/567a8d6a83e26a83f7ef1b1401ae1c545c4e1e33))
+* **ui:** show split notification banner once ([bc33ad7](https://github.com/chadbyte/clay/commit/bc33ad7cf6771282879d6228b6ee36a95c31fee7))
+* **worker:** delegate follow-up implementation ([d00c2e7](https://github.com/chadbyte/clay/commit/d00c2e73b9428bd4d09e7a879c8ff44be3f2ddbe))
+* **yoke:** clarify adapter registration logs ([783d456](https://github.com/chadbyte/clay/commit/783d4568958450f4160663a8b1414259ec294ecb))
+* **yoke:** share one 90s initialize timeout across vendors ([2047d30](https://github.com/chadbyte/clay/commit/2047d30cbc6ebce57689064f813552cdb465cda0))
+
+
+### Features
+
+* add composer shell commands and conflict handling ([#421](https://github.com/chadbyte/clay/issues/421)) ([144e4d8](https://github.com/chadbyte/clay/commit/144e4d80404fb3160460b42c8b502e759890bd17))
+* **notes:** add deferred-proposal exception to sticky note guidance ([1cc7a5b](https://github.com/chadbyte/clay/commit/1cc7a5bc5ce63fb01fdb5a23220474016d7645ee))
+* **notes:** track deferred defects proactively ([#423](https://github.com/chadbyte/clay/issues/423)) ([8c17a82](https://github.com/chadbyte/clay/commit/8c17a82b94cdc697675d3f004d62072a57ace554))
+* **sessions:** add configurable session handoffs ([6c0bb98](https://github.com/chadbyte/clay/commit/6c0bb98f569e3fb02e9f74a3722d71444a34ef4d))
+* **sessions:** auto-approve worker proposals when skip permissions is on ([bb151a4](https://github.com/chadbyte/clay/commit/bb151a4f6644bb1c2894c5dcd05e2951cfd00d4f))
+* **sessions:** show active background tasks with stop controls ([4e2cca5](https://github.com/chadbyte/clay/commit/4e2cca510a74ae70a3e5346da5d34df015796c00))
+* **shell:** add composer command execution ([10806b2](https://github.com/chadbyte/clay/commit/10806b2ae8ab9261e93c95c129ee3a7a0c34fde8))
+* **ui:** dock document viewer leftmost with a global tab bar ([20f7659](https://github.com/chadbyte/clay/commit/20f7659d16f5405eafc49b37e90d17f83995876b)), closes [#file-viewer](https://github.com/chadbyte/clay/issues/file-viewer) [#main-panels](https://github.com/chadbyte/clay/issues/main-panels)
+* **ui:** reorganize session header controls ([478b31a](https://github.com/chadbyte/clay/commit/478b31aacad2fcd0fab756dac8d036ce7fa9c5a2))
+* **vendors:** add experimental agent integrations ([80348c4](https://github.com/chadbyte/clay/commit/80348c4ed2f4962d50bdf696cc3bbfcce4c40845))
+* **worktrees:** allow access outside project folder ([2c1a23e](https://github.com/chadbyte/clay/commit/2c1a23e3f6082ff319d47112303df28d25b3f8e4))
+* **yoke:** add Gemini and OpenCode ACP adapters ([27261fb](https://github.com/chadbyte/clay/commit/27261fbded8bc59029076eb14589103d28caefb1))
+* **yoke:** emit background_tasks_changed from codex background terminals ([7903132](https://github.com/chadbyte/clay/commit/790313229e046134006fef8161ebaeaab8c3cacc))
+* **yoke:** replace Gemini CLI with Antigravity ([0f15c35](https://github.com/chadbyte/clay/commit/0f15c35cdbc1d688493950813e83459eabd1e2d8))
+* **yoke:** replace Gemini CLI with Antigravity ([#422](https://github.com/chadbyte/clay/issues/422)) ([d80fc92](https://github.com/chadbyte/clay/commit/d80fc92d99e9609f05d4e7a4955215d923651293))
+
+# [3.4.0-beta.26](https://github.com/chadbyte/clay/compare/v3.4.0-beta.25...v3.4.0-beta.26) (2026-08-26)
+
+
+### Bug Fixes
+
+* **yoke:** share one 90s initialize timeout across vendors ([2047d30](https://github.com/chadbyte/clay/commit/2047d30cbc6ebce57689064f813552cdb465cda0))
+
+# [3.4.0-beta.25](https://github.com/chadbyte/clay/compare/v3.4.0-beta.24...v3.4.0-beta.25) (2026-08-26)
+
+
+### Bug Fixes
+
+* **kiro:** widen ACP initialize timeout to 90s ([38f6def](https://github.com/chadbyte/clay/commit/38f6def1ef55831a2913b56d28690ef8df4263b0))
+
+# [3.4.0-beta.24](https://github.com/chadbyte/clay/compare/v3.4.0-beta.23...v3.4.0-beta.24) (2026-08-26)
+
+
+### Bug Fixes
+
+* **ui:** show connecting wording and quiet pane connection overlay ([567a8d6](https://github.com/chadbyte/clay/commit/567a8d6a83e26a83f7ef1b1401ae1c545c4e1e33))
+
+# [3.4.0-beta.23](https://github.com/chadbyte/clay/compare/v3.4.0-beta.22...v3.4.0-beta.23) (2026-08-26)
+
+
+### Features
+
+* **ui:** dock document viewer leftmost with a global tab bar ([20f7659](https://github.com/chadbyte/clay/commit/20f7659d16f5405eafc49b37e90d17f83995876b)), closes [#file-viewer](https://github.com/chadbyte/clay/issues/file-viewer) [#main-panels](https://github.com/chadbyte/clay/issues/main-panels)
+
+# [3.4.0-beta.22](https://github.com/chadbyte/clay/compare/v3.4.0-beta.21...v3.4.0-beta.22) (2026-08-26)
+
+
+### Features
+
+* **yoke:** emit background_tasks_changed from codex background terminals ([7903132](https://github.com/chadbyte/clay/commit/790313229e046134006fef8161ebaeaab8c3cacc))
+
+# [3.4.0-beta.21](https://github.com/chadbyte/clay/compare/v3.4.0-beta.20...v3.4.0-beta.21) (2026-08-26)
+
+
+### Bug Fixes
+
+* **sessions:** report interrupted worker turns as interrupted ([87dac13](https://github.com/chadbyte/clay/commit/87dac13853529bbbd46c99548befb1663e1fe8ac))
+
+# [3.4.0-beta.20](https://github.com/chadbyte/clay/compare/v3.4.0-beta.19...v3.4.0-beta.20) (2026-08-26)
+
+
+### Bug Fixes
+
+* **ui:** match delegation notice border to input focus state ([965f873](https://github.com/chadbyte/clay/commit/965f873c8322b009b37c9194aa5388fcf4c143fa))
+
+# [3.4.0-beta.19](https://github.com/chadbyte/clay/compare/v3.4.0-beta.18...v3.4.0-beta.19) (2026-08-26)
+
+
+### Bug Fixes
+
+* **models:** isolate model state per session and vendor ([db4b062](https://github.com/chadbyte/clay/commit/db4b06221cad1575bf3f77791e0c02a83f0bfadd))
+
+# [3.4.0-beta.18](https://github.com/chadbyte/clay/compare/v3.4.0-beta.17...v3.4.0-beta.18) (2026-08-26)
+
+
+### Features
+
+* **sessions:** auto-approve worker proposals when skip permissions is on ([bb151a4](https://github.com/chadbyte/clay/commit/bb151a4f6644bb1c2894c5dcd05e2951cfd00d4f))
+
+# [3.4.0-beta.17](https://github.com/chadbyte/clay/compare/v3.4.0-beta.16...v3.4.0-beta.17) (2026-08-26)
+
+
+### Features
+
+* **notes:** add deferred-proposal exception to sticky note guidance ([1cc7a5b](https://github.com/chadbyte/clay/commit/1cc7a5bc5ce63fb01fdb5a23220474016d7645ee))
+
+# [3.4.0-beta.16](https://github.com/chadbyte/clay/compare/v3.4.0-beta.15...v3.4.0-beta.16) (2026-08-26)
+
+
+### Bug Fixes
+
+* **sessions:** reset queued-turn state on result-less turn endings ([17bba30](https://github.com/chadbyte/clay/commit/17bba30f53add46c5353ad1443e49b934e2ff931))
+
+# [3.4.0-beta.15](https://github.com/chadbyte/clay/compare/v3.4.0-beta.14...v3.4.0-beta.15) (2026-08-26)
+
+
+### Features
+
+* **sessions:** show active background tasks with stop controls ([4e2cca5](https://github.com/chadbyte/clay/commit/4e2cca510a74ae70a3e5346da5d34df015796c00))
+
+# [3.4.0-beta.14](https://github.com/chadbyte/clay/compare/v3.4.0-beta.13...v3.4.0-beta.14) (2026-08-26)
+
+
+### Bug Fixes
+
+* **daemon:** create IPC socket before project registration ([6329f12](https://github.com/chadbyte/clay/commit/6329f12be3edf104d6cb3cd6543a0458b9403731))
+
+# [3.4.0-beta.13](https://github.com/chadbyte/clay/compare/v3.4.0-beta.12...v3.4.0-beta.13) (2026-08-26)
+
+
+### Features
+
+* **sessions:** add configurable session handoffs ([6c0bb98](https://github.com/chadbyte/clay/commit/6c0bb98f569e3fb02e9f74a3722d71444a34ef4d))
+
+# [3.4.0-beta.12](https://github.com/chadbyte/clay/compare/v3.4.0-beta.11...v3.4.0-beta.12) (2026-08-26)
+
+
+### Bug Fixes
+
+* **models:** harden model discovery and selection ([bc01d84](https://github.com/chadbyte/clay/commit/bc01d8452645746e4e9822c2ab153fee4b775f09))
+
+# [3.4.0-beta.11](https://github.com/chadbyte/clay/compare/v3.4.0-beta.10...v3.4.0-beta.11) (2026-08-26)
+
+
+### Bug Fixes
+
+* **yoke:** clarify adapter registration logs ([783d456](https://github.com/chadbyte/clay/commit/783d4568958450f4160663a8b1414259ec294ecb))
+
+# [3.4.0-beta.10](https://github.com/chadbyte/clay/compare/v3.4.0-beta.9...v3.4.0-beta.10) (2026-08-26)
+
+
+### Features
+
+* **vendors:** add experimental agent integrations ([80348c4](https://github.com/chadbyte/clay/commit/80348c4ed2f4962d50bdf696cc3bbfcce4c40845))
+
+# [3.4.0-beta.9](https://github.com/chadbyte/clay/compare/v3.4.0-beta.8...v3.4.0-beta.9) (2026-08-26)
+
+
+### Features
+
+* **worktrees:** allow access outside project folder ([2c1a23e](https://github.com/chadbyte/clay/commit/2c1a23e3f6082ff319d47112303df28d25b3f8e4))
+
+# [3.4.0-beta.8](https://github.com/chadbyte/clay/compare/v3.4.0-beta.7...v3.4.0-beta.8) (2026-08-26)
+
+
+### Bug Fixes
+
+* **ui:** open pane web links in new tabs ([77b0bad](https://github.com/chadbyte/clay/commit/77b0bad1b5f9ac52ac7a53e0fcd190df84478436))
+* **ui:** show split notification banner once ([bc33ad7](https://github.com/chadbyte/clay/commit/bc33ad7cf6771282879d6228b6ee36a95c31fee7))
+
+
+### Features
+
+* **ui:** reorganize session header controls ([478b31a](https://github.com/chadbyte/clay/commit/478b31aacad2fcd0fab756dac8d036ce7fa9c5a2))
+
+# [3.4.0-beta.7](https://github.com/chadbyte/clay/compare/v3.4.0-beta.6...v3.4.0-beta.7) (2026-08-25)
+
+
+### Bug Fixes
+
+* **sessions:** prefer installed vendors for blank sessions ([a7bbd50](https://github.com/chadbyte/clay/commit/a7bbd50a0552439ff4c4cb4ae690c74967506692))
+
+# [3.4.0-beta.6](https://github.com/chadbyte/clay/compare/v3.4.0-beta.5...v3.4.0-beta.6) (2026-08-25)
+
+
+### Bug Fixes
+
+* **sessions:** publish installed vendors before warmup ([cbda521](https://github.com/chadbyte/clay/commit/cbda521da16a4f312c355119813caf733bf49c24))
+
+# [3.4.0-beta.5](https://github.com/chadbyte/clay/compare/v3.4.0-beta.4...v3.4.0-beta.5) (2026-08-25)
+
+
+### Bug Fixes
+
+* **mobile:** correct PWA chat layout ([#420](https://github.com/chadbyte/clay/issues/420)) ([159ee82](https://github.com/chadbyte/clay/commit/159ee8200c61e53324dc8ad93972043c230cf079))
+
+# [3.4.0-beta.4](https://github.com/chadbyte/clay/compare/v3.4.0-beta.3...v3.4.0-beta.4) (2026-08-25)
+
+
+### Features
+
+* **notes:** track deferred defects proactively ([#423](https://github.com/chadbyte/clay/issues/423)) ([8c17a82](https://github.com/chadbyte/clay/commit/8c17a82b94cdc697675d3f004d62072a57ace554))
+
+# [3.4.0-beta.3](https://github.com/chadbyte/clay/compare/v3.4.0-beta.2...v3.4.0-beta.3) (2026-08-24)
+
+
+### Features
+
+* **yoke:** replace Gemini CLI with Antigravity ([0f15c35](https://github.com/chadbyte/clay/commit/0f15c35cdbc1d688493950813e83459eabd1e2d8))
+* **yoke:** replace Gemini CLI with Antigravity ([#422](https://github.com/chadbyte/clay/issues/422)) ([d80fc92](https://github.com/chadbyte/clay/commit/d80fc92d99e9609f05d4e7a4955215d923651293))
+
+# [3.4.0-beta.2](https://github.com/chadbyte/clay/compare/v3.4.0-beta.1...v3.4.0-beta.2) (2026-08-24)
+
+
+### Bug Fixes
+
+* **codex:** handle session writer conflicts ([247483b](https://github.com/chadbyte/clay/commit/247483b4a25e64d24ed8cef40ec02f9be2390682))
+
+
+### Features
+
+* add composer shell commands and conflict handling ([#421](https://github.com/chadbyte/clay/issues/421)) ([144e4d8](https://github.com/chadbyte/clay/commit/144e4d80404fb3160460b42c8b502e759890bd17))
+* **shell:** add composer command execution ([10806b2](https://github.com/chadbyte/clay/commit/10806b2ae8ab9261e93c95c129ee3a7a0c34fde8))
+
+# [3.4.0-beta.1](https://github.com/chadbyte/clay/compare/v3.3.2-beta.3...v3.4.0-beta.1) (2026-08-24)
+
+
+### Bug Fixes
+
+* **files:** make file watching resilient ([cfaa188](https://github.com/chadbyte/clay/commit/cfaa188cf1a1d25f1484758a42996f7d8114155b))
+
+
+### Features
+
+* **yoke:** add Gemini and OpenCode ACP adapters ([27261fb](https://github.com/chadbyte/clay/commit/27261fbded8bc59029076eb14589103d28caefb1))
+
+## [3.3.2-beta.3](https://github.com/chadbyte/clay/compare/v3.3.2-beta.2...v3.3.2-beta.3) (2026-08-24)
+
+
+### Bug Fixes
+
+* **debate:** prevent proposal failures from stopping daemon ([05ee090](https://github.com/chadbyte/clay/commit/05ee090b70bfd291a80b1081c77daf94f422bda6))
+
+## [3.3.2-beta.2](https://github.com/chadbyte/clay/compare/v3.3.2-beta.1...v3.3.2-beta.2) (2026-08-24)
+
+
+### Bug Fixes
+
+* **ui:** clear activity dots when tools take over ([8fb8ffd](https://github.com/chadbyte/clay/commit/8fb8ffdae0ecfbb07df6e3f96e2516a7c7252e52))
+
+## [3.3.2-beta.1](https://github.com/chadbyte/clay/compare/v3.3.1...v3.3.2-beta.1) (2026-08-20)
+
+
+### Bug Fixes
+
+* **worker:** delegate follow-up implementation ([d00c2e7](https://github.com/chadbyte/clay/commit/d00c2e73b9428bd4d09e7a879c8ff44be3f2ddbe))
+
+## [3.3.1](https://github.com/chadbyte/clay/compare/v3.3.0...v3.3.1) (2026-08-20)
+
+
+### Bug Fixes
+
+* **release:** align alias package provenance ([e03bb3d](https://github.com/chadbyte/clay/commit/e03bb3d185ef7d92b78d0fee4ce7202f10ee9cf1))
+
+## [3.3.1-beta.1](https://github.com/chadbyte/clay/compare/v3.3.0...v3.3.1-beta.1) (2026-08-20)
+
+
+### Bug Fixes
+
+* **release:** align alias package provenance ([e03bb3d](https://github.com/chadbyte/clay/commit/e03bb3d185ef7d92b78d0fee4ce7202f10ee9cf1))
+
+# [3.3.0](https://github.com/chadbyte/clay/compare/v3.2.1...v3.3.0) (2026-08-20)
+
+
+### Bug Fixes
+
+* **markdown:** show actions before preview ([650f18c](https://github.com/chadbyte/clay/commit/650f18c20ef80cc5d811c10c6999e8ac4734b21f))
+* **sessions:** keep stop active for queued turns ([fa28379](https://github.com/chadbyte/clay/commit/fa28379b38bff34df66e789ea2ba26bbe642e928))
+* **sessions:** prevent stalled message delivery ([b40c21f](https://github.com/chadbyte/clay/commit/b40c21fa7a3ab49518339cc7dc918402ead5e1e8))
+* **split:** align pair arrow and deduplicate banners ([f5fdfc2](https://github.com/chadbyte/clay/commit/f5fdfc2ddbb0fe0c3ee6dd6725e9be14bf59c711))
+* **split:** align pane chrome with native sessions ([d9a800b](https://github.com/chadbyte/clay/commit/d9a800b49c83cec4052cb898778ae283ee0a00fb))
+* **yoke:** resolve default vendor by shared preference order ([490b14e](https://github.com/chadbyte/clay/commit/490b14e6b8fb7f36398c0ef52ee22af478e38b81))
+
+
+### Features
+
+* **git:** add agent-aware project controls ([6d009bd](https://github.com/chadbyte/clay/commit/6d009bd8b9f83d2fce7572e4192c2c6693cb923e))
+* **markdown:** add fullscreen slide presentations ([fa11163](https://github.com/chadbyte/clay/commit/fa11163db7fc200e71a04dfe90898b02a4aea563))
+* **pair:** add Fable worker delegation flow ([9bcebf3](https://github.com/chadbyte/clay/commit/9bcebf36624ad9a24a726cf9f799852a188fe058))
+
+
+### Performance Improvements
+
+* **daemon:** share periodic project sync loop ([263ba33](https://github.com/chadbyte/clay/commit/263ba33a6501c195e14befe72beae4964710b95e))
+
+# [3.3.0-beta.2](https://github.com/chadbyte/clay/compare/v3.3.0-beta.1...v3.3.0-beta.2) (2026-08-20)
+
+
+### Bug Fixes
+
+* **markdown:** show actions before preview ([650f18c](https://github.com/chadbyte/clay/commit/650f18c20ef80cc5d811c10c6999e8ac4734b21f))
+* **sessions:** keep stop active for queued turns ([fa28379](https://github.com/chadbyte/clay/commit/fa28379b38bff34df66e789ea2ba26bbe642e928))
+* **sessions:** prevent stalled message delivery ([b40c21f](https://github.com/chadbyte/clay/commit/b40c21fa7a3ab49518339cc7dc918402ead5e1e8))
+* **yoke:** resolve default vendor by shared preference order ([490b14e](https://github.com/chadbyte/clay/commit/490b14e6b8fb7f36398c0ef52ee22af478e38b81))
+
+
+### Features
+
+* **git:** add agent-aware project controls ([6d009bd](https://github.com/chadbyte/clay/commit/6d009bd8b9f83d2fce7572e4192c2c6693cb923e))
+* **markdown:** add fullscreen slide presentations ([fa11163](https://github.com/chadbyte/clay/commit/fa11163db7fc200e71a04dfe90898b02a4aea563))
+
 # [3.3.0-beta.1](https://github.com/chadbyte/clay/compare/v3.2.2-beta.3...v3.3.0-beta.1) (2026-08-18)
 
 

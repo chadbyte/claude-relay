@@ -52,8 +52,11 @@ test("Codex registers and executes session-bound dynamic tools", async function 
     abortController: new AbortController(),
   });
 
+  await handle.setModel("gpt-5.6-sol");
   handle.pushMessage("Implement the feature");
+  var events = [];
   for await (var event of handle) {
+    events.push(event);
     if (event.yokeType === "result") break;
   }
   handle.close();
@@ -61,9 +64,11 @@ test("Codex registers and executes session-bound dynamic tools", async function 
   var startCall = calls.find(function (call) { return call.method === "thread/start"; });
   assert.strictEqual(startCall.params.dynamicTools[0].name, "send_to_partner");
   var turnCall = calls.find(function (call) { return call.method === "turn/start"; });
+  assert.strictEqual(turnCall.params.model, "gpt-5.6-sol");
   assert.match(turnCall.params.input[0].text, /Base instructions/);
   assert.match(turnCall.params.input[0].text, /You are the Driver/);
   assert.deepStrictEqual(receivedArgs, { message: "Build it" });
+  assert.deepStrictEqual(events[0], { yokeType: "session_started", sessionId: "thread-pair" });
   assert.deepStrictEqual(responses, [{
     id: 41,
     result: { contentItems: [{ type: "inputText", text: "Worker complete" }], success: true },

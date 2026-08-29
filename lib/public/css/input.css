@@ -401,7 +401,7 @@
 
 .context-picker-section-label {
   font-size: 10px;
-  font-weight: 600;
+  font-weight: var(--font-weight-ui);
   color: var(--text-dimmer);
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -512,9 +512,6 @@
 }
 
 /* --- Email setup modal --- */
-#email-defaults-modal { position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; }
-#email-defaults-modal.hidden { display: none; }
-
 .email-setup-overlay {
   position: fixed;
   inset: 0;
@@ -538,7 +535,7 @@
 .email-setup-title {
   margin: 0 0 16px;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: var(--font-weight-heading);
   color: var(--text);
 }
 .email-setup-field {
@@ -631,7 +628,7 @@
   border: none;
   background: var(--accent);
   color: #fff;
-  font-weight: 600;
+  font-weight: var(--font-weight-ui);
 }
 .email-setup-btn-primary:hover {
   background: var(--accent-hover);
@@ -670,6 +667,50 @@
   position: relative;
 }
 
+.background-tasks-bar {
+  max-width: var(--content-width);
+  margin: 0 auto 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--input-bg);
+  overflow: hidden;
+}
+
+.background-tasks-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 10px;
+  border: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.background-tasks-chip, .session-background-task-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--bg);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.background-tasks-list { padding: 0 10px 8px; }
+.background-task-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-top: 1px solid var(--border-subtle); }
+.background-task-description { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.background-task-type { padding: 2px 6px; border-radius: 5px; background: var(--code-bg); color: var(--text-muted); font-size: 11px; }
+.background-task-stop { border: 1px solid var(--border); border-radius: 5px; padding: 3px 7px; background: transparent; color: var(--text-secondary); cursor: pointer; font: inherit; font-size: 12px; }
+.background-task-stop:hover { color: var(--text); border-color: var(--text-muted); }
+
 #input-row {
   display: flex;
   flex-direction: column;
@@ -677,11 +718,21 @@
   border: none;
   border-radius: 8px;
   padding: 7px;
-  transition: box-shadow 0.2s;
+  transition: box-shadow 0.18s ease, transform 0.18s ease, background 0.18s ease;
 }
 
 #input-row:focus-within {
-  box-shadow: 0 0 0 1px var(--border);
+  background: color-mix(in srgb, var(--input-bg) 96%, white);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--accent) 22%, var(--border)),
+    0 8px 22px rgba(var(--shadow-rgb), 0.14),
+    0 2px 6px rgba(var(--shadow-rgb), 0.08);
+  transform: translateY(-1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #input-row { transition: box-shadow 0.01ms; }
+  #input-row:focus-within { transform: none; }
 }
 
 #input-textarea-wrap {
@@ -711,7 +762,7 @@
   color: var(--text-muted);
 }
 
-/* --- Bottom toolbar (attach left, model+send right) --- */
+/* --- Bottom toolbar (attach left, session config + send right) --- */
 #input-bottom {
   display: flex;
   align-items: center;
@@ -726,21 +777,7 @@
   flex-shrink: 0;
 }
 
-/* --- Vendor toggle (split toggle) --- */
-#vendor-toggle-wrap {
-  display: flex;
-  align-items: center;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  overflow: hidden;
-  height: 30px;
-  flex-shrink: 0;
-}
-#vendor-toggle-wrap.hidden { display: none; }
-
-/* Compact session-vendor icon shown next to the config-chip when the
-   full vendor-toggle is hidden (because the session's vendor is already
-   committed). Visual only - not clickable. */
+/* Compact committed-session vendor icon next to the config chip. */
 #active-vendor-indicator {
   display: inline-flex;
   align-items: center;
@@ -755,56 +792,12 @@
   border-radius: 4px;
   object-fit: cover;
 }
-#vendor-toggle-wrap.locked {
-  border: none;
-  height: auto;
-  pointer-events: none;
-}
-#vendor-toggle-wrap.locked .vendor-toggle-btn:not(.active) { display: none; }
-#vendor-toggle-wrap.locked .vendor-toggle-btn.active {
-  background: transparent;
-  padding: 0;
-  gap: 0;
-  opacity: 0.7;
-}
-#vendor-toggle-wrap.locked .vendor-toggle-btn.active .vendor-toggle-label { display: none; }
-#vendor-toggle-wrap.locked .vendor-toggle-btn:first-child { border-right: none; }
-.vendor-toggle-btn {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 0 10px;
-  height: 100%;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  font-size: 12px;
-  color: var(--text-secondary);
-  transition: background 0.15s, color 0.15s;
-  white-space: nowrap;
-}
-.vendor-toggle-btn:first-child { border-right: 1px solid var(--border); }
-.vendor-toggle-btn.active {
-  background: var(--accent-12);
-  color: var(--accent);
-  font-weight: 600;
-}
-.vendor-toggle-btn.disabled {
-  opacity: 0.35;
-  cursor: default;
-}
-.vendor-toggle-icon {
-  width: 16px;
-  height: 16px;
-  border-radius: 4px;
-  object-fit: cover;
-}
-.vendor-toggle-label {
-  pointer-events: none;
-}
-@media (max-width: 900px) {
-  .vendor-toggle-label { display: none; }
-  .vendor-toggle-btn { padding: 0 8px; }
+.vendor-experimental-badge {
+  font-size: 10px;
+  line-height: 1;
+  font-weight: 400;
+  filter: saturate(0.85);
+  margin-left: auto;
 }
 
 /* --- Attach buttons & menu --- */
@@ -825,6 +818,7 @@
 
 #attach-file-btn,
 #attach-image-btn,
+#shell-command-btn,
 #schedule-btn,
 #input-more-btn {
   width: 36px;
@@ -843,13 +837,75 @@
 
 #attach-file-btn .lucide,
 #attach-image-btn .lucide,
+#shell-command-btn .lucide,
 #schedule-btn .lucide,
 #input-more-btn .lucide { width: 20px; height: 20px; flex-shrink: 0; }
 
 #attach-file-btn:hover,
 #attach-image-btn:hover,
+#shell-command-btn:hover,
 #schedule-btn:hover,
 #input-more-btn:hover { background: rgba(var(--overlay-rgb), 0.06); color: var(--text); }
+
+#shell-command-btn.active {
+  background: var(--accent-12);
+  color: var(--accent);
+}
+
+#input-row.shell-command-mode {
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+#input-row.shell-command-mode #input {
+  font-family: var(--font-mono, "SFMono-Regular", Consolas, monospace);
+}
+
+.shell-command-card {
+  width: min(760px, calc(100% - 24px));
+  margin: 10px auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--input-bg);
+  overflow: hidden;
+}
+
+.shell-command-card.error { border-color: rgba(239, 68, 68, 0.45); }
+
+.shell-command-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.shell-command-header code {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text);
+}
+
+.shell-command-icon { display: inline-flex; }
+.shell-command-icon .lucide { width: 16px; height: 16px; }
+.shell-command-status { flex-shrink: 0; color: var(--text-muted); }
+
+.shell-command-card.running .shell-command-status { color: var(--accent); }
+
+.shell-command-output {
+  max-height: 320px;
+  margin: 0;
+  padding: 12px;
+  overflow: auto;
+  color: var(--text-secondary);
+  font: 12px/1.5 var(--font-mono, "SFMono-Regular", Consolas, monospace);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
 
 #ask-mate-btn {
   width: 36px;
@@ -1160,7 +1216,6 @@
    Attach (files/images -> path injection) and voice input stay available. */
 body.tui-composer-active #schedule-btn,
 body.tui-composer-active #ask-mate-btn,
-body.tui-composer-active #vendor-toggle-wrap,
 body.tui-composer-active #active-vendor-indicator,
 body.tui-composer-active #config-chip-wrap {
   display: none !important;

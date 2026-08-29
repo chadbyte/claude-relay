@@ -5,10 +5,19 @@
 #messages {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
   padding: 20px 0 12px;
   position: relative;
+}
+
+/* Rich message content can contain wide tables, diagrams, or generated HTML.
+   Keep that content inside the chat scroller; nested code blocks still own
+   their intentional horizontal scrolling. */
+#messages > * {
+  min-width: 0;
+  max-width: 100%;
 }
 
 /* --- Remote cursors (Figma-style) --- */
@@ -168,8 +177,7 @@
 /* --- Delegated work-order card ------------------------------------- */
 /* Self-contained: the generic bubble avatar/name/time are hidden and the
    identity lives in the card's own header strip. The body stays on a
-   NEUTRAL background -- accent only touches the header and the top rule,
-   so long technical briefs read like a document, not a tinted bubble. */
+   neutral background, with a restrained routing color for metadata. */
 .msg-user-delegated .dm-bubble-avatar,
 .msg-user-delegated .dm-bubble-header {
   display: none;
@@ -180,7 +188,7 @@
   overflow: hidden;
   background: var(--bg);
   border: 1px solid var(--border);
-  border-top: 2px solid var(--accent);
+  border-top: 1px solid color-mix(in srgb, var(--link) 55%, var(--border));
   border-radius: 12px;
   max-width: min(720px, 100%);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.14), 0 4px 14px rgba(0, 0, 0, 0.08);
@@ -192,7 +200,7 @@
   gap: 10px;
   padding: 10px 14px;
   background: linear-gradient(to bottom,
-    color-mix(in srgb, var(--accent) 7%, var(--bg-alt)),
+    color-mix(in srgb, var(--link) 3%, var(--bg-alt)),
     var(--bg-alt));
   border-bottom: 1px solid var(--border-subtle);
 }
@@ -216,7 +224,7 @@
   font-weight: 700;
   letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: color-mix(in srgb, var(--link) 68%, var(--text-secondary));
   line-height: 1;
 }
 
@@ -268,8 +276,8 @@
 }
 .msg-user-delegated .delegated-brief li { margin: 3px 0; }
 .msg-user-delegated .delegated-brief li::marker {
-  color: var(--accent);
-  font-weight: 650;
+  color: color-mix(in srgb, var(--link) 52%, var(--text-muted));
+  font-weight: 600;
 }
 
 .msg-user-delegated .dm-bubble-avatar-other {
@@ -277,8 +285,8 @@
 }
 
 .msg-user-delegated .dm-bubble-name {
-  color: var(--accent);
-  font-weight: 650;
+  color: color-mix(in srgb, var(--link) 62%, var(--text-secondary));
+  font-weight: 600;
 }
 
 /* --- User message action bar --- */
@@ -384,6 +392,7 @@
 
 .md-content {
   font-size: 15px;
+  font-weight: var(--font-weight-body);
   line-height: 1.7;
   word-break: break-word;
   color: var(--text);
@@ -468,14 +477,17 @@ pre:hover .code-copy-btn { opacity: 1; }
   border-radius: 0;
 }
 
-.md-content strong { font-weight: 600; }
+.md-content strong { font-weight: var(--font-weight-heading); }
 .md-content em { font-style: italic; font-synthesis: style; }
 
 .md-content a {
-  color: var(--accent);
+  color: var(--link);
   text-decoration: none;
 }
-.md-content a:hover { text-decoration: underline; }
+.md-content a:hover {
+  color: var(--link-hover);
+  text-decoration: underline;
+}
 
 .md-content ul, .md-content ol {
   padding-left: 24px;
@@ -1716,7 +1728,7 @@ pre.mermaid-error {
 }
 
 .dm-msg-name {
-  font-weight: 700;
+  font-weight: var(--font-weight-heading);
   font-size: 15px;
   color: var(--text);
 }
@@ -1847,7 +1859,7 @@ pre.mermaid-error {
 
 .dm-header-name {
   font-size: 15px;
-  font-weight: 700;
+  font-weight: var(--font-weight-heading);
   color: #fff;
   white-space: nowrap;
   overflow: hidden;

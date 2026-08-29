@@ -43,30 +43,9 @@
 #header-rename-btn:hover { color: var(--text-secondary); background: rgba(var(--overlay-rgb),0.04); border-color: var(--border); }
 #header-rename-btn .lucide { width: 13px; height: 13px; }
 
-#header-add-worker-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  border: 1px solid transparent;
-  background: none;
-  color: var(--text-dimmer);
-  cursor: pointer;
-  border-radius: 8px;
-  flex-shrink: 0;
-  padding: 0;
-  margin-left: 4px;
-  transition: color 0.15s, background 0.15s, border-color 0.15s;
-}
-#header-add-worker-btn:hover { color: var(--text-secondary); background: rgba(var(--overlay-rgb),0.04); border-color: var(--border); }
-#header-add-worker-btn .lucide { width: 13px; height: 13px; }
-#header-add-worker-btn.hidden { display: none; }
-body.dm-mode #header-add-worker-btn { display: none; }
-
-/* "Close terminal" button: sits just left of the rename pencil during a live
-   TUI session. Matches the rename button's chrome; reds out on hover since it
-   stops the running claude (the session stays resumable). */
+/* "Close terminal" button for a live TUI session. Matches the session-control
+   chrome; reds out on hover since it stops the running agent while preserving
+   the resumable session. */
 #header-tui-close-btn {
   display: flex;
   align-items: center;
@@ -667,6 +646,41 @@ body.dm-mode #header-add-worker-btn { display: none; }
   color: var(--text-dimmer);
   font-style: italic;
 }
+.config-model-state {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 280px;
+  padding: 10px 14px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  white-space: normal;
+}
+.config-model-state > div { flex: 1; min-width: 0; }
+.config-model-state-title { color: var(--text); font-weight: 600; }
+.config-model-state-detail { margin-top: 2px; color: var(--text-muted); line-height: 1.35; }
+.config-model-spinner {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: config-model-spin 0.8s linear infinite;
+}
+@keyframes config-model-spin { to { transform: rotate(360deg); } }
+.config-model-retry {
+  flex: 0 0 auto;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 4px 8px;
+  background: var(--surface-raised);
+  color: var(--text-secondary);
+  font: inherit;
+  cursor: pointer;
+}
+.config-model-retry:hover { color: var(--text); border-color: var(--text-muted); }
+.config-radio-item.pending { color: var(--accent); opacity: 0.75; }
 
 /* Segmented control for effort */
 .config-segmented {
@@ -980,4 +994,3 @@ body.dm-mode #header-add-worker-btn { display: none; }
   #config-chip .config-chip-icon { display: inline; width: 14px; height: 14px; }
   #config-chip-label { display: none; }
 }
-

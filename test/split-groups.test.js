@@ -139,6 +139,31 @@ test("configured pair roles survive member renumbering", function (t) {
   assert.deepStrictEqual(reloaded.groups[0].pair, { driverId: 21, workerId: 22 });
 });
 
+test("an in-progress Worker becomes restart-safe when its session identity arrives", function (t) {
+  var f = fixture(t, false);
+  f.sessions.get(1).cliSessionId = "cli-driver";
+  var created = f.store.create(f.ws1, {
+    members: [1, 2],
+    pair: { driverId: 1, workerId: 2 },
+  });
+  assert.strictEqual(created.ok, true);
+  assert.deepStrictEqual(created.group.memberCliIds, ["cli-driver", null]);
+
+  f.sessions.get(2).cliSessionId = "cli-worker";
+  assert.strictEqual(f.store.refreshAnchors(2), true);
+  var persisted = JSON.parse(fs.readFileSync(path.join(f.dir, "split-groups.json")));
+  assert.deepStrictEqual(persisted[0].memberCliIds, ["cli-driver", "cli-worker"]);
+  assert.deepStrictEqual(persisted[0].pairCliIds, ["cli-driver", "cli-worker"]);
+
+  var renumbered = new Map([
+    [11, { localId: 11, title: "Driver", cliSessionId: "cli-driver" }],
+    [12, { localId: 12, title: "Worker", cliSessionId: "cli-worker" }],
+  ]);
+  var reloaded = createSplitGroupStore({ sessions: renumbered, sessionsDir: f.dir, usersModule: null });
+  assert.deepStrictEqual(reloaded.groups[0].members, [11, 12]);
+  assert.deepStrictEqual(reloaded.groups[0].pair, { driverId: 11, workerId: 12 });
+});
+
 test("configured pair roles must reference both members", function (t) {
   var f = fixture(t, false);
   var result = f.store.create(f.ws1, {

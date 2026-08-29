@@ -1243,7 +1243,7 @@ button.top-bar-pill.pill-accent:hover { background: color-mix(in srgb, var(--acc
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: #000;
+  background: var(--bg);
   z-index: 999;
   transition: opacity 0.6s ease;
 }
@@ -1253,15 +1253,67 @@ button.top-bar-pill.pill-accent:hover { background: color-mix(in srgb, var(--acc
   pointer-events: none;
 }
 
-#ascii-logo-canvas {
-  width: 800px;
-  height: 400px;
+.connect-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(0.65rem, 1.2vw, 0.9rem);
+  animation: connect-brand-breathe 3.8s ease-in-out infinite;
+}
+
+.connect-symbol {
+  width: clamp(58px, 6vw, 82px);
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 12px 28px rgb(88 87 252 / 0.12));
+}
+
+.connect-wordmark {
+  width: clamp(155px, 18vw, 238px);
+  aspect-ratio: 4611 / 1531;
+  background: linear-gradient(
+    105deg,
+    var(--brand-indigo) 18%,
+    var(--brand-indigo) 42%,
+    var(--brand-green) 50%,
+    var(--brand-indigo) 58%,
+    var(--brand-indigo) 82%
+  );
+  background-size: 260% 100%;
+  -webkit-mask: url("../clay-studio-wordmark.svg?v=400") center / contain no-repeat;
+  mask: url("../clay-studio-wordmark.svg?v=400") center / contain no-repeat;
+  animation: connect-wordmark-shimmer 6.4s ease-in-out infinite;
 }
 
 #connect-overlay-msg {
-  color: #555;
+  color: var(--text-dimmer);
   font-family: var(--font-mono);
   font-size: 0.85rem;
-  margin-top: 1.2rem;
+  margin-top: 1.35rem;
   letter-spacing: 0.03em;
+}
+
+@keyframes connect-brand-breathe {
+  0%, 100% { opacity: 0.76; transform: scale(0.992); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes connect-wordmark-shimmer {
+  0%, 18% { background-position: 100% 50%; }
+  58%, 100% { background-position: -100% 50%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .connect-brand,
+  .connect-wordmark {
+    animation: none;
+  }
+
+  .connect-brand {
+    opacity: 0.92;
+  }
+
+  .connect-wordmark {
+    background-position: 50% 50%;
+  }
 }

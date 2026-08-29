@@ -1,29 +1,6 @@
 # Clay Design System
 
-Version 1.0 | Last updated: 2026-03-23
-
----
-
-## 1. Philosophy
-
-### Clay is a space, not a tool
-
-Tools are used and closed. Spaces are inhabited.
-
-Just as Slack became "where teams work" rather than "a chat tool," Clay is "where you work with AI" rather than "an AI tool." When users enter Clay, the first impression should be: warm, organized, and my place.
-
-This philosophy is the starting point for every design decision. When adding or changing any element, ask: "Does this make the space better?"
-
-### Three design promises
-
-**1. Quiet Order**
-A good space has invisible rules, yet you instinctively know where everything is. You walk into a cafe and know where to order without anyone telling you. Every element follows a predictable system, but that system should never feel conscious.
-
-**2. Warm Density**
-Dense information that never feels cramped. Not the cold density of a developer tool, but the warm density of a well-organized desk. Conserve space, but leave room to breathe.
-
-**3. Presence**
-AI is not an API response. It is a teammate who is "there." Avatars, names, status indicators. These elements make AI feel like "being with" rather than "using."
+Version 1.1 | Last updated: 2026-08-27
 
 ---
 
@@ -31,101 +8,51 @@ AI is not an API response. It is a teammate who is "there." Avatars, names, stat
 
 ### 2.1 Logo
 
-Rainbow gradient (mint > blue > purple > pink > orange > yellow) applied to "Clay" text. The rainbow is finalized. The typeface is not yet finalized (currently rounded typeface + bold outline, subject to change).
+Clay Studio uses a tactile symbol and a restrained serif wordmark.
 
-**Logo origin:** Derived from the CLI tri-accent gradient. Three color stops interpolated across 9 lines and refined into 6 color bands.
-
-**CLI source stops (3 colors):**
-
-| Stop | Color | HEX |
-|------|-------|-----|
-| Top | Green | `#09E5A3` |
-| Mid | Indigo | `#5857FC` |
-| Bottom | Terracotta | `#FE7150` |
-
-**Logo band colors (6 colors):**
-
-| # | Name | HEX | Position |
-|---|------|-----|----------|
-| 1 | Vivid Green | `#00EBA0` | Top |
-| 2 | Vivid Teal | `#00C8DC` | |
-| 3 | Vivid Blue | `#1E64FF` | |
-| 4 | Vivid Indigo | `#5832FF` | |
-| 5 | Vivid Magenta | `#C83CB4` | |
-| 6 | Vivid Terracotta | `#FF5A32` | Bottom |
-
-Higher saturation than CLI source for vivid, clean rendering.
+- **Symbol:** One dominant indigo clay form joined to a smaller green insert. The soft asymmetry, pressed junction, and two subtle finger marks express collaboration and human touch.
+- **Wordmark:** “Clay Studio” set in Source Serif 4, weight 400. The production SVG contains outlined letterforms and has no runtime font dependency.
+- **Name:** Use “Clay Studio” in branded contexts. “Clay” may remain where compact product naming is required.
 
 ### 2.2 Logo construction
 
-```
-+-----------------------------------+
-|         White Stroke              |  <- outermost, separates from background
-|  +-----------------------------+  |
-|  |      Black Stroke           |  |  <- letter outline emphasis
-|  |  +------------------------+ |  |
-|  |  |   Gradient/Band Fill   | |  |  <- 6-color fill (top to bottom)
-|  |  +------------------------+ |  |
-|  +-----------------------------+  |
-+-----------------------------------+
-```
-
-- White stroke : Black stroke ratio ~ 2:1
-- Total stroke thickness ~ 15-20% of letter stroke width
+- Indigo is the dominant mass; green is the smaller point of connection.
+- The two forms meet directly. Never add a black or white outline between them.
+- Preserve the rounded outer contour and the original interlocking proportions.
+- Texture and dimensional shading must remain restrained enough for the silhouette to read at 16px.
+- The wordmark is neutral by default. Branded green-and-indigo motion is reserved for intentional moments such as the loading screen.
 
 ### 2.3 Logo variants
 
-**Wordmark (full "Clay" text):**
-
-| Variant | Description | File |
-|---------|-------------|------|
-| Banded | 6-color bands, hard edges | `clay-wordmark-banded.png` |
-| Gradient | Smooth color transitions | `clay-wordmark-gradient.png` |
-
-**Icon (standalone "C"):**
-
-| Variant | Files |
-|---------|-------|
-| Banded | `icon-banded-{128,256,512,1024}.png` |
-| Gradient | `icon-gradient-{128,256,512,1024}.png` |
-| Transparent | `icon-{banded,gradient}-{256,512,1024}-transparent.png` |
-
-**Favicon:**
-
-| File | Size | Use |
-|------|------|-----|
-| `favicon-banded.png` | 16x16 | Browser tab |
-| `favicon-32.png` | 32x32 | High-DPI tab |
-| `favicon-48.png` | 48x48 | Bookmarks |
-| `favicon.ico` | multi | Legacy |
+| Asset | File | Use |
+|-------|------|-----|
+| Symbol master | `design/media/logo/clay-studio-symbol-master.png` | Source for exported raster sizes |
+| Wordmark master | `design/media/logo/clay-studio-wordmark.svg` | Source for wordmark usage |
+| UI symbol | `lib/public/clay-studio-symbol.png` | App navigation and notifications |
+| Favicon | `lib/public/clay-studio-favicon-32.png` | Browser tab and dynamic favicon base |
+| Wordmark | `lib/public/clay-studio-wordmark.svg` | Loading screen and product wordmark |
+| Platform icons | `apple-touch-icon.png`, `icon-192.png`, `icon-512.png` | iOS and PWA |
 
 ### 2.4 Logo usage rules
 
-1. **Primary**: Banded variant. Official logo, UI top bar, favicon.
-2. **Secondary**: Gradient variant. Marketing, presentations.
-3. **Minimum size**: Icon 16px, wordmark height no smaller than 14px.
-4. **Background**: White or light gray recommended. Use transparent variant on dark backgrounds.
-5. **No modifications**: No reordering colors, rotating, adding shadows, or removing strokes.
-6. **Clear space**: Maintain at least 50% of the "C" height as padding around the logo.
-7. **Color order is fixed**: Green, Teal, Blue, Indigo, Magenta, Terracotta. Never reorder.
-8. **Three-layer structure is mandatory**: fill, black stroke, white stroke. Never omit a layer.
+1. **Brand Indigo:** `#5857FC` is the primary chromatic color.
+2. **Brand Green:** `#07E5A3` is the connection and signal color.
+3. These are the only chromatic brand colors. Ink `#171717` and Paper `#F2F2EF` are supporting neutrals.
+4. Do not introduce additional chromatic colors, decorative color cycling, or theme-derived brand colors.
+5. Maintain approximately 70–85% indigo and 15–30% green within the symbol.
+6. Never rotate, mirror, outline, crop tightly, or alter the relationship between the two clay forms.
+7. The symbol must remain legible at 16–32px; the finger marks may disappear naturally at those sizes.
 
 ### 2.5 Favicon animation
 
-Color flow animation on favicon for urgent states:
-
-- **Method**: 6-color bands flow top-to-bottom (canvas-based)
-- **Speed**: ~12fps (83ms intervals)
+- **Method:** Keep the symbol fixed and alternate a small green/indigo attention dot.
+- **Speed:** 500ms intervals.
 - **Use**: Permission requests, user input needed, urgent states only
 - **Restore**: Immediately revert to static favicon when state clears
 
 ### 2.6 Brand tone
 
-Earthy warmth + playful vibrancy. A balance between the logo's colorfulness and the UI's restraint.
-
-**Clay's color DNA**: Backgrounds use warm beige/brown tones. Avoid cold blue-grays. Just as Slack's aubergine is unmistakably Slack, Clay's warm beige is unmistakably Clay.
-
-When in doubt about a color choice, place it next to the logo.
+Tactile, thoughtful, editorial, and quietly confident. Clay Studio should feel human without becoming childish, rustic, or decorative. Theme skins may control UI surfaces, but brand assets always retain the fixed indigo-and-green identity.
 
 ---
 
@@ -133,7 +60,7 @@ When in doubt about a color choice, place it next to the logo.
 
 ### 3.1 Design intent
 
-Clay's color is "warmth." Pure black (#000) and pure white (#fff) are never used. Every color carries a subtle warm undertone (reddish/earthy), making the interface comfortable for extended use and never mechanical.
+Brand color and interface theme color are separate systems. Clay Indigo and Clay Green identify the product; user-selected skins control backgrounds, text, borders, and semantic UI accents. A skin must never recolor the symbol or wordmark shimmer.
 
 ### 3.2 Theme architecture
 
@@ -152,83 +79,33 @@ accent2 -> --accent2      Secondary accent
 
 Derived values (sidebar-bg, input-bg, etc.) are auto-calculated from base values by theme.js. They are not defined directly in theme files.
 
-### 3.3 Clay official theme colors
+The bundled default pair is **Clay Studio Light** (`clay-light`) and **Clay Studio Dark** (`clay-dark`). New users follow their system light/dark preference within this pair. Clay Studio Light uses Clay Indigo as its primary interaction color; Clay Studio Dark uses an accessibility-adjusted indigo tint. Both use Clay Green as the secondary brand signal. Explicitly selected alternative skins remain user-controlled.
 
-**Clay Light (finalized, default theme)**
-
-```
-Background:       #F3EBE7   Warm beige. Clay's signature.
-Surface:          #EBE1DC   Slightly darker beige.
-Border:           #D8CCC6   Soft tonal boundary.
-Primary text:     #504541   Warm dark brown. Not pure black.
-Secondary text:   #786D67
-Muted text:       #A09590
-Primary accent:   #F74728   Vivid orange-red. Energy and action.
-Secondary accent: #2A26E5   Deep blue. Information and links.
-```
-
-**Clay Dark (direction only, not finalized)**
-
-```
-Background:       #1F1B1B   Warm near-black. Not pure black.
-Surface:          #2A2525   Warm dark brown.
-Border:           #352F2F
-Primary text:     #C2BAB4   Warm light beige.
-Primary accent:   #FE7150   Brighter orange for dark background visibility.
-Secondary accent: #5857FC   Brighter blue for dark background visibility.
-```
-
-Rules:
-- Light mode is default. Dark mode is secondary.
-- Clay Light/Dark's warm undertone is the color DNA. Recommended for custom themes too.
-- The 24 bundled themes (Dracula, Nord, etc.) use their own color schemes. Clay's palette is not forced on them.
-- The hardcoded defaults in base.css are Dracula (fallback only). Clay's identity lives in the Clay Light/Dark theme files.
-
-### 3.4 Accent palette
-
-Three accent groups, each with three brightness levels:
-
-| Group | Bright | Mid | Deep |
-|-------|--------|-----|------|
-| Green | `#09E5A3` | `#00B785` | `#066852` |
-| Blue  | `#5857FC` | `#2A26E5` | `#1C1979` |
-| Red   | `#FE7150` | `#F74728` | `#BA2E19` |
-
-Light theme uses Mid-Deep levels. Dark theme uses Bright-Mid levels.
-
-### 3.5 Body palette
-
-Clay/rose tones. The basis for Light theme's base00-02:
-
-| Light | Mid | Deep |
-|-------|-----|------|
-| `#DAC7C4` | `#D6B6B0` | `#C0A9A4` |
-
-### 3.6 Base16 slot mapping
+### 3.3 Base16 slot mapping
 
 | Slot | Role | Light | Dark |
 |------|------|-------|------|
-| base00-02 | Background tones | Clay/rose body | Warm brown body |
-| base03-05 | Text hierarchy | Warm grays | Warm grays, brighter |
+| base00-02 | Background tones | Skin-defined | Skin-defined |
+| base03-05 | Text hierarchy | Skin-defined | Skin-defined |
 | base08 | Error / destructive | Deep red | Mid red |
-| base09 | **Primary accent** | Mid red | Bright red |
-| base0A | Warning / yellow | Warm gold | Warm gold, saturated |
+| base09 | **Primary accent** | Skin-defined | Skin-defined |
+| base0A | Warning / yellow | Skin-defined | Skin-defined |
 | base0B | Success / green | Deep green | Bright green |
 | base0C | Info / teal | Deep teal | Teal |
 | base0D | Links / blue | Rich blue | Bright blue |
 | base0E | Special / purple | Muted purple | Saturated purple |
-| base0F | Misc / brown | Clay brown | Clay brown |
-| accent2 | **Secondary accent** | Mid blue | Bright blue |
+| base0F | Miscellaneous | Skin-defined | Skin-defined |
+| accent2 | **Secondary accent** | Skin-defined | Skin-defined |
 
-### 3.7 Accent system
+### 3.4 Accent system
 
-**`--accent` (base09, terracotta):** Primary interaction color. Buttons, link hover, progress bars, focus rings.
+**`--accent` (base09):** Skin-defined primary interaction color. Buttons, link hover, progress bars, focus rings.
 
-**`--accent2` (indigo):** Information/status display color. Activity text, user island avatar, AskUserQuestion highlight, tool link hover, file history badge, session info copy button.
+**`--accent2`:** Skin-defined information/status display color. Activity text, user island avatar, AskUserQuestion highlight, tool link hover, file history badge, session info copy button.
 
 Thinking blocks do NOT use accent2 (they use overlay-rgb based styling).
 
-### 3.8 Background layers
+### 3.5 Background layers
 
 4 levels. All depth is expressed with these 4. If a 5th is needed, rethink the design.
 
@@ -244,7 +121,7 @@ Rules:
 - Same-level surfaces overlap? Separate with borders. Do not invent a new background color.
 - Level 2 (overlay) must always have a shadow. No shadowless floating elements.
 
-### 3.9 Text hierarchy
+### 3.6 Text hierarchy
 
 4 levels.
 
@@ -259,7 +136,7 @@ Rules:
 - If --text-primary exceeds 60% of all text on screen, the hierarchy has collapsed. Re-classify information.
 - --text-disabled is only for non-interactive elements. "Less important" text uses --text-muted.
 
-### 3.10 Semantic colors
+### 3.7 Semantic colors
 
 4 colors. No additions.
 
@@ -286,7 +163,7 @@ Rules:
 - Semantic colors are not decorative. Green means "success," not "pretty."
 - Never use semantic colors directly as backgrounds. Use subtle/muted/strong variants. Base values are for foreground only.
 
-### 3.11 Borders
+### 3.8 Borders
 
 ```
 --border-default    Standard separator. Between regions.
@@ -298,11 +175,11 @@ Rules:
 - Border width is always 1px. 2px+ borders are decoration.
 - Exception: Active tab left indicator (3px solid --color-accent). This is an indicator, not a border.
 
-### 3.12 Selection
+### 3.9 Selection
 
 Text drag selection: `rgba(9, 229, 163, 0.25)`. Fixed green. The only hardcoded color, independent of theme.
 
-### 3.13 Mate colors
+### 3.10 Mate colors
 
 Each Mate may have a system-assigned unique color tone used for avatar backgrounds and subtle message area tinting.
 
@@ -1276,19 +1153,13 @@ These variables are the complete Clay design system. No values exist outside thi
 
 ```
 design/media/logo/
-+-- clay-wordmark-banded.png          # Primary wordmark
-+-- clay-wordmark-gradient.png        # Secondary wordmark
-+-- icon-banded-{128..1024}.png       # Banded C icon (solid bg)
-+-- icon-gradient-{128..1024}.png     # Gradient C icon (solid bg)
-+-- icon-*-transparent.png            # Transparent background variants
-+-- favicon-{16,32,48}.png            # Favicon PNGs
-+-- favicon.ico                       # Multi-size ICO
++-- clay-studio-symbol-master.png     # 1100px transparent symbol master
++-- clay-studio-wordmark.svg          # Source Serif 4 outlined wordmark
 
 lib/public/
-+-- favicon-banded.png                # Active favicon (16x16)
-+-- wordmark-banded-{20,32,64}.png    # Topbar wordmark
++-- clay-studio-symbol.png            # UI symbol (512x512)
++-- clay-studio-favicon-32.png        # Browser and dynamic favicon base
++-- clay-studio-wordmark.svg          # Loading screen wordmark
 +-- apple-touch-icon.png              # iOS icon (180x180)
-+-- apple-touch-icon-dark.png         # iOS icon dark
 +-- icon-192.png / icon-512.png       # PWA icons
-+-- icon-192-dark.png / icon-512-dark.png
 ```

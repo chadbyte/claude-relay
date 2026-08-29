@@ -16,6 +16,9 @@ YOKE Kiro Adapter   (lib/yoke/adapters/kiro.js)
     |
     v
 KiroAcpServer       (lib/yoke/kiro-acp-server.js)
+    |
+    v
+Shared ACP Manager  (lib/yoke/acp-process-manager.js)
     |  spawn `kiro-cli acp --agent-engine v3`
     v  stdin/stdout JSON-RPC 2.0 (bidirectional)
 kiro-cli binary     (~/.local/bin/kiro-cli)
@@ -54,7 +57,8 @@ requests we can route through Clay's `canUseTool`. Always use ACP mode.
 | File | Purpose |
 |------|---------|
 | `lib/yoke/adapters/kiro.js` | YOKE adapter. Init, model catalog, createQuery, event flattening, permission routing, abort. |
-| `lib/yoke/kiro-acp-server.js` | Child-process manager. Spawn `kiro-cli acp`, stdin/stdout JSON-RPC, request-id tracking, auth-error detection. |
+| `lib/yoke/acp-process-manager.js` | Vendor-neutral stdio process manager. JSON-RPC request tracking and session-aware event routing. |
+| `lib/yoke/kiro-acp-server.js` | Thin Kiro profile. Binary discovery, spawn arguments, and auth-error detection. |
 | `lib/kiro-defaults.js` | **Single source of truth** for Kiro defaults (agent/mode). Do not duplicate elsewhere. |
 
 ---

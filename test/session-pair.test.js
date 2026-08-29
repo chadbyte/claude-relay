@@ -37,11 +37,20 @@ function fixture(configured, options) {
     startQuery: function (session, text) {
       starts.push({ session: session, text: text });
       if (session !== worker) return Promise.resolve();
+      delete session._lastTurnInterrupted;
       setTimeout(function () {
-        if (options.workerError) session.history.push({ type: "error", text: options.workerError });
-        else session.history.push({ type: "delta", text: "Partner result" });
+        if (options.workerError) {
+          session.history.push({ type: "error", text: options.workerError });
+        } else if (options.workerInterrupted) {
+          session.history.push({ type: "delta", text: "Partial implementation" });
+          session.history.push({ type: "info", text: "Interrupted · What should Claude do instead?" });
+          session.history.push({ type: "done", code: 0 });
+          session._lastTurnInterrupted = true;
+        } else {
+          session.history.push({ type: "delta", text: "Partner result" });
+        }
         session.isProcessing = false;
-        if (options.autoTurnDone !== false) attached.handleTurnDone(session);
+        if (options.autoTurnDone !== false && !options.workerInterrupted) attached.handleTurnDone(session);
       }, options.workerDelay || 20);
       return Promise.resolve();
     },
@@ -64,6 +73,9 @@ test("configured pairs expose partner tools only to the Driver", function () {
   assert.deepStrictEqual(f.attached.getToolDefs(f.driver).map(function (tool) { return tool.name; }), ["send_to_partner", "read_partner"]);
   assert.deepStrictEqual(f.attached.getToolDefs(f.worker), []);
   assert.match(f.attached.getSystemPrompt(f.driver), /Driver/);
+  assert.match(f.attached.getSystemPrompt(f.driver), /completed Worker turn leaves the Worker session available/);
+  assert.match(f.attached.getSystemPrompt(f.driver), /create a replacement with spawn_sessions/);
+  assert.match(f.attached.getToolDefs(f.driver)[0].description, /reuse the same Worker for follow-up implementation/);
   assert.strictEqual(f.attached.getSystemPrompt(f.worker), "");
 });
 
@@ -122,6 +134,34 @@ test("the detached monitor delivers failures even when no normal turn-done event
   assert.strictEqual(f.driverPushes.length, 1);
   assert.match(f.driverPushes[0], /Worker error:\nWorker crashed/);
   assert.strictEqual(f.worker._pairDelegation, undefined);
+});
+
+test("waiting for an interrupted Worker returns its partial response and interrupted status", async function () {
+  var f = fixture(true, { workerInterrupted: true });
+  var tool = f.attached.getToolDefs(f.driver)[0];
+  var result = parseToolResult(await tool.handler({ message: "Inspect the tests", timeoutSeconds: 2 }));
+  assert.deepStrictEqual(result, { status: "interrupted", response: "Partial implementation" });
+  assert.deepStrictEqual(f.driverPushes, []);
+});
+
+test("the detached monitor reports interruption as partial, not completion", async function () {
+  var f = fixture(true, { workerInterrupted: true });
+  var tool = f.attached.getToolDefs(f.driver)[0];
+  await tool.handler({ message: "Inspect the tests", wait: false });
+  await new Promise(function (resolve) { setTimeout(resolve, 550); });
+
+  assert.strictEqual(f.driverPushes.length, 1);
+  assert.match(f.driverPushes[0], /Worker execution interrupted/);
+  assert.match(f.driverPushes[0], /PARTIAL/);
+  assert.doesNotMatch(f.driverPushes[0], /completed/);
+});
+
+test("a new Worker turn clears an earlier interrupted state", async function () {
+  var f = fixture(true);
+  f.worker._lastTurnInterrupted = true;
+  var tool = f.attached.getToolDefs(f.driver)[0];
+  var result = parseToolResult(await tool.handler({ message: "Inspect the tests", timeoutSeconds: 2 }));
+  assert.deepStrictEqual(result, { status: "complete", response: "Partner result" });
 });
 
 test("a user-started Worker turn never pushes to the Driver", function () {

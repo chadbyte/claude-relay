@@ -59,7 +59,7 @@
 
 .us-modal-title {
   font-size: 15px;
-  font-weight: 700;
+  font-weight: var(--font-weight-heading);
   color: var(--text);
   letter-spacing: 0.01em;
 }
@@ -196,7 +196,7 @@
 .us-section h2 {
   margin: 0 0 14px;
   font-size: 18px;
-  font-weight: 700;
+  font-weight: var(--font-weight-heading);
   color: var(--text);
   letter-spacing: -0.01em;
 }
@@ -204,7 +204,7 @@
 .us-section h3 {
   margin: 22px 0 10px;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: var(--font-weight-heading);
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -228,6 +228,108 @@
   padding: 14px;
 }
 
+#user-settings .settings-theme-card .settings-field {
+  padding: 14px;
+}
+
+#user-settings .settings-theme-picker {
+  margin-top: 14px;
+}
+
+#user-settings .theme-picker {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+#user-settings .theme-picker-group {
+  min-width: 0;
+}
+
+#user-settings .theme-picker-header {
+  padding: 0 2px 8px;
+  font-size: 11px;
+  font-weight: var(--font-weight-heading);
+  color: var(--text-dimmer);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+#user-settings .theme-picker-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+#user-settings .theme-picker-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 42px;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+#user-settings .theme-picker-item:hover {
+  border-color: var(--border);
+  color: var(--text);
+}
+
+#user-settings .theme-picker-item.active {
+  border-color: var(--accent);
+  background: var(--accent-8);
+  color: var(--text);
+}
+
+#user-settings .theme-swatches {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+#user-settings .theme-swatch {
+  width: 10px;
+  height: 16px;
+  border: 1px solid rgba(var(--overlay-rgb), 0.1);
+}
+
+#user-settings .theme-swatch:first-child {
+  border-radius: 4px 0 0 4px;
+}
+
+#user-settings .theme-swatch:last-child {
+  border-radius: 0 4px 4px 0;
+}
+
+#user-settings .theme-picker-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#user-settings .theme-picker-check {
+  flex-shrink: 0;
+  color: var(--accent);
+  font-size: 14px;
+  opacity: 0;
+}
+
+#user-settings .theme-picker-item.active .theme-picker-check {
+  opacity: 1;
+}
+
 #user-settings .us-account-hero {
   display: flex;
   align-items: center;
@@ -240,7 +342,7 @@
   flex-shrink: 0;
   width: 56px;
   height: 56px;
-  border-radius: 50%;
+  border-radius: 26%;
   overflow: hidden;
   border: 1px solid rgba(var(--overlay-rgb), 0.1);
   background: var(--bg);
@@ -282,7 +384,7 @@
 
 #user-settings .us-account-name {
   font-size: 17px;
-  font-weight: 700;
+  font-weight: var(--font-weight-heading);
   color: var(--text);
   line-height: 1.2;
   letter-spacing: -0.01em;
@@ -337,7 +439,7 @@
   display: block;
   margin-bottom: 4px;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: var(--font-weight-ui);
   color: var(--text-secondary);
 }
 
@@ -518,7 +620,7 @@
   background: var(--accent);
   color: #fff;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: var(--font-weight-ui);
   cursor: pointer;
 }
 
@@ -580,7 +682,7 @@
 #user-settings .settings-pin-form-title {
   margin-bottom: 8px;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: var(--font-weight-heading);
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -673,7 +775,7 @@
 
 #user-settings .layout-option-label {
   font-size: 14px;
-  font-weight: 700;
+  font-weight: var(--font-weight-heading);
   color: var(--text);
 }
 
@@ -833,6 +935,10 @@
   }
 
   #user-settings .layout-switcher {
+    grid-template-columns: 1fr;
+  }
+
+  #user-settings .theme-picker {
     grid-template-columns: 1fr;
   }
 

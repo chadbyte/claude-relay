@@ -102,10 +102,44 @@ test("worker delegation notice joins the composer without a gap", function () {
 
 test("split pane clients leave notification banners to the parent shell", function () {
   var notificationsSource = fs.readFileSync(path.join(__dirname, "../lib/public/modules/app-notifications.js"), "utf8");
+  var paneCss = fs.readFileSync(path.join(__dirname, "../lib/public/css/pane.css"), "utf8");
   var initStart = notificationsSource.indexOf("export function initAppNotifications()");
   var initEnd = notificationsSource.indexOf("// ========================================================", initStart);
   var initSource = notificationsSource.slice(initStart, initEnd);
 
   assert.match(initSource, /if \(store\.get\('paneMode'\)\) return;/);
   assert.ok(initSource.indexOf("paneMode") < initSource.indexOf('document.createElement("div")'));
+  assert.match(paneCss, /body\.pane-mode \.notif-banner-container\s*\{[^}]*display:\s*none !important/s);
+});
+
+test("split pane clients prepare web links before browser navigation", function () {
+  var bridgeSource = fs.readFileSync(path.join(__dirname, "../lib/public/modules/pane-bridge.js"), "utf8");
+
+  assert.match(bridgeSource, /document\.addEventListener\("click", preparePaneLink, true\)/);
+  assert.match(bridgeSource, /document\.addEventListener\("auxclick", preparePaneLink, true\)/);
+  assert.match(bridgeSource, /forceExternalLinkToNewTab\(anchor, window\.location\.href\)/);
+});
+
+test("session actions replace the dedicated worker button and stay out of split panes", function () {
+  var html = fs.readFileSync(path.join(__dirname, "../lib/public/index.html"), "utf8");
+  var actionsSource = fs.readFileSync(path.join(__dirname, "../lib/public/modules/session-actions.js"), "utf8");
+
+  assert.match(html, /id="header-session-actions-btn"/);
+  assert.doesNotMatch(html, /id="header-add-worker-btn"/);
+  assert.match(actionsSource, /!!state\.splitPanes/);
+  assert.match(actionsSource, /state\.paneMode/);
+  assert.match(actionsSource, /Add AI worker/);
+  assert.match(actionsSource, /Send context to another agent/);
+  assert.match(actionsSource, /handoff_session_options/);
+  assert.match(actionsSource, /Reasoning effort/);
+  assert.match(actionsSource, /model: modelSelect\.value/);
+});
+
+test("split pane permission control is anchored beside the session title", function () {
+  var splitSource = fs.readFileSync(path.join(__dirname, "../lib/public/modules/split-view.js"), "utf8");
+  var paneCss = fs.readFileSync(path.join(__dirname, "../lib/public/css/pane.css"), "utf8");
+
+  assert.match(splitSource, /header\.insertBefore\(fullAccess, ctxChip\)/);
+  assert.match(paneCss, /\.split-pane-title\s*\{[^}]*flex:\s*0 1 auto/s);
+  assert.match(paneCss, /\.split-pane-context\s*\{[^}]*margin-left:\s*auto/s);
 });

@@ -67,7 +67,7 @@
 
 .project-list-title {
   font-size: 11px;
-  font-weight: 600;
+  font-weight: var(--font-weight-ui);
   color: var(--text-dimmer);
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -129,7 +129,7 @@
 }
 
 .project-list-item.current .pd-name {
-  font-weight: 600;
+  font-weight: var(--font-weight-ui);
 }
 
 .pd-name {
@@ -266,7 +266,7 @@
 
 .sidebar-section-title {
   font-size: 11px;
-  font-weight: 600;
+  font-weight: var(--font-weight-ui);
   color: var(--text-dimmer);
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -275,7 +275,7 @@
 /* --- Section labels --- */
 .sidebar-section-label {
   font-size: 11px;
-  font-weight: 600;
+  font-weight: var(--font-weight-ui);
   color: var(--text-dimmer);
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -300,6 +300,7 @@
 }
 .sidebar-tools-header .sidebar-section-label {
   padding: 0;
+  color: var(--text-muted);
 }
 
 /* Small shortcut-pill for the Cmd/Ctrl+O hotkey overlay. Mirrors the
@@ -398,33 +399,55 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  min-height: 58px;
-  padding: 6px 2px;
+  gap: 5px;
+  min-height: 60px;
+  padding: 5px 2px;
   border-radius: 10px;
   border: none;
-  background: rgba(var(--overlay-rgb), 0.025);
-  color: var(--text-muted);
+  background: transparent;
+  color: var(--text-secondary);
   font-family: inherit;
   font-size: 10px;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+  transition: background 0.15s, color 0.15s;
 }
-.palette-tile .lucide { width: 16px; height: 16px; flex-shrink: 0; }
+.palette-tile > .lucide {
+  box-sizing: content-box;
+  width: 16px;
+  height: 16px;
+  padding: 6px;
+  border-radius: 9px;
+  background: var(--bg);
+  color: var(--text-muted);
+  box-shadow: 0 1px 3px rgba(var(--shadow-rgb), 0.1);
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s, transform 0.15s;
+}
 .palette-tile:hover {
-  background: rgba(var(--overlay-rgb), 0.08);
-  color: var(--text-secondary);
-  box-shadow: 0 2px 10px rgba(var(--shadow-rgb), 0.08);
-}
-.palette-tile.active {
-  background: rgba(var(--overlay-rgb), 0.08);
+  background: rgba(var(--overlay-rgb), 0.035);
   color: var(--text);
 }
+.palette-tile:hover > .lucide {
+  background: var(--bg-alt);
+  color: var(--text-secondary);
+  box-shadow: 0 3px 8px rgba(var(--shadow-rgb), 0.14);
+  transform: translateY(-1px);
+}
+.palette-tile.active {
+  background: rgba(var(--overlay-rgb), 0.035);
+  color: var(--text);
+}
+.palette-tile.active > .lucide {
+  color: var(--text);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--link) 52%, var(--border)),
+    0 2px 6px rgba(var(--shadow-rgb), 0.12);
+}
 .palette-tile .tool-btn-label {
-  font-size: 10px;
+  font-size: 10.5px;
   font-weight: 500;
-  line-height: 1.15;
+  line-height: 1.2;
   text-align: center;
   max-width: 100%;
   overflow: hidden;
@@ -611,6 +634,7 @@
 
 .sidebar-sessions-header-row .sidebar-section-label {
   padding: 0;
+  color: var(--text-muted);
 }
 
 .session-filter-count {
@@ -715,12 +739,12 @@
 .sidebar-sessions-search-inline button:hover { color: var(--text); background: var(--sidebar-hover); }
 
 .session-item.search-match {
-  background: var(--accent-12);
+  background: color-mix(in srgb, var(--link) 9%, transparent);
   color: var(--text);
 }
 
 .session-item.search-match .session-item-text {
-  color: var(--accent);
+  color: var(--link);
 }
 
 .session-highlight {
@@ -738,18 +762,18 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 12px 8px 4px;
+  margin: 14px 8px 5px;
   padding: 0;
   min-height: 22px;
-  font-size: 10px;
+  font-size: 10.5px;
   font-weight: 600;
-  color: var(--text-dimmer);
+  color: var(--text-muted);
   letter-spacing: 0.2px;
 }
 
 .session-group-header-label {
   min-width: 0;
-  color: var(--text-dimmer);
+  color: var(--text-muted);
 }
 
 .session-group-clear-btn {
@@ -822,16 +846,16 @@
   position: relative;
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 0 12px;
-  height: 34px;
-  border-radius: 10px;
+  gap: 7px;
+  padding: 0 9px;
+  height: 36px;
+  border-radius: 9px;
   cursor: pointer;
   font-size: 13px;
-  font-weight: 600;
-  color: var(--text-muted);
+  font-weight: var(--font-weight-body);
+  color: var(--text-secondary);
   margin-bottom: 0;
-  transition: background 0.35s ease, color 0.35s ease;
+  transition: background 0.15s ease, color 0.15s ease;
   contain: size layout;
 }
 
@@ -848,14 +872,34 @@
   filter: grayscale(0.9) brightness(0.9);
   transition: opacity 0.15s, filter 0.15s;
 }
+.session-vendor-mark {
+  width: 16px;
+  height: 16px;
+  margin-right: 0;
+  border-radius: 4px;
+  background: transparent;
+  box-shadow: none;
+  opacity: 0.5;
+  filter: grayscale(0.72) saturate(0.6);
+  flex-shrink: 0;
+}
 .session-item:hover .session-vendor-icon,
 .session-item.active .session-vendor-icon {
   opacity: 1;
   filter: none;
 }
+.session-item:hover .session-vendor-mark {
+  opacity: 0.76;
+  filter: grayscale(0.28) saturate(0.82);
+}
+.session-item.active .session-vendor-mark {
+  opacity: 0.88;
+  filter: grayscale(0.12) saturate(0.9);
+}
 
 .session-item-text {
   flex: 1;
+  line-height: 1.3;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -863,14 +907,23 @@
 }
 
 .session-item:hover {
-  background: var(--sidebar-hover);
-  color: var(--text-secondary);
+  background: rgba(var(--overlay-rgb), 0.035);
+  color: var(--text);
 }
 
 .session-item.active {
-  background: var(--sidebar-active);
+  background: color-mix(in srgb, var(--link) 7%, transparent);
   color: var(--text);
-  font-weight: 600;
+  font-weight: var(--font-weight-ui);
+}
+
+.session-item-age {
+  flex-shrink: 0;
+  color: var(--text-dimmer);
+  font-size: 9.5px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.8;
+  transition: opacity 0.15s;
 }
 
 .split-group-text {
@@ -960,7 +1013,7 @@
   min-width: 18px;
   height: 18px;
   border-radius: 9px;
-  background: #e74c3c;
+  background: var(--link);
   color: #fff;
   font-size: 11px;
   font-weight: 700;
@@ -974,11 +1027,18 @@
 }
 
 .session-item .session-item-text {
-  padding-right: 28px;
+  padding-right: 0;
 }
 
 .session-item:has(.session-presence) .session-item-text {
   padding-right: 54px;
+}
+
+.session-item:has(.session-presence) .session-item-age,
+.session-item:has(.session-unread-badge.has-unread) .session-item-age,
+.session-item:hover .session-item-age,
+.session-item:focus-within .session-item-age {
+  opacity: 0;
 }
 
 .session-close-btn {
@@ -1067,14 +1127,14 @@
   border: none;
   border-radius: 10px;
   background: transparent;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   font-family: inherit;
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   text-align: left;
   min-width: 0;
-  opacity: 0.62;
+  opacity: 1;
   transition: background 0.15s, color 0.15s, opacity 0.15s;
 }
 
@@ -1086,8 +1146,8 @@
 }
 
 .session-top-action-icon {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   flex-shrink: 0;
   border-radius: 4px;
   object-fit: cover;
@@ -1134,11 +1194,11 @@
   border: none;
   border-radius: 0;
   background: transparent;
-  font-size: 11px;
+  font-size: 10.5px;
   line-height: 1.4;
-  color: color-mix(in srgb, var(--text-dimmer) 88%, transparent);
+  color: var(--text-muted);
   text-align: center;
-  text-shadow: 0 0 10px rgba(var(--shadow-rgb), 0.08);
+  opacity: 0.78;
 }
 
 .session-list-sticky-top {
@@ -1350,7 +1410,7 @@
   border-radius: 10px;
   cursor: pointer;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: var(--font-weight-body);
   color: var(--text-muted);
   transition: background 0.35s ease, color 0.35s ease;
 }
@@ -1707,7 +1767,7 @@
 .user-island-name {
   font-family: "Pretendard", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: var(--font-weight-heading);
   color: var(--text);
   white-space: nowrap;
   overflow: hidden;
@@ -1753,30 +1813,6 @@
   align-items: center;
   justify-content: center;
   transition: background 0.15s, color 0.15s;
-}
-
-.user-island-actions button#user-theme-toggle-btn {
-  color: var(--text-secondary);
-}
-
-.user-island-actions button#user-theme-toggle-btn:hover {
-  color: var(--text);
-}
-
-.user-island-actions button#user-theme-toggle-btn.theme-toggle-light {
-  color: #7b8cff;
-}
-
-.user-island-actions button#user-theme-toggle-btn.theme-toggle-light:hover {
-  color: #98a4ff;
-}
-
-.user-island-actions button#user-theme-toggle-btn.theme-toggle-dark {
-  color: #f2b84d;
-}
-
-.user-island-actions button#user-theme-toggle-btn.theme-toggle-dark:hover {
-  color: #ffca6b;
 }
 
 .user-island-actions button .lucide {
@@ -1896,99 +1932,6 @@
 #hamburger-btn .lucide {
   width: 20px;
   height: 20px;
-}
-
-/* --- Theme picker --- */
-.theme-picker {
-  position: fixed;
-  background: var(--bg-alt);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 0;
-  min-width: 220px;
-  max-height: 70vh;
-  overflow-y: auto;
-  box-shadow: 0 8px 32px rgba(var(--shadow-rgb), 0.5);
-  z-index: 200;
-  opacity: 0;
-  transform: translateY(8px);
-  pointer-events: none;
-  transition: opacity 0.15s, transform 0.15s;
-}
-
-.theme-picker.visible {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
-
-.theme-picker-header {
-  padding: 8px 14px 4px;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-dimmer);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  position: sticky;
-  top: 0;
-  background: var(--bg-alt);
-  z-index: 1;
-}
-
-.theme-picker-section {
-  padding-bottom: 4px;
-}
-
-.theme-picker-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  padding: 7px 14px;
-  border: none;
-  background: none;
-  color: var(--text-secondary);
-  font-family: inherit;
-  font-size: 13px;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.theme-picker-item:hover {
-  background: rgba(var(--overlay-rgb), 0.05);
-}
-
-.theme-picker-item.active {
-  color: var(--text);
-}
-
-.theme-swatches {
-  display: flex;
-  gap: 3px;
-  flex-shrink: 0;
-}
-
-.theme-swatch {
-  width: 12px;
-  height: 12px;
-  border-radius: 3px;
-  border: 1px solid rgba(var(--overlay-rgb), 0.1);
-}
-
-.theme-picker-label {
-  flex: 1;
-  text-align: left;
-}
-
-.theme-picker-check {
-  font-size: 14px;
-  color: var(--accent);
-  opacity: 0;
-  flex-shrink: 0;
-}
-
-.theme-picker-item.active .theme-picker-check {
-  opacity: 1;
 }
 
 /* --- Sidebar resize handle (overlay, no layout space) --- */

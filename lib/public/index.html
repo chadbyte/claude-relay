@@ -11,10 +11,10 @@
   if(!isIOS){var l=document.createElement("link");l.rel="manifest";l.href="/manifest.json";document.head.appendChild(l)}
 })();
 </script>
-<meta name="theme-color" content="#282a36">
-<link rel="icon" type="image/png" href="favicon-banded.png">
+<meta name="theme-color" content="#171715">
+<link rel="icon" type="image/png" sizes="32x32" href="clay-studio-favicon-32.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>Clay</title>
+<title>Clay Studio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
@@ -30,7 +30,7 @@
 (function(){try{var k="clay-theme-vars",v=localStorage.getItem(k),r=document.documentElement;if(v){var o=JSON.parse(v),p;for(p in o)r.style.setProperty(p,o[p]);var vt=localStorage.getItem(k.replace("-vars","-variant"));if(vt==="light"){r.classList.add("light-theme");r.classList.remove("dark-theme")}else{r.classList.add("dark-theme");r.classList.remove("light-theme")}var m=document.querySelector('meta[name="theme-color"]');if(m&&o["--bg"])m.setAttribute("content",o["--bg"])}else{var sl=window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches;if(sl){r.classList.add("light-theme");r.classList.remove("dark-theme")}}}catch(e){}})();
 </script>
 <script>if(window.navigator.standalone||window.matchMedia("(display-mode:standalone)").matches){document.documentElement.classList.add("pwa-standalone")}</script>
-<link rel="stylesheet" href="style.css?v=20260407">
+<link rel="stylesheet" href="style.css?v=20260829-terminal-canvas1">
 <style>
 @media(max-width:768px){
   /* User messages: vertical stack, avatar on top, right-aligned */
@@ -101,9 +101,9 @@
 
   <!-- === Icon Strip === -->
   <div id="icon-strip">
-    <div class="icon-strip-home" title="Clay">
+    <div class="icon-strip-home" title="Clay Studio">
       <span class="icon-strip-pill"></span>
-      <img class="icon-strip-logo" src="icon-banded-76.png" width="38" height="38" alt="Clay">
+      <img class="icon-strip-logo" src="clay-studio-symbol.png" width="38" height="38" alt="Clay Studio">
       <span class="icon-strip-home-badge" id="icon-strip-home-badge"></span>
     </div>
     <div class="icon-strip-separator"></div>
@@ -172,7 +172,7 @@
     <div id="sidebar-column">
       <div class="title-bar-sidebar">
         <button class="title-bar-project-dropdown" id="title-bar-project-dropdown">
-          <span class="title-bar-project-icon" id="title-bar-project-icon"></span>
+          <span class="title-bar-project-icon" id="title-bar-project-icon" aria-hidden="true"></span>
           <span class="title-bar-project-name" id="title-bar-project-name"></span>
           <i data-lucide="chevron-down" class="title-bar-chevron"></i>
         </button>
@@ -232,6 +232,16 @@
             <kbd>&#8593;&#8595;</kbd><span>nav</span>
             <kbd>&#8592;&#8594;</kbd><span>fold</span>
             <kbd>&#8629;</kbd><span>open</span>
+          </div>
+        </div>
+        <div id="sidebar-panel-git" class="sidebar-panel hidden">
+          <div class="git-panel-titlebar">
+            <button id="git-panel-refresh" type="button" title="Refresh Git status"><i data-lucide="refresh-cw"></i></button>
+            <span>Git</span>
+            <button id="git-panel-close" type="button" title="Close Git panel"><i data-lucide="x"></i></button>
+          </div>
+          <div id="git-panel-body" class="git-panel-body">
+            <div class="git-panel-loading"><span class="git-panel-spinner"></span> Reading repository</div>
           </div>
         </div>
       </div>
@@ -329,12 +339,11 @@
           </div>
           <button id="hamburger-btn" aria-label="Toggle sidebar" title="Toggle sidebar"><i data-lucide="menu"></i></button>
           <span class="header-title" id="header-title">Connecting...</span>
+          <button id="header-rename-btn" type="button" title="Rename session"><i data-lucide="pencil"></i></button>
           <button id="header-info-btn" type="button" title="Session info"><i data-lucide="info"></i></button>
           <button id="header-full-access-btn" type="button" class="session-full-access hidden" role="switch" aria-checked="false" title="Skip Permissions is off — permission prompts are on">
             <span class="session-full-access-label">Skip Permissions</span><span class="session-full-access-track" aria-hidden="true"><span></span></span>
           </button>
-          <button id="header-rename-btn" type="button" title="Rename session"><i data-lucide="pencil"></i></button>
-          <button id="header-add-worker-btn" type="button" title="Add Worker — this session becomes the Driver of a pair"><i data-lucide="user-plus"></i></button>
           <button type="button" id="header-tui-close-btn" class="header-tui-close-btn hidden" title="Close terminal (keeps history, resume anytime)" aria-label="Close terminal"><i data-lucide="power"></i></button>
           <div id="mate-mobile-title" class="mate-mobile-title hidden">
             <img id="mate-mobile-avatar" class="mate-mobile-avatar" alt="">
@@ -345,6 +354,9 @@
         <div id="ralph-sticky" class="hidden"></div>
         <div id="debate-sticky" class="hidden"></div>
         <div class="status">
+          <button id="header-session-actions-btn" type="button" aria-label="Session actions" aria-haspopup="menu" aria-expanded="false">
+            <i data-lucide="bot"></i><span>Add AI worker</span><i class="session-actions-trigger-chevron" data-lucide="chevron-down"></i>
+          </button>
           <button type="button" id="header-tui-font-btn" class="header-tui-font-btn hidden" title="Terminal font" aria-label="Terminal font">
             <i data-lucide="type"></i>
           </button>
@@ -353,11 +365,14 @@
           <button id="terminal-toggle-btn" title="Terminal"><i data-lucide="square-terminal"></i><span id="terminal-count" class="hidden"></span></button>
         </div>
       </div>
-      <div id="main-panels">
+    <div id="main-panels">
       <div id="app">
         <div id="connect-overlay">
-      <canvas id="ascii-logo-canvas"></canvas>
-      <p id="connect-overlay-msg">Reconnecting to server…</p>
+      <div class="connect-brand">
+        <img class="connect-symbol" src="clay-studio-symbol.png" alt="">
+        <div class="connect-wordmark" role="img" aria-label="Clay Studio"></div>
+      </div>
+      <p id="connect-overlay-msg">Connecting…</p>
     </div>
     <div id="sticky-notes-container" class="hidden"></div>
     <div id="debate-info-float" class="hidden"></div>
@@ -461,6 +476,7 @@
               <button id="input-more-btn" type="button" aria-label="More options" title="More options" class="mobile-only"><i data-lucide="plus"></i></button>
               <button id="attach-file-btn" type="button" aria-label="Attach file" title="Attach file" class="desktop-only"><i data-lucide="paperclip"></i></button>
               <button id="attach-image-btn" type="button" aria-label="Attach image" title="Attach image" class="desktop-only"><i data-lucide="image"></i></button>
+              <button id="shell-command-btn" type="button" aria-label="Run shell command" aria-pressed="false" title="Run a shell command and add its output to the next agent message" class="desktop-only"><i data-lucide="square-terminal"></i></button>
               <button id="stt-btn" type="button" aria-label="Voice input" title="Voice input"><i data-lucide="mic"></i></button>
               <button id="schedule-btn" type="button" aria-label="Schedule message" title="Schedule message"><i data-lucide="clock"></i></button>
               <button id="ask-mate-btn" type="button" aria-label="Ask Mate" title="Ask a Mate for advice on this session"><i data-lucide="at-sign"></i></button>
@@ -474,20 +490,6 @@
               </div>
             </div>
             <div id="input-bottom-right">
-              <div id="vendor-toggle-wrap">
-                <button id="vendor-btn-claude" class="vendor-toggle-btn active" data-vendor="claude">
-                  <img src="/claude-code-avatar.png" class="vendor-toggle-icon" alt="Claude">
-                  <span class="vendor-toggle-label">Claude Code</span>
-                </button>
-                <button id="vendor-btn-codex" class="vendor-toggle-btn" data-vendor="codex">
-                  <img src="/codex-avatar.png" class="vendor-toggle-icon" alt="Codex">
-                  <span class="vendor-toggle-label">Codex</span>
-                </button>
-                <button id="vendor-btn-kiro" class="vendor-toggle-btn" data-vendor="kiro">
-                  <img src="/kiro-avatar.svg" class="vendor-toggle-icon" alt="Kiro">
-                  <span class="vendor-toggle-label">Kiro CLI</span>
-                </button>
-              </div>
               <div id="active-vendor-indicator" class="hidden" title="Session vendor">
                 <img id="active-vendor-icon" alt="">
               </div>
@@ -563,6 +565,10 @@
           <i data-lucide="image"></i>
           <span>Image</span>
         </button>
+        <button class="input-more-action" id="input-more-shell">
+          <i data-lucide="square-terminal"></i>
+          <span>Shell command</span>
+        </button>
       </div>
       <div class="input-more-divider"></div>
       <div class="input-more-section-label">
@@ -594,26 +600,38 @@
   <div id="mobile-tab-bar">
     <button class="mobile-tab" data-tab="chat" id="mob-tab-chat"><i data-lucide="message-square"></i><span class="mobile-tab-label">Chat</span></button>
     <button class="mobile-tab" data-tab="search" id="mob-tab-search"><i data-lucide="search"></i><span class="mobile-tab-label">Search</span></button>
-    <button class="mobile-tab-home" id="mobile-home-btn"><img src="/icon-banded-76.png" alt="Home" class="mobile-home-icon"></button>
+    <button class="mobile-tab-home" id="mobile-home-btn"><img src="/clay-studio-symbol.png" alt="Clay Studio home" class="mobile-home-icon"></button>
     <button class="mobile-tab" data-tab="tools" id="mob-tab-tools"><i data-lucide="wrench"></i><span class="mobile-tab-label">Tools</span></button>
     <button class="mobile-tab" data-tab="settings" id="mob-tab-settings"><i data-lucide="settings"></i><span class="mobile-tab-label">Settings</span></button>
   </div>
 
   <div id="file-viewer" class="hidden">
     <div class="file-viewer-header">
-      <span class="file-viewer-path" id="file-viewer-path"></span>
-      <span class="file-viewer-live-status hidden" id="file-viewer-live-status" aria-live="polite">
-        <span class="file-viewer-live-dot"></span>
-        <span class="file-viewer-live-label">Editing</span>
-      </span>
-      <button class="file-viewer-btn hidden" id="file-viewer-render" title="Toggle rendered view"><i data-lucide="book-open"></i></button>
-      <button class="file-viewer-btn hidden" id="file-viewer-pdf" title="Export PDF"><i data-lucide="file-down"></i></button>
-      <button class="file-viewer-btn hidden" id="file-viewer-history" title="Edit history"><i data-lucide="clock"></i></button>
-      <button class="file-viewer-btn" id="file-viewer-refresh" title="Refresh"><i data-lucide="refresh-cw"></i></button>
-      <button class="file-viewer-btn" id="file-viewer-copy" title="Copy contents" aria-label="Copy contents"><i data-lucide="copy"></i></button>
-      <button class="file-viewer-btn hidden" id="file-viewer-copy-formatted" title="Copy Markdown formatting" aria-label="Copy Markdown formatting"><i data-lucide="clipboard-copy"></i></button>
-      <button class="file-viewer-btn" id="file-viewer-fullscreen" title="Toggle fullscreen"><i data-lucide="maximize-2"></i></button>
-      <button class="file-viewer-btn" id="file-viewer-close" title="Close"><i data-lucide="x"></i></button>
+      <div class="file-viewer-tabbar">
+        <div class="file-viewer-tabs" id="file-viewer-tabs" role="tablist"></div>
+        <div class="file-viewer-window-actions" aria-label="Document viewer controls">
+          <button class="file-viewer-btn" id="file-viewer-fullscreen" title="Toggle fullscreen" aria-label="Toggle document viewer fullscreen"><i data-lucide="maximize-2"></i></button>
+          <button class="file-viewer-btn" id="file-viewer-close" title="Close viewer" aria-label="Close document viewer"><i data-lucide="x"></i></button>
+        </div>
+      </div>
+      <div class="file-viewer-breadcrumbs">
+        <div class="file-viewer-path" id="file-viewer-path" aria-label="Current file path"></div>
+        <span class="file-viewer-live-status hidden" id="file-viewer-live-status" aria-live="polite">
+          <span class="file-viewer-live-dot"></span>
+          <span class="file-viewer-live-label">Editing</span>
+        </span>
+        <div class="file-viewer-toolbar" aria-label="Current file actions">
+          <button class="file-viewer-btn hidden" id="file-viewer-render" title="Toggle rendered view"><i data-lucide="book-open"></i></button>
+          <button class="file-viewer-btn hidden" id="file-viewer-pdf" title="Export PDF"><i data-lucide="file-down"></i></button>
+          <button class="file-viewer-btn hidden" id="file-viewer-slides" title="Present as slides" aria-label="Present Markdown as slides" aria-pressed="false"><i data-lucide="presentation"></i></button>
+          <button class="file-viewer-btn file-viewer-slide-level hidden" id="file-viewer-slide-level" title="Split slides by heading level" aria-haspopup="menu" aria-expanded="false"><span>H1</span><i data-lucide="chevron-down"></i></button>
+          <button class="file-viewer-btn hidden" id="file-viewer-history" title="Edit history"><i data-lucide="clock"></i></button>
+          <button class="file-viewer-btn" id="file-viewer-refresh" title="Refresh"><i data-lucide="refresh-cw"></i></button>
+          <button class="file-viewer-btn" id="file-viewer-download" title="Download file" aria-label="Download file"><i data-lucide="download"></i></button>
+          <button class="file-viewer-btn" id="file-viewer-copy" title="Copy contents" aria-label="Copy contents"><i data-lucide="copy"></i></button>
+          <button class="file-viewer-btn hidden" id="file-viewer-copy-formatted" title="Copy Markdown formatting" aria-label="Copy Markdown formatting"><i data-lucide="clipboard-copy"></i></button>
+        </div>
+      </div>
     </div>
     <div class="file-viewer-body" id="file-viewer-body"></div>
   </div>
@@ -869,7 +887,6 @@
       </div>
     </div>
     <div class="user-island-actions">
-      <button id="user-theme-toggle-btn" title="Themes" aria-label="Themes"><i data-lucide="palette"></i></button>
       <button id="user-settings-btn" title="User settings"><i data-lucide="settings"></i></button>
     </div>
   </div>
@@ -991,6 +1008,13 @@
         <!-- Appearance section -->
         <div class="us-section" data-section="us-appearance">
           <h2>Appearance</h2>
+          <div class="settings-card settings-theme-card">
+            <div class="settings-field">
+              <div class="settings-label">Theme</div>
+              <div class="settings-hint">Choose the color palette used across Clay Studio.</div>
+              <div id="us-theme-picker" class="settings-theme-picker" aria-label="Theme selection"></div>
+            </div>
+          </div>
           <div class="settings-card">
             <div class="settings-label" style="margin-bottom:10px;">Chat layout</div>
             <div class="layout-switcher" id="us-layout-switcher">
@@ -1115,9 +1139,6 @@
             <option value="notifications">Notifications</option>
             <option value="security">Security</option>
           </optgroup>
-          <optgroup label="Defaults">
-            <option value="models">Model</option>
-          </optgroup>
           <optgroup label="Config">
             <option value="claudemd">Instructions</option>
             <option value="environment">Environment</option>
@@ -1140,9 +1161,6 @@
           <button class="settings-nav-item active" data-section="overview"><span>Status</span></button>
           <button class="settings-nav-item" data-section="notifications"><span>Notifications</span></button>
           <button class="settings-nav-item" data-section="security"><span>Security</span></button>
-          <div class="settings-nav-separator"></div>
-          <div class="settings-nav-category">Defaults</div>
-          <button class="settings-nav-item" data-section="models"><span>Model</span></button>
           <div class="settings-nav-separator"></div>
           <div class="settings-nav-category">Config</div>
           <button class="settings-nav-item" data-section="claudemd"><span>Instructions</span></button>
@@ -1237,55 +1255,6 @@
             <div class="settings-field-row">
               <label class="settings-label">Project Slug</label>
               <span class="settings-value settings-mono" id="settings-project-slug">-</span>
-            </div>
-          </div>
-        </div>
-        <div class="server-settings-section" data-section="models">
-          <h2>Model</h2>
-          <p class="settings-hint" style="margin-bottom: 20px;">Configure which model to use and how Claude behaves during sessions.</p>
-          <div class="settings-card">
-            <div class="settings-field">
-              <label class="settings-label">Model</label>
-              <div class="settings-hint">Choose the Claude model to use. Larger models are slower but more capable.</div>
-              <div id="ss-model-list" class="settings-model-list"></div>
-            </div>
-          </div>
-          <div class="settings-card" id="ss-beta-card" style="display:none">
-            <div class="settings-field">
-              <label class="settings-label">Extended Context (Beta)</label>
-              <div class="settings-hint">Enable 1M token context window for Sonnet models. Allows processing much larger codebases and files, but may increase latency.</div>
-              <label class="settings-toggle-row ss-beta-toggle-row">
-                <div>
-                  <span class="settings-label">1M Context</span>
-                </div>
-                <input type="checkbox" id="ss-beta-1m">
-                <span class="toggle-track"><span class="toggle-thumb"></span></span>
-              </label>
-            </div>
-          </div>
-          <div class="settings-card">
-            <div class="settings-field">
-              <label class="settings-label">Mode</label>
-              <div class="settings-hint">Controls how Claude handles tool use and file edits.</div>
-              <div id="ss-mode-list" class="settings-model-list"></div>
-            </div>
-          </div>
-          <div class="settings-card" id="ss-effort-card">
-            <div class="settings-field">
-              <label class="settings-label">Effort</label>
-              <div class="settings-hint">Controls how much thinking effort Claude puts into responses. Higher effort means longer, more thorough responses.</div>
-              <div class="settings-btn-group" id="ss-effort-bar"></div>
-            </div>
-          </div>
-          <div class="settings-card" id="ss-thinking-card">
-            <div class="settings-field">
-              <label class="settings-label">Thinking</label>
-              <div class="settings-hint">Controls whether Claude shows its reasoning process. Budget mode lets you set a token limit.</div>
-              <div class="settings-btn-group" id="ss-thinking-bar"></div>
-              <div id="ss-thinking-budget-row" class="settings-budget-row" style="display:none">
-                <label class="settings-budget-label">Budget tokens</label>
-                <input id="ss-thinking-budget" type="number" class="settings-budget-input" min="1024" max="128000" step="1024" value="10000">
-              </div>
             </div>
           </div>
         </div>
@@ -1665,21 +1634,6 @@
     </div>
     <div class="mcp-content" id="mcp-content">
       <p class="mcp-no-servers">No MCP servers detected. Configure in Clay Chrome Extension.</p>
-    </div>
-  </div>
-</div>
-
-<!-- Email Defaults Modal -->
-<div id="email-defaults-modal" class="hidden">
-  <div class="confirm-backdrop"></div>
-  <div class="confirm-dialog mcp-dialog">
-    <div class="mcp-header">
-      <span class="mcp-title"><i data-lucide="mail"></i> Email</span>
-      <button class="skills-close" id="email-defaults-close"><i data-lucide="x"></i></button>
-    </div>
-    <div class="mcp-content" id="email-defaults-content">
-      <p class="mcp-desc">Toggle email accounts to auto-enable them for every new session in this project.</p>
-      <div id="email-defaults-list"></div>
     </div>
   </div>
 </div>
@@ -2294,7 +2248,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@xterm/addon-fit@0/lib/addon-fit.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@xterm/addon-web-links@0/lib/addon-web-links.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@xterm/addon-webgl@0/lib/addon-webgl.min.js"></script>
-<script type="module" src="app.js"></script>
+<script type="module" src="app.js?v=20260829-image-save-details1"></script>
 <div id="pwa-install-modal" class="pwa-modal hidden">
   <div class="pwa-modal-backdrop"></div>
   <div class="pwa-modal-card">

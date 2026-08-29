@@ -31,6 +31,7 @@ Wires all modules, sets up session manager and SDK bridge, dispatches messages.
 | `project-sessions.js` | `new_session`, `switch_session`, `delete_session`, `rename_session`, `resume_session`, `fork_session`, `rewind_*`, `permission_response`, `elicitation_response`, `set_model`, `set_effort`, `set_thinking`, `set_betas`, `set_*_mode`, `browse_dir`, `add_project`, `create_project`, `clone_project`, `create_worktree`, `remove_project*`, `schedule_move`, `reorder_projects`, `set_project_title`, `set_project_icon`, `get_daemon_config`, `set_pin`, `set_keep_awake`, `set_auto_continue`, `set_image_retention`, `shutdown_server`, `restart_server`, `process_stats`, `stop`, `stop_task`, `kill_process`, `set_update_channel`, `check_update`, `update_now`, `ask_user_response`, `input_sync`, `cursor_*`, `text_select`, `push_subscribe`, `load_more_history`, `search_sessions`, `search_session_content`, `list_cli_sessions`, `set_session_visibility`, `transfer_project_owner`, `set_mate_dm` | Session lifecycle, config, project management, daemon settings, permissions, updates |
 | `project-filesystem.js` | `fs_list`, `fs_read`, `fs_write`, `fs_watch`, `fs_unwatch`, `fs_file_history`, `fs_git_diff`, `fs_file_at`, `get_project_env`, `set_project_env`, `read_global_claude_md`, `write_global_claude_md`, `get_shared_env`, `set_shared_env` | File browser, file history, project env/settings |
 | `project-user-message.js` | `message`, `note_*`, `term_*`, `context_sources_save`, `browser_tab_list`, `extension_result`, `loop_*` (delegation), `schedule_*`, `send_scheduled_now`, `cancel_scheduled_message` | User message dispatch, sticky notes, terminals, context sources, browser extension |
+| `project-shell-command.js` | `shell_command` | One-shot composer shell execution and pending agent context capture |
 | `project-loop.js` | `loop_start`, `loop_stop`, `ralph_wizard_complete`, `ralph_wizard_cancel`, `ralph_cancel_crafting`, `ralph_preview_files`, `loop_registry_*`, `schedule_create`, `hub_schedules_list`, `delete_loop_group` | Loop/Ralph engine, loop registry, scheduling |
 | `project-notifications.js` | `notification_mark_read`, `notification_mark_all_read`, `notification_delete`, `notification_clear_all` | Notification center persistence and CRUD |
 | `whats-new.js` + `whats-new-content.js` | `whats_new_state` (s2c, pushed from `project-connection.js`), `whats_new_seen` (c2s, handled in `project-sessions.js`) | What's New modal. `whats-new-content.js` is pure data (entries array). `whats-new.js` joins content with per-user seen ids. Client viewer (`lib/public/modules/whats-new.js`) is content-agnostic; add a new modal by appending to the content file only. |
@@ -49,8 +50,10 @@ Wires all modules, sets up session manager and SDK bridge, dispatches messages.
 | `project-image.js` | `hydrateImageRefs`, `saveImageFile`, image directory setup |
 | `project-file-watch.js` | File and directory fs.watch wrappers |
 | `project-session-spawn.js` | Agent-driven sibling session creation, safety policy, and concurrency queue |
+| `project-models.js` | Vendor model discovery, loading/error responses, model matching, and selection acknowledgements |
 | `project-worker-proposal.js` | Fable-triggered inline Worker suggestions, approval routing, and execution handoff |
 | `session-spawn-mcp-server.js` | SDK-free `clay-sessions` MCP tool definitions for spawning and checking sessions |
+| `session-handoff-mcp-server.js` | SDK-free `clay-handoff` MCP tool definition for reading a session's handoff source chain |
 | `project-session-document.js` + `session-document-mcp-server.js` | Session-bound `clay-documents` MCP signal that snapshots and presents explicit Markdown editing work |
 | `sdk-bridge.js` | SDK bridge coordinator: createSDKBridge factory, worker lifecycle, query stream, tool permissions, mention sessions |
 | `sdk-skill-discovery.js` | Skill directory scanning, shell segment splitting, SDK/filesystem skill merging |
@@ -78,15 +81,20 @@ YOKE is the vendor-agnostic interface layer. Each adapter implements the same co
 | Module | Concern |
 |--------|---------|
 | `yoke/index.js` | Adapter factory, wraps createQuery with project instructions |
-| `yoke/interface.js` | YOKE interface contract definition |
+| `yoke/interface.js` | YOKE interface contract definition, plus vendor-neutral shared constants (`INITIALIZE_TIMEOUT_MS`) |
 | `yoke/adapters/claude.js` | Claude adapter using `@anthropic-ai/claude-agent-sdk`. In-process + worker (OS user isolation) paths |
 | `yoke/adapters/codex.js` | Codex adapter using `codex app-server` JSON-RPC protocol. Handles approval events, skill injection, MCP bridge config |
 | `yoke/codex-app-server.js` | Codex `app-server` child process manager. JSON-RPC 2.0 over stdin/stdout, request ID tracking, event routing |
+| `yoke/adapters/acp.js` | Shared default YOKE adapter for ACP agents. Vendor drivers may augment or replace lifecycle behavior so ACP never limits the YOKE contract |
+| `yoke/adapters/antigravity.js` | Antigravity CLI integration using Google's official bidirectional stream-JSON protocol for sessions, models, effort, tools, results, and usage |
+| `yoke/acp-agent-profiles.js` + `yoke/acp-driver-runtime.js` | OpenCode, Kimi Code, Grok Build, GitHub Copilot CLI, Qwen Code, and Junie CLI process metadata plus composable vendor hooks for initialization, sessions, permissions, events, results, and optional YOKE methods |
+| `yoke/acp-query-handle.js` + `yoke/acp-event-normalizer.js` | Shared ACP session lifecycle, permission handling, and YOKE event normalization |
 | `yoke/adapters/kiro.js` | Kiro adapter using `kiro-cli acp` (Agent Client Protocol). Dynamic model catalog, event flattening (session/update), permission routing, session resume |
-| `yoke/kiro-acp-server.js` | Kiro `acp` child process manager. JSON-RPC 2.0 over stdin/stdout, request ID tracking, auth-error detection |
+| `yoke/acp-process-manager.js` | Vendor-neutral ACP child process manager. JSON-RPC 2.0 over stdin/stdout, request ID tracking, session-aware event routing |
+| `yoke/kiro-acp-server.js` | Thin Kiro ACP profile. Binary discovery, Kiro arguments, and auth-error detection |
 | `yoke/mcp-bridge-server.js` | Stdio MCP server spawned by Codex. Proxies tool list/call to Clay via HTTP at `/api/mcp-bridge` |
 
-**When adding a new vendor**: implement the YOKE interface, register in `yoke/index.js` createAdapter switch. Do not add vendor-specific logic outside the adapter.
+**When adding a new vendor**: use the shared ACP defaults when the runtime supports ACP, then keep special behavior in its driver hooks. If the runtime needs deeper semantics, retain a dedicated YOKE adapter while sharing only the ACP process manager, as Kiro does. For a non-ACP runtime, implement the YOKE interface and register it in `yoke/index.js`.
 
 **For Codex-specific patterns and gotchas**: see [CODEX-INTEGRATION.md](./CODEX-INTEGRATION.md).
 
@@ -142,11 +150,14 @@ Bootstraps UI, initializes store, wires remaining Tier 3 modules. All business l
 | `app-rendering.js` | Message rendering, streaming, scroll management, pre-thinking dots, suggestion chips, system messages |
 | `app-projects.js` | Project list, switching, add/remove project modals, update available pill, topbar presence |
 | `app-panels.js` | Config chip (model/mode/effort/thinking/beta), usage panel, status panel, context panel, context popover |
+| `model-picker.js` | Vendor model loading state, request correlation, retry/error UI, and acknowledged model selection |
+| `filebrowser-tabs.js` | Global document-viewer tab lifecycle, focus, and close behavior |
 | `worker-proposal.js` | Inline Worker recommendation card with model/reasoning selection and lifecycle states |
 | `app-loop-ui.js` | Ralph Loop UI: bars, banners, preview modal, execution modal |
 | `app-loop-wizard.js` | Ralph Loop wizard: step navigation, mode/authorship selection, data collection |
 | `app-notifications.js` | Notification center panel, badge, rendering, click-to-navigate |
 | `app-debate-ui.js` | Debate sticky banner, floor/conclude/ended modes, bottom bar, hand raise |
+| `background-tasks-ui.js` | Active background-task indicator and task stop controls |
 | `app-skills-install.js` | Skill install dialog, requireSkills, requireClayMateInterview |
 | `app-favicon.js` | Dynamic favicon, IO blink, urgent blink, send button mode, activity indicator |
 | `app-header.js` | Session rename, session info popover, progressive history loading |
@@ -160,6 +171,7 @@ Bootstraps UI, initializes store, wires remaining Tier 3 modules. All business l
 | `scheduler-config.js` | Schedule create/edit modal, delete dialog, cron builder, recurrence/interval UI, calendar date picker, preview events |
 | `scheduler-history.js` | Run history rendering, schedule event message handlers (registry updates, run started/finished, loop scheduled) |
 | `terminal-toolbar.js` | **Shared** mobile control-key bar (Tab/Ctrl/Esc/arrows/Alt) used by both `terminal.js` (bottom-panel shell) and `session-tui-view.js` (embedded TUI). Owns key sequences + sticky modifiers; callers pass a `send` fn. Do not duplicate the key logic |
+| `shell-command.js` | Composer shell-command mode, one-shot result card, and next-message context state |
 
 ---
 

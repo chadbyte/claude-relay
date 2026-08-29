@@ -36,29 +36,32 @@
   position: absolute;
   width: 38px;
   height: 38px;
+  box-sizing: border-box;
   border-radius: 12px;
   background: var(--bg-alt);
-  transition: background 0.2s ease;
+  box-shadow: 0 1px 2px rgba(var(--shadow-rgb), 0.08);
+  transition: background 0.2s ease, box-shadow 0.2s ease;
   z-index: -1;
 }
 
 .icon-strip-home:hover::before {
-  background: var(--accent);
+  background: var(--bg);
+  box-shadow: 0 2px 6px rgba(var(--shadow-rgb), 0.14);
 }
 
 .icon-strip-home .icon-strip-logo {
   width: 38px;
   height: 38px;
-  border-radius: 12px;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .icon-strip-home:hover .icon-strip-logo {
-  opacity: 0.8;
+  opacity: 1;
 }
 
 .icon-strip-home.active::before {
-  background: var(--accent);
+  background: var(--bg);
+  box-shadow: 0 1px 3px rgba(var(--shadow-rgb), 0.14);
 }
 
 /* First separator aligns with title bar border (48px line) */
@@ -185,26 +188,32 @@
   position: absolute;
   width: 38px;
   height: 38px;
+  box-sizing: border-box;
   border-radius: 12px;
-  background: var(--bg-alt);
-  transition: background 0.2s ease;
+  background: var(--bg);
+  box-shadow: 0 1px 2px rgba(var(--shadow-rgb), 0.1);
+  transition: background 0.2s ease, box-shadow 0.2s ease;
   z-index: -1;
 }
 
 .icon-strip-item:hover::before {
-  background: var(--accent);
+  background: var(--bg-alt);
+  box-shadow: 0 2px 6px rgba(var(--shadow-rgb), 0.14);
 }
 
 .icon-strip-item:hover {
-  color: #fff;
+  color: var(--text);
 }
 
 .icon-strip-item.active::before {
-  background: var(--accent);
+  background: color-mix(in srgb, var(--brand-indigo) 6%, var(--bg));
+  box-shadow:
+    0 5px 14px color-mix(in srgb, var(--brand-indigo) 28%, transparent),
+    0 1px 3px rgba(var(--shadow-rgb), 0.14);
 }
 
 .icon-strip-item.active {
-  color: #fff;
+  color: var(--text);
 }
 
 /* --- Socket status indicator on icon (top-left dot) --- */
@@ -486,6 +495,8 @@
 .icon-strip-item .project-emoji {
   width: 22px;
   height: 22px;
+  position: relative;
+  z-index: 1;
   pointer-events: none;
 }
 
@@ -1230,22 +1241,25 @@
   width: 30px;
   height: 30px;
   border-radius: 8px;
-  background: var(--bg-alt);
-  opacity: 0.7;
-  transition: opacity 0.15s, background 0.15s;
+  background: var(--bg);
+  box-shadow: 0 1px 2px rgba(var(--shadow-rgb), 0.1);
+  transition: background 0.15s, box-shadow 0.15s;
 }
 
 .icon-strip-wt-item:hover::before {
-  opacity: 1;
+  background: var(--bg-alt);
+  box-shadow: 0 2px 5px rgba(var(--shadow-rgb), 0.14);
 }
 
 .icon-strip-wt-item.active::before {
-  background: var(--accent);
-  opacity: 1;
+  background: var(--bg);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--link) 58%, var(--border)),
+    0 1px 3px rgba(var(--shadow-rgb), 0.16);
 }
 
 .icon-strip-wt-item.active {
-  color: #fff;
+  color: var(--text);
 }
 
 .icon-strip-wt-item .wt-branch-abbrev {
@@ -1257,19 +1271,26 @@
   z-index: 1;
 }
 
-/* Disabled/inaccessible worktree */
-.icon-strip-wt-item.wt-disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
+/* Worktree registered outside the main project folder. It remains usable;
+   the badge communicates location without treating it as an error. */
+.worktree-external-badge {
+  position: absolute;
+  right: 5px;
+  bottom: 1px;
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2px solid var(--sidebar-bg);
+  background: var(--warning);
+  color: var(--bg);
+  z-index: 3;
+  pointer-events: none;
 }
 
-.icon-strip-wt-item.wt-disabled::after {
-  content: "\1F6AB";
-  position: absolute;
-  font-size: 14px;
-  z-index: 3;
-  filter: grayscale(0.3);
-}
+.worktree-external-badge .lucide { width: 8px; height: 8px; stroke-width: 2.8; }
 
 /* Group add button */
 .icon-strip-group-add {
@@ -1420,10 +1441,19 @@ select.wt-modal-input {
   opacity: 0.85;
 }
 
-.mobile-project-item.wt-disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
+.mobile-worktree-external-badge {
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--warning) 14%, transparent);
+  color: var(--warning);
+  flex-shrink: 0;
 }
+
+.mobile-worktree-external-badge .lucide { width: 12px; height: 12px; stroke-width: 2.4; }
 
 .mobile-folder-chevron {
   font-size: 8px;

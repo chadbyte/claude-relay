@@ -1,0 +1,11 @@
+{
+  "name": "Clay Studio Dark",
+  "author": "Clay Studio",
+  "variant": "dark",
+  "base00": "171715", "base01": "20201D", "base02": "393934", "base03": "686861",
+  "base04": "A0A098", "base05": "D1D1CA", "base06": "E8E8E2", "base07": "FAFAF5",
+  "base08": "FF7479", "base09": "7776FF", "base0A": "E0B45B", "base0B": "07E5A3",
+  "base0C": "5FD2C0", "base0D": "8AA7FF", "base0E": "C39AF3", "base0F": "D69A7D",
+  "accent2": "07E5A3",
+  "link": "7F7EC8"
+}

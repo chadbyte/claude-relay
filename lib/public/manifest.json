@@ -1,5 +1,5 @@
 {
-  "name": "Clay",
+  "name": "Clay Studio",
   "short_name": "Clay",
   "id": "/",
   "start_url": "/",
@@ -17,11 +17,6 @@
       "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
-    },
-    {
-      "src": "icon-mono.svg",
-      "sizes": "any",
-      "type": "image/svg+xml"
     }
   ]
 }

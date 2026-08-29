@@ -77,6 +77,7 @@ function createForkFixture(options) {
   });
   var server = attached.createMcpServer(fakeAdapter, parent);
   var spawnTool = server.tools.filter(function(tool) { return tool.name === "spawn_sessions"; })[0];
+  var checkTool = server.tools.filter(function(tool) { return tool.name === "check_spawned_sessions"; })[0];
   return {
     parent: parent,
     sessions: sessions,
@@ -84,6 +85,7 @@ function createForkFixture(options) {
     forks: forks,
     get broadcasts() { return broadcasts; },
     spawn: function(args) { return spawnTool.handler(args); },
+    check: function(args) { return checkTool.handler(args || {}); },
   };
 }
 
@@ -122,6 +124,20 @@ test("spawned sessions cannot create grandchildren", function() {
   assert.throws(function() {
     spawnModule.assertSpawnAllowed({ localId: 7, spawn: { parentId: 2 } }, [], 1);
   }, { message: "spawned sessions cannot spawn further sessions" });
+});
+
+test("check_spawned_sessions reports an interrupted child distinctly", async function() {
+  var f = createForkFixture();
+  var response = await f.spawn({ sessions: JSON.stringify([{ title: "Worker", prompt: "Implement it" }]) });
+  var spawned = JSON.parse(response.content[0].text).spawned[0];
+  var child = f.sessions.get(spawned.localId);
+  child.isProcessing = false;
+  child._lastTurnInterrupted = true;
+  child.history.push({ type: "info", text: "Interrupted · What should Claude do instead?" });
+  child.history.push({ type: "done", code: 0 });
+
+  var checked = JSON.parse((await f.check()).content[0].text);
+  assert.strictEqual(checked[0].status, "interrupted");
 });
 
 test("twentieth child is allowed and twenty-first is rejected", function() {

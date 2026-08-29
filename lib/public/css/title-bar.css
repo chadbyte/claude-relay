@@ -30,7 +30,7 @@
   padding: 2px 10px;
   font-family: inherit;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: var(--font-weight-ui);
   cursor: pointer;
   white-space: nowrap;
   line-height: 1;
@@ -208,33 +208,65 @@
 .title-bar-project-dropdown {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   flex: 1;
   min-width: 0;
   background: none;
   border: none;
-  padding: 4px 8px;
-  margin: -4px -8px;
-  border-radius: 6px;
+  padding: 4px;
+  margin: 0;
+  border-radius: 10px;
   cursor: pointer;
-  transition: background 0.15s;
+  text-align: left;
+  transition: background 0.15s, box-shadow 0.15s;
   font-family: inherit;
 }
 
-.title-bar-project-dropdown:hover {
-  background: rgba(var(--overlay-rgb), 0.06);
+.title-bar-project-dropdown:hover,
+.title-bar-project-dropdown.open {
+  background: rgba(var(--overlay-rgb), 0.035);
+}
+
+.title-bar-project-dropdown:focus { outline: none; }
+.title-bar-project-dropdown:focus-visible {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--link) 18%, transparent);
 }
 
 .title-bar-project-icon {
-  display: none;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  background: var(--bg);
+  color: var(--text-muted);
+  box-shadow: 0 1px 3px rgba(var(--shadow-rgb), 0.1);
   font-size: 18px;
   line-height: 1;
   flex-shrink: 0;
+  transition: background 0.15s, box-shadow 0.15s, transform 0.15s;
 }
 
-.title-bar-project-icon.has-icon {
-  display: inline-flex;
-  align-items: center;
+.title-bar-project-icon::before {
+  content: "";
+  width: 15px;
+  height: 15px;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.title-bar-project-icon.has-icon::before {
+  display: none;
+}
+
+.title-bar-project-dropdown:hover .title-bar-project-icon,
+.title-bar-project-dropdown.open .title-bar-project-icon {
+  background: var(--bg-alt);
+  box-shadow: 0 3px 8px rgba(var(--shadow-rgb), 0.14);
+  transform: translateY(-1px);
 }
 
 .title-bar-project-icon .emoji {
@@ -251,9 +283,10 @@
 
 .title-bar-project-name {
   font-family: "Pretendard", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 17px;
-  font-weight: 800;
+  font-size: 14px;
+  font-weight: var(--font-weight-heading);
   color: var(--text);
+  flex: 0 1 auto;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -261,10 +294,10 @@
 }
 
 .title-bar-chevron {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   flex-shrink: 0;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   transition: transform 0.2s;
 }
 
@@ -276,7 +309,7 @@
   width: 100%;
   font-family: "Pretendard", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 17px;
-  font-weight: 800;
+  font-weight: var(--font-weight-heading);
   color: var(--text);
   background: var(--bg-alt);
   border: 1px solid var(--accent);
@@ -322,6 +355,25 @@
 @media (max-width: 768px) {
   #top-bar {
     display: none !important;
+  }
+
+  .title-bar-content {
+    height: calc(48px + var(--safe-top));
+    padding: var(--safe-top) 16px 0;
+  }
+
+  /* The inline title editor must own the header while the keyboard is open.
+     Leaving the other controls visible made its usable width nearly zero. */
+  .title-bar-content.session-renaming .status,
+  .title-bar-content.session-renaming #header-left > :not(.header-rename-input) {
+    display: none !important;
+  }
+
+  .title-bar-content.session-renaming .header-rename-input {
+    flex: 1 1 100%;
+    width: 100%;
+    min-height: 36px;
+    font-size: 16px;
   }
 
   #sidebar-column {

@@ -148,6 +148,52 @@ test("a same-vendor fallback recommends a non-Fable execution model", async func
   assert.strictEqual(proposal.recommendedModel, "claude-sonnet-4-6");
 });
 
+test("skip permissions auto-approves and starts a Worker", async function () {
+  var f = fixture();
+  f.session.permissionMode = "bypassPermissions";
+  var tool = f.attached.getToolDefs(f.session)[0];
+  var result = parseToolResult(await tool.handler({
+    summary: "The implementation is large enough to benefit from a dedicated Worker.",
+    plan: "1. Inspect the current flow\n2. Implement the change\n3. Run focused tests",
+    message: "Implement the approved change and run focused tests.",
+    recommendedVendor: "codex",
+    recommendedModel: "gpt-5.6-sol",
+    recommendedEffort: "high",
+  }));
+  var proposal = f.session.history.filter(function (item) { return item.type === "worker_proposal"; })[0];
+
+  assert.strictEqual(result.status, "running");
+  assert.match(result.instruction, /auto-approved and started/);
+  assert.strictEqual(proposal.autoApproved, true);
+  assert.ok(proposal.status === "running" || proposal.status === "completed");
+  assert.strictEqual(f.pairs.length, 1);
+  assert.ok(f.updates.some(function (message) { return message.autoApproved === true; }));
+});
+
+test("skip permissions off leaves a Worker proposal pending", async function () {
+  var f = fixture();
+  var proposal = await postProposal(f);
+
+  assert.strictEqual(proposal.status, "pending");
+  assert.strictEqual(proposal.autoApproved, undefined);
+  assert.strictEqual(f.pairs.length, 0);
+  assert.strictEqual(f.delegations.length, 0);
+});
+
+test("auto-approved proposal updates carry the auto-approval marker", async function () {
+  var f = fixture();
+  f.session.dangerouslySkipPermissions = true;
+  var tool = f.attached.getToolDefs(f.session)[0];
+  await tool.handler({
+    summary: "The implementation is large enough to benefit from a dedicated Worker.",
+    plan: "1. Inspect the current flow\n2. Implement the change\n3. Run focused tests",
+    message: "Implement the approved change and run focused tests.",
+  });
+
+  var starting = f.updates.find(function (message) { return message.status === "starting"; });
+  assert.strictEqual(starting.autoApproved, true);
+});
+
 test("accepting a Worker suggestion creates the split, delegates, and returns the result", async function () {
   var f = fixture();
   var proposal = await postProposal(f);
@@ -170,7 +216,32 @@ test("accepting a Worker suggestion creates the split, delegates, and returns th
   assert.strictEqual(proposal.status, "completed");
   assert.strictEqual(proposal.resultPreview, "Implemented and tested.");
   assert.match(f.starts[0].text, /Worker execution completed/);
+  assert.match(f.starts[0].text, /send a follow-up with send_to_partner/);
+  assert.match(f.starts[0].text, /create a replacement with spawn_sessions/);
   assert.match(f.starts[0].text, /Implemented and tested/);
   assert.ok(f.updates.some(function (message) { return message.status === "running"; }));
   assert.ok(f.updates.some(function (message) { return message.status === "completed"; }));
+});
+
+test("an interrupted Worker proposal stays interrupted and warns the Driver", async function () {
+  var f = fixture();
+  f.attached = proposalModule.attachWorkerProposal({
+    sm: f.sm,
+    isMate: false,
+    splitStore: { groupForMember: function () { return null; } },
+    getSdk: function () { return { pushMessage: function () { return false; }, startQuery: function (target, text) { f.starts.push({ session: target, text: text }); return Promise.resolve(); } }; },
+    sendTo: function (ws, message) { f.directEvents.push(message); },
+    usersModule: { isMultiUser: function () { return false; } },
+    getLinuxUserForSession: function () { return null; },
+    onProcessingChanged: function () {},
+    adapters: {},
+    createPairRecord: function () { return { worker: { localId: 2 }, group: { id: "sg_worker", members: [1, 2] } }; },
+    sendToPartner: function () { return Promise.resolve({ content: [{ type: "text", text: JSON.stringify({ status: "interrupted", response: "Partial implementation" }) }] }); },
+  });
+  var proposal = await postProposal(f);
+  await f.attached.respondToProposal(f.ws, { proposalId: proposal.proposalId, accepted: true, vendor: "codex", model: "gpt-5.6-sol", effort: "high" });
+  await nextTurn();
+  assert.strictEqual(proposal.status, "interrupted");
+  assert.match(f.starts[0].text, /Worker execution interrupted/);
+  assert.match(f.starts[0].text, /PARTIAL/);
 });

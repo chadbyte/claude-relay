@@ -1,0 +1,11 @@
+{
+  "name": "Clay Studio Light",
+  "author": "Clay Studio",
+  "variant": "light",
+  "base00": "F7F7F3", "base01": "EEEEEA", "base02": "D7D7D0", "base03": "A2A29B",
+  "base04": "73736C", "base05": "44443F", "base06": "252522", "base07": "151513",
+  "base08": "C84B50", "base09": "5857FC", "base0A": "956A19", "base0B": "087B59",
+  "base0C": "187A7C", "base0D": "3F62B4", "base0E": "7A52A8", "base0F": "9A5A46",
+  "accent2": "07E5A3",
+  "link": "4948B8"
+}
