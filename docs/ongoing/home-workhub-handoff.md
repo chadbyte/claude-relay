@@ -43,6 +43,17 @@ clay-kernel/docs/ARCHITECTURE.md — L+S+D, "augmentation not mediation").
 7. Ruby/WASM (clayOS's boundary) is explicitly NOT adopted here: the
    declarative-UI + worker-sandboxed-logic split provides the isolation
    with a web-native stack that LLMs author reliably.
+8. Built-ins are capsules too (added 2026-08-20). The board is
+   first-class but must live INSIDE the capsule spec; when the spec is
+   too small, the spec grows — built-ins never escape it. Two sanctioned
+   extensions: (a) manifest `runtime: "server" | "worker"` — identical
+   state/action contract, but trusted built-ins shipping with Clay may
+   execute logic server-side (invariants a client must not be able to
+   bypass, e.g. board completion rules); user/mate tools are always
+   `worker`. (b) the UI vocabulary grows `board` (column container) and
+   `board-card` (draggable card) nodes; home-board.js becomes the
+   reference renderer for those nodes, and the board ships as
+   manifest + ui.json + server logic like any capsule.
 
 ## Vision
 
@@ -376,9 +387,12 @@ B. Tool contract skeleton: manifest format, declarative UI renderer
 C. Universal mate control: tool_snapshot / tool_act / tool_set /
    tool_storage_* MCP tools, Skills attachment from manifests,
    action attribution + human-interaction stream to the mate.
-D. Board on the contract: expose the board through the same tool_*
-   surface (native renderer stays; its actions and snapshot join the
-   universal protocol). This absorbs the old "step 3: board MCP tools".
+D. Board on the contract — REVISED per principle 8: the board becomes a
+   real capsule (manifest + ui.json + logic with runtime: "server").
+   Generalize phase C's board direct path into the server-runtime
+   execution path any trusted built-in can use; add board/board-card
+   nodes to the renderer vocabulary with home-board.js as their
+   reference renderer. This absorbs the old "step 3: board MCP tools".
 E. Tool LLM access + authoring flow: `api.llm.complete({system, prompt,
    model?})` in the logic api — host-mediated like storage RPC, gated by
    a manifest `permissions: ["llm"]` declaration, attributed/logged per
@@ -395,6 +409,27 @@ per-tool files (as shipped in phase B), never a global instance —
 structural isolation, OS-user-mode compatibility, bounded nedb memory,
 removal = directory delete. A future shared/team scope would be a
 manifest-declared `scope: "shared"`, not a global DB.
+
+### Phase C notes
+
+Mate control uses a fixed `clay-tools` MCP surface: list, snapshot, act,
+and set. Installed-tool availability and Skills text come directly from
+the per-user registry. Snapshot, act, and set for worker-backed tools make
+a correlated WebSocket round trip to the user's most recently opened live
+home client; that client runs the same worker action used by human controls
+and returns canonical state. Requests time out after 15 seconds.
+
+This means worker-backed tools cannot be controlled while the user's home
+screen is closed or disconnected. The MCP call returns a clear error in
+that case; the server does not simulate browser state. An installed tool
+can be started headlessly by the home client when its dock tab is not
+mounted.
+
+The native board is included in the same MCP surface but takes a direct
+server path, so it remains available without a browser. Board actions call
+the board manager with the mate ID as actor: create, update, and move retain
+the board invariants, moving to done is rejected, and `proposeDone` is the
+mate completion path. Board changes are broadcast with caller attribution.
 
 ### Build order phase 1 (original, superseded by roadmap v2 above)
 
