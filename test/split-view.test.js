@@ -135,6 +135,32 @@ test("session actions replace the dedicated worker button and stay out of split 
   assert.match(actionsSource, /model: modelSelect\.value/);
 });
 
+test("configured pair roles are status labels rather than role-transfer controls", function () {
+  var pairSource = fs.readFileSync(path.join(__dirname, "../lib/public/modules/split-pair-ui.js"), "utf8");
+  var paneCss = fs.readFileSync(path.join(__dirname, "../lib/public/css/pane.css"), "utf8");
+
+  assert.match(pairSource, /document\.createElement\("span"\)/);
+  assert.match(pairSource, /Worker controlled by the Driver/);
+  assert.doesNotMatch(pairSource, /Worker — click to make this session the Driver instead/);
+  assert.doesNotMatch(paneCss, /button\.split-pair-role/);
+});
+
+test("configured Workers preserve direct human messaging and stopping", function () {
+  var pairSource = fs.readFileSync(path.join(__dirname, "../lib/public/modules/split-pair-ui.js"), "utf8");
+  var messageSource = fs.readFileSync(path.join(__dirname, "../lib/public/modules/app-messages.js"), "utf8");
+  var paneCss = fs.readFileSync(path.join(__dirname, "../lib/public/css/pane.css"), "utf8");
+
+  assert.doesNotMatch(pairSource, /syncWorkerComposerLock/);
+  assert.doesNotMatch(messageSource, /syncWorkerComposerLock/);
+  assert.doesNotMatch(paneCss, /worker-controlled/);
+});
+
+test("dissolving a pair closes the split UI back to the Driver session", function () {
+  var splitSource = fs.readFileSync(path.join(__dirname, "../lib/public/modules/split-view.js"), "utf8");
+
+  assert.match(splitSource, /if \(!stillExists\) switchNativeSession\(split\.panes\[0\]\.sessionId\)/);
+});
+
 test("split pane permission control is anchored beside the session title", function () {
   var splitSource = fs.readFileSync(path.join(__dirname, "../lib/public/modules/split-view.js"), "utf8");
   var paneCss = fs.readFileSync(path.join(__dirname, "../lib/public/css/pane.css"), "utf8");

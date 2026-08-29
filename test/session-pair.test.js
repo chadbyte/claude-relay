@@ -11,11 +11,12 @@ function fixture(configured, options) {
   var driver = { localId: 1, ownerId: null, title: "Planner", vendor: "claude", history: [], isProcessing: false };
   var worker = { localId: 2, ownerId: null, title: "Builder", vendor: "codex", history: [], isProcessing: false };
   var sessions = new Map([[1, driver], [2, worker]]);
-  var group = { id: "sg_pair", members: [1, 2] };
-  if (configured) group.pair = { driverId: 1, workerId: 2 };
+  var group = options.ungrouped ? null : { id: "sg_pair", members: [1, 2] };
+  if (configured && group) group.pair = { driverId: 1, workerId: 2 };
   var events = [];
   var starts = [];
   var driverPushes = [];
+  var pairMessages = [];
   var attached;
   var sm = {
     sessions: sessions,
@@ -23,8 +24,16 @@ function fixture(configured, options) {
     modelsByVendor: {},
     capabilitiesByVendor: {},
     sendAndRecord: function (session, message) { session.history.push(message); },
-    sendToSession: function () {},
+    sendToSession: function (session, message) { if (message.type === "pair_session_created") pairMessages.push(message); },
     broadcastSessionList: function () {},
+    createSessionRaw: function (spec) {
+      worker.ownerId = spec.ownerId || null;
+      worker.vendor = spec.vendor;
+      worker.model = spec.model || null;
+      worker.effort = spec.effort || null;
+      sessions.set(worker.localId, worker);
+      return worker;
+    },
   };
   var sdk = {
     pushMessage: function (session, text) {
@@ -57,7 +66,19 @@ function fixture(configured, options) {
   };
   attached = pairModule.attachSessionPair({
     sm: sm,
-    splitStore: { groupForMember: function (id) { return group.members.indexOf(id) === -1 ? null : group; }, create: function () {} },
+    splitStore: {
+      groupForMember: function (id) { return !group || group.members.indexOf(id) === -1 ? null : group; },
+      create: function (ws, msg) {
+        group = { id: "sg_created", members: msg.members.slice(), pair: msg.pair };
+        return { ok: true, group: group };
+      },
+      dissolve: function (ws, msg) {
+        if (!group || group.id !== msg.id) return { ok: false, error: "Split group not found" };
+        var removed = group;
+        group = null;
+        return { ok: true, group: removed };
+      },
+    },
     getSdk: function () { return sdk; },
     send: function (message) { events.push(message); },
     sendTo: function () {},
@@ -65,24 +86,26 @@ function fixture(configured, options) {
     getLinuxUserForSession: function () { return null; },
     onProcessingChanged: function () {},
   });
-  return { attached: attached, driver: driver, worker: worker, group: group, events: events, starts: starts, driverPushes: driverPushes };
+  return { attached: attached, driver: driver, worker: worker, group: group, getGroup: function () { return group; }, events: events, starts: starts, driverPushes: driverPushes, pairMessages: pairMessages };
 }
 
 test("configured pairs expose partner tools only to the Driver", function () {
   var f = fixture(true);
-  assert.deepStrictEqual(f.attached.getToolDefs(f.driver).map(function (tool) { return tool.name; }), ["send_to_partner", "read_partner"]);
+  assert.deepStrictEqual(f.attached.getToolDefs(f.driver).map(function (tool) { return tool.name; }), ["send_to_partner", "read_partner", "interrupt_partner", "close_partner"]);
   assert.deepStrictEqual(f.attached.getToolDefs(f.worker), []);
   assert.match(f.attached.getSystemPrompt(f.driver), /Driver/);
   assert.match(f.attached.getSystemPrompt(f.driver), /completed Worker turn leaves the Worker session available/);
-  assert.match(f.attached.getSystemPrompt(f.driver), /create a replacement with spawn_sessions/);
+  assert.match(f.attached.getSystemPrompt(f.driver), /human may also message or stop the Worker directly/);
+  assert.match(f.attached.getSystemPrompt(f.driver), /Use close_partner immediately/);
+  assert.match(f.attached.getSystemPrompt(f.driver), /never substitute a background session/);
   assert.match(f.attached.getToolDefs(f.driver)[0].description, /reuse the same Worker for follow-up implementation/);
   assert.strictEqual(f.attached.getSystemPrompt(f.worker), "");
 });
 
 test("ad-hoc splits expose partner tools to both sessions", function () {
   var f = fixture(false);
-  assert.strictEqual(f.attached.getToolDefs(f.driver).length, 2);
-  assert.strictEqual(f.attached.getToolDefs(f.worker).length, 2);
+  assert.strictEqual(f.attached.getToolDefs(f.driver).length, 4);
+  assert.strictEqual(f.attached.getToolDefs(f.worker).length, 4);
 });
 
 test("send_to_partner records attribution and returns the response", async function () {
@@ -97,6 +120,30 @@ test("send_to_partner records attribution and returns the response", async funct
   assert.deepStrictEqual(f.events.map(function (event) { return event.active; }), [true, false]);
   assert.strictEqual(f.worker._delegatedBy, undefined);
   assert.deepStrictEqual(f.driverPushes, []);
+});
+
+test("send_to_partner creates and opens a visible Worker when the Driver is unpaired", async function () {
+  var f = fixture(false, { ungrouped: true });
+  assert.match(f.attached.getSystemPrompt(f.driver), /open it in the right pane automatically/);
+  var tool = f.attached.getToolDefs(f.driver)[0];
+  var result = parseToolResult(await tool.handler({ message: "Build the feature", timeoutSeconds: 2 }));
+
+  assert.deepStrictEqual(result, { status: "complete", response: "Partner result", workerCreated: true, partnerId: 2 });
+  assert.deepStrictEqual(f.getGroup().pair, { driverId: 1, workerId: 2 });
+  assert.strictEqual(f.worker.vendor, "codex");
+  assert.strictEqual(f.pairMessages.length, 1);
+  assert.strictEqual(f.pairMessages[0].group.id, "sg_created");
+});
+
+test("send_to_partner validates its task before creating a Worker", async function () {
+  var f = fixture(false, { ungrouped: true });
+  var tool = f.attached.getToolDefs(f.driver)[0];
+  var result = await tool.handler({ message: "  " });
+
+  assert.strictEqual(result.isError, true);
+  assert.match(result.content[0].text, /message is required/);
+  assert.strictEqual(f.getGroup(), null);
+  assert.strictEqual(f.pairMessages.length, 0);
 });
 
 test("a detached delegated turn pushes its result to the Driver once", async function () {
@@ -172,6 +219,46 @@ test("a user-started Worker turn never pushes to the Driver", function () {
   assert.strictEqual(f.attached.handleTurnDone(f.worker), false);
   assert.deepStrictEqual(f.driverPushes, []);
   assert.deepStrictEqual(f.driver.history, []);
+});
+
+test("only the Driver can interrupt a configured Worker's active task", async function () {
+  var f = fixture(true);
+  var stopped = false;
+  f.worker.isProcessing = true;
+  f.worker.abortController = { abort: function () { stopped = true; } };
+  var tool = f.attached.getToolDefs(f.driver)[2];
+  var result = parseToolResult(await tool.handler({}));
+
+  assert.deepStrictEqual(result, { status: "interrupting", partnerId: 2, title: "Builder" });
+  assert.strictEqual(stopped, true);
+  assert.strictEqual(f.worker.taskStopRequested, true);
+  var workerTool = f.attached.getToolDefs(f.worker).find(function (item) { return item.name === "interrupt_partner"; });
+  assert.strictEqual(workerTool, undefined);
+});
+
+test("the Driver can close an idle Worker while preserving its session", async function () {
+  var f = fixture(true);
+  var tool = f.attached.getToolDefs(f.driver)[3];
+  var result = parseToolResult(await tool.handler({}));
+
+  assert.deepStrictEqual(result, { status: "closed", partnerId: 2, interrupted: false, historyPreserved: true });
+  assert.strictEqual(f.getGroup(), null);
+  assert.strictEqual(f.attached.getToolDefs(f.worker).length, 4);
+});
+
+test("closing a running Worker interrupts it before dissolving the pair", async function () {
+  var f = fixture(true);
+  var stopped = false;
+  f.worker.isProcessing = true;
+  f.worker.abortController = { abort: function () { stopped = true; } };
+  var tool = f.attached.getToolDefs(f.driver)[3];
+  var result = parseToolResult(await tool.handler({}));
+
+  assert.strictEqual(result.status, "closed");
+  assert.strictEqual(result.interrupted, true);
+  assert.strictEqual(stopped, true);
+  assert.strictEqual(f.worker.taskStopRequested, true);
+  assert.strictEqual(f.getGroup(), null);
 });
 
 test("a role change invalidates a detached Worker completion", async function () {

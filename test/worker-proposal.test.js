@@ -217,7 +217,7 @@ test("accepting a Worker suggestion creates the split, delegates, and returns th
   assert.strictEqual(proposal.resultPreview, "Implemented and tested.");
   assert.match(f.starts[0].text, /Worker execution completed/);
   assert.match(f.starts[0].text, /send a follow-up with send_to_partner/);
-  assert.match(f.starts[0].text, /create a replacement with spawn_sessions/);
+  assert.match(f.starts[0].text, /never substitute a background session/);
   assert.match(f.starts[0].text, /Implemented and tested/);
   assert.ok(f.updates.some(function (message) { return message.status === "running"; }));
   assert.ok(f.updates.some(function (message) { return message.status === "completed"; }));
