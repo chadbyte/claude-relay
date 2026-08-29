@@ -69,6 +69,18 @@ body.home-active #main-area { border: 0; border-radius: 0; }
   min-height: 0;
   overflow: hidden;
   background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow:
+    4px 8px 18px rgba(var(--shadow-rgb), 0.14),
+    2px 2px 4px rgba(var(--shadow-rgb), 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  animation: home-workbench-in 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes home-workbench-in {
+  from { opacity: 0; transform: translateX(10px) scale(0.995); }
+  to { opacity: 1; transform: translateX(0) scale(1); }
 }
 
 .home-dock-divider,
@@ -83,7 +95,8 @@ body.home-active #main-area { border: 0; border-radius: 0; }
 
 #home-hub.dock-focus .home-tool-workbench {
   flex: 1 1 auto;
-  width: 100%;
+  width: calc(100% - 16px);
+  margin: 8px;
 }
 
 @media (min-width: 1180px) {
@@ -92,30 +105,42 @@ body.home-active #main-area { border: 0; border-radius: 0; }
   #home-hub.dock-split .home-dock-divider {
     position: relative;
     display: block;
-    flex: 0 0 11px;
+    z-index: 4;
+    flex: 0 0 12px;
+    margin-right: -12px;
     cursor: col-resize;
     touch-action: none;
   }
 
   #home-hub.dock-split .home-dock-divider::after {
     position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 5px;
-    width: 1px;
-    background: var(--border-subtle);
+    top: 14px;
+    bottom: 14px;
+    left: 4px;
+    width: 2px;
+    border-radius: 2px;
+    background: transparent;
     content: "";
-    transition: background 0.15s ease;
+    transition: background 0.15s ease, opacity 0.15s ease;
   }
 
   #home-hub.dock-split .home-dock-divider:hover::after,
-  body.home-dock-resizing #home-dock-divider::after { background: var(--text-dimmer); }
+  #home-hub.dock-split .home-dock-divider:focus-visible::after,
+  body.home-dock-resizing #home-dock-divider::after {
+    background: var(--text-dimmer);
+    opacity: 0.65;
+  }
+
+  #home-hub.dock-split .home-dock-divider:focus-visible { outline: none; }
 
   #home-hub.dock-split .home-tool-workbench {
     flex: 0 0 var(--home-dock-width);
     width: var(--home-dock-width);
     min-width: 420px;
     max-width: 58vw;
+    height: calc(100% - 16px);
+    align-self: center;
+    margin: 8px 8px 8px 12px;
   }
 
   #home-hub.dock-split .home-mate-chat-transcript,
@@ -1377,44 +1402,63 @@ textarea.tool-input {
     inset: 0;
     z-index: 2;
     display: block;
+    border-radius: 12px;
     background: rgba(var(--shadow-rgb), 0.14);
   }
 
   #home-hub.dock-split .home-tool-workbench {
     position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
+    top: 8px;
+    right: 8px;
+    bottom: 8px;
     z-index: 3;
     width: min(var(--home-dock-width), 65vw);
     min-width: 420px;
     max-width: 65vw;
-    border-left: 1px solid var(--border-subtle);
-    box-shadow: -18px 0 42px rgba(var(--shadow-rgb), 0.12);
+    box-shadow:
+      -18px 16px 42px rgba(var(--shadow-rgb), 0.16),
+      2px 2px 4px rgba(var(--shadow-rgb), 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.04);
   }
 }
 
 @media (max-width: 768px) {
-  .home-workspace { flex-direction: column; }
-
-  #home-hub.dock-split .home-workspace { overflow-y: auto; }
-
-  #home-hub.dock-split .home-conversation-region {
-    flex: 0 0 52vh;
-    min-height: 320px;
+  #home-hub.dock-split,
+  #home-hub.dock-focus {
+    padding: var(--safe-top) 0 calc(56px + var(--safe-bottom, 0px));
   }
 
+  .home-workspace { flex-direction: column; }
+
+  #home-hub.dock-split .home-conversation-region,
+  #home-hub.dock-split .home-dock-divider,
+  #home-hub.dock-split .home-dock-backdrop { display: none; }
+
   #home-hub.dock-split .home-tool-workbench {
-    flex: 0 0 62vh;
+    flex: 1 1 auto;
     width: 100%;
-    min-height: 420px;
-    border-top: 1px solid var(--border-subtle);
+    min-height: 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    animation: none;
   }
 
   #home-hub.dock-focus .home-tool-workbench {
     flex: 1 1 auto;
+    width: 100%;
     min-height: 0;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    animation: none;
   }
 
-  #home-hub.dock-focus .home-dock-return span { display: none; }
+  #home-hub.dock-split .home-dock-return { display: inline-flex; }
+  #home-hub.dock-split #home-dock-focus { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-tool-workbench { animation: none; }
 }

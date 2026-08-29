@@ -137,7 +137,121 @@ Claude — a calm place you live in, not a dashboard you visit.
    subtle activity dot on hidden changes; mate actions never force the
    dock open (a quiet "updated Board · View" notice is acceptable).
 
-### Spatial model v3 — execution stages and status
+**Spatial correction (2026-08-30): the flat split is retired.** The
+conversation remains Home's underlying stage. When invited, the dock is an
+inset, raised Workbench window using the same spatial language as Clay's
+terminal and document viewer: a quiet border, restrained radius, layered
+shadow, its own header, and an invisible left-edge resize target. On wide
+screens the conversation may reserve enough right inset to remain readable,
+but Home must never look like a rigid two-column grid. Intermediate screens
+use an inset overlay; mobile uses a full-screen capsule subview. Tool focus
+keeps the window identity and a clear return to conversation. This correction
+supersedes item 8's no-outer-card rule for the Workbench only; the board itself
+still follows the flat-column, raised-card rule.
+
+## Home experience masterplan v4 (locked 2026-08-30)
+
+Home is Clay Studio's end-user experience, not a launcher for the coding
+client. Project mode hosts coding agents such as Claude Code and Codex; Home
+is where a user maintains relationships with Mates, continues conversations,
+and invites Capsules into the conversation when work needs a tangible surface.
+
+### Product model and ownership
+
+- **Mate**: a persistent identity and relationship with its own Knowledge and
+  Memory boundary. A Mate is closer to a durable collaborator than a folder.
+- **Conversation**: one resumable thread with a Mate. Conversations belong to
+  their Mate and form the temporal history shown in Home.
+- **Capsule**: a deterministic or accumulating capability shared by the user
+  and every Mate. Capsules and their data belong to the user, never to one
+  Mate.
+- **Workbench**: the floating window in which a Capsule becomes visible and
+  operable. Conversation is the source; the Workbench is invited from it.
+- **Project mode**: a separate developer surface. Leaving Home for a project
+  hides rather than tears down the mounted Home surface whenever possible.
+
+The governing sentence is: **Conversation is the home. The sidebar remembers
+where the user has been. The Workbench appears only when conversation needs a
+place for work to become tangible.**
+
+### Spatial responsibilities
+
+Home has three intentionally unequal regions:
+
+1. **Sidebar — navigation through relationships and time.** A flat,
+   approximately 240px frame contains New conversation, one Capsules entry,
+   the current Mate, four to six recent conversations, All conversations, and
+   a collapse control. It does not display session metadata, capsule lists,
+   counts, or multiple nested groups. Collapsing removes the frame completely
+   so the conversation recenters; it does not leave an icon rail.
+2. **Conversation — the primary stage.** The two-voice transcript and composer
+   remain the visual center. Mate switching and New conversation move to the
+   sidebar, leaving only genuinely local conversation actions in the stage.
+3. **Workbench — an invited floating window.** Capsules open in a raised,
+   inset window above the conversation canvas. Its tabs, focus, close, size,
+   active capsule, and internal capsule state resume independently of the
+   conversation.
+
+Knowledge and Memory are deliberately absent from the sidebar's permanent
+navigation. They are Mate-owned backstage concepts available from the current
+Mate's overflow/settings. When a management surface is needed it may open in
+the Workbench, but neither concept is promoted to a first-class Home destination.
+
+### Sidebar information architecture
+
+The resting order is deliberately short:
+
+```
+Clay                                      Collapse
+
+New conversation
+Capsules                                  Activity when hidden
+
+MATE
+Current Mate                              Overflow
+
+RECENT
+Conversation
+Conversation
+Conversation
+Conversation
+
+All conversations
+```
+
+Recent rows show only a title and, when genuinely processing, a small activity
+dot. All conversations opens a calm searchable sheet rather than expanding the
+sidebar. Selecting a row restores that exact Mate and session. The current Mate
+row opens the existing Mate switcher; its overflow owns Knowledge, Memory, and
+Mate settings.
+
+### Workbench states and responsive behavior
+
+1. **Conversation:** the Workbench is closed and the transcript is centered in
+   the available stage.
+2. **Workbench open:** the last Capsule resumes, or Capsule Library appears
+   when none has been active. On desktop the window floats at the right and the
+   conversation shifts only enough to preserve reading width. It remains
+   resizable through an invisible, accessible left-edge target.
+3. **Capsule focus:** the Workbench occupies most of the stage while retaining
+   an inset window silhouette and an explicit Return to conversation action.
+
+At intermediate widths the Workbench becomes an inset overlay with a backdrop.
+On mobile it becomes a full-screen subview instead of stacking beneath chat.
+The existing mobile tab bar remains global navigation. A hidden Capsule change
+marks the sidebar Capsules row but never forces the Workbench open.
+
+### Persistence contract
+
+The existing server-side dock preference remains responsible for
+`{ dockOpen, dockWidth, activeToolId }`. A separate user-scoped Home surface
+preference will remember `{ activeMateId, activeSessionByMate,
+sidebarCollapsed }`. Same-tab minimize/resume continues to preserve the
+mounted DOM, draft, scroll, stream, and current Capsule exactly. Reload and
+cross-device restoration recover durable selections and Capsule data from the
+server; no Home preference may use localStorage.
+
+### Home experience — execution stages and status
 
 Stage 1 — conversation experience (spec items 3, 4, 5, 6 + header
 simplification): mate-color purge on home, avatar rail -> selected-mate
@@ -182,10 +296,45 @@ the current project while leaving the conversation DOM, draft, scroll, stream,
 and dock state mounted, and Clay Home resumes that suspended point. — DONE
 2026-08-20.
 
-Stage 4 — board polish + palette (remaining spec item 8 + round-1 leftovers):
-finish card-level board polish and generate the muted avatar palette at the
-source (no CSS filters). The dock frame, tabs, and board column containers were
-already flattened in Stage 3. — NOT STARTED.
+Stage 4 — floating Workbench: replace the Stage 3 flat dock/divider appearance
+with the inset terminal/document-viewer window language while preserving the
+three-state controller and server-side dock preference. Desktop gets a floating
+resizable window and readable conversation re-centering; intermediate screens
+get an inset overlay; mobile gets a full-screen capsule subview. Remove dead
+flat-split styling and retain accessible resize/focus/return behavior. — DONE
+2026-08-30. The Workbench now shares Clay's 12px inset-window silhouette,
+border, layered shadow, and restrained entrance motion. Its left-edge resize
+target is invisible at rest and reveals only a subtle interaction cue. Tablet
+uses an inset overlay and mobile replaces the former stacked layout with a
+full-stage Capsule surface above the persistent tab bar.
+
+Stage 5 — conversation foundation: add user-filtered Mate session list and
+explicit session-open protocol paths; add the user-scoped Home surface
+preference; restore the last Mate and exact active session per Mate after a
+reload without regressing same-tab mounted resume. The session protocol must
+ship before recent conversations become visible. — NOT STARTED.
+
+Stage 6 — minimal Home sidebar: add the flat 232–248px frame with New
+conversation, Capsules, current Mate/switcher, four to six recent conversations,
+All conversations, and complete collapse. Move duplicate Mate/New chat actions
+out of the conversation header. Knowledge and Memory remain under Mate
+overflow/settings. — NOT STARTED.
+
+Stage 7 — Capsule Library and navigation: make the sidebar Capsules entry resume
+the last active Capsule or open a native Capsule Library in the Workbench; move
+the hidden-activity signal to that entry; preserve tool tabs, suggestion-driven
+opening, shared installed-tool state, and user-owned Capsule storage. — NOT
+STARTED.
+
+Stage 8 — Mate backstage: make Knowledge, Memory, and Mate management coherent
+secondary surfaces reached from the current Mate overflow and rendered in the
+Workbench when appropriate. They must not become permanent sidebar destinations.
+— NOT STARTED.
+
+Stage 9 — visual QA and remaining polish: finish board card/column polish,
+generate the muted avatar palette at the source, and verify keyboard/focus/ESC,
+popstate, suspend/resume, tablet/mobile layouts, import resolution, and full
+test coverage. — NOT STARTED.
 
 Working agreement: the dev server serves this worktree live, so during
 a stage the UI can look half-built; judge visuals only at stage-commit

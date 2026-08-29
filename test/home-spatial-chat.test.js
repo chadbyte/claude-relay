@@ -79,8 +79,17 @@ test("home dock exposes conversation, split, and focused tool states", function 
   assert.match(dockSource, /dockOpen: false/);
   assert.match(dockSource, /home_dock_get/);
   assert.match(dockSource, /home_dock_set/);
-  assert.match(dockResizeSource, /available - 480/);
+  assert.match(dockSource, /window\.innerWidth <= 768[\s\S]*closeHomeDock\(\)/);
+  assert.match(dockResizeSource, /available - 504/);
   assert.match(dockResizeSource, /window\.innerWidth \* 0\.58/);
+  assert.match(dockResizeSource, /workbench\.getBoundingClientRect\(\)/);
+  assert.match(dockResizeSource, /pointerOffset/);
+  assert.match(cssSource, /\.home-tool-workbench \{[\s\S]*border: 1px solid var\(--border\);[\s\S]*border-radius: 12px;[\s\S]*box-shadow:/);
+  assert.match(cssSource, /@keyframes home-workbench-in/);
+  assert.match(cssSource, /#home-hub\.dock-split \.home-dock-divider::after \{[\s\S]*background: transparent;/);
+  assert.match(cssSource, /@media \(max-width: 768px\) \{[\s\S]*#home-hub\.dock-split \.home-conversation-region,[\s\S]*display: none;/);
+  assert.match(cssSource, /#home-hub\.dock-split,[\s\S]*padding: var\(--safe-top\) 0 calc\(56px \+ var\(--safe-bottom, 0px\)\)/);
+  assert.doesNotMatch(cssSource, /flex: 0 0 52vh|flex: 0 0 62vh/);
   assert.doesNotMatch(indexSource + cssSource, /hub-split|hub-pane-board|home-app-frame/);
   assert.doesNotMatch(dockSource, /localStorage/);
 });
