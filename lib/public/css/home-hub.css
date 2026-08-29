@@ -99,7 +99,7 @@ body.home-active #main-area { border: 0; border-radius: 0; }
   margin: 8px;
 }
 
-@media (min-width: 1180px) {
+@media (min-width: 1340px) {
   #home-hub.dock-split .home-conversation-region { min-width: 480px; }
 
   #home-hub.dock-split .home-dock-divider {
@@ -395,17 +395,12 @@ body.home-active #main-area { border: 0; border-radius: 0; }
   background: transparent;
 }
 
-.home-mate-chat-actions {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
 .home-mate-chat-controls {
   flex: 0 0 auto;
   display: flex;
   align-items: center;
   gap: 7px;
+  margin-left: auto;
 }
 
 .home-tools-trigger {
@@ -462,7 +457,6 @@ body.home-active #main-area { border: 0; border-radius: 0; }
   height: 14px;
 }
 
-.home-mate-chat-overflow,
 .home-mate-property-close {
   display: inline-flex;
   align-items: center;
@@ -477,39 +471,15 @@ body.home-active #main-area { border: 0; border-radius: 0; }
   cursor: pointer;
 }
 
-.home-mate-chat-overflow:hover,
 .home-mate-property-close:hover {
   border-color: var(--border-subtle);
   background: rgba(var(--overlay-rgb), 0.05);
   color: var(--text);
 }
 
-.home-mate-chat-overflow .lucide,
 .home-mate-property-close .lucide {
   width: 15px;
   height: 15px;
-}
-
-.home-mate-chat-new {
-  padding: 4px 8px;
-  border: 1px solid var(--border-subtle);
-  border-radius: 8px;
-  background: transparent;
-  color: var(--text-muted);
-  font-family: inherit;
-  font-size: 11px;
-  cursor: pointer;
-}
-
-.home-mate-chat-new:hover:not(:disabled) {
-  border-color: var(--border);
-  background: rgba(var(--overlay-rgb), 0.04);
-  color: var(--text);
-}
-
-.home-mate-chat-new:disabled {
-  opacity: 0.45;
-  cursor: default;
 }
 
 .home-mate-actions-menu {
@@ -1396,7 +1366,7 @@ textarea.tool-input {
   }
 }
 
-@media (min-width: 769px) and (max-width: 1179px) {
+@media (min-width: 769px) and (max-width: 1339px) {
   #home-hub.dock-split .home-dock-backdrop {
     position: absolute;
     inset: 0;

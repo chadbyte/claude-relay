@@ -124,13 +124,35 @@
   <div id="main-area">
     <div id="home-hub" class="hidden">
       <div class="home-hub-inner">
+        <button id="home-sidebar-backdrop" class="home-sidebar-backdrop" type="button" aria-label="Close Home navigation"></button>
+        <aside id="home-sidebar" class="home-sidebar" aria-label="Home navigation">
+          <div class="home-sidebar-brand-row">
+            <div class="home-sidebar-brand"><img src="/clay-studio-symbol.png" alt=""><span>Clay</span></div>
+            <button id="home-sidebar-collapse" class="home-sidebar-icon-btn" type="button" title="Collapse sidebar" aria-label="Collapse Home sidebar"><i data-lucide="panel-left-close"></i></button>
+          </div>
+          <nav class="home-sidebar-primary" aria-label="Home actions">
+            <button id="home-sidebar-new" class="home-sidebar-action" type="button"><i data-lucide="square-pen"></i><span>New conversation</span></button>
+            <button id="home-sidebar-capsules" class="home-sidebar-action" type="button" aria-disabled="true"><i data-lucide="box"></i><span>Capsules</span><span id="home-sidebar-capsules-activity" class="home-sidebar-activity" aria-hidden="true"></span></button>
+          </nav>
+          <section class="home-sidebar-section home-sidebar-mate-section" aria-labelledby="home-sidebar-mate-label">
+            <div id="home-sidebar-mate-label" class="home-sidebar-label">Mate</div>
+            <div class="home-sidebar-mate-row">
+              <div id="home-mate-switcher" class="home-mate-switcher"></div>
+              <button id="home-sidebar-mate-overflow" class="home-sidebar-icon-btn" type="button" aria-label="Mate settings" aria-haspopup="menu" aria-expanded="false"><i data-lucide="more-horizontal"></i></button>
+            </div>
+          </section>
+          <section class="home-sidebar-section home-sidebar-recents" aria-labelledby="home-sidebar-recent-label">
+            <div id="home-sidebar-recent-label" class="home-sidebar-label">Recent</div>
+            <div id="home-sidebar-recent-list" class="home-sidebar-recent-list"></div>
+          </section>
+          <button id="home-sidebar-all" class="home-sidebar-all" type="button"><i data-lucide="search"></i><span>All conversations</span></button>
+        </aside>
         <div id="home-workspace" class="home-workspace">
           <div id="home-conversation-region" class="home-conversation-region">
             <div id="home-mate-chat" class="home-mate-chat">
               <div class="home-mate-chat-header" id="home-mate-chat-header">
-                <div id="home-mate-switcher" class="home-mate-switcher"></div>
+                <button id="home-sidebar-expand" class="home-sidebar-expand" type="button" title="Show sidebar" aria-label="Show Home sidebar"><i data-lucide="panel-left-open"></i><span>Clay</span></button>
                 <div class="home-mate-chat-controls">
-                  <div id="home-mate-chat-actions" class="home-mate-chat-actions"></div>
                   <button id="home-tools-btn" class="home-tools-trigger" type="button" aria-expanded="false" aria-controls="home-tool-workbench">
                     <i data-lucide="panel-right"></i><span id="home-tools-label">Tools</span><span id="home-tools-activity" aria-hidden="true"></span>
                   </button>

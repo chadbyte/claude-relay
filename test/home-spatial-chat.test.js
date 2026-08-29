@@ -14,6 +14,7 @@ var shellSource = fs.readFileSync(path.join(root, "lib/public/modules/home-shell
 var dockSource = fs.readFileSync(path.join(root, "lib/public/modules/home-dock.js"), "utf8");
 var dockResizeSource = fs.readFileSync(path.join(root, "lib/public/modules/home-dock-resize.js"), "utf8");
 var chatSource = fs.readFileSync(path.join(root, "lib/public/modules/home-mate-chat.js"), "utf8");
+var homeSidebarSource = fs.readFileSync(path.join(root, "lib/public/modules/home-sidebar.js"), "utf8");
 var paletteSource = fs.readFileSync(path.join(root, "lib/public/modules/command-palette.js"), "utf8");
 var dmSource = fs.readFileSync(path.join(root, "lib/public/modules/app-dm.js"), "utf8");
 var cssSource = fs.readFileSync(path.join(root, "lib/public/css/home-hub.css"), "utf8");
@@ -134,12 +135,15 @@ test("empty home chat renders contextual greeting and working suggestions", func
   assert.match(chatSource, /submitSuggestion\(suggestion\)/);
 });
 
-test("home chat actions are consolidated into a labeled overflow menu", function () {
-  assert.match(chatSource, /aria-label", "Mate actions"/);
+test("Mate and new-conversation actions live in the Home sidebar", function () {
+  assert.match(homeMarkup, /id="home-sidebar-new"/);
+  assert.match(homeMarkup, /id="home-sidebar-mate-overflow"/);
+  assert.doesNotMatch(homeMarkup, /id="home-mate-chat-actions"/);
+  assert.match(homeSidebarSource, /startNewHomeConversation/);
+  assert.match(homeSidebarSource, /openHomeMateActions/);
   assert.match(chatSource, /"Memory"/);
   assert.match(chatSource, /"Knowledge"/);
   assert.match(chatSource, /"Start debate"/);
-  assert.match(chatSource, /newButton\.textContent = "New chat"/);
 });
 
 test("home chat CSS centers the transcript and keeps one composer surface", function () {

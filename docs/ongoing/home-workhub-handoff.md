@@ -329,7 +329,15 @@ Stage 6 — minimal Home sidebar: add the flat 232–248px frame with New
 conversation, Capsules, current Mate/switcher, four to six recent conversations,
 All conversations, and complete collapse. Move duplicate Mate/New chat actions
 out of the conversation header. Knowledge and Memory remain under Mate
-overflow/settings. — NOT STARTED.
+overflow/settings. — DONE 2026-08-30. Added a flat 240px sidebar (232px at
+compact desktop widths), five title-only recent conversations from the Stage 5
+session protocol, and a calm searchable custom All conversations sheet. Recent
+and sheet selections restore the exact Mate and session. Full collapse removes
+the frame and persists `sidebarCollapsed` through the server-side Home surface
+preference; narrow layouts use an overlay drawer. Capsules remains a Stage 7
+placeholder/activity target. Focused Home tests pass (34/34); all 115 client
+module imports resolve, targeted syntax audits pass, and touched JavaScript
+modules remain under 500 lines. No full suite was run.
 
 Stage 7 — Capsule Library and navigation: make the sidebar Capsules entry resume
 the last active Capsule or open a native Capsule Library in the Workbench; move
