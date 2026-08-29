@@ -379,8 +379,22 @@ C. Universal mate control: tool_snapshot / tool_act / tool_set /
 D. Board on the contract: expose the board through the same tool_*
    surface (native renderer stays; its actions and snapshot join the
    universal protocol). This absorbs the old "step 3: board MCP tools".
-E. Tool authoring flow: a mate creates manifest+logic.js+ui tree in
-   conversation and mounts it into the dock.
+E. Tool LLM access + authoring flow: `api.llm.complete({system, prompt,
+   model?})` in the logic api — host-mediated like storage RPC, gated by
+   a manifest `permissions: ["llm"]` declaration, attributed/logged per
+   tool. Provider stage 1: one-shot queries through the yoke adapters
+   (no new config). Stage 2 (later): per-user BYOK key store,
+   server-side only, enabling direct API calls with explicit small
+   models for atomic tools. Then the authoring flow: a mate creates
+   manifest+logic.js+ui tree in conversation and mounts it into the
+   dock — reference demo: an atomic KO<->EN translator with minimal
+   context and stored history.
+
+Storage decision (2026-08-20): tool datastores are per-user AND
+per-tool files (as shipped in phase B), never a global instance —
+structural isolation, OS-user-mode compatibility, bounded nedb memory,
+removal = directory delete. A future shared/team scope would be a
+manifest-declared `scope: "shared"`, not a global DB.
 
 ### Build order phase 1 (original, superseded by roadmap v2 above)
 
