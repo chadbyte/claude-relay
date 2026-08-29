@@ -342,8 +342,17 @@ modules remain under 500 lines. No full suite was run.
 Stage 7 — Capsule Library and navigation: make the sidebar Capsules entry resume
 the last active Capsule or open a native Capsule Library in the Workbench; move
 the hidden-activity signal to that entry; preserve tool tabs, suggestion-driven
-opening, shared installed-tool state, and user-owned Capsule storage. — NOT
-STARTED.
+opening, shared installed-tool state, and user-owned Capsule storage. — DONE
+2026-08-30. The enabled sidebar entry resumes the last installed active Capsule
+or opens an ephemeral native Library host view when no Capsule is active. The
+Library reads the shared `installedTools` state, keeps the Workbench's Capsule
+tabs and controls intact, and activates real registered Capsules without
+inventing a persisted Library tool ID. Hidden Capsule activity now appears only
+on the sidebar entry. Existing responsive Workbench states, suggestion-driven
+opening, runtime and user-scoped storage paths, and the server preference
+`{ dockOpen, dockWidth, activeToolId }` remain unchanged. Focused Stage 7 tests
+pass (51/51); all 116 client module imports resolve and targeted syntax audits
+pass. No full suite was run.
 
 Stage 8 — Mate backstage: make Knowledge, Memory, and Mate management coherent
 secondary surfaces reached from the current Mate overflow and rendered in the

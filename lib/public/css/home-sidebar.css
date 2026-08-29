@@ -98,15 +98,13 @@
   font-weight: 530;
 }
 
-.home-sidebar-action:hover:not([aria-disabled="true"]),
+.home-sidebar-action:hover,
 .home-sidebar-all:hover,
 .home-sidebar-recent-row:hover,
 .home-sidebar-recent-row.is-active {
   background: rgba(var(--overlay-rgb), 0.05);
   color: var(--text);
 }
-
-.home-sidebar-action[aria-disabled="true"] { cursor: default; }
 
 .home-sidebar-action .lucide,
 .home-sidebar-all .lucide {

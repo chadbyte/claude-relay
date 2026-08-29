@@ -1,0 +1,143 @@
+/* Quiet native index for installed Capsules inside the Home Workbench. */
+
+.home-capsule-library {
+  width: min(680px, 100%);
+  height: 100%;
+  margin: 0 auto;
+  padding: clamp(22px, 5vh, 54px) clamp(8px, 3vw, 34px) 30px;
+  overflow-y: auto;
+}
+
+.home-capsule-library-intro {
+  padding: 0 4px 22px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.home-capsule-library-eyebrow {
+  margin-bottom: 9px;
+  color: var(--text-dimmer);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.home-capsule-library h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: clamp(20px, 2.6vw, 28px);
+  font-weight: 620;
+  letter-spacing: -0.025em;
+}
+
+.home-capsule-library h2:focus { outline: none; }
+
+.home-capsule-library-intro p {
+  max-width: 430px;
+  margin: 8px 0 0;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.home-capsule-library-list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding-top: 10px;
+  padding-left: 0;
+  list-style: none;
+}
+
+.home-capsule-library-item { margin: 0; }
+
+.home-capsule-library-row {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) 20px;
+  gap: 11px;
+  align-items: center;
+  width: 100%;
+  min-height: 58px;
+  padding: 8px 5px;
+  border: 0;
+  border-bottom: 1px solid var(--border-subtle);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.home-capsule-library-row:hover,
+.home-capsule-library-row:focus-visible {
+  background: rgba(var(--overlay-rgb), 0.035);
+}
+
+.home-capsule-library-row:focus-visible {
+  outline: 1px solid var(--border);
+  outline-offset: -1px;
+}
+
+.home-capsule-library-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 9px;
+  color: var(--text-secondary);
+}
+
+.home-capsule-library-icon .lucide,
+.home-capsule-library-arrow .lucide { width: 14px; height: 14px; }
+
+.home-capsule-library-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.home-capsule-library-name {
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 620;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-capsule-library-hint {
+  color: var(--text-dimmer);
+  font-size: 10px;
+}
+
+.home-capsule-library-arrow {
+  display: inline-flex;
+  color: var(--text-dimmer);
+  opacity: 0;
+  transform: translate(-3px, 3px);
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.home-capsule-library-row:hover .home-capsule-library-arrow,
+.home-capsule-library-row:focus-visible .home-capsule-library-arrow {
+  opacity: 1;
+  transform: translate(0, 0);
+}
+
+.home-capsule-library-empty {
+  padding: 42px 4px;
+  color: var(--text-dimmer);
+  font-size: 12px;
+}
+
+@media (max-width: 768px) {
+  .home-capsule-library { padding: 24px 10px calc(30px + var(--safe-bottom, 0px)); }
+  .home-capsule-library-intro { padding-bottom: 18px; }
+  .home-capsule-library-row { min-height: 62px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-capsule-library-arrow { transition: none; }
+}

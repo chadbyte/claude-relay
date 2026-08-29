@@ -964,17 +964,6 @@ body.home-active #main-area { border: 0; border-radius: 0; }
   background: var(--bg);
 }
 
-#home-tools-activity {
-  display: none;
-  width: 5px;
-  height: 5px;
-  margin-left: -2px;
-  border-radius: 50%;
-  background: var(--text-secondary);
-}
-
-#home-tools-activity.visible { display: block; }
-
 /* Declarative home tools */
 .home-tool-root,
 .home-tool-display {
