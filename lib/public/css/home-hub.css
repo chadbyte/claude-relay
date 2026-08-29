@@ -631,6 +631,16 @@
   background: var(--bg-alt);
 }
 
+[data-dock-tool-id].mate-acted .home-app-mark {
+  animation: home-tool-mate-pulse 1.4s ease-out;
+}
+
+@keyframes home-tool-mate-pulse {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 55%, transparent); }
+  45% { box-shadow: 0 0 0 7px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
 .home-app-mark {
   display: flex;
   align-items: center;

@@ -1,0 +1,138 @@
+var test = require("node:test");
+var assert = require("node:assert");
+var fs = require("fs");
+var os = require("os");
+var path = require("path");
+
+var testRoot = fs.mkdtempSync(path.join(os.tmpdir(), "clay-tool-control-test-"));
+process.env.CLAY_HOME = testRoot;
+
+var serverBoard = require("../lib/server-board");
+var serverTools = require("../lib/server-tools");
+var getToolDefs = require("../lib/tool-control-mcp-server").getToolDefs;
+
+test.after(function () { fs.rmSync(testRoot, { recursive: true, force: true }); });
+
+function harness(timeoutMs) {
+  var sockets = [];
+  var projects = new Map();
+  projects.set("home", {
+    forEachClient: function (visit) {
+      for (var i = 0; i < sockets.length; i++) visit(sockets[i]);
+    },
+  });
+  var users = {
+    isMultiUser: function () { return false; },
+    findUserById: function () { return null; },
+  };
+  var boardHandler = serverBoard.attachBoard({ users: users, projects: projects });
+  var toolsHandler = serverTools.attachTools({
+    users: users,
+    projects: projects,
+    boardHandler: boardHandler,
+    controlTimeoutMs: timeoutMs || 15000,
+  });
+  var mateId = "mate_test";
+  var handlers = {
+    list: function () {
+      return [{ id: "board", name: "Board", native: true, skills: "Use proposeDone." }].concat(
+        toolsHandler.installedManifests("default").map(function (manifest) {
+          return { id: manifest.id, name: manifest.name, native: false, skills: manifest.skills || "" };
+        })
+      );
+    },
+    snapshot: function (toolId) {
+      return toolsHandler.controlForMate("default", mateId, toolId, "snapshot", {});
+    },
+    act: function (toolId, actionId, args) {
+      return toolsHandler.controlForMate("default", mateId, toolId, "act", { actionId: actionId, args: args });
+    },
+    set: function (toolId, controlId, value) {
+      return toolsHandler.controlForMate("default", mateId, toolId, "set", { controlId: controlId, value: value });
+    },
+  };
+  return { sockets: sockets, board: boardHandler, tools: toolsHandler, defs: getToolDefs(handlers) };
+}
+
+function tool(defs, name) {
+  return defs.filter(function (definition) { return definition.name === name; })[0];
+}
+
+async function result(definition, args) {
+  var response = await definition.handler(args || {});
+  return { response: response, value: response.isError ? null : JSON.parse(response.content[0].text) };
+}
+
+test("mate tool MCP exposes the fixed four-tool surface and installed skills", async function () {
+  var ctx = harness();
+  assert.deepStrictEqual(ctx.defs.map(function (definition) { return definition.name; }), [
+    "clay_tool_list", "clay_tool_snapshot", "clay_tool_act", "clay_tool_set",
+  ]);
+  var listed = await result(tool(ctx.defs, "clay_tool_list"), {});
+  assert.strictEqual(listed.value[0].id, "board");
+  var scratchpad = listed.value.filter(function (item) { return item.id === "scratchpad"; })[0];
+  assert.match(scratchpad.skills, /clay_tool_set/);
+});
+
+test("board MCP actions preserve mate done rules and record attribution", async function () {
+  var ctx = harness();
+  var events = [];
+  ctx.sockets.push({
+    readyState: 1,
+    send: function (payload) { events.push(JSON.parse(payload)); },
+  });
+  var created = await result(tool(ctx.defs, "clay_tool_act"), {
+    toolId: "board",
+    actionId: "create",
+    args: { title: "Mate-owned card" },
+  });
+  assert.strictEqual(created.value.result.createdBy, "mate_test");
+  assert.strictEqual(events[0].callerId, "mate_test");
+
+  var moved = await result(tool(ctx.defs, "clay_tool_act"), {
+    toolId: "board",
+    actionId: "move",
+    args: { cardId: created.value.result._id, column: "done" },
+  });
+  assert.strictEqual(moved.response.isError, true);
+  assert.match(moved.response.content[0].text, /Only the user can move a card to done/);
+
+  var proposed = await result(tool(ctx.defs, "clay_tool_act"), {
+    toolId: "board",
+    actionId: "proposeDone",
+    args: { cardId: created.value.result._id },
+  });
+  assert.strictEqual(proposed.value.result.pendingDone, true);
+  assert.strictEqual(proposed.value.result.createdBy, "mate_test");
+});
+
+test("browser tool control fails clearly without an open home screen", async function () {
+  var ctx = harness();
+  ctx.tools.installedManifests("default");
+  var snapshot = await result(tool(ctx.defs, "clay_tool_snapshot"), { toolId: "scratchpad" });
+  assert.strictEqual(snapshot.response.isError, true);
+  assert.match(snapshot.response.content[0].text, /home screen is not open/);
+});
+
+test("browser tool control correlates caller responses and times out", async function () {
+  var ctx = harness(20);
+  ctx.tools.installedManifests("default");
+  var sent = [];
+  var ws = {
+    readyState: 1,
+    _homeChatTap: { openedAt: Date.now() },
+    send: function (payload) { sent.push(JSON.parse(payload)); },
+  };
+  ctx.sockets.push(ws);
+  var pending = ctx.tools.controlForMate("default", "mate_test", "scratchpad", "snapshot", {});
+  assert.strictEqual(sent[0].callerId, "mate_test");
+  ctx.tools.handleMessage(ws, {
+    type: "tool_control_response",
+    requestId: sent[0].requestId,
+    data: { state: { items: [] } },
+  });
+  assert.deepStrictEqual(await pending, { state: { items: [] } });
+
+  var timedOut = ctx.tools.controlForMate("default", "mate_test", "scratchpad", "snapshot", {});
+  await assert.rejects(timedOut, /timed out/);
+});
