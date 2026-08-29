@@ -2,8 +2,7 @@
 .mate-sidebar-avatar,
 .mate-collapsed-avatar,
 .dm-bubble-avatar,
-.dm-bubble-avatar-me,
-.home-hub-mate-avatar {
+.dm-bubble-avatar-me {
   image-rendering: -webkit-optimize-contrast;
   image-rendering: smooth;
   -webkit-backface-visibility: hidden;
@@ -2924,12 +2923,11 @@ body.mate-dm-active .activity-inline:not(.mention-activity-bar):not(.mate-pre-ac
    other users) but greys out and disables the Mates-specific bits. */
 
 /* Always hide pure-Mates UI: rotating switch hint, individual mate
-   avatars in the icon strip, the home-hub mates strip, and the
-   "Ask Mate" button in the chat input. These never contain anything
+   avatars in the icon strip, and the "Ask Mate" button in the chat
+   input. These never contain anything
    but mates, so they collapse in both modes. */
 body.mates-disabled .icon-strip-mate,
 body.mates-disabled #icon-strip-hint-mate,
-body.mates-disabled #home-hub-mates,
 body.mates-disabled #ask-mate-btn {
   display: none !important;
 }

@@ -130,13 +130,18 @@
       <div class="home-hub-inner">
         <div class="hub-split">
           <div class="hub-pane hub-pane-mates">
-            <div id="home-hub-mates" class="home-hub-mates"></div>
             <div id="home-mate-chat" class="home-mate-chat">
-              <div class="home-mate-chat-header" id="home-mate-chat-header"></div>
-              <div class="home-mate-chat-messages" id="home-mate-chat-messages"></div>
-              <div class="home-mate-chat-composer">
-                <textarea id="home-mate-chat-input" rows="1" placeholder="Message"></textarea>
-                <button id="home-mate-chat-send" aria-label="Send message"><i data-lucide="arrow-up"></i></button>
+              <div class="home-mate-chat-header" id="home-mate-chat-header">
+                <div id="home-mate-switcher" class="home-mate-switcher"></div>
+                <div id="home-mate-chat-actions" class="home-mate-chat-actions"></div>
+              </div>
+              <div class="home-mate-chat-stage">
+                <div class="home-mate-chat-messages" id="home-mate-chat-messages"></div>
+                <div class="home-mate-chat-composer">
+                  <textarea id="home-mate-chat-input" rows="1" placeholder="Message"></textarea>
+                  <button id="home-mate-chat-send" aria-label="Send message"><i data-lucide="arrow-up"></i></button>
+                </div>
+                <div id="home-mate-chat-suggestions" class="home-mate-chat-suggestions"></div>
               </div>
             </div>
           </div>
