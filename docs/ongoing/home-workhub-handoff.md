@@ -377,7 +377,27 @@ extracted client modules remain under 500 lines. No full suite was run.
 Stage 9 — visual QA and remaining polish: finish board card/column polish,
 generate the muted avatar palette at the source, and verify keyboard/focus/ESC,
 popstate, suspend/resume, tablet/mobile layouts, import resolution, and full
-test coverage. — NOT STARTED.
+test coverage. — DONE 2026-08-30. Board columns are flat drafting lanes with
+raised, keyboard-focusable cards, accessible list/region semantics, explicit
+control labels, reduced-motion handling, and server-confirmed Alt+Arrow focus
+restoration. Narrow board hosts use container-driven 190px lanes with
+horizontal scrolling and proximity snapping; mobile retains 280px peek lanes.
+Generated Mate marks use a muted six-color palette in their SVG source;
+matching built-in definitions carry those colors, while custom avatar images
+remain unfiltered and unchanged. Browser QA used the real Home client and
+modules with mock Home state because the live daemon required authentication.
+Desktop 1440x1000 verified expanded and collapsed navigation plus the floating
+board. Intermediate 1024x820 exposed the compressed-lane defect and then
+verified the fixed container-driven 190px scroll/snap lanes. Mobile 390x844
+verified the hidden sidebar, full-screen Workbench, 280px peek lanes, sidebar
+overlay, and conversation layout. Interaction checks verified composer Escape
+focus restoration, server-confirmed Alt+Arrow card focus restoration with a
+mock connected WebSocket, All conversations open/Escape, and exact draft DOM
+and value preservation across same-tab hide/show. Focused Stage 9, adjacent
+Home, avatar, and board protocol tests pass (79/79); all 118 client module
+imports resolve, targeted syntax audits pass, and changed client modules remain
+under 500 lines. The required final Node v22.22.1 `npm test` passed 516/516 with
+zero failures.
 
 Working agreement: the dev server serves this worktree live, so during
 a stage the UI can look half-built; judge visuals only at stage-commit

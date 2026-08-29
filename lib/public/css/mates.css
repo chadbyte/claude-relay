@@ -501,17 +501,11 @@
   background: var(--border, #333);
 }
 
-/* === Mate avatar in user strip: squircle + desaturate === */
+/* Mate colors are muted in the generated source; custom images stay intact. */
 .icon-strip-mate .icon-strip-user-avatar {
   border-radius: 8px;
-  filter: saturate(0.65);
-}
-.icon-strip-mate:hover .icon-strip-user-avatar,
-.icon-strip-mate.mention-active .icon-strip-user-avatar {
-  filter: saturate(1);
 }
 .icon-strip-mate.active .icon-strip-user-avatar {
-  filter: saturate(1);
   box-shadow: 0 0 0 2px var(--accent);
   border-radius: 8px;
 }
