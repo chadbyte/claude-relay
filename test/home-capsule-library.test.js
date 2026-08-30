@@ -15,11 +15,12 @@ var chatSource = fs.readFileSync(path.join(root, "lib/public/modules/home-mate-c
 var cssSource = fs.readFileSync(path.join(root, "lib/public/css/home-capsule-library.css"), "utf8");
 var homeMarkup = indexSource.slice(indexSource.indexOf('<div id="home-hub"'), indexSource.indexOf('<div id="whats-new-article"'));
 
-test("Capsules sidebar entry is an accessible Workbench controller", function () {
-  assert.match(homeMarkup, /id="home-sidebar-capsules"[^>]*aria-label="Capsules"[^>]*aria-expanded="false"[^>]*aria-controls="home-tool-workbench"/);
-  assert.doesNotMatch(homeMarkup, /id="home-sidebar-capsules"[^>]*aria-disabled/);
-  assert.match(sidebarSource, /openHomeCapsules/);
-  assert.match(sidebarSource, /home-sidebar-capsules"\)\.addEventListener\("click", openCapsulesFromSidebar\)/);
+test("top Capsules entry is the sole accessible Workbench controller", function () {
+  assert.match(homeMarkup, /id="home-tools-btn"[^>]*aria-expanded="false"[^>]*aria-controls="home-tool-workbench"[\s\S]*id="home-tools-label">Capsules<\/span>/);
+  assert.match(homeMarkup, /id="home-tools-activity"/);
+  assert.doesNotMatch(homeMarkup, /id="home-sidebar-capsules"/);
+  assert.doesNotMatch(sidebarSource, /openHomeCapsules|home-sidebar-capsules/);
+  assert.match(dockSource, /home-tools-btn"\)\.addEventListener\("click", function \(\) \{[\s\S]*dockOpen'[\s\S]*closeHomeDock\(\);[\s\S]*else openHomeCapsules\(\)/);
 });
 
 test("Capsules resumes the last installed Capsule or opens Library without a fake persisted tool", function () {
@@ -82,11 +83,14 @@ test("Library selection opens the real registered Capsule and keeps dock tabs", 
   assert.match(dockSource, /dockLibraryOpen: false/);
 });
 
-test("hidden Capsule activity lives on the sidebar instead of conversation Tools", function () {
-  assert.match(homeMarkup, /id="home-sidebar-capsules-activity"/);
-  assert.doesNotMatch(homeMarkup, /id="home-tools-activity"/);
-  assert.match(dockSource, /home-sidebar-capsules-activity/);
+test("hidden Capsule activity lives on the invariant top Capsules trigger", function () {
+  assert.match(homeMarkup, /id="home-tools-label">Capsules<\/span><span id="home-tools-activity"/);
+  assert.doesNotMatch(homeMarkup, /home-sidebar-capsules/);
+  assert.match(dockSource, /getElementById\("home-tools-activity"\)/);
+  assert.doesNotMatch(dockSource, /home-sidebar-capsules/);
+  assert.match(dockSource, /if \(label\) label\.textContent = "Capsules"/);
   assert.match(dockSource, /activity\.classList\.toggle\("is-active", hasActivity\)/);
+  assert.match(dockSource, /button\.setAttribute\("aria-label", hasActivity \? "Capsules, new activity" : "Capsules"\)/);
   assert.match(dockSource, /dockHasActivity: true, dockActivityToolId: toolId \|\| null/);
   assert.match(dockSource, /dockHasActivity: false/);
 });
@@ -110,5 +114,5 @@ test("Capsule Library is responsive and moves focus into visible Workbench conte
   assert.match(dockSource, /home-capsule-library-title[\s\S]*title\.focus\(\)/);
   assert.match(dockSource, /home-dock-switcher \.home-dock-tool\.active[\s\S]*activeTab\.focus\(\)/);
   assert.match(cssSource, /@media \(max-width: 768px\)/);
-  assert.match(sidebarSource, /openHomeCapsules\(\);[\s\S]*closeNarrowDrawer\(false\)/);
+  assert.match(dockSource, /if \(store\.get\('dockOpen'\)\) closeHomeDock\(\);[\s\S]*else openHomeCapsules\(\)/);
 });

@@ -2,34 +2,46 @@ var test = require("node:test");
 var assert = require("node:assert/strict");
 var attachHomeChat = require("../lib/server-home-chat").attachHomeChat;
 
+function settle() {
+  return new Promise(function (resolve) { setImmediate(resolve); });
+}
+
 function fixture(options) {
   var opts = options || {};
+  var mate = { id: "mate-a", name: "A", vendor: "claude", model: "sonnet" };
   var sessions = new Map([
-    [1, { localId: 1, cliSessionId: "session-old", ownerId: "u1", title: "Older", lastActivity: 10, history: [] }],
-    [2, { localId: 2, cliSessionId: "session-new", ownerId: "u1", title: "Newer", lastActivity: 30, history: [{ type: "user_message", text: "Hello" }] }],
+    [1, { localId: 1, cliSessionId: "session-old", ownerId: "u1", title: "Older", lastActivity: 10, vendor: "claude", model: "sonnet", history: [] }],
+    [2, { localId: 2, cliSessionId: "session-new", ownerId: "u1", title: "Newer", lastActivity: 30, vendor: "codex", model: "gpt-5.6", history: [{ type: "user_message", text: "Hello" }] }],
     [3, { localId: 3, cliSessionId: "session-other", ownerId: "u2", title: "Other user's chat", lastActivity: 40, history: [] }],
     [4, { localId: 4, cliSessionId: "session-hidden", ownerId: "u1", title: "Hidden", lastActivity: 50, hidden: true, history: [] }],
     [5, { localId: 5, cliSessionId: "session-single", title: "Single-user chat", lastActivity: 20, history: [] }],
   ]);
   var subscribed = null;
+  var subscription = null;
   var manager = {
     sessions: sessions,
-    subscribeSession: function (id) {
+    subscribeSession: function (id, callback) {
       subscribed = id;
+      subscription = callback;
       return function () {};
     },
+    saveSessionFile: function () {},
     createSession: function () { throw new Error("unexpected session creation"); },
   };
   var project = {
     getSessionManager: function () { return manager; },
+    getVendorModelCatalog: function () { return Promise.resolve({ status: "ready", models: ["sonnet"], defaultModel: "sonnet", error: "" }); },
     getMemoryState: function () { return { entries: [], summary: "" }; },
     listKnowledgeFiles: function () { return []; },
+    forEachClient: function () {},
   };
   var handler = attachHomeChat({
     users: { isMultiUser: function () { return opts.singleUser !== true; } },
     mates: {
       buildMateCtx: function () { return {}; },
-      getAllMates: function () { return [{ id: "mate-a", name: "A", vendor: "claude" }]; },
+      getAllMates: function () { return [mate]; },
+      getMate: function () { return mate; },
+      updateMate: function (ctx, mateId, patch) { mate = Object.assign({}, mate, patch); return mate; },
       getMateDir: function () { return "/tmp/mate-a"; },
     },
     projects: new Map([["mate-mate-a", project]]),
@@ -41,7 +53,13 @@ function fixture(options) {
     _clayUser: opts.unauthenticated ? null : { id: "u1" },
     send: function (value) { messages.push(JSON.parse(value)); },
   };
-  return { handler: handler, ws: ws, messages: messages, getSubscribed: function () { return subscribed; } };
+  return {
+    handler: handler,
+    ws: ws,
+    messages: messages,
+    getSubscribed: function () { return subscribed; },
+    emit: function (event) { if (subscription) subscription(event); },
+  };
 }
 
 test("Mate conversation list includes only the requesting user's visible sessions", function () {
@@ -57,20 +75,68 @@ test("Mate conversation list includes only the requesting user's visible session
   });
 });
 
-test("Explicit Mate conversation open restores the exact requested session", function () {
+test("Explicit Mate conversation open restores the exact requested session", async function () {
   var f = fixture();
-  f.handler.handleMessage(f.ws, { type: "home_mate_session_open", mateId: "mate-a", sessionId: "session-old" });
+  f.handler.handleMessage(f.ws, { type: "home_mate_session_open", mateId: "mate-a", sessionId: "session-old", requestId: "open-old" });
+  await settle();
   assert.strictEqual(f.getSubscribed(), 1);
   assert.strictEqual(f.messages[0].type, "home_mate_history");
   assert.strictEqual(f.messages[0].sessionId, "session-old");
+  assert.strictEqual(f.messages[0].requestId, "open-old");
+  assert.strictEqual(f.messages[0].vendor, "claude");
+  assert.strictEqual(f.messages[0].model, "sonnet");
+});
+
+test("exact Home sessions retain distinct committed model metadata", async function () {
+  var f = fixture();
+  f.handler.handleMessage(f.ws, { type: "home_mate_session_open", mateId: "mate-a", sessionId: "session-old", requestId: "open-a" });
+  f.handler.handleMessage(f.ws, { type: "home_mate_session_open", mateId: "mate-a", sessionId: "session-new", requestId: "open-b" });
+  await settle();
+  var histories = f.messages.filter(function (message) { return message.type === "home_mate_history"; });
+  assert.deepStrictEqual(histories.map(function (message) {
+    return [message.sessionId, message.vendor, message.model, message.requestId];
+  }), [
+    ["session-old", "claude", "sonnet", "open-a"],
+    ["session-new", "codex", "gpt-5.6", "open-b"],
+  ]);
+});
+
+test("Home live session events refresh committed model metadata", async function () {
+  var f = fixture();
+  f.handler.handleMessage(f.ws, { type: "home_mate_session_open", mateId: "mate-a", sessionId: "session-new", requestId: "open-live" });
+  await settle();
+  f.messages.length = 0;
+  f.emit({ type: "delta", text: "Hi" });
+  f.emit({ type: "done" });
+  assert.deepStrictEqual(f.messages.slice(0, 2).map(function (message) {
+    return [message.type, message.sessionId, message.vendor, message.model, message.requestId];
+  }), [
+    ["home_mate_delta", "session-new", "codex", "gpt-5.6", "open-live"],
+    ["home_mate_done", "session-new", "codex", "gpt-5.6", "open-live"],
+  ]);
 });
 
 test("Explicit Mate conversation open rejects another user's session", function () {
   var f = fixture();
-  f.handler.handleMessage(f.ws, { type: "home_mate_session_open", mateId: "mate-a", sessionId: "session-other" });
+  f.handler.handleMessage(f.ws, { type: "home_mate_session_open", mateId: "mate-a", sessionId: "session-other", requestId: "open-denied" });
   assert.strictEqual(f.getSubscribed(), null);
   assert.strictEqual(f.messages[0].type, "home_mate_error");
   assert.strictEqual(f.messages[0].code, "session_not_found");
+  assert.strictEqual(f.messages[0].sessionId, "session-other");
+  assert.strictEqual(f.messages[0].requestId, "open-denied");
+});
+
+test("Home send failures inherit the active session correlation", async function () {
+  var f = fixture();
+  f.handler.handleMessage(f.ws, { type: "home_mate_session_open", mateId: "mate-a", sessionId: "session-old", requestId: "open-send" });
+  await settle();
+  f.messages.length = 0;
+  f.handler.handleMessage(f.ws, { type: "home_mate_send", mateId: "mate-a", text: "Hello" });
+  await settle();
+  assert.strictEqual(f.messages[0].type, "home_mate_error");
+  assert.strictEqual(f.messages[0].sessionId, "session-old");
+  assert.strictEqual(f.messages[0].requestId, "open-send");
+  assert.match(f.messages[0].text, /SDK bridge unavailable/);
 });
 
 test("single-user Mate conversation lists include only ownerless sessions", function () {
@@ -83,7 +149,8 @@ test("single-user Mate conversation lists include only ownerless sessions", func
 
 test("unauthenticated multi-user Mate conversation requests reveal no sessions", function () {
   var f = fixture({ unauthenticated: true });
-  f.handler.handleMessage(f.ws, { type: "home_mate_sessions_list", mateId: "mate-a" });
+  f.handler.handleMessage(f.ws, { type: "home_mate_sessions_list", mateId: "mate-a", requestId: "list-auth" });
   assert.strictEqual(f.messages[0].type, "home_mate_error");
   assert.strictEqual(f.messages[0].text, "Not authenticated.");
+  assert.strictEqual(f.messages[0].requestId, "list-auth");
 });

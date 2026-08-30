@@ -17,7 +17,8 @@ function fixture(options) {
   var adapter = options.adapter || {
     init: function() {
       return Promise.resolve({
-        models: [{ value: "fable", resolvedModel: "claude-fable-5", displayName: "Claude Fable" }],
+        models: options.models || [{ value: "fable", resolvedModel: "claude-fable-5", displayName: "Claude Fable" }],
+        defaultModel: options.adapterDefaultModel || "",
         capabilities: { midSessionModelSwitch: true },
       });
     },
@@ -61,6 +62,28 @@ test("model loading returns an actionable error instead of a blank list", async 
   assert.strictEqual(f.sent[0].modelStatus, "error");
   assert.deepStrictEqual(f.sent[0].models, []);
   assert.match(f.sent[0].error, /authentication expired/);
+});
+
+test("vendor catalog lookup can be reused without emitting project model_info", async function() {
+  var f = fixture();
+  var catalog = await f.attached.getVendorCatalog({}, "claude");
+  assert.strictEqual(catalog.status, "ready");
+  assert.strictEqual(catalog.models[0].value, "fable");
+  assert.deepStrictEqual(f.sent, []);
+});
+
+test("vendor catalog exposes only a concrete validated default model", async function() {
+  var saved = fixture({ currentModel: "claude-sonnet-4", models: [{ value: "fable" }, { value: "sonnet", resolvedModel: "claude-sonnet-4" }], adapterDefaultModel: "fable" });
+  var savedCatalog = await saved.attached.getVendorCatalog({}, "claude");
+  assert.strictEqual(savedCatalog.defaultModel, "sonnet");
+
+  var adapter = fixture({ currentModel: "removed", models: ["fable", "sonnet"], adapterDefaultModel: "sonnet" });
+  var adapterCatalog = await adapter.attached.getVendorCatalog({}, "claude");
+  assert.strictEqual(adapterCatalog.defaultModel, "sonnet");
+
+  var invalid = fixture({ currentModel: "removed", models: ["fable"], adapterDefaultModel: "also-removed" });
+  var invalidCatalog = await invalid.attached.getVendorCatalog({}, "claude");
+  assert.strictEqual(invalidCatalog.defaultModel, "");
 });
 
 test("model selection reports adapter success and failure", async function() {

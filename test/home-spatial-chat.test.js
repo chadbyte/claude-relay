@@ -14,20 +14,28 @@ var shellSource = fs.readFileSync(path.join(root, "lib/public/modules/home-shell
 var dockSource = fs.readFileSync(path.join(root, "lib/public/modules/home-dock.js"), "utf8");
 var dockResizeSource = fs.readFileSync(path.join(root, "lib/public/modules/home-dock-resize.js"), "utf8");
 var chatSource = fs.readFileSync(path.join(root, "lib/public/modules/home-mate-chat.js"), "utf8");
+var renderingSource = fs.readFileSync(path.join(root, "lib/public/modules/app-rendering.js"), "utf8");
+var cardsSource = fs.readFileSync(path.join(root, "lib/public/modules/app-message-cards.js"), "utf8");
+var runtimeSource = fs.readFileSync(path.join(root, "lib/public/modules/chat-render-runtime.js"), "utf8");
+var bubbleSource = fs.readFileSync(path.join(root, "lib/public/modules/chat-bubble-renderer.js"), "utf8");
 var homeSidebarSource = fs.readFileSync(path.join(root, "lib/public/modules/home-sidebar.js"), "utf8");
 var paletteSource = fs.readFileSync(path.join(root, "lib/public/modules/command-palette.js"), "utf8");
-var dmSource = fs.readFileSync(path.join(root, "lib/public/modules/app-dm.js"), "utf8");
 var cssSource = fs.readFileSync(path.join(root, "lib/public/css/home-hub.css"), "utf8");
 var matesCssSource = fs.readFileSync(path.join(root, "lib/public/css/mates.css"), "utf8");
 var avatarCssSource = fs.readFileSync(path.join(root, "lib/public/css/avatar-imprints.css"), "utf8");
 var homeMarkup = indexSource.slice(indexSource.indexOf('<div id="home-hub"'), indexSource.indexOf('<div id="whats-new-article"'));
 
-test("home markup uses the selected-mate switcher and unified chat stage", function () {
-  assert.match(indexSource, /id="home-mate-switcher"/);
+test("home markup uses the first-depth Mate list and unified chat stage", function () {
+  assert.match(indexSource, /id="home-mate-list"/);
+  assert.doesNotMatch(homeMarkup, /id="home-mate-chat-switcher"|data-home-mate-switcher/);
   assert.match(indexSource, /class="home-mate-chat-stage"/);
   assert.match(indexSource, /id="home-mate-chat-suggestions"/);
   assert.match(homeMarkup, /class="home-mate-chat-controls"[\s\S]*id="home-tools-btn"/);
   assert.match(homeMarkup, /id="home-tools-btn"[\s\S]*id="home-minimize-btn"/);
+  assert.match(homeMarkup, /id="home-sidebar-expand"[^>]*aria-label="Show Home sidebar"[^>]*aria-describedby="home-sidebar-expand-brand-label"[\s\S]*home-sidebar-expand-wordmark[\s\S]*class="home-mate-chat-controls"[\s\S]*id="home-tools-label">Capsules<[\s\S]*<span>Return<\/span>/);
+  assert.match(homeMarkup, /id="home-tools-label">Capsules<\/span>/);
+  assert.match(homeMarkup, /id="home-minimize-btn"[^>]*title="Return to project"[^>]*aria-label="Return to project"[\s\S]*data-lucide="arrow-down-left"[\s\S]*<span>Return<\/span>/);
+  assert.match(cssSource, /\.home-minimize-trigger \{[\s\S]*gap: 5px;[\s\S]*border: 1px solid var\(--border-subtle\);[\s\S]*font-size: 11px/);
   assert.doesNotMatch(indexSource, /id="home-bar"|id="home-projects-btn"|id="home-search-btn"/);
   assert.doesNotMatch(cssSource, /#home-bar|\.home-bar-|\.home-projects-|#home-projects-btn/);
   assert.doesNotMatch(homeMarkup, /notif-center-btn|user-settings-btn|home-bar/);
@@ -37,6 +45,7 @@ test("home markup uses the selected-mate switcher and unified chat stage", funct
 test("home minimizes and resumes without resetting its mounted work", function () {
   assert.match(hubSource, /homeHubSuspended/);
   assert.match(hubSource, /export function minimizeHomeHub\(\)/);
+  assert.match(hubSource, /home-minimize-btn"\)\.classList\.toggle\("hidden", !store\.get\('currentSlug'\)\)/);
   assert.match(hubSource, /route = "\/p\/" \+ slug \+ "\/"/);
   assert.match(hubSource, /if \(!resume\) \{[\s\S]*requestTools\(\)[\s\S]*renderDock\(\)/);
   assert.doesNotMatch(hubSource, /resetHomeDockFocus|closeHomeChat/);
@@ -74,6 +83,10 @@ test("Cmd+K remains a global project exit from a direct home load", function () 
 test("home dock exposes conversation, split, and focused tool states", function () {
   assert.match(indexSource, /id="home-tools-btn"/);
   assert.match(indexSource, /id="home-dock-divider"/);
+  assert.match(homeMarkup, /aria-label="Resize Capsules Workbench"/);
+  assert.match(homeMarkup, /id="home-tool-workbench"[^>]*aria-label="Capsules Workbench"/);
+  assert.match(homeMarkup, /aria-label="Focus Capsules Workbench"/);
+  assert.match(homeMarkup, /aria-label="Collapse Capsules Workbench"/);
   assert.match(indexSource, /Return to conversation/);
   assert.match(dockSource, /dock-split/);
   assert.match(dockSource, /dock-focus/);
@@ -100,13 +113,15 @@ test("board suggestion opens the dock without replacing its message send", funct
   assert.match(chatSource, /submitMessage\(\)/);
 });
 
-test("home mate switcher preserves management and status affordances", function () {
-  assert.match(hubSource, /home-mate-switcher-row-bio/);
-  assert.match(hubSource, /home-mate-switcher-presence/);
-  assert.match(hubSource, /home-mate-switcher-unread/);
-  assert.match(hubSource, /home-mate-switcher-mention/);
-  assert.match(hubSource, /showMateCtxMenu/);
-  assert.match(hubSource, /openMateWizard/);
+test("first-depth Home Mate list preserves management and activity affordances", function () {
+  assert.match(hubSource, /home-mate-list-avatar/);
+  assert.match(hubSource, /home-mate-list-activity/);
+  assert.match(hubSource, /home-mate-list-unread/);
+  assert.match(hubSource, /if \(mate\.model\)[\s\S]*home-mate-list-model[\s\S]*model\.textContent = mate\.model/);
+  assert.match(hubSource, /getActiveMentionMateIds/);
+  assert.match(homeMarkup, /id="home-sidebar-memory"[\s\S]*id="home-sidebar-knowledge"[\s\S]*id="home-sidebar-model"[\s\S]*id="home-sidebar-settings"[\s\S]*id="home-sidebar-debate"/);
+  assert.doesNotMatch(homeMarkup + homeSidebarSource, /home-sidebar-mate-overflow|openHomeMateActions/);
+  assert.match(homeSidebarSource, /openHomeMateAction/);
 });
 
 test("home surface no longer propagates mate colors", function () {
@@ -119,15 +134,46 @@ test("legacy home mate rail selectors are gone from client styles", function () 
   assert.doesNotMatch(styleSource, /home-hub-mates|home-hub-mate-|home-mate-tooltip|home-mate-hover/);
 });
 
-test("home chat diverges from shared human DM rendering", function () {
-  assert.doesNotMatch(chatSource, /dm-render\.js|buildDmMessage|buildDmTypingIndicator/);
-  assert.match(chatSource, /home-chat-message-assistant/);
-  assert.match(chatSource, /home-chat-message-user/);
+test("Home and project chat share the fixed bubble Markdown renderer", function () {
+  assert.match(renderingSource, /from ['"]\.\/chat-bubble-renderer\.js['"]/);
+  assert.match(chatSource, /from ['"]\.\/chat-bubble-renderer\.js['"]/);
+  assert.match(renderingSource, /createAssistantBubble\(\{/);
+  assert.match(chatSource, /createAssistantBubble\(\{/);
+  assert.match(chatSource, /createUserBubble\(\{ text: message\.text \|\| "", time: timeText \}\)/);
+  assert.match(bubbleSource, /content\.className = "md-content"/);
+  assert.match(bubbleSource, /content\.innerHTML = renderMarkdown\(text \|\| ""\)/);
+  assert.match(bubbleSource, /highlightCodeBlocks\(content\)/);
+  assert.match(bubbleSource, /renderMermaidBlocks\(content\)/);
+  assert.match(chatSource, /if \(finalize\) finalizeAssistantBubble[\s\S]*else renderAssistantBubbleText\(row, message\.text \|\| "", false\)/);
+  assert.match(chatSource, /appendMessage\(messages\[i\], mate, mateName, !streaming\)/);
+  assert.match(chatSource, /disposeChatBubbleTree\(messagesEl\);[\s\S]*messagesEl\.innerHTML = ""/);
+  assert.match(bubbleSource, /document\.removeEventListener\("click", handleOutsideClick\)/);
+  assert.match(chatSource, /home-mate-chat-transcript home-chat-bubble-layout/);
+  assert.match(cssSource, /\.home-mate-chat-transcript\.home-chat-bubble-layout \.msg-user/);
+  assert.match(cssSource, /\.home-mate-chat-transcript\.home-chat-bubble-layout \.msg-assistant/);
+  assert.doesNotMatch(chatSource, /currentMsgEl|currentFullText|wide-view/);
+  assert.doesNotMatch(bubbleSource, /store\.js|currentMsgEl|currentFullText/);
+  assert.match(cardsSource, /from ['"]\.\/chat-render-runtime\.js['"]/);
+  assert.match(renderingSource, /from ['"]\.\/chat-render-runtime\.js['"]/);
+  assert.match(renderingSource, /export \{ addUserMessage, addSystemMessage, addConflictMessage, addContextOverflowMessage \} from ['"]\.\/app-message-cards\.js['"]/);
+  assert.doesNotMatch(renderingSource, /export function addUserMessage|export function addSystemMessage/);
+  assert.doesNotMatch(renderingSource, /var (?:turnCounter|prependAnchor|activityEl|isUserScrolledUp|stickyBottom)\b|function (?:addToMessages|scrollToBottom|getMsgTime|shouldGroupMessage)\b|export var VENDOR_/);
+  assert.match(runtimeSource, /var turnCounter = 0;[\s\S]*var prependAnchor = null;[\s\S]*var activityEl = null;[\s\S]*var isUserScrolledUp = false;[\s\S]*var stickyBottom = false;/);
+  assert.ok(renderingSource.split("\n").length < 500);
+  assert.ok(cardsSource.split("\n").length < 500);
+  assert.ok(runtimeSource.split("\n").length < 500);
+  assert.doesNotMatch(chatSource, /content\.textContent = message\.text|home-chat-message-assistant|home-chat-message-user|home-chat-message-content/);
+  assert.ok(bubbleSource.split("\n").length < 500);
+  assert.doesNotMatch(bubbleSource, /\b(?:const|let)\b|=>|localStorage/);
   assert.match(chatSource, /home-chat-typing/);
-  assert.match(dmSource, /from ['"]\.\/dm-render\.js['"]/);
 });
 
 test("empty home chat renders contextual greeting and working suggestions", function () {
+  assert.match(chatSource, /home-mate-chat-brand/);
+  assert.match(chatSource, /symbol\.src = "\/clay-studio-symbol\.png"/);
+  assert.match(chatSource, /home-sidebar-brand-wordmark home-mate-chat-brand-wordmark/);
+  assert.match(chatSource, /wordmark\.textContent = "Clay Studio"/);
+  assert.match(chatSource, /if \(hasConversation\) \{[\s\S]*appendMessage[\s\S]*\} else \{\s*renderEmptyState/);
   assert.match(chatSource, /What should we work on,/);
   assert.match(chatSource, /shortBio\(mate\)/);
   assert.match(chatSource, /Add a card to the board/);
@@ -137,26 +183,32 @@ test("empty home chat renders contextual greeting and working suggestions", func
 
 test("Mate and new-conversation actions live in the Home sidebar", function () {
   assert.match(homeMarkup, /id="home-sidebar-new"/);
-  assert.match(homeMarkup, /id="home-sidebar-mate-overflow"/);
+  assert.match(homeMarkup, /id="home-sidebar-memory"[^>]*disabled[\s\S]*>Memory<\/span>/);
+  assert.match(homeMarkup, /id="home-sidebar-knowledge"[^>]*disabled[\s\S]*>Knowledge<\/span>/);
+  assert.match(homeMarkup, /id="home-sidebar-model"[^>]*disabled[\s\S]*>Model<\/span>/);
+  assert.match(homeMarkup, /id="home-sidebar-settings"[^>]*disabled[\s\S]*>Mate settings<\/span>/);
+  assert.match(homeMarkup, /id="home-sidebar-debate"[^>]*disabled[\s\S]*>Start debate<\/span>/);
+  assert.doesNotMatch(homeMarkup, /home-sidebar-mate-overflow/);
   assert.doesNotMatch(homeMarkup, /id="home-mate-chat-actions"/);
   assert.match(homeSidebarSource, /startNewHomeConversation/);
-  assert.match(homeSidebarSource, /openHomeMateActions/);
-  assert.match(chatSource, /"Memory"/);
-  assert.match(chatSource, /"Knowledge"/);
-  assert.match(chatSource, /"Mate settings"/);
-  assert.match(chatSource, /"Start debate"/);
+  assert.match(homeSidebarSource, /openHomeMateAction/);
+  assert.match(chatSource, /export function openHomeMateAction\(kind\)/);
+  assert.match(chatSource, /kind === "memory" \|\| kind === "knowledge" \|\| kind === "model" \|\| kind === "settings"/);
+  assert.match(chatSource, /kind !== "debate"/);
 });
 
 test("home chat CSS centers the transcript and keeps one composer surface", function () {
   assert.match(cssSource, /\.home-mate-chat-transcript\s*\{[\s\S]*?width: min\(720px, 100%\)/);
-  assert.match(cssSource, /\.home-chat-message-user \.home-chat-message-content\s*\{[\s\S]*?max-width: 75%/);
+  assert.match(cssSource, /\.home-mate-chat-transcript\.home-chat-bubble-layout \.msg-user \.bubble\s*\{[\s\S]*?max-width: 85%/);
+  assert.match(cssSource, /\.home-mate-chat-transcript\.home-chat-bubble-layout \.msg-assistant \.md-content\s*\{[\s\S]*?background: none/);
+  assert.match(cssSource, /\.home-mate-chat-composer-frame\s*\{[\s\S]*?width: min\(720px, calc\(100% - 36px\)\)/);
   assert.match(cssSource, /\.home-mate-chat-composer\s*\{[\s\S]*?border-radius: 22px/);
   assert.match(cssSource, /\.home-mate-chat\.is-empty \.home-mate-chat-stage/);
   assert.match(cssSource, /\.home-mate-chat\.is-empty \.home-mate-chat-stage\s*\{[\s\S]*?padding-bottom: 18%/);
   assert.match(cssSource, /#home-hub\s*\{[\s\S]*?padding: calc\(14px \+ var\(--safe-top\)\) 24px 24px/);
 });
 
-test("home app imports the renamed switcher renderer", function () {
+test("home app imports the compatible Mate-list renderer", function () {
   assert.match(appSource, /renderHomeMateSwitcher/);
-  assert.doesNotMatch(appSource, /renderHomeHubMates/);
+  assert.match(hubSource, /getElementById\("home-mate-list"\)/);
 });
