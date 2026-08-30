@@ -1,4 +1,4 @@
-## [3.8.1-beta.1](https://github.com/chadbyte/clay/compare/v3.8.0...v3.8.1-beta.1) (2026-08-30)
+## [3.8.1](https://github.com/chadbyte/clay/compare/v3.8.0...v3.8.1) (2026-08-30)
 
 
 ### Bug Fixes
