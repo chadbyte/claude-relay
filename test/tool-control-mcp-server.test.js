@@ -16,11 +16,14 @@ test.after(function () { fs.rmSync(testRoot, { recursive: true, force: true }); 
 function harness(timeoutMs) {
   var sockets = [];
   var projects = new Map();
-  projects.set("home", {
+  var projectClients = new Set();
+  var projectContext = {
+    clients: projectClients,
     forEachClient: function (visit) {
       for (var i = 0; i < sockets.length; i++) visit(sockets[i]);
     },
-  });
+  };
+  projects.set("home", projectContext);
   var users = {
     isMultiUser: function () { return false; },
     findUserById: function () { return null; },
@@ -51,7 +54,7 @@ function harness(timeoutMs) {
     install: function (input) { return toolsHandler.installForMate("default", input); },
     uninstall: function (toolId) { return toolsHandler.removeForMate("default", toolId); },
   };
-  return { sockets: sockets, board: boardHandler, tools: toolsHandler, defs: getToolDefs(handlers) };
+  return { sockets: sockets, projectClients: projectClients, projectContext: projectContext, board: boardHandler, tools: toolsHandler, defs: getToolDefs(handlers) };
 }
 
 function tool(defs, name) {
@@ -165,6 +168,57 @@ test("server LLM bridge rejects capsules without llm permission", async function
   assert.strictEqual(sent[0].type, "tools_error");
   assert.strictEqual(sent[0].requestId, "llm-1");
   assert.match(sent[0].message, /does not have the llm permission/);
+});
+
+test("server LLM bridge uses one concrete configured vendor model", async function () {
+  var ctx = harness();
+  ctx.tools.installedManifests("default");
+  var sent = [];
+  var calls = [];
+  var ws = { readyState: 1, send: function (payload) { sent.push(JSON.parse(payload)); } };
+  ctx.projectClients.add(ws);
+  ctx.projectContext.completeToolLlm = function (socket, args) {
+    calls.push({ socket: socket, args: args });
+    return Promise.resolve("Hello");
+  };
+  ctx.tools.handleMessage(ws, {
+    type: "tool_llm_op",
+    toolId: "translator",
+    requestId: "llm-configured",
+    args: { prompt: "안녕", model: "fast" },
+  });
+  for (var i = 0; i < 50 && sent.length === 0; i++) await new Promise(function (resolve) { setTimeout(resolve, 5); });
+  assert.strictEqual(calls.length, 1);
+  assert.strictEqual(calls[0].socket, ws);
+  assert.strictEqual(calls[0].args.model, "fast");
+  assert.deepStrictEqual(sent[0], { type: "tool_llm_result", toolId: "translator", requestId: "llm-configured", data: "Hello" });
+});
+
+test("Capsule model configuration is correlated and does not expose credentials", async function () {
+  var ctx = harness();
+  var sent = [];
+  var ws = { readyState: 1, send: function (payload) { sent.push(JSON.parse(payload)); } };
+  ctx.projectClients.add(ws);
+  var aliases = [];
+  ctx.projectContext.getToolLlmConfig = function (_ws, alias) {
+    aliases.push(alias);
+    return Promise.resolve({ status: "ready", vendor: "claude", vendorName: "Claude", model: "fable", modelName: "Fable", error: "" });
+  };
+  assert.strictEqual(ctx.tools.handleMessage(ws, { type: "tool_llm_config_get", requestId: "config-1", alias: "deep" }), true);
+  for (var i = 0; i < 50 && sent.length === 0; i++) await new Promise(function (resolve) { setTimeout(resolve, 5); });
+  assert.deepStrictEqual(sent[0], {
+    type: "tool_llm_config_state",
+    requestId: "config-1",
+    alias: "deep",
+    status: "ready",
+    vendor: "claude",
+    vendorName: "Claude",
+    model: "fable",
+    modelName: "Fable",
+    error: "",
+  });
+  assert.deepStrictEqual(aliases, ["deep"]);
+  assert.strictEqual(JSON.stringify(sent[0]).indexOf("API_KEY"), -1);
 });
 
 test("storage failures reply on the correlated tool_storage_result channel", async function () {

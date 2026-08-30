@@ -5,6 +5,7 @@
   "version": 1,
   "runtime": "worker",
   "permissions": ["llm"],
+  "modelAlias": "fast",
   "initialAction": "load",
   "example": true,
   "skills": "Use source-text with clay_tool_set, set translation-direction to ko-en or en-ko, then call the translate action. Read result and history from clay_tool_snapshot. Delete a history row with the remove action and its id."

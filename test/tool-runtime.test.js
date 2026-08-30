@@ -104,6 +104,7 @@ test("a failed initial action still leaves the runtime ready", async function ()
 
 test("storage and LLM operations wait for a connecting socket", async function () {
   var sent = [];
+  var aliases = [];
   var ws = {
     readyState: 0,
     send: function (raw) { sent.push(JSON.parse(raw)); },
@@ -113,6 +114,7 @@ test("storage and LLM operations wait for a connecting socket", async function (
     toolId: "waiting-tool",
     logicSource: "var tool = { initialState: {}, actions: {} };",
     allowLlm: true,
+    onLlmRequest: function (alias) { aliases.push(alias); },
     wsWaitMs: 100,
     wsRetryMs: 5,
   });
@@ -126,5 +128,6 @@ test("storage and LLM operations wait for a connecting socket", async function (
   ws.readyState = 1;
   await waitFor(function () { return sent.length === 2; });
   assert.deepStrictEqual(sent.map(function (message) { return message.type; }).sort(), ["tool_llm_op", "tool_storage_op"]);
+  assert.deepStrictEqual(aliases, ["fast"]);
   runtime.stop();
 });

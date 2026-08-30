@@ -3,6 +3,7 @@ var assert = require("node:assert");
 var fs = require("fs");
 var os = require("os");
 var path = require("path");
+var pathToFileURL = require("url").pathToFileURL;
 
 var testRoot = fs.mkdtempSync(path.join(os.tmpdir(), "clay-tools-registry-test-"));
 process.env.CLAY_HOME = testRoot;
@@ -30,6 +31,9 @@ test("tool registry rejects unsafe IDs and unknown UI nodes", function () {
   var badUi = validTool("bad-ui");
   badUi.uiTree.children.push({ type: "script" });
   assert.throws(function () { registry.installTool(ctx("validation"), badUi); }, /Unknown UI node type/);
+  var badAlias = validTool("bad-alias");
+  badAlias.manifest.modelAlias = "quickest";
+  assert.throws(function () { registry.installTool(ctx("validation"), badAlias); }, /modelAlias must be fast, standard, or deep/);
 });
 
 test("tool install, list, get, and remove roundtrip", function () {
@@ -78,9 +82,38 @@ test("built-in capsule folders seed once and user deletion stays durable", funct
   var translator = registry.getTool(userCtx, "translator");
   assert.ok(translator);
   assert.deepStrictEqual(translator.manifest.permissions, ["llm"]);
+  assert.strictEqual(translator.manifest.modelAlias, "fast");
   assert.match(translator.logicSource, /api\.llm\.complete/);
   registry.removeTool(userCtx, "scratchpad");
   assert.ok(!registry.listTools(userCtx).some(function (item) { return item.id === "scratchpad"; }));
+});
+
+test("old shipped Translator metadata is hydrated in memory without upgrading custom content", async function () {
+  var shippedCtx = ctx("builtin-metadata-hydration");
+  registry.listTools(shippedCtx);
+  var shippedRoot = registry.resolveToolsRoot(shippedCtx);
+  var manifestPath = path.join(shippedRoot, "translator", "manifest.json");
+  var oldManifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+  delete oldManifest.modelAlias;
+  fs.writeFileSync(manifestPath, JSON.stringify(oldManifest, null, 2) + "\n", "utf8");
+
+  var hydrated = registry.getTool(shippedCtx, "translator");
+  var status = await import(pathToFileURL(path.join(__dirname, "../lib/public/modules/tool-llm-status.js")).href);
+  assert.strictEqual(hydrated.manifest.modelAlias, "fast");
+  assert.strictEqual(status.initialToolLlmAlias(hydrated.manifest), "fast");
+  assert.strictEqual(JSON.parse(fs.readFileSync(manifestPath, "utf8")).modelAlias, undefined);
+
+  var customCtx = ctx("custom-translator-metadata");
+  registry.listTools(customCtx);
+  var customRoot = registry.resolveToolsRoot(customCtx);
+  var customManifestPath = path.join(customRoot, "translator", "manifest.json");
+  var customManifest = JSON.parse(fs.readFileSync(customManifestPath, "utf8"));
+  delete customManifest.modelAlias;
+  fs.writeFileSync(customManifestPath, JSON.stringify(customManifest, null, 2) + "\n", "utf8");
+  fs.appendFileSync(path.join(customRoot, "translator", "logic.js"), "\n// User-customized behavior.\n", "utf8");
+  var custom = registry.getTool(customCtx, "translator");
+  assert.strictEqual(custom.manifest.modelAlias, undefined);
+  assert.strictEqual(status.initialToolLlmAlias(custom.manifest), null);
 });
 
 test("v2 seed migration adds translator without restoring deleted older capsules", function () {

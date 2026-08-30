@@ -1,6 +1,6 @@
 var test = require("node:test");
 var assert = require("node:assert");
-var { attachModels, modelEntryMatches } = require("../lib/project-models");
+var { attachModels, modelEntryMatches, normalizeCatalogModels, selectCatalogModel } = require("../lib/project-models");
 
 function fixture(options) {
   options = options || {};
@@ -92,6 +92,54 @@ test("vendor catalog exposes only a concrete validated default model", async fun
   var invalid = fixture({ currentModel: "removed", models: ["fable"], adapterDefaultModel: "also-removed" });
   var invalidCatalog = await invalid.attached.getVendorCatalog({}, "claude");
   assert.strictEqual(invalidCatalog.defaultModel, "");
+});
+
+test("Capsule model resolution returns a concrete catalog value without emitting picker state", async function() {
+  var f = fixture({
+    currentModel: "claude-fable-5",
+    models: [{ value: "fable", resolvedModel: "claude-fable-5", displayName: "Claude Fable" }],
+  });
+  var resolved = await f.attached.resolveConfiguredModel({}, "standard");
+  assert.deepStrictEqual(resolved, {
+    status: "ready",
+    vendor: "claude",
+    vendorName: "Claude Code",
+    model: "fable",
+    modelName: "Claude Fable",
+    alias: "standard",
+    error: "",
+  });
+  assert.deepStrictEqual(f.sent, []);
+});
+
+test("Capsule model resolution reports actionable configuration failure", async function() {
+  var f = fixture({
+    adapter: {
+      init: function() { return Promise.reject(new Error("authentication required")); },
+      supportedModels: function() { return Promise.resolve([]); },
+    },
+  });
+  var resolved = await f.attached.resolveConfiguredModel({}, "fast");
+  assert.strictEqual(resolved.status, "error");
+  assert.strictEqual(resolved.model, "");
+  assert.match(resolved.error, /authentication required/);
+});
+
+test("Capsule aliases select different concrete values from rich catalog entries", async function() {
+  var models = [
+    { value: "swift", resolvedModel: "vendor-swift-v2", displayName: "Swift Mini" },
+    { value: "balanced", resolvedModel: "vendor-balanced-v3", displayName: "Balanced Sonnet" },
+    { value: "reasoner", resolvedModel: "vendor-reasoner-v4", displayName: "Reasoner Pro" },
+  ];
+  var f = fixture({ currentModel: "vendor-balanced-v3", models: models });
+  var fast = await f.attached.resolveConfiguredModel({}, "fast");
+  var standard = await f.attached.resolveConfiguredModel({}, "standard");
+  var deep = await f.attached.resolveConfiguredModel({}, "deep");
+  assert.deepStrictEqual([fast.model, standard.model, deep.model], ["swift", "balanced", "reasoner"]);
+  assert.deepStrictEqual([fast.alias, standard.alias, deep.alias], ["fast", "standard", "deep"]);
+  assert.ok([fast.model, standard.model, deep.model].every(function(model) { return typeof model === "string" && model !== "[object Object]"; }));
+  assert.deepStrictEqual(normalizeCatalogModels(models).map(function(model) { return model.value; }), ["swift", "balanced", "reasoner"]);
+  assert.strictEqual(selectCatalogModel(models, "vendor-balanced-v3", "standard").value, "balanced");
 });
 
 test("model selection reports adapter success and failure", async function() {
