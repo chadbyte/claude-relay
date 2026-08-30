@@ -51,7 +51,9 @@ function harness(timeoutMs) {
     set: function (toolId, controlId, value) {
       return toolsHandler.controlForMate("default", mateId, toolId, "set", { controlId: controlId, value: value });
     },
+    source: function (toolId) { return toolsHandler.sourceForMate("default", toolId); },
     install: function (input) { return toolsHandler.installForMate("default", input); },
+    update: function (toolId, input) { return toolsHandler.updateForMate("default", toolId, input); },
     uninstall: function (toolId) { return toolsHandler.removeForMate("default", toolId); },
   };
   return { sockets: sockets, projectClients: projectClients, projectContext: projectContext, board: boardHandler, tools: toolsHandler, defs: getToolDefs(handlers) };
@@ -69,7 +71,7 @@ async function result(definition, args) {
 test("mate tool MCP exposes driving and approved authoring tools with installed skills", async function () {
   var ctx = harness();
   assert.deepStrictEqual(ctx.defs.map(function (definition) { return definition.name; }), [
-    "clay_tool_list", "clay_tool_snapshot", "clay_tool_act", "clay_tool_set", "clay_tool_install", "clay_tool_uninstall",
+    "clay_tool_list", "clay_tool_snapshot", "clay_tool_act", "clay_tool_set", "clay_tool_source", "clay_tool_install", "clay_tool_update", "clay_tool_uninstall",
   ]);
   var listed = await result(tool(ctx.defs, "clay_tool_list"), {});
   assert.ok(listed.value.some(function (item) { return item.id === "board" && item.runtime === "server"; }));
@@ -87,6 +89,106 @@ test("mate tool MCP exposes driving and approved authoring tools with installed 
   assert.match(installDescription, /uncaught action error restores the pre-action UI state/);
 });
 
+test("Mate source and update obey the user gate, revisions, and preserve storage", async function () {
+  var ctx = harness();
+  var installed = await result(tool(ctx.defs, "clay_tool_install"), {
+    manifest: { id: "editable-widget", name: "Editable Widget", runtime: "worker" },
+    uiTree: { type: "stack", children: [{ type: "text", props: { text: "Ready" } }] },
+    logicSource: "var tool = { initialState: {}, actions: {} };",
+  });
+  assert.strictEqual(installed.value.metadata.mateEditingAllowed, false);
+  var denied = await result(tool(ctx.defs, "clay_tool_source"), { toolId: "editable-widget" });
+  assert.strictEqual(denied.response.isError, true);
+  assert.match(denied.response.content[0].text, /has not allowed Mate source access/);
+  var deniedUpdate = await result(tool(ctx.defs, "clay_tool_update"), {
+    toolId: "editable-widget", baseRevision: "unknown",
+    manifest: { id: "editable-widget", name: "Denied", runtime: "worker" },
+    uiTree: { type: "stack" }, logicSource: "var tool = { initialState: {}, actions: {} };",
+  });
+  assert.strictEqual(deniedUpdate.response.isError, true);
+  assert.match(deniedUpdate.response.content[0].text, /has not allowed Mate editing/);
+  ctx.tools.setMateAccess("default", "editable-widget", true);
+  var source = await result(tool(ctx.defs, "clay_tool_source"), { toolId: "editable-widget" });
+  assert.strictEqual(source.value.manifest.id, "editable-widget");
+  assert.match(source.value.logicSource, /initialState/);
+  assert.ok(source.value.revision);
+  var root = require("../lib/tools-registry").resolveToolsRoot({ userId: "default", multiUser: false, linuxUser: null });
+  fs.writeFileSync(path.join(root, "editable-widget", "data.db"), "keep\n", "utf8");
+  var updated = await result(tool(ctx.defs, "clay_tool_update"), {
+    toolId: "editable-widget",
+    baseRevision: source.value.revision,
+    manifest: { id: "editable-widget", name: "Edited Widget", runtime: "worker" },
+    uiTree: { type: "stack", children: [{ type: "text", props: { text: "Edited" } }] },
+    logicSource: "var tool = { initialState: { edited: true }, actions: {} };",
+  });
+  assert.strictEqual(updated.value.manifest.name, "Edited Widget");
+  assert.notStrictEqual(updated.value.revision, source.value.revision);
+  assert.strictEqual(fs.readFileSync(path.join(root, "editable-widget", "data.db"), "utf8"), "keep\n");
+  var stale = await result(tool(ctx.defs, "clay_tool_update"), {
+    toolId: "editable-widget",
+    baseRevision: source.value.revision,
+    manifest: { id: "editable-widget", name: "Stale", runtime: "worker" },
+    uiTree: { type: "stack" },
+    logicSource: "var tool = { initialState: {}, actions: {} };",
+  });
+  assert.strictEqual(stale.response.isError, true);
+  assert.match(stale.response.content[0].text, /source changed/);
+});
+
+test("user source is always readable while Mate access toggles are server-confirmed", async function () {
+  var ctx = harness();
+  ctx.tools.installedManifests("default");
+  var sent = [];
+  var ws = { readyState: 1, send: function (payload) { sent.push(JSON.parse(payload)); } };
+  ctx.sockets.push(ws);
+  assert.strictEqual(ctx.tools.handleMessage(ws, { type: "tool_source_get", toolId: "scratchpad", requestId: "source-user" }), true);
+  for (var i = 0; i < 50 && sent.length === 0; i++) await new Promise(function (resolve) { setTimeout(resolve, 5); });
+  assert.strictEqual(sent[0].type, "tool_source_state");
+  assert.strictEqual(sent[0].ok, true);
+  assert.match(sent[0].logicSource, /var tool/);
+  sent.length = 0;
+  ctx.tools.handleMessage(ws, { type: "tool_source_get", toolId: "board", requestId: "source-server" });
+  for (var bi = 0; bi < 50 && sent.length === 0; bi++) await new Promise(function (resolve) { setTimeout(resolve, 5); });
+  assert.strictEqual(sent[0].ok, true);
+  assert.strictEqual(sent[0].logicAvailable, false);
+  assert.strictEqual(sent[0].logicSource, null);
+  assert.strictEqual(sent[0].manifest.runtime, "server");
+  sent.length = 0;
+  assert.strictEqual(ctx.tools.handleMessage(ws, { type: "tool_mate_access_set", toolId: "scratchpad", allowed: true, requestId: "access-user" }), true);
+  for (var j = 0; j < 50 && sent.length === 0; j++) await new Promise(function (resolve) { setTimeout(resolve, 5); });
+  assert.strictEqual(sent[0].type, "tool_mate_access_state");
+  assert.strictEqual(sent[0].ok, true);
+  assert.strictEqual(sent[0].metadata.mateEditingAllowed, true);
+  sent.length = 0;
+  ctx.tools.handleMessage(ws, { type: "tool_mate_access_set", toolId: "board", allowed: true, requestId: "access-server" });
+  for (var k = 0; k < 50 && sent.length === 0; k++) await new Promise(function (resolve) { setTimeout(resolve, 5); });
+  assert.strictEqual(sent[0].ok, false);
+  assert.match(sent[0].error, /Server-managed Capsules/);
+});
+
+test("Mate access broadcasts only to authenticated sockets for the same user", async function () {
+  var ownerMessages = [];
+  var otherMessages = [];
+  var owner = { readyState: 1, _clayUser: { id: "owner" }, send: function (payload) { ownerMessages.push(JSON.parse(payload)); } };
+  var other = { readyState: 1, _clayUser: { id: "other" }, send: function (payload) { otherMessages.push(JSON.parse(payload)); } };
+  var projects = new Map();
+  projects.set("home", {
+    forEachClient: function (visit) { visit(owner); visit(other); },
+  });
+  var users = {
+    isMultiUser: function () { return true; },
+    findUserById: function (id) { return { id: id, linuxUser: null }; },
+  };
+  var tools = serverTools.attachTools({ users: users, projects: projects });
+  tools.installedManifests("owner");
+  assert.strictEqual(tools.handleMessage(owner, { type: "tool_mate_access_set", toolId: "scratchpad", allowed: true, requestId: "owner-access" }), true);
+  for (var i = 0; i < 50 && ownerMessages.length === 0; i++) await new Promise(function (resolve) { setTimeout(resolve, 5); });
+  assert.strictEqual(ownerMessages.length, 1);
+  assert.strictEqual(ownerMessages[0].requestId, "owner-access");
+  assert.strictEqual(ownerMessages[0].metadata.mateEditingAllowed, true);
+  assert.deepStrictEqual(otherMessages, []);
+});
+
 test("mate capsule install uses registry validation and broadcasts live changes", async function () {
   var ctx = harness();
   var sent = [];
@@ -98,6 +200,14 @@ test("mate capsule install uses registry validation and broadcasts live changes"
   });
   assert.strictEqual(installed.value.manifest.id, "mate-widget");
   assert.strictEqual(sent[0].type, "tool_installed");
+
+  var replacement = await result(tool(ctx.defs, "clay_tool_install"), {
+    manifest: { id: "mate-widget", name: "Replacement", runtime: "worker" },
+    uiTree: { type: "stack" },
+    logicSource: "var tool = { initialState: {}, actions: {} };",
+  });
+  assert.strictEqual(replacement.response.isError, true);
+  assert.match(replacement.response.content[0].text, /already exists.*update tool/);
 
   var rejected = await result(tool(ctx.defs, "clay_tool_install"), {
     manifest: { id: "mate-server", name: "Mate Server", runtime: "server" },

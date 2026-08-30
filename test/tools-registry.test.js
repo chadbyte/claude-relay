@@ -79,6 +79,80 @@ test("tool install, list, get, and remove roundtrip", function () {
   assert.strictEqual(registry.getTool(userCtx, "roundtrip-tool"), null);
 });
 
+test("Mate editing metadata defaults off, persists outside source, and stays user-isolated", function () {
+  var first = ctx("metadata-first");
+  var second = ctx("metadata-second");
+  registry.installTool(first, validTool("private-source"));
+  registry.installTool(second, validTool("private-source"));
+  assert.deepStrictEqual(registry.getToolMetadata(first, "private-source"), { mateEditingAllowed: false });
+  assert.deepStrictEqual(registry.getToolMetadata(second, "private-source"), { mateEditingAllowed: false });
+  registry.setMateEditingAllowed(first, "private-source", true);
+  assert.deepStrictEqual(registry.getTool(first, "private-source").metadata, { mateEditingAllowed: true });
+  assert.deepStrictEqual(registry.getToolMetadata(second, "private-source"), { mateEditingAllowed: false });
+  assert.strictEqual(fs.existsSync(path.join(registry.resolveToolsRoot(first), ".capsule-metadata.json")), true);
+  assert.strictEqual(fs.existsSync(path.join(registry.resolveToolsRoot(first), "private-source", ".capsule-metadata.json")), false);
+});
+
+test("Capsule source revisions are stable and updates preserve storage with stale-write protection", function () {
+  var userCtx = ctx("source-update");
+  registry.installTool(userCtx, validTool("revision-tool"));
+  var directory = path.join(registry.resolveToolsRoot(userCtx), "revision-tool");
+  fs.writeFileSync(path.join(directory, "data.db"), "owned storage\n", "utf8");
+  registry.setMateEditingAllowed(userCtx, "revision-tool", true);
+  var first = registry.getToolSource(userCtx, "revision-tool");
+  var unchanged = registry.getToolSource(userCtx, "revision-tool");
+  assert.strictEqual(first.revision, unchanged.revision);
+  var updated = validTool("revision-tool");
+  updated.manifest.name = "Revised Tool";
+  updated.logicSource = "var tool = { initialState: { revised: true }, actions: {} };\n";
+  var result = registry.updateTool(userCtx, "revision-tool", Object.assign({ baseRevision: first.revision }, updated));
+  var revised = registry.getToolSource(userCtx, "revision-tool");
+  assert.strictEqual(result.manifest.name, "Revised Tool");
+  assert.notStrictEqual(revised.revision, first.revision);
+  assert.strictEqual(fs.readFileSync(path.join(directory, "data.db"), "utf8"), "owned storage\n");
+  assert.deepStrictEqual(registry.getToolMetadata(userCtx, "revision-tool"), { mateEditingAllowed: true });
+  assert.throws(function () {
+    registry.updateTool(userCtx, "revision-tool", Object.assign({ baseRevision: first.revision }, updated));
+  }, /source changed/);
+});
+
+test("Capsule source updates preserve ID/runtime and installs cannot replace an existing ID", function () {
+  var userCtx = ctx("source-contract");
+  var input = validTool("collision-tool");
+  registry.installTool(userCtx, input);
+  assert.throws(function () { registry.installTool(userCtx, input); }, /already exists.*update tool/);
+  var source = registry.getToolSource(userCtx, "collision-tool");
+  var renamed = validTool("different-id");
+  assert.throws(function () {
+    registry.updateTool(userCtx, "collision-tool", Object.assign({ baseRevision: source.revision }, renamed));
+  }, /cannot change the Capsule ID/);
+});
+
+test("failed multi-file source replacement rolls authored files back", function () {
+  var userCtx = ctx("source-rollback");
+  registry.installTool(userCtx, validTool("rollback-tool"));
+  var before = registry.getToolSource(userCtx, "rollback-tool");
+  var replacement = validTool("rollback-tool");
+  replacement.manifest.name = "Should Not Persist";
+  var originalRename = fs.renameSync;
+  var calls = 0;
+  fs.renameSync = function (from, to) {
+    calls += 1;
+    if (calls === 4) throw new Error("injected rename failure");
+    return originalRename.call(fs, from, to);
+  };
+  try {
+    assert.throws(function () {
+      registry.updateTool(userCtx, "rollback-tool", Object.assign({ baseRevision: before.revision }, replacement));
+    }, /injected rename failure/);
+  } finally {
+    fs.renameSync = originalRename;
+  }
+  var after = registry.getToolSource(userCtx, "rollback-tool");
+  assert.strictEqual(after.revision, before.revision);
+  assert.strictEqual(after.manifest.name, before.manifest.name);
+});
+
 test("tool registry isolates users", function () {
   registry.installTool(ctx("first-user"), validTool("private-tool"));
   assert.deepStrictEqual(userToolIds(ctx("first-user")), ["private-tool"]);

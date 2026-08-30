@@ -111,10 +111,14 @@ test("capsule authoring tools are excluded from both auto-approval paths", funct
   var bridge = createSDKBridge({ cwd: process.cwd(), sessionManager: {}, adapter: {}, send: function () {} });
   assert.strictEqual(bridge.checkToolWhitelist("mcp__clay-tools__clay_tool_list", {}).behavior, "allow");
   assert.strictEqual(bridge.checkToolWhitelist("mcp__clay-tools__clay_tool_act", {}).behavior, "allow");
+  assert.strictEqual(bridge.checkToolWhitelist("mcp__clay-tools__clay_tool_source", {}).behavior, "allow");
   assert.strictEqual(bridge.checkToolWhitelist("mcp__clay-tools__clay_tool_install", {}), null);
   assert.strictEqual(bridge.checkToolWhitelist("mcp__clay-tools__clay_tool_uninstall", {}), null);
+  assert.strictEqual(bridge.checkToolWhitelist("mcp__clay-tools__clay_tool_update", {}), null);
   assert.ok(managedAllow.indexOf("mcp__clay-tools__clay_tool_list") !== -1);
+  assert.ok(managedAllow.indexOf("mcp__clay-tools__clay_tool_source") !== -1);
   assert.ok(managedAllow.indexOf("mcp__clay-tools__clay_tool_install") === -1);
+  assert.ok(managedAllow.indexOf("mcp__clay-tools__clay_tool_update") === -1);
   assert.ok(managedAllow.indexOf("mcp__clay-tools__clay_tool_uninstall") === -1);
   assert.ok(managedAllow.indexOf("mcp__clay-tools__*") === -1);
 });

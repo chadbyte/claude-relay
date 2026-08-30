@@ -629,6 +629,15 @@ body.home-active #main-area { border: 0; border-radius: 0; }
   overflow-x: auto;
 }
 
+.home-dock-context {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  min-width: 0;
+}
+
+.home-dock-context[hidden] { display: none; }
+
 .home-dock-tool {
   position: relative;
   align-self: stretch;
@@ -950,6 +959,10 @@ body.home-active #main-area { border: 0; border-radius: 0; }
 
   #home-hub.dock-split .home-dock-return { display: inline-flex; }
   #home-hub.dock-split #home-dock-focus { display: none; }
+  .home-dock-header { gap: 4px; padding-inline: 6px; }
+  .home-dock-return { width: 30px; padding: 0; }
+  .home-dock-return span { display: none; }
+  .home-dock-switcher { gap: 8px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
