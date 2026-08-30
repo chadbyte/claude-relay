@@ -1,3 +1,18 @@
+# [3.8.0](https://github.com/chadbyte/clay/compare/v3.7.0...v3.8.0) (2026-08-30)
+
+
+### Bug Fixes
+
+* **terminal:** preserve panel header on desktop resize ([bbbc644](https://github.com/chadbyte/clay/commit/bbbc644602711515d865e39d6c248b821851e082))
+
+
+### Features
+
+* **imagegen:** save generated images to project ([232eaac](https://github.com/chadbyte/clay/commit/232eaac8bf21acfb24b5c38acda747c055ecedff))
+* **imagegen:** save generated images to project ([#459](https://github.com/chadbyte/clay/issues/459)) ([2eed480](https://github.com/chadbyte/clay/commit/2eed480f2733367f5cc9112946289ee550eeb17b))
+* **session:** add complete Driver control for visible Workers ([fb2a541](https://github.com/chadbyte/clay/commit/fb2a54160f747c9dfee49b7eb742d9b03b951d7a))
+* **ui:** unify avatar identity and session actions ([#460](https://github.com/chadbyte/clay/issues/460)) ([7b04d0c](https://github.com/chadbyte/clay/commit/7b04d0ce66032b6df4d6ec5a40c5f3bcafcfcc98))
+
 # [3.8.0-beta.4](https://github.com/chadbyte/clay/compare/v3.8.0-beta.3...v3.8.0-beta.4) (2026-08-29)
 
 
