@@ -28,7 +28,10 @@ function fixture(options) {
     },
     subscribeSession: function () { return function () {}; },
     sendAndRecord: function (session, event) { session.history.push(event); },
-    saveSessionFile: opts.noPersistence ? null : function (session) { saved.push(session.localId); },
+    saveSessionFile: opts.noPersistence ? null : function (session) {
+      if (opts.persistenceError) throw new Error("save failed");
+      saved.push(session.localId);
+    },
   };
   var messages = [];
   var ws = {
@@ -77,7 +80,7 @@ function fixture(options) {
     projects: new Map([["mate-mate-a", project]]),
     addProject: function () {},
   });
-  return { handler: handler, ws: ws, messages: messages, updates: updates, created: created, sessions: sessions, saved: saved, dispatched: dispatched, getMate: function () { return mate; } };
+  return { handler: handler, ws: ws, messages: messages, updates: updates, created: created, sessions: sessions, manager: manager, saved: saved, dispatched: dispatched, getMate: function () { return mate; } };
 }
 
 test("Mate model catalog responses preserve request correlation and vendor state", async function () {
@@ -172,6 +175,84 @@ test("vendor and concrete model persist atomically and seed new Home sessions", 
   await settle();
   assert.equal(f.created[0].vendor, "codex");
   assert.equal(f.created[0].model, "gpt-5.6");
+});
+
+test("composer model selection updates the same pristine Home draft and its next send", async function () {
+  var f = fixture({
+    vendors: [
+      { id: "claude", displayName: "Claude", installed: true },
+      { id: "codex", displayName: "Codex", installed: true },
+    ],
+    catalogs: { codex: { status: "ready", models: [{ value: "gpt-5.6", resolvedModel: "gpt-5.6-codex" }] } },
+  });
+  f.handler.handleMessage(f.ws, { type: "home_mate_new_session", mateId: "mate-a", requestId: "new-draft" });
+  await settle();
+  var history = f.messages.filter(function (message) { return message.type === "home_mate_history"; })[0];
+  assert.equal(history.sessionId, "local:11");
+  f.handler.handleMessage(f.ws, { type: "home_mate_model_set", mateId: "mate-a", vendor: "codex", model: "gpt-5.6-codex", sessionId: history.sessionId, requestId: "draft-model" });
+  await settle();
+  var result = f.messages.filter(function (message) { return message.type === "home_mate_model_result"; })[0];
+  assert.equal(result.ok, true);
+  assert.equal(result.requestedSessionId, "local:11");
+  assert.equal(result.sessionId, "local:11");
+  assert.equal(result.sessionApplied, true);
+  assert.equal(result.sessionVendor, "codex");
+  assert.equal(result.sessionModel, "gpt-5.6");
+  assert.equal(f.sessions.get(11).vendor, "codex");
+  assert.equal(f.sessions.get(11).model, "gpt-5.6");
+  assert.deepEqual(f.saved, [11]);
+  assert.equal(f.created.length, 1);
+  assert.deepEqual(f.getMate(), { id: "mate-a", name: "A", vendor: "codex", model: "gpt-5.6" });
+  f.handler.handleMessage(f.ws, { type: "home_mate_send", mateId: "mate-a", sessionId: "local:11", requestId: "new-draft", text: "Use the draft model" });
+  await settle();
+  assert.deepEqual(f.dispatched, ["gpt-5.6"]);
+  assert.equal(f.created.length, 1);
+});
+
+test("activity, processing, stale, and other-user sessions remain immutable while the Mate default updates", async function () {
+  var activityTypes = ["user_message", "delta", "tool_start", "tool_result"];
+  for (var i = 0; i < activityTypes.length; i++) {
+    var session = { localId: 1, cliSessionId: "activity-" + i, ownerId: "u1", vendor: "claude", model: "fable", history: [{ type: activityTypes[i] }], lastActivity: 20 };
+    var active = fixture({ existingSession: session });
+    active.handler.handleMessage(active.ws, { type: "home_mate_model_set", mateId: "mate-a", vendor: "claude", model: "sonnet", sessionId: session.cliSessionId, requestId: "activity-set-" + i });
+    await settle();
+    var activeResult = active.messages.filter(function (message) { return message.type === "home_mate_model_result"; })[0];
+    assert.equal(activeResult.sessionApplied, false);
+    assert.match(activeResult.sessionReason, /already has activity/);
+    assert.equal(session.model, "fable");
+    assert.deepEqual(active.saved, []);
+    assert.equal(active.getMate().model, "sonnet");
+  }
+
+  var processingSession = { localId: 1, cliSessionId: "processing", ownerId: "u1", vendor: "claude", model: "fable", history: [], isProcessing: true };
+  var processing = fixture({ existingSession: processingSession });
+  processing.handler.handleMessage(processing.ws, { type: "home_mate_model_set", mateId: "mate-a", vendor: "claude", model: "sonnet", sessionId: "processing", requestId: "processing-set" });
+  await settle();
+  assert.equal(processingSession.model, "fable");
+  assert.equal(processing.messages.filter(function (message) { return message.type === "home_mate_model_result"; })[0].sessionApplied, false);
+
+  var owned = { localId: 1, cliSessionId: "owned", ownerId: "u1", vendor: "claude", model: "fable", history: [] };
+  var inaccessible = fixture({ existingSession: owned });
+  inaccessible.sessions.set(2, { localId: 2, cliSessionId: "other-user", ownerId: "u2", vendor: "claude", model: "fable", history: [] });
+  inaccessible.handler.handleMessage(inaccessible.ws, { type: "home_mate_model_set", mateId: "mate-a", vendor: "claude", model: "sonnet", sessionId: "other-user", requestId: "other-set" });
+  await settle();
+  var inaccessibleResult = inaccessible.messages.filter(function (message) { return message.type === "home_mate_model_result"; })[0];
+  assert.equal(inaccessibleResult.sessionApplied, false);
+  assert.equal(inaccessible.sessions.get(2).model, "fable");
+  assert.deepEqual(inaccessible.saved, []);
+});
+
+test("a draft persistence failure rolls back in-memory session metadata", async function () {
+  var session = { localId: 1, cliSessionId: "draft-save-error", ownerId: "u1", vendor: "claude", model: "fable", history: [] };
+  var f = fixture({ existingSession: session, persistenceError: true });
+  f.handler.handleMessage(f.ws, { type: "home_mate_model_set", mateId: "mate-a", vendor: "claude", model: "sonnet", sessionId: "draft-save-error", requestId: "draft-save" });
+  await settle();
+  var result = f.messages.filter(function (message) { return message.type === "home_mate_model_result"; })[0];
+  assert.equal(result.ok, true);
+  assert.equal(result.sessionApplied, false);
+  assert.match(result.sessionReason, /could not be persisted/);
+  assert.equal(session.vendor, "claude");
+  assert.equal(session.model, "fable");
 });
 
 test("vendor-only, unavailable-vendor, and cross-catalog selections never persist", async function () {

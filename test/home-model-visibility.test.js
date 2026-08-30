@@ -37,13 +37,13 @@ test("composer presents concrete, loading, or accessible Choose model states", f
   assert.match(homeMarkup, />Conversation model<\/span>[\s\S]*id="home-mate-chat-session-model-value">Loading model…<\/span>[\s\S]*id="home-mate-chat-session-model-choose"[^>]*>Choose model<\/button>/);
   assert.match(hubCss, /#home-mate-chat-session-model-choose \{[\s\S]*cursor: pointer/);
   assert.match(chatSource, /sessionModelEl\.setAttribute\("aria-label", "Model for this conversation: " \+ label\)/);
-  assert.match(chatSource, /sessionModelChooseEl\.setAttribute\("aria-label", "Choose a model for the current Mate\. Used for new conversations\."\)/);
-  assert.match(chatSource, /sessionModelChooseEl\.addEventListener\("click", function \(\) \{ openHomeMateAction\("model"\); \}\)/);
-  assert.match(modelPickerSource, /clay:home-mate-model-confirmed", \{ detail: \{ mateId: msg\.mateId, vendor: state\.mateVendor, model: state\.mateModel \} \}/);
+  assert.match(chatSource, /canChangeDraft[\s\S]*Choose a model for this draft conversation and future new conversations/);
+  assert.match(chatSource, /sessionModelChooseEl\.addEventListener\("click", function \(\) \{ openHomeMateAction\("model", \{ sessionId: store\.get\('homeChatSessionId'\) \}\); \}\)/);
+  assert.match(modelPickerSource, /clay:home-mate-model-confirmed[\s\S]*requestedSessionId: msg\.requestedSessionId[\s\S]*sessionApplied: msg\.sessionApplied === true/);
   assert.match(chatSource, /clay:home-mate-model-confirmed[\s\S]*handleHomeMateModelConfirmed\(event\.detail \|\| \{\}\)/);
-  assert.match(chatSource, /handleHomeMateModelConfirmed\(msg\)[\s\S]*msg\.mateId !== store\.get\('homeChatMateId'\)[\s\S]*if \(store\.get\('homeChatSessionModel'\)\) return;[\s\S]*resumeHomeChat\(\)/);
+  assert.match(chatSource, /handleHomeMateModelConfirmed\(msg\)[\s\S]*confirmedHomeSessionModel[\s\S]*homeChatSessionVendor: confirmed\.vendor[\s\S]*homeChatSessionModel: confirmed\.model/);
   assert.doesNotMatch(chatSource.slice(chatSource.indexOf("export function handleHomeMateModelConfirmed")), /msg\.ok/);
-  assert.match(chatSource, /inputEl\.disabled = !mateId \|\| streaming \|\| !hasCommittedSessionModel\(\)/);
+  assert.match(chatSource, /inputEl\.disabled = !mateId \|\| !hasCommittedSessionModel\(\)/);
   assert.match(chatSource, /sendBtn\.disabled = !mateId \|\| streaming \|\| !hasCommittedSessionModel\(\)/);
 });
 

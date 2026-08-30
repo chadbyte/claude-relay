@@ -25,8 +25,8 @@ var styleSource = read("lib/public/style.css");
 var homeMarkup = indexSource.slice(indexSource.indexOf('<div id="home-hub"'), indexSource.indexOf('<div id="whats-new-article"'));
 
 test("first-depth selected Mate actions open backstage and keep Debate coherent", function () {
-  assert.match(chatSource, /export function openHomeMateAction\(kind\)/);
-  assert.match(chatSource, /kind === "memory" \|\| kind === "knowledge" \|\| kind === "model" \|\| kind === "settings"[\s\S]*openHomeMateProperty\(kind, mate\.id, getMateName\(mate\)\)/);
+  assert.match(chatSource, /export function openHomeMateAction\(kind, options\)/);
+  assert.match(chatSource, /kind === "memory" \|\| kind === "knowledge" \|\| kind === "model" \|\| kind === "settings"[\s\S]*openHomeMateProperty\(kind, mate\.id, getMateName\(mate\), options\)/);
   assert.match(chatSource, /window\.dispatchEvent\(new CustomEvent\("clay:home-debate"\)\)/);
   assert.match(chatSource, /openDebateModal\(\{[\s\S]*dmContext: messages\.map/);
   assert.doesNotMatch(chatSource + homeMarkup, /home-mate-actions-menu|role="menuitem"|home-sidebar-mate-overflow/);
