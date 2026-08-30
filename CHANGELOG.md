@@ -1,3 +1,10 @@
+## [3.8.1](https://github.com/chadbyte/clay/compare/v3.8.0...v3.8.1) (2026-08-30)
+
+
+### Bug Fixes
+
+* **worktree:** skip stale worktree directories ([5ae299f](https://github.com/chadbyte/clay/commit/5ae299f17090ab787956ee92120d1ea5e6e99ad6))
+
 # [3.8.0](https://github.com/chadbyte/clay/compare/v3.7.0...v3.8.0) (2026-08-30)
 
 
