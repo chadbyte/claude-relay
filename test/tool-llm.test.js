@@ -9,7 +9,7 @@ function queryHandle(events, capture) {
     pushMessage: function (prompt) { capture.prompt = prompt; return true; },
     setModel: function () {}, setEffort: function () {}, setToolPolicy: function () {},
     stopTask: function () {}, getContextUsage: function () { return Promise.resolve(null); },
-    endInput: function () {}, abort: function () {}, close: function () { capture.closed = true; },
+    endInput: function () { capture.inputEnded = true; }, abort: function () {}, close: function () { capture.closed = true; },
     [Symbol.asyncIterator]: async function* () {
       for (var i = 0; i < events.length; i++) yield events[i];
     },
@@ -24,12 +24,14 @@ test("LLM arguments retain capability aliases and reject vendor model names", fu
 test("LLM completion uses a sessionless one-shot adapter query", async function () {
   var capture = {};
   var adapter = {
-    createQuery: function (opts) {
+    vendor: "claude",
+    createQuery: function () { throw new Error("generic query must not run"); },
+    createOneShotQuery: function (opts) {
       capture.opts = opts;
-      return Promise.resolve(queryHandle([
-        { yokeType: "text_delta", text: "안녕" },
-        { yokeType: "result" },
-      ], capture));
+      return Promise.resolve({
+        handle: queryHandle([{ yokeType: "text_delta", text: "안녕" }, { yokeType: "result" }], capture),
+        backendPersistence: "ephemeral",
+      });
     },
   };
   var text = await toolLlm.complete({
@@ -40,19 +42,44 @@ test("LLM completion uses a sessionless one-shot adapter query", async function 
   });
   assert.strictEqual(text, "안녕");
   assert.strictEqual(capture.opts.model, "claude-haiku-4-5");
-  assert.strictEqual(capture.opts.persistSession, false);
   assert.strictEqual(capture.opts.skipProjectInstructions, true);
   assert.strictEqual(capture.opts.skipSkills, true);
+  assert.strictEqual((await capture.opts.canUseTool("Read", {})).behavior, "deny");
   assert.strictEqual(capture.prompt, "hello");
+  assert.strictEqual(capture.inputEnded, true);
   assert.strictEqual(capture.closed, true);
+});
+
+test("LLM completion uses the adapter-native YOKE one-shot path when available", async function () {
+  var capture = { prompts: [] };
+  var adapter = {
+    vendor: "claude",
+    createQuery: function () { throw new Error("Capsule bridge bypassed completeOnce"); },
+    createOneShotQuery: function (opts) {
+      capture.opts = opts;
+      return Promise.resolve({
+        handle: queryHandle([{ yokeType: "text_delta", text: "native" }, { yokeType: "result" }], capture),
+        backendPersistence: "ephemeral",
+      });
+    },
+  };
+  var text = await toolLlm.complete({
+    adapters: { claude: adapter }, cwd: "/tmp", args: { prompt: "hello", model: "fast" },
+    selection: { vendor: "claude", model: "claude-haiku-4-5" },
+  });
+  assert.strictEqual(text, "native");
+  assert.strictEqual(capture.opts.skipProjectInstructions, true);
+  assert.strictEqual(capture.opts.skipSkills, true);
 });
 
 test("LLM completion never stringifies a rich catalog object as the selected model", async function () {
   var capture = {};
   var adapter = {
-    createQuery: function (opts) {
+    vendor: "claude",
+    createQuery: function () { throw new Error("generic query must not run"); },
+    createOneShotQuery: function (opts) {
       capture.model = opts.model;
-      return Promise.resolve(queryHandle([{ yokeType: "result" }], capture));
+      return Promise.resolve({ handle: queryHandle([{ yokeType: "result" }], capture), backendPersistence: "ephemeral" });
     },
   };
   await toolLlm.complete({
@@ -63,6 +90,17 @@ test("LLM completion never stringifies a rich catalog object as the selected mod
   });
   assert.strictEqual(capture.model, "fable");
   assert.notStrictEqual(capture.model, "[object Object]");
+});
+
+test("LLM completion rejects providers without verified ephemeral one-shot support", async function () {
+  var adapter = {
+    vendor: "legacy-provider",
+    createQuery: function () { throw new Error("must not materialize a backend query"); },
+  };
+  await assert.rejects(toolLlm.complete({
+    adapters: { legacy: adapter }, cwd: "/tmp", args: { prompt: "hello", model: "fast" },
+    selection: { vendor: "legacy", model: "legacy-model" },
+  }), /legacy-provider adapter does not guarantee ephemeral one-shot execution/);
 });
 
 test("LLM completion rejects missing concrete configuration actionably", async function () {

@@ -752,11 +752,10 @@ E. Tool LLM access + authoring flow: `api.llm.complete({system, prompt,
    consumer, never a vendor SDK consumer — a capsule cannot name a
    vendor. `model` is a capability alias ("fast" | "standard" |
    "deep"), resolved per user to whatever vendor/model their yoke
-   adapters and (later) BYOK keys provide. Provider stage 1: one-shot
-   queries through the installed yoke adapters (claude/codex/kiro, no
-   new config). Stage 2 (later): per-user BYOK key store, server-side
-   only, plugging additional providers into the same alias resolution
-   so atomic tools get small cheap models without vendor lock. Then the authoring flow: a mate creates
+   adapters provide. The host executes these through YOKE's explicit
+   ephemeral one-shot contract: Claude uses `persistSession: false`,
+   Codex requires a confirmed `thread.ephemeral`, and adapters without a
+   verified ephemeral capability fail closed. Then the authoring flow: a mate creates
    manifest+logic.js+ui tree in conversation and mounts it into the
    dock — reference demo: an atomic KO<->EN translator with minimal
    context and stored history.
@@ -830,24 +829,17 @@ Phase C's normal 15-second browser-control limit. Each completion uses a
 correlated 60-second RPC from worker to browser host to `server-tools.js`,
 and server logs include the capsule ID and caller ID.
 
-The server resolves the user's first installed YOKE adapter with
-`resolveDefaultVendor` and performs a direct one-shot adapter query outside
-the project session manager. It passes `skipProjectInstructions: true` and
-`skipSkills: true`, so an atomic capsule sees only its fixed system prompt
-and input. Claude maps
-fast/standard/deep to haiku/sonnet/opus and receives
-`persistSession: false` through both in-process and OS-user worker paths.
-Codex maps to gpt-5.4-mini/gpt-5.6-terra/gpt-5.6-sol. Antigravity maps to
-flash/default/pro. Other adapters select a matching small or strong model
-from their advertised catalog, with the adapter default for standard.
-
-Leak risk: Claude's no-session-persistence option prevents these calls from
-writing `~/.claude/projects` transcripts, so they cannot become the helper
-sessions described in Known mate defects §1. Non-Claude YOKE adapters do not
-currently expose a common persistence-disable primitive. They still bypass
-Clay's session manager and therefore do not enter Clay's project session
-list, but their underlying CLI/provider may retain its own ephemeral thread
-metadata. That residual provider-local retention is the remaining risk.
+The server resolves a concrete catalog model for the requested capability
+alias, then calls YOKE's canonical `completeOnce` outside the project session
+manager. It passes `skipProjectInstructions: true` and `skipSkills: true`, so
+an atomic capsule sees only its fixed system prompt and input. The Capsule path
+sends one prompt, denies tools, normalizes streamed or final-only output,
+enforces abort and timeout, closes resources, and never registers a Clay
+session. Claude uses its native `persistSession: false` path in-process and
+through OS-user workers. Clay's bundled Codex app-server starts a thread with
+`ephemeral: true` and must confirm `thread.ephemeral === true`. Capsule calls
+reject adapters that cannot explicitly verify ephemeral backend persistence;
+the generic YOKE unknown-persistence escape hatch is not enabled here.
 
 The `clay-tools` MCP server now also exposes `clay_tool_install` and
 `clay_tool_uninstall`. Neither is auto-approved in the SDK whitelist or the

@@ -88,3 +88,8 @@ test("Home never instructs the user to choose a Mate", function () {
   assert.match(homeSource, /Getting Home ready/);
   assert.match(homeSource, /Loading your Mate and recent conversation/);
 });
+
+test("Mate introduction keeps server-controlled conversation privacy copy", function () {
+  var markup = source("lib/public/index.html");
+  assert.match(markup, /Clay keeps your conversation history on your server, under your control\./);
+});
