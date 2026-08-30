@@ -728,7 +728,7 @@ A. Tool dock + DM demolition: the right pane becomes a dock hosting N
    chip rail routing to openDm, DM picker mate section, set_mate_dm
    path for mates) so principle 1 is true in code, not just at home.
 B. Tool contract skeleton: manifest format, declarative UI renderer
-   (component vocabulary v1) with Clay-native rendering, worker-
+   (safe semantic component vocabulary) with Clay-native rendering, worker-
    sandboxed logic runtime with state+actions, per-tool scoped nedb
    storage on the server.
 C. Universal mate control: tool_snapshot / tool_act / tool_set /
@@ -798,6 +798,16 @@ as `{ id, error }` entries instead of disappearing silently.
 Capsule storage also lives in that directory as `data.db`; the board moves
 there with a read-through migration from its legacy board datastore path.
 
+Declarative Capsule UI v2 keeps the original nodes and adds a bounded semantic
+presentation grammar: enumerated tone, size, emphasis, layout, card, button,
+text, heading, list, field, section, callout, icon, and empty-state options.
+The registry rejects unknown props, arbitrary class/style/HTML, invalid icons,
+duplicate IDs, unsafe option/argument shapes, and oversized trees. The renderer
+maps only validated semantics to Clay-owned classes and accessible attributes.
+The v3 seed marker upgrades old Translator and Scratchpad UI only when shipped
+manifest, logic, and old UI fingerprints still match; customized or deleted
+Capsules remain untouched.
+
 `runtime: "server"` is reserved for shipped built-ins and cannot be
 installed through the WebSocket installer. Server capsules resolve through
 the fixed adapter map in `capsules-server-logic.js`; no folder supplies
@@ -844,7 +854,7 @@ the generic YOKE unknown-persistence escape hatch is not enabled here.
 The `clay-tools` MCP server now also exposes `clay_tool_install` and
 `clay_tool_uninstall`. Neither is auto-approved in the SDK whitelist or the
 managed Claude hook list. The install description is self-contained: it
-defines manifest fields and permissions, the complete UI vocabulary,
+defines manifest fields and permissions, the complete safe UI v2 vocabulary,
 dot-path bindings and `$item.*` templates, the worker `var tool` action
 contract, storage and LLM APIs, caller attribution, and the no-DOM/no-import
 constraints. Installs still use the registry's validation and worker-only
@@ -853,9 +863,10 @@ without reload.
 
 `lib/capsules/translator/` is the reference LLM capsule. It declares the
 LLM permission, translates Korean and English with a minimal fixed prompt,
-and persists latest-first history through scoped capsule storage. Existing
-Phase D users receive only this new built-in during the v2 seed migration,
-so previously deleted board or scratchpad folders remain deleted.
+and persists latest-first history through scoped capsule storage. The v2 seed
+migration added Translator without restoring older deletions; the v3 UI
+migration updates only fingerprint-matching shipped Translator/Scratchpad
+markup, so deleted or customized Capsule folders remain untouched.
 
 ### Build order phase 1 (original, superseded by roadmap v2 above)
 

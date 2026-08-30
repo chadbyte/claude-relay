@@ -1,6 +1,7 @@
 var test = require("node:test");
 var assert = require("node:assert");
 var path = require("path");
+var vm = require("node:vm");
 var pathToFileURL = require("url").pathToFileURL;
 
 var originalWorker = global.Worker;
@@ -129,5 +130,76 @@ test("storage and LLM operations wait for a connecting socket", async function (
   await waitFor(function () { return sent.length === 2; });
   assert.deepStrictEqual(sent.map(function (message) { return message.type; }).sort(), ["tool_llm_op", "tool_storage_op"]);
   assert.deepStrictEqual(aliases, ["fast"]);
+  runtime.stop();
+});
+
+test("action api publishes intermediate state before an async action completes", async function () {
+  var runtime = runtimeModule.createToolRuntime({
+    toolId: "progress-tool",
+    logicSource: "var tool = { initialState: { busy: false }, actions: { run: async function (state, args, api) { api.setState({ busy: true, message: 'Working' }); return { busy: false, message: 'Done' }; } } };",
+  });
+  runtime.start();
+  var posted = [];
+  var sandbox = {
+    self: { postMessage: function (message) { posted.push(message); } },
+    setTimeout: setTimeout,
+    clearTimeout: clearTimeout,
+  };
+  vm.runInNewContext(workerSource, sandbox);
+  sandbox.self.onmessage({ data: { type: "init" } });
+  sandbox.self.onmessage({ data: { type: "action", name: "run", args: {}, callerId: "user", actionSeq: 7 } });
+  await delay(0);
+  var states = posted.filter(function (message) { return message.type === "state"; }).map(function (message) { return JSON.parse(JSON.stringify(message)); });
+  assert.deepStrictEqual(states, [
+    { type: "state", newState: { busy: false } },
+    { type: "state", newState: { busy: true, message: "Working" }, actionSeq: 7, intermediate: true },
+    { type: "state", newState: { busy: false, message: "Done" }, actionSeq: 7 },
+  ]);
+  runtime.stop();
+});
+
+test("intermediate worker state rerenders without resolving the pending action", async function () {
+  var seen = [];
+  var runtime = runtimeModule.createToolRuntime({
+    toolId: "progress-host",
+    logicSource: "var tool = { initialState: {}, actions: { run: function (state) { return state; } } };",
+    onState: function (state) { seen.push(state); },
+  });
+  runtime.start();
+  var worker = workers[0];
+  worker.onmessage({ data: { type: "state", newState: { busy: false } } });
+  var settled = false;
+  var action = runtime.action("run", {}, "user").then(function (state) { settled = true; return state; });
+  var actionMessage = worker.messages.filter(function (message) { return message.type === "action"; })[0];
+  worker.onmessage({ data: { type: "state", newState: { busy: true }, actionSeq: actionMessage.actionSeq, intermediate: true } });
+  await delay(0);
+  assert.strictEqual(settled, false);
+  assert.deepStrictEqual(runtime.getState(), { busy: true });
+  worker.onmessage({ data: { type: "state", newState: { busy: false, done: true }, actionSeq: actionMessage.actionSeq } });
+  assert.deepStrictEqual(await action, { busy: false, done: true });
+  assert.deepStrictEqual(seen, [{ busy: false }, { busy: true }, { busy: false, done: true }]);
+  runtime.stop();
+});
+
+test("an uncaught async action error rolls intermediate UI state back", async function () {
+  var runtime = runtimeModule.createToolRuntime({
+    toolId: "rollback-tool",
+    logicSource: "var tool = { initialState: { busy: false, value: 'before' }, actions: { run: async function (state, args, api) { api.setState({ busy: true, value: state.value }); throw new Error('Failed'); } } };",
+  });
+  runtime.start();
+  var posted = [];
+  var sandbox = {
+    self: { postMessage: function (message) { posted.push(message); } },
+    setTimeout: setTimeout,
+    clearTimeout: clearTimeout,
+  };
+  vm.runInNewContext(workerSource, sandbox);
+  sandbox.self.onmessage({ data: { type: "init" } });
+  sandbox.self.onmessage({ data: { type: "action", name: "run", args: {}, callerId: "user", actionSeq: 9 } });
+  await delay(0);
+  var normalized = posted.map(function (message) { return JSON.parse(JSON.stringify(message)); });
+  assert.ok(normalized.some(function (message) { return message.intermediate === true && message.newState.busy === true; }));
+  assert.ok(normalized.some(function (message) { return message.rollback === true && message.newState.busy === false && message.newState.value === "before"; }));
+  assert.ok(normalized.some(function (message) { return message.type === "error" && message.actionSeq === 9 && message.message === "Failed"; }));
   runtime.stop();
 });

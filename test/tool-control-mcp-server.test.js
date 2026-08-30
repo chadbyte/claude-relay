@@ -77,6 +77,14 @@ test("mate tool MCP exposes driving and approved authoring tools with installed 
   assert.match(scratchpad.skills, /clay_tool_set/);
   var translator = listed.value.filter(function (item) { return item.id === "translator"; })[0];
   assert.deepStrictEqual(translator.permissions, ["llm"]);
+  var installDescription = tool(ctx.defs, "clay_tool_install").description;
+  assert.match(installDescription, /safe JSON nodes/);
+  assert.match(installDescription, /tone neutral\/accent\/info\/success\/warning\/danger/);
+  assert.match(installDescription, /Arbitrary class, style, HTML/);
+  assert.match(installDescription, /section, callout, icon/);
+  assert.match(installDescription, /when conditionally renders/);
+  assert.match(installDescription, /api\.setState\(nextState\)/);
+  assert.match(installDescription, /uncaught action error restores the pre-action UI state/);
 });
 
 test("mate capsule install uses registry validation and broadcasts live changes", async function () {

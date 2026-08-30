@@ -110,6 +110,12 @@ Object.defineProperty(FakeElement.prototype, "innerHTML", {
   get: function () { return ""; },
 });
 
+function flatten(node) {
+  var result = [node];
+  for (var i = 0; i < node.children.length; i++) result = result.concat(flatten(node.children[i]));
+  return result;
+}
+
 test("worker rerenders cannot replace a live Korean IME node or drop rapid Hangul input", async function () {
   var originalDocument = global.document;
   var fakeDocument = {
@@ -200,4 +206,76 @@ test("detached composed controls do not dispatch stale actions", async function 
   input.value = "안녕";
   input.emit("input");
   assert.deepStrictEqual(commits, []);
+});
+
+test("declarative UI v2 renders fixed semantics, accessible hints, and safe text", async function () {
+  var originalDocument = global.document;
+  var fakeDocument = {
+    activeElement: null,
+    createElement: function (tagName) { return new FakeElement(tagName, fakeDocument); },
+  };
+  global.document = fakeDocument;
+  try {
+    var rendererUrl = pathToFileURL(path.join(__dirname, "../lib/public/modules/tool-renderer.js")).href;
+    var renderer = await import(rendererUrl);
+    var container = new FakeElement("div", fakeDocument);
+    var actions = [];
+    var tree = {
+      type: "stack",
+      props: { gap: "xl" },
+      children: [
+        { type: "heading", props: { text: "Editorial utility", level: 2, role: "display" } },
+        { type: "text", props: { text: "<b>Text, not HTML</b>", role: "muted" } },
+        { type: "input", id: "source", bind: "source", action: "setSource", props: { label: "Source", hint: "Required source", required: true } },
+        { type: "button", id: "run", action: "run", props: { label: "Run", accessibleLabel: "Run Capsule", variant: "primary", icon: "sparkles", disabled: "$state.busy" } },
+        { type: "callout", when: "showFeedback", props: { title: "Status", tone: "success" }, children: [{ type: "text", bind: "message" }] },
+        { type: "empty-state", bind: "items", props: { icon: "notebook-pen", title: "Empty", text: "Add an item." } },
+      ],
+    };
+    renderer.renderToolUi("v2-test", tree, { source: "안녕", items: [], busy: false }, function (action, args) { actions.push({ action: action, args: args }); }, container);
+    var nodes = flatten(container);
+    var heading = nodes.filter(function (node) { return node.className.indexOf("tool-heading") !== -1; })[0];
+    var textNode = nodes.filter(function (node) { return node.className.indexOf("tool-text--role-muted") !== -1; })[0];
+    var input = nodes.filter(function (node) { return node.dataset.toolControlId === "source"; })[0];
+    var button = nodes.filter(function (node) { return node.dataset.toolControlId === "run"; })[0];
+    var icon = nodes.filter(function (node) { return node["data-lucide"] === "sparkles"; })[0];
+    assert.match(heading.className, /tool-heading--role-display/);
+    assert.strictEqual(textNode.textContent, "<b>Text, not HTML</b>");
+    assert.strictEqual(input.value, "안녕");
+    assert.strictEqual(input.required, true);
+    assert.ok(input["aria-describedby"]);
+    assert.match(button.className, /tool-button--variant-primary/);
+    assert.strictEqual(button.disabled, false);
+    assert.strictEqual(button["aria-label"], "Run Capsule");
+    assert.ok(icon);
+    assert.strictEqual(nodes.some(function (node) { return node.className.indexOf("tool-callout") !== -1; }), false);
+    button.emit("click");
+    assert.strictEqual(actions[0].action, "run");
+    assert.strictEqual(renderer.getControlCatalog("v2-test").source.bind, "source");
+    renderer.renderToolUi("v2-test", tree, { source: "안녕", items: [], busy: true, showFeedback: true, message: "Saved" }, function () {}, container);
+    var updatedNodes = flatten(container);
+    var disabledButton = updatedNodes.filter(function (node) { return node.dataset.toolControlId === "run"; })[0];
+    assert.strictEqual(disabledButton.disabled, true);
+    assert.ok(updatedNodes.some(function (node) { return node.className.indexOf("tool-callout") !== -1; }));
+    assert.ok(updatedNodes.some(function (node) { return node.textContent === "Saved"; }));
+  } finally {
+    global.document = originalDocument;
+  }
+});
+
+test("v1 declarative defaults remain renderable", async function () {
+  var originalDocument = global.document;
+  var fakeDocument = { activeElement: null, createElement: function (tagName) { return new FakeElement(tagName, fakeDocument); } };
+  global.document = fakeDocument;
+  try {
+    var rendererUrl = pathToFileURL(path.join(__dirname, "../lib/public/modules/tool-renderer.js")).href;
+    var renderer = await import(rendererUrl);
+    var container = new FakeElement("div", fakeDocument);
+    renderer.renderToolUi("v1-test", { type: "card", children: [{ type: "text", props: { text: "Legacy" } }] }, {}, function () {}, container);
+    var nodes = flatten(container);
+    assert.ok(nodes.some(function (node) { return node.className === "tool-card"; }));
+    assert.ok(nodes.some(function (node) { return node.textContent === "Legacy"; }));
+  } finally {
+    global.document = originalDocument;
+  }
 });

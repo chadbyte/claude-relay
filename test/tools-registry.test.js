@@ -36,6 +36,39 @@ test("tool registry rejects unsafe IDs and unknown UI nodes", function () {
   assert.throws(function () { registry.installTool(ctx("validation"), badAlias); }, /modelAlias must be fast, standard, or deep/);
 });
 
+test("Capsule UI v2 validates semantic presentation and rejects unsafe markup", function () {
+  var translator = JSON.parse(fs.readFileSync(path.join(__dirname, "../lib/capsules/translator/ui.json"), "utf8"));
+  var scratchpad = JSON.parse(fs.readFileSync(path.join(__dirname, "../lib/capsules/scratchpad/ui.json"), "utf8"));
+  assert.strictEqual(registry.validateUiNode(translator), true);
+  assert.strictEqual(registry.validateUiNode(scratchpad), true);
+
+  var unsafeStyle = validTool("unsafe-style");
+  unsafeStyle.uiTree.props = { style: "position:fixed" };
+  assert.throws(function () { registry.installTool(ctx("validation"), unsafeStyle); }, /Unknown UI property 'style'/);
+  var unsafeClass = validTool("unsafe-class");
+  unsafeClass.uiTree.props = { class: "admin" };
+  assert.throws(function () { registry.installTool(ctx("validation"), unsafeClass); }, /Unknown UI property 'class'/);
+  assert.throws(function () { registry.validateUiNode({ type: "button", action: "go", props: { label: "Go", variant: "neon" } }); }, /must be one of/);
+  assert.throws(function () { registry.validateUiNode({ type: "button", action: "go", props: { label: "Go", icon: "skull-crossbones" } }); }, /allowed Lucide icon/);
+  assert.throws(function () { registry.validateUiNode({ type: "stack", children: [{ type: "text", id: "same" }, { type: "text", id: "same" }] }); }, /Duplicate UI node ID/);
+  assert.throws(function () { registry.validateUiNode({ type: "input", id: "orphan", bind: "value", props: { label: "Value" } }); }, /requires bind and action/);
+  assert.throws(function () { registry.validateUiNode({ type: "input", bind: "value", action: "setValue" }); }, /requires a label or ID/);
+  assert.throws(function () { registry.validateUiNode({ type: "icon", props: { icon: "info" } }); }, /requires a label/);
+  assert.throws(function () { registry.validateUiNode({ type: "text", bind: "$state.__proto__.polluted" }); }, /safe dot path/);
+  assert.strictEqual(registry.validateUiNode({ type: "callout", when: "showError", children: [{ type: "text", bind: "error" }] }), true);
+  assert.strictEqual(registry.validateUiNode({ type: "button", action: "remove", when: "$item.awaitingConfirmation", props: { label: "Confirm" } }), true);
+  assert.throws(function () { registry.validateUiNode({ type: "text", when: "$state.constructor.visible" }); }, /safe state path/);
+  assert.throws(function () { registry.validateUiNode({ type: "button", action: "go", props: { label: "Go", args: { value: "$item.constructor.name" } } }); }, /unsafe state path/);
+  assert.throws(function () { registry.validateUiNode({ type: "select", id: "choice", bind: "choice", action: "choose", props: { options: [{ value: {}, label: "Bad" }] } }); }, /option value\/label types/);
+  var deep = { type: "stack" };
+  var cursor = deep;
+  for (var depth = 0; depth < 16; depth++) { cursor.children = [{ type: "stack" }]; cursor = cursor.children[0]; }
+  assert.throws(function () { registry.validateUiNode(deep); }, /exceeds depth/);
+  var wide = { type: "stack", children: [] };
+  for (var wi = 0; wi < 76; wi++) wide.children.push({ type: "stack", children: [{ type: "text" }, { type: "text" }, { type: "text" }, { type: "text" }] });
+  assert.throws(function () { registry.validateUiNode(wide); }, /exceeds 300 nodes/);
+});
+
 test("tool install, list, get, and remove roundtrip", function () {
   var userCtx = ctx("roundtrip");
   var installed = registry.installTool(userCtx, validTool("roundtrip-tool"));
@@ -125,6 +158,27 @@ test("v2 seed migration adds translator without restoring deleted older capsules
   assert.ok(listed.some(function (item) { return item.id === "translator"; }));
   assert.ok(!listed.some(function (item) { return item.id === "board"; }));
   assert.ok(!listed.some(function (item) { return item.id === "scratchpad"; }));
+});
+
+test("v3 seed upgrades only untouched shipped v1 UIs and preserves deletions/customizations", function () {
+  var userCtx = ctx("builtin-ui-v2-upgrade");
+  var root = registry.resolveToolsRoot(userCtx);
+  fs.mkdirSync(root, { recursive: true });
+  fs.writeFileSync(path.join(root, ".capsules-v2"), "board\nscratchpad\ntranslator\n");
+  fs.cpSync(path.join(__dirname, "../lib/capsules/translator"), path.join(root, "translator"), { recursive: true });
+  fs.cpSync(path.join(__dirname, "../lib/capsules/scratchpad"), path.join(root, "scratchpad"), { recursive: true });
+  fs.copyFileSync(path.join(__dirname, "fixtures/translator-ui-v1.json"), path.join(root, "translator/ui.json"));
+  fs.copyFileSync(path.join(__dirname, "fixtures/scratchpad-ui-v1.json"), path.join(root, "scratchpad/ui.json"));
+  var customScratchpad = JSON.parse(fs.readFileSync(path.join(root, "scratchpad/ui.json"), "utf8"));
+  customScratchpad.children[0].props.text = "My private scratchpad";
+  fs.writeFileSync(path.join(root, "scratchpad/ui.json"), JSON.stringify(customScratchpad, null, 2) + "\n");
+
+  registry.listTools(userCtx);
+  var upgraded = JSON.parse(fs.readFileSync(path.join(root, "translator/ui.json"), "utf8"));
+  assert.strictEqual(upgraded.children[0].children[1].props.role, "display");
+  assert.match(fs.readFileSync(path.join(root, "scratchpad/ui.json"), "utf8"), /My private scratchpad/);
+  assert.strictEqual(fs.existsSync(path.join(root, "board")), false);
+  assert.strictEqual(fs.existsSync(path.join(root, ".capsules-v3")), true);
 });
 
 test("tool install rejects server runtime", function () {

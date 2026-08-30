@@ -1,38 +1,111 @@
 {
   "type": "stack",
-  "props": { "gap": "md" },
+  "props": { "gap": "xl" },
   "children": [
-    { "type": "heading", "props": { "text": "Translator", "level": 2 } },
     {
-      "type": "select",
-      "id": "translation-direction",
-      "bind": "direction",
-      "action": "setDirection",
-      "props": {
-        "label": "Direction",
-        "options": [
-          { "value": "ko-en", "label": "Korean → English" },
-          { "value": "en-ko", "label": "English → Korean" }
-        ]
-      }
+      "type": "stack",
+      "props": { "gap": "xs" },
+      "children": [
+        { "type": "text", "props": { "text": "Language utility", "role": "caption", "tone": "accent" } },
+        { "type": "heading", "props": { "text": "Translator", "level": 2, "role": "display" } },
+        { "type": "text", "props": { "text": "A focused Korean and English translation workspace.", "role": "muted" } }
+      ]
     },
-    { "type": "textarea", "id": "source-text", "bind": "source", "action": "setSource", "props": { "label": "Text", "placeholder": "Enter text to translate…" } },
-    { "type": "button", "id": "translate", "action": "translate", "props": { "label": "Translate" } },
-    { "type": "card", "children": [{ "type": "text", "bind": "result" }] },
-    { "type": "divider" },
-    { "type": "heading", "props": { "text": "History", "level": 3 } },
-    { "type": "empty-state", "bind": "history", "props": { "text": "No translations yet." } },
     {
-      "type": "list",
-      "bind": "history",
+      "type": "card",
+      "props": { "variant": "raised", "padding": "lg" },
       "children": [
         {
-          "type": "card",
+          "type": "stack",
+          "props": { "gap": "md" },
           "children": [
-            { "type": "badge", "bind": "$item.direction" },
-            { "type": "text", "bind": "$item.source" },
-            { "type": "text", "bind": "$item.result" },
-            { "type": "button", "action": "remove", "props": { "label": "Delete", "variant": "danger", "args": { "id": "$item._id" } } }
+            {
+              "type": "select",
+              "id": "translation-direction",
+              "bind": "direction",
+              "action": "setDirection",
+              "props": {
+                "label": "Direction",
+                "hint": "Choose the source and destination languages.",
+                "required": true,
+                "options": [
+                  { "value": "ko-en", "label": "Korean → English" },
+                  { "value": "en-ko", "label": "English → Korean" }
+                ]
+              }
+            },
+            {
+              "type": "textarea",
+              "id": "source-text",
+              "bind": "source",
+              "action": "setSource",
+              "props": {
+                "label": "Source text",
+                "hint": "Type or paste the passage you want translated.",
+                "placeholder": "Enter text to translate…",
+                "rows": 6,
+                "required": true
+              }
+            },
+            {
+              "type": "row",
+              "props": { "justify": "end" },
+              "children": [
+                { "type": "button", "id": "translate", "action": "translate", "props": { "label": "Translate", "variant": "primary", "icon": "languages" } }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "card",
+      "props": { "variant": "output", "tone": "accent", "padding": "lg" },
+      "children": [
+        {
+          "type": "stack",
+          "props": { "gap": "xs" },
+          "children": [
+            { "type": "text", "props": { "text": "Translation", "role": "caption", "tone": "accent" } },
+            { "type": "text", "bind": "result", "props": { "role": "output" } }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "props": { "label": "History", "accessibleLabel": "Translation history", "gap": "sm" },
+      "children": [
+        { "type": "empty-state", "bind": "history", "props": { "icon": "history", "title": "No translations yet", "text": "Completed translations will collect here." } },
+        {
+          "type": "list",
+          "bind": "history",
+          "props": { "variant": "cards", "gap": "sm" },
+          "children": [
+            {
+              "type": "card",
+              "props": { "variant": "outlined", "padding": "md" },
+              "children": [
+                {
+                  "type": "stack",
+                  "props": { "gap": "sm" },
+                  "children": [
+                    {
+                      "type": "row",
+                      "props": { "justify": "between", "wrap": true, "align": "center" },
+                      "children": [
+                        { "type": "badge", "bind": "$item.direction", "props": { "tone": "accent", "icon": "languages" } },
+                        { "type": "button", "action": "remove", "props": { "label": "Delete", "accessibleLabel": "Delete translation", "variant": "ghost", "tone": "danger", "icon": "trash-2", "args": { "id": "$item._id" } } }
+                      ]
+                    },
+                    { "type": "text", "props": { "text": "Source", "role": "caption" } },
+                    { "type": "text", "bind": "$item.source", "props": { "role": "strong" } },
+                    { "type": "text", "props": { "text": "Translation", "role": "caption", "tone": "accent" } },
+                    { "type": "text", "bind": "$item.result", "props": { "role": "output" } }
+                  ]
+                }
+              ]
+            }
           ]
         }
       ]

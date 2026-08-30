@@ -1,28 +1,52 @@
 {
   "type": "stack",
-  "props": { "gap": "md" },
+  "props": { "gap": "xl" },
   "children": [
-    { "type": "heading", "props": { "text": "Scratchpad", "level": 2 } },
     {
-      "type": "row",
+      "type": "stack",
+      "props": { "gap": "xs" },
       "children": [
-        { "type": "input", "id": "scratch-input", "bind": "draft", "action": "setDraft", "props": { "label": "New note", "placeholder": "Write something…" } },
-        { "type": "button", "id": "add-note", "action": "add", "props": { "label": "Add" } }
+        { "type": "text", "props": { "text": "Quick capture", "role": "caption", "tone": "accent" } },
+        { "type": "heading", "props": { "text": "Scratchpad", "level": 2, "role": "display" } },
+        { "type": "text", "props": { "text": "Keep the small things close while you work.", "role": "muted" } }
       ]
     },
-    { "type": "empty-state", "bind": "items", "props": { "text": "No notes yet." } },
     {
-      "type": "list",
-      "bind": "items",
+      "type": "card",
+      "props": { "variant": "raised", "padding": "lg" },
       "children": [
         {
-          "type": "card",
+          "type": "row",
+          "props": { "align": "end", "gap": "sm" },
+          "children": [
+            { "type": "input", "id": "scratch-input", "bind": "draft", "action": "setDraft", "props": { "label": "New note", "hint": "Captured notes stay in this Capsule.", "placeholder": "Write something…" } },
+            { "type": "button", "id": "add-note", "action": "add", "props": { "label": "Add note", "variant": "primary", "icon": "plus" } }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "props": { "label": "Notes", "accessibleLabel": "Saved notes", "gap": "sm" },
+      "children": [
+        { "type": "empty-state", "bind": "items", "props": { "icon": "notebook-pen", "title": "Nothing captured yet", "text": "Add a note to begin your scratchpad." } },
+        {
+          "type": "list",
+          "bind": "items",
+          "props": { "variant": "cards", "gap": "sm" },
           "children": [
             {
-              "type": "row",
+              "type": "card",
+              "props": { "variant": "outlined", "padding": "md" },
               "children": [
-                { "type": "text", "bind": "$item.text" },
-                { "type": "button", "action": "remove", "props": { "label": "Delete", "variant": "danger", "args": { "id": "$item._id" } } }
+                {
+                  "type": "row",
+                  "props": { "justify": "between", "align": "start", "gap": "sm" },
+                  "children": [
+                    { "type": "text", "bind": "$item.text", "props": { "role": "body" } },
+                    { "type": "button", "action": "remove", "props": { "label": "Delete", "accessibleLabel": "Delete note", "variant": "ghost", "tone": "danger", "icon": "trash-2", "args": { "id": "$item._id" } } }
+                  ]
+                }
               ]
             }
           ]
