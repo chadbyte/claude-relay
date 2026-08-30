@@ -18,6 +18,7 @@ function fixture(options) {
   ]);
   var subscribed = null;
   var subscription = null;
+  var recorded = [];
   var manager = {
     sessions: sessions,
     subscribeSession: function (id, callback) {
@@ -27,6 +28,11 @@ function fixture(options) {
     },
     saveSessionFile: function () {},
     createSession: function () { throw new Error("unexpected session creation"); },
+    sendAndRecord: function (session, event) {
+      recorded.push(event);
+      session.history.push(event);
+      if (subscribed === session.localId && subscription) subscription(event);
+    },
   };
   var project = {
     getSessionManager: function () { return manager; },
@@ -34,6 +40,7 @@ function fixture(options) {
     getMemoryState: function () { return { entries: [], summary: "" }; },
     listKnowledgeFiles: function () { return []; },
     forEachClient: function () {},
+    sdk: Object.prototype.hasOwnProperty.call(opts, "sdk") ? opts.sdk : null,
   };
   var handler = attachHomeChat({
     users: { isMultiUser: function () { return opts.singleUser !== true; } },
@@ -59,6 +66,16 @@ function fixture(options) {
     messages: messages,
     getSubscribed: function () { return subscribed; },
     emit: function (event) { if (subscription) subscription(event); },
+    emitRecorded: function (event) {
+      var session = sessions.get(subscribed);
+      if (event.type === "session_id") session.cliSessionId = event.cliSessionId;
+      session.history.push(event);
+      if (subscription) subscription(event);
+    },
+    addSession: function (session) { sessions.set(session.localId, session); },
+    getSession: function (id) { return sessions.get(id); },
+    getRecorded: function () { return recorded; },
+    record: function (sessionId, event) { manager.sendAndRecord(sessions.get(sessionId), event); },
   };
 }
 
@@ -116,6 +133,44 @@ test("Home live session events refresh committed model metadata", async function
   ]);
 });
 
+test("fresh Home taps promote session identity before streaming notification-visible output", async function () {
+  var f = fixture();
+  f.addSession({ localId: 6, cliSessionId: null, ownerId: "u1", title: "Fresh", lastActivity: 60, vendor: "claude", model: "sonnet", history: [] });
+  f.handler.handleMessage(f.ws, { type: "home_mate_session_open", mateId: "mate-a", sessionId: "local:6", requestId: "open-fresh" });
+  await settle();
+  assert.equal(f.messages[0].sessionId, "local:6");
+  f.messages.length = 0;
+  f.getSession(6).responsePreview = "The visible assistant reply";
+  f.emitRecorded({ type: "session_id", cliSessionId: "durable-fresh" });
+  f.emitRecorded({ type: "delta", text: "The visible assistant reply" });
+  f.emitRecorded({ type: "result" });
+  var stream = f.messages.filter(function (message) {
+    return message.type === "home_mate_session_identity" || message.type === "home_mate_delta" || message.type === "home_mate_done";
+  });
+  assert.deepEqual(stream.map(function (message) {
+    return [message.type, message.previousSessionId || null, message.sessionId, message.requestId, message.text || null];
+  }), [
+    ["home_mate_session_identity", "local:6", "durable-fresh", "open-fresh", null],
+    ["home_mate_delta", null, "durable-fresh", "open-fresh", "The visible assistant reply"],
+    ["home_mate_done", null, "durable-fresh", "open-fresh", "The visible assistant reply"],
+  ]);
+  assert.equal(f.getSession(6).responsePreview, "The visible assistant reply");
+  assert.equal(f.ws._homeChatTap.sessionReference, "durable-fresh");
+});
+
+test("Home final events recover canonical history text when a live delta was missed", async function () {
+  var f = fixture();
+  f.handler.handleMessage(f.ws, { type: "home_mate_session_open", mateId: "mate-a", sessionId: "session-old", requestId: "open-final-only" });
+  await settle();
+  f.messages.length = 0;
+  f.getSession(1).history.push({ type: "user_message", text: "Question" });
+  f.getSession(1).history.push({ type: "delta", text: "Recovered from canonical history" });
+  f.emitRecorded({ type: "done" });
+  assert.equal(f.messages[0].type, "home_mate_done");
+  assert.equal(f.messages[0].text, "Recovered from canonical history");
+  assert.equal(f.messages[0].requestId, "open-final-only");
+});
+
 test("Explicit Mate conversation open rejects another user's session", function () {
   var f = fixture();
   f.handler.handleMessage(f.ws, { type: "home_mate_session_open", mateId: "mate-a", sessionId: "session-other", requestId: "open-denied" });
@@ -137,6 +192,64 @@ test("Home send failures inherit the active session correlation", async function
   assert.strictEqual(f.messages[0].sessionId, "session-old");
   assert.strictEqual(f.messages[0].requestId, "open-send");
   assert.match(f.messages[0].text, /SDK bridge unavailable/);
+});
+
+test("Home send records one canonical user turn and restores user plus assistant history", async function () {
+  var startCalls = 0;
+  var f = fixture({ sdk: {
+    startQuery: function () { startCalls++; },
+    pushMessage: function () { throw new Error("unexpected push"); },
+  } });
+  f.handler.handleMessage(f.ws, { type: "home_mate_session_open", mateId: "mate-a", sessionId: "session-old", requestId: "open-record" });
+  await settle();
+  f.messages.length = 0;
+  f.handler.handleMessage(f.ws, { type: "home_mate_send", mateId: "mate-a", sessionId: "session-old", requestId: "open-record", text: "Remember my question" });
+  await settle();
+  assert.equal(startCalls, 1);
+  assert.deepEqual(f.getRecorded(), [{ type: "user_message", text: "Remember my question" }]);
+  assert.equal(f.messages.some(function (message) { return message.type === "home_mate_user_message" || message.type === "user_message"; }), false);
+  f.record(1, { type: "delta", text: "Here is the answer" });
+  f.record(1, { type: "result" });
+  f.handler.handleMessage(f.ws, { type: "home_mate_close" });
+  f.messages.length = 0;
+  f.handler.handleMessage(f.ws, { type: "home_mate_session_open", mateId: "mate-a", sessionId: "session-old", requestId: "reopen-record" });
+  await settle();
+  assert.deepEqual(f.messages[0].messages, [
+    { role: "user", text: "Remember my question" },
+    { role: "assistant", text: "Here is the answer" },
+  ]);
+});
+
+test("Home push-to-existing-query records one canonical user turn", async function () {
+  var pushCalls = 0;
+  var f = fixture({ sdk: {
+    startQuery: function () { throw new Error("unexpected start"); },
+    pushMessage: function () { pushCalls++; },
+  } });
+  f.getSession(1).isProcessing = true;
+  f.handler.handleMessage(f.ws, { type: "home_mate_session_open", mateId: "mate-a", sessionId: "session-old", requestId: "open-push" });
+  await settle();
+  f.messages.length = 0;
+  f.handler.handleMessage(f.ws, { type: "home_mate_send", mateId: "mate-a", sessionId: "session-old", requestId: "open-push", text: "Follow up" });
+  await settle();
+  assert.equal(pushCalls, 1);
+  assert.deepEqual(f.getRecorded(), [{ type: "user_message", text: "Follow up" }]);
+  assert.equal(f.messages.length, 0);
+});
+
+test("a synchronous Home dispatch failure preserves one submitted user turn", async function () {
+  var f = fixture({ sdk: {
+    startQuery: function () { throw new Error("dispatch failed"); },
+    pushMessage: function () { throw new Error("unexpected push"); },
+  } });
+  f.handler.handleMessage(f.ws, { type: "home_mate_session_open", mateId: "mate-a", sessionId: "session-old", requestId: "open-fail" });
+  await settle();
+  f.messages.length = 0;
+  f.handler.handleMessage(f.ws, { type: "home_mate_send", mateId: "mate-a", sessionId: "session-old", requestId: "open-fail", text: "Keep this submission" });
+  await settle();
+  assert.deepEqual(f.getRecorded(), [{ type: "user_message", text: "Keep this submission" }]);
+  assert.equal(f.messages[0].type, "home_mate_error");
+  assert.match(f.messages[0].text, /dispatch failed/);
 });
 
 test("single-user Mate conversation lists include only ownerless sessions", function () {

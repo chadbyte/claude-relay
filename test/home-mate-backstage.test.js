@@ -10,6 +10,7 @@ var appSource = read("lib/public/app.js");
 var chatSource = read("lib/public/modules/home-mate-chat.js");
 var dockSource = read("lib/public/modules/home-dock.js");
 var propertiesSource = read("lib/public/modules/home-mate-properties.js");
+var modelPickerSource = read("lib/public/modules/home-mate-model-picker.js");
 var managementSource = read("lib/public/modules/mate-management.js");
 var sidebarMatesSource = read("lib/public/modules/sidebar-mates.js");
 var sidebarPresenceSource = read("lib/public/modules/sidebar-presence.js");
@@ -88,23 +89,39 @@ test("Memory and Knowledge reuse the existing owned read-only protocols", functi
   assert.doesNotMatch(propertiesSource, /home_mate_(memory|knowledge)_(save|update|delete|create)/);
 });
 
-test("Mate model backstage is correlated, server-confirmed, and accessible", function () {
-  assert.match(propertiesSource, /type: "home_mate_models_get", mateId: activeMateId, requestId: modelRequestId/);
-  assert.match(propertiesSource, /type: "home_mate_model_set", mateId: activeMateId, vendor: modelState\.vendor, model: model, requestId: modelSelectionRequestId/);
-  assert.match(propertiesSource, /msg\.requestId !== modelRequestId/);
-  assert.match(propertiesSource, /msg\.requestId !== modelSelectionRequestId/);
-  assert.match(propertiesSource, /Used for new conversations\. Existing conversations keep their current model\./);
-  assert.match(propertiesSource, /status === "loading"[\s\S]*Loading models/);
-  assert.match(propertiesSource, /status === "error" \|\| modelState\.status === "empty"/);
-  assert.match(propertiesSource, /role", "alert"/);
-  assert.match(propertiesSource, /aria-pressed/);
-  assert.match(propertiesSource, /aria-live", "polite"/);
-  assert.match(propertiesSource, /focusedModel[\s\S]*focus\(\{ preventScroll: true \}\)/);
+test("Mate model backstage offers correlated Vendor and Model recovery without partial persistence", function () {
+  var requestSource = modelPickerSource.slice(modelPickerSource.indexOf("export function requestHomeMateModels"), modelPickerSource.indexOf("function selectMateModel"));
+  assert.match(propertiesSource, /from '\.\/home-mate-model-picker\.js'/);
+  assert.match(modelPickerSource, /type: "home_mate_models_get", mateId: activeMateId, vendor: requestedVendor, requestId: requestId/);
+  assert.match(modelPickerSource, /type: "home_mate_model_set", mateId: activeMateId, vendor: state\.vendor, model: model, requestId: selectionRequestId/);
+  assert.match(modelPickerSource, /msg\.requestId !== requestId/);
+  assert.match(modelPickerSource, /msg\.requestId !== selectionRequestId/);
+  assert.match(modelPickerSource, /Used for new conversations\. Existing conversations keep their current vendor and model\./);
+  assert.match(modelPickerSource, /appendHeading\(body, "Vendor"\)/);
+  assert.match(modelPickerSource, /appendHeading\(body, "Model"\)/);
+  assert.match(modelPickerSource, /state\.status = "loading"[\s\S]*Loading " \+ vendorLabel/);
+  assert.match(modelPickerSource, /home-mate-model-retry[\s\S]*Try again/);
+  assert.match(modelPickerSource, /homeModelFocus = "catalog-status"[\s\S]*tabIndex = -1/);
+  assert.match(modelPickerSource, /role", "alert"/);
+  assert.match(modelPickerSource, /aria-pressed/);
+  assert.match(modelPickerSource, /aria-live", "polite"/);
+  assert.match(propertiesSource, /focusedModel[\s\S]*focusedVendor[\s\S]*focus\(\{ preventScroll: true \}\)/);
+  assert.match(propertiesSource, /focusedModelControl[\s\S]*data-home-model-focus[\s\S]*focus\(\{ preventScroll: true \}\)/);
+  assert.match(modelPickerSource, /vendor\.id !== state\.vendor\) requestHomeMateModels/);
+  assert.match(modelPickerSource, /requestHomeMateModels\(vendor, rerender, focusAfter\)[\s\S]*selectionRequestId\) return/);
+  assert.doesNotMatch(requestSource, /selectionRequestId = null/);
+  assert.match(modelPickerSource, /homeMateVendor = vendor\.id[\s\S]*button\.disabled = !!selectionRequestId/);
+  assert.match(modelPickerSource, /selectionModel = model[\s\S]*rerenderAndFocus\(rerender, "selection-status", ""\)/);
+  assert.match(modelPickerSource, /status\.dataset\.homeMateModel = selectionModel[\s\S]*status\.tabIndex = -1/);
+  assert.doesNotMatch(modelPickerSource, /\[data-home-mate-(?:vendor|model)='" \+/);
+  assert.match(modelPickerSource, /querySelectorAll\(selector\)[\s\S]*dataset\[datasetKey\] === value/);
+  assert.match(modelPickerSource, /rerenderAndFocus\(rerender, "model", model\)/);
+  assert.doesNotMatch(modelPickerSource, /updateMate|mate_update|currentModel|model-picker/);
   assert.doesNotMatch(messagesSource, /home_mate_models_state|home_mate_model_result|handleHomeMateModelsState|handleHomeMateModelResult/);
   assert.match(connectionSource, /import \{ processMessage \} from '\.\/app-message-router\.js'/);
   assert.match(messageRouterSource, /msg\.type === "home_mate_models_state"[\s\S]*handleHomeMateModelsState\(msg\);[\s\S]*return true/);
   assert.match(messageRouterSource, /msg\.type === "home_mate_model_result"[\s\S]*handleHomeMateModelResult\(msg\);[\s\S]*return true/);
-  assert.match(messageRouterSource, /if \(handleHomeModelMessage\(msg\)\) return;[\s\S]*processAppMessage\(msg\)/);
+  assert.match(messageRouterSource, /if \(handleHomeProtocolMessage\(msg\)\) return;[\s\S]*processAppMessage\(msg\)/);
   assert.equal((messageRouterSource.match(/home_mate_models_state/g) || []).length, 1);
   assert.equal((messageRouterSource.match(/home_mate_model_result/g) || []).length, 1);
   assert.equal((messageRouterSource.match(/handleHomeMateModelsState\(msg\)/g) || []).length, 1);
@@ -163,6 +180,7 @@ test("Stage 8 client modules follow dependency and size constraints", function (
     "lib/public/modules/home-dock.js",
     "lib/public/modules/home-mate-chat.js",
     "lib/public/modules/home-mate-properties.js",
+    "lib/public/modules/home-mate-model-picker.js",
     "lib/public/modules/mate-management.js",
     "lib/public/modules/sidebar-mates.js",
     "lib/public/modules/sidebar-presence.js",

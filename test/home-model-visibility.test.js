@@ -10,8 +10,10 @@ var indexSource = source("lib/public/index.html");
 var appSource = source("lib/public/app.js");
 var hubSource = source("lib/public/modules/app-home-hub.js");
 var chatSource = source("lib/public/modules/home-mate-chat.js");
+var streamStateSource = source("lib/public/modules/home-chat-stream-state.js");
 var messagesSource = source("lib/public/modules/app-messages.js");
 var propertiesSource = source("lib/public/modules/home-mate-properties.js");
+var modelPickerSource = source("lib/public/modules/home-mate-model-picker.js");
 var serverSource = source("lib/server-home-chat.js");
 var serverModelsSource = source("lib/server-home-models.js");
 var sidebarCss = source("lib/public/css/home-sidebar.css");
@@ -20,10 +22,11 @@ var homeMarkup = indexSource.slice(indexSource.indexOf('<div id="home-hub"'), in
 
 test("sidebar Model action continuously exposes the selected Mate default", function () {
   assert.match(homeMarkup, /id="home-sidebar-model"[^>]*home-sidebar-model-action[\s\S]*>Model<\/span>[\s\S]*id="home-sidebar-model-value"/);
-  assert.match(hubSource, /var defaultModel = mate \? \(mate\.model \|\| "Choose model"\) : "Loading model…"/);
+  assert.match(hubSource, /var defaultModel = mate \? \(mate\.model \? \(mate\.vendor \|\| "claude"\) \+ " · " \+ mate\.model : "Choose model"\) : "Loading model…"/);
   assert.match(hubSource, /modelValue\.textContent = defaultModel/);
   assert.match(hubSource, /modelValue\.classList\.toggle\("hidden", !mate && !store\.get\('homeChatMateId'\)\)/);
-  assert.match(hubSource, /Default for new conversations: " \+ defaultModel/);
+  assert.match(hubSource, /Used for new conversations: " \+ defaultModel/);
+  assert.doesNotMatch(hubSource, /Default for new conversations:/);
   assert.match(messagesSource, /case "mate_updated":[\s\S]*store\.set\(\{ cachedMatesList: _cml \}\)/);
   assert.match(hubSource, /state\.homeChatMateId !== prev\.homeChatMateId \|\| state\.cachedMatesList !== prev\.cachedMatesList\) renderHomeMateSwitcher\(\)/);
   assert.match(sidebarCss, /\.home-sidebar-action-value \{[\s\S]*color: var\(--text-dimmer\);[\s\S]*text-overflow: ellipsis/);
@@ -36,7 +39,7 @@ test("composer presents concrete, loading, or accessible Choose model states", f
   assert.match(chatSource, /sessionModelEl\.setAttribute\("aria-label", "Model for this conversation: " \+ label\)/);
   assert.match(chatSource, /sessionModelChooseEl\.setAttribute\("aria-label", "Choose a model for the current Mate\. Used for new conversations\."\)/);
   assert.match(chatSource, /sessionModelChooseEl\.addEventListener\("click", function \(\) \{ openHomeMateAction\("model"\); \}\)/);
-  assert.match(propertiesSource, /clay:home-mate-model-confirmed", \{ detail: \{ mateId: msg\.mateId, model: msg\.model \|\| "" \} \}/);
+  assert.match(modelPickerSource, /clay:home-mate-model-confirmed", \{ detail: \{ mateId: msg\.mateId, vendor: state\.mateVendor, model: state\.mateModel \} \}/);
   assert.match(chatSource, /clay:home-mate-model-confirmed[\s\S]*handleHomeMateModelConfirmed\(event\.detail \|\| \{\}\)/);
   assert.match(chatSource, /handleHomeMateModelConfirmed\(msg\)[\s\S]*msg\.mateId !== store\.get\('homeChatMateId'\)[\s\S]*if \(store\.get\('homeChatSessionModel'\)\) return;[\s\S]*resumeHomeChat\(\)/);
   assert.doesNotMatch(chatSource.slice(chatSource.indexOf("export function handleHomeMateModelConfirmed")), /msg\.ok/);
@@ -55,9 +58,10 @@ test("Home session model state resets before every Mate, session, and new-conver
 
 test("correlated history owns the displayed model and stale sessions cannot overwrite it", function () {
   assert.match(serverSource, /type: "home_mate_history",[\s\S]*requestId: requestId \|\| null,[\s\S]*model: session\.model \|\| null,[\s\S]*vendor: session\.vendor \|\| null/);
-  assert.match(chatSource, /function isCurrentSessionMessage\(msg\)[\s\S]*msg\.requestId !== activeSessionRequestId[\s\S]*msg\.sessionId !== sessionId/);
+  assert.match(chatSource, /function isCurrentSessionMessage\(msg\)[\s\S]*isOwnedHomeSessionMessage/);
+  assert.match(streamStateSource, /msg\.requestId && msg\.requestId !== active\.requestId[\s\S]*msg\.sessionId !== active\.sessionId/);
   assert.match(chatSource, /handleHomeMateHistory\(msg\)[\s\S]*homeChatSessionModel: typeof msg\.model[\s\S]*homeChatSessionVendor: typeof msg\.vendor[\s\S]*homeChatSessionModelLoading: false/);
-  assert.match(serverSource, /transformEvent\(event, mateId, session, requestId\)[\s\S]*model: session && session\.model \? session\.model : null,[\s\S]*vendor: session && session\.vendor \? session\.vendor : null/);
+  assert.match(serverSource, /transformEvent\(event, mateId, session, requestId, stableSessionId\)[\s\S]*model: session && session\.model \? session\.model : null,[\s\S]*vendor: session && session\.vendor \? session\.vendor : null/);
 });
 
 test("Home failures preserve request correlation while older uncorrelated errors remain compatible", function () {
@@ -66,14 +70,15 @@ test("Home failures preserve request correlation while older uncorrelated errors
   assert.match(serverSource, /var sendRequestId = msg\.requestId \|\| \(sendTap && sendTap\.requestId\) \|\| null/);
   assert.match(chatSource, /home_mate_send", mateId: mateId, sessionId: store\.get\('homeChatSessionId'\), requestId: activeSessionRequestId/);
   assert.match(chatSource, /handleHomeMateError\(msg\) \{\s*if \(!isCurrentSessionMessage\(msg\)\) return/);
-  assert.match(chatSource, /if \(msg\.requestId && msg\.requestId !== activeSessionRequestId\) return false/);
+  assert.match(streamStateSource, /if \(msg\.requestId && msg\.requestId !== active\.requestId\) return false/);
 });
 
 test("missing committed models require an explicit choice without default inference", function () {
-  assert.match(chatSource, /if \(model\) return model;[\s\S]*return "Choose model"/);
+  assert.match(chatSource, /if \(model\) return \(store\.get\('homeChatSessionVendor'\) \|\| "Vendor"\) \+ " · " \+ model;[\s\S]*return "Choose model"/);
   assert.match(chatSource, /msg\.code === "model_unavailable"[\s\S]*homeChatSessionModel: null,[\s\S]*homeChatSessionModelLoading: false/);
   assert.doesNotMatch(hubSource + chatSource + homeMarkup, /Vendor default|[A-Z][A-Za-z ]+ default/);
   assert.doesNotMatch(chatSource, /currentModel|model-picker|mate\.model/);
+  assert.doesNotMatch(modelPickerSource, /currentModel|set_model|get_vendor_models/);
   assert.doesNotMatch(serverSource.slice(serverSource.indexOf("function sendHistory"), serverSource.indexOf("function handleMessage")), /found\.mate\.model/);
   assert.match(serverModelsSource, /selected = catalogModel\(models, catalog\.defaultModel\)[\s\S]*for \(var i = 0; i < models\.length && !selected; i\+\+\) selected = modelEntryValue\(models\[i\]\)/);
 });

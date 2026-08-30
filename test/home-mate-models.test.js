@@ -11,7 +11,8 @@ function settle() {
 function fixture(options) {
   var opts = options || {};
   var mateModel = Object.prototype.hasOwnProperty.call(opts, "mateModel") ? opts.mateModel : "fable";
-  var mate = { id: "mate-a", name: "A", vendor: "claude", model: mateModel };
+  var mateVendor = opts.mateVendor || "claude";
+  var mate = { id: "mate-a", name: "A", vendor: mateVendor, model: mateModel };
   var sessions = new Map();
   if (opts.existingSession) sessions.set(1, opts.existingSession);
   var created = [];
@@ -26,6 +27,7 @@ function fixture(options) {
       return session;
     },
     subscribeSession: function () { return function () {}; },
+    sendAndRecord: function (session, event) { session.history.push(event); },
     saveSessionFile: opts.noPersistence ? null : function (session) { saved.push(session.localId); },
   };
   var messages = [];
@@ -37,8 +39,9 @@ function fixture(options) {
   var updates = [];
   var project = {
     getSessionManager: function () { return manager; },
-    getVendorModelCatalog: function () {
-      return Promise.resolve(opts.catalog || {
+    getVendorModelCatalog: function (catalogWs, vendor) {
+      var catalog = opts.catalogs && opts.catalogs[vendor] ? opts.catalogs[vendor] : opts.catalog;
+      return Promise.resolve(catalog || {
         status: "ready",
         error: "",
         models: [
@@ -46,6 +49,9 @@ function fixture(options) {
           { value: "sonnet", displayName: "Claude Sonnet" },
         ],
       });
+    },
+    getVendorModelAvailability: function () {
+      return opts.vendors || [{ id: "claude", displayName: "Claude", installed: true }];
     },
     sdk: opts.sdk === null ? null : (opts.sdk || {
       startQuery: function (session) { dispatched.push(session.model); },
@@ -83,11 +89,14 @@ test("Mate model catalog responses preserve request correlation and vendor state
     mateId: "mate-a",
     requestId: "catalog-1",
     vendor: "claude",
+    mateVendor: "claude",
+    mateModel: "fable",
     model: "fable",
     models: [
       { value: "fable", resolvedModel: "claude-fable-5", displayName: "Claude Fable" },
       { value: "sonnet", displayName: "Claude Sonnet" },
     ],
+    vendors: [{ id: "claude", displayName: "Claude", installed: true }],
     status: "ready",
     error: "",
   });
@@ -97,7 +106,7 @@ test("Mate model catalog responses preserve request correlation and vendor state
 test("Mate model access errors remain correlated instead of leaving the UI loading", function () {
   var f = fixture({ unauthenticated: true });
   f.handler.handleMessage(f.ws, { type: "home_mate_models_get", mateId: "mate-a", requestId: "catalog-auth" });
-  assert.deepEqual(f.messages[0], { type: "home_mate_models_state", mateId: "mate-a", requestId: "catalog-auth", vendor: "", model: "", models: [], status: "error", error: "Not authenticated." });
+  assert.deepEqual(f.messages[0], { type: "home_mate_models_state", mateId: "mate-a", requestId: "catalog-auth", vendor: "", mateVendor: "", mateModel: "", model: "", models: [], vendors: [], status: "error", error: "Not authenticated." });
 });
 
 test("Mate model selection validates the Mate vendor catalog before persistence", async function () {
@@ -115,11 +124,81 @@ test("valid Mate model selection persists and broadcasts the server-confirmed re
   var f = fixture();
   f.handler.handleMessage(f.ws, { type: "home_mate_model_set", mateId: "mate-a", vendor: "claude", model: "claude-fable-5", requestId: "set-valid" });
   await settle();
-  assert.deepEqual(f.updates[0], { ctx: { userId: "u1" }, mateId: "mate-a", patch: { model: "fable" } });
+  assert.deepEqual(f.updates[0], { ctx: { userId: "u1" }, mateId: "mate-a", patch: { vendor: "claude", model: "fable" } });
   assert.equal(f.getMate().model, "fable");
   assert.equal(f.messages[0].type, "mate_updated");
   assert.equal(f.messages[0].mate.model, "fable");
   assert.deepEqual(f.messages[1], { type: "home_mate_model_result", mateId: "mate-a", requestId: "set-valid", ok: true, vendor: "claude", model: "fable" });
+});
+
+test("Mate model chooser loads another configured vendor without partially persisting it", async function () {
+  var f = fixture({
+    vendors: [
+      { id: "claude", displayName: "Claude", installed: true },
+      { id: "codex", displayName: "Codex", installed: true },
+    ],
+    catalogs: {
+      claude: { status: "error", models: [], error: "Claude authentication expired." },
+      codex: { status: "ready", models: [{ value: "gpt-5.6", displayName: "GPT-5.6" }], error: "" },
+    },
+  });
+  f.handler.handleMessage(f.ws, { type: "home_mate_models_get", mateId: "mate-a", vendor: "codex", requestId: "catalog-codex" });
+  await settle();
+  assert.equal(f.messages[0].vendor, "codex");
+  assert.equal(f.messages[0].mateVendor, "claude");
+  assert.equal(f.messages[0].model, "");
+  assert.deepEqual(f.messages[0].models, [{ value: "gpt-5.6", displayName: "GPT-5.6" }]);
+  assert.equal(f.updates.length, 0);
+  assert.equal(f.getMate().vendor, "claude");
+});
+
+test("vendor and concrete model persist atomically and seed new Home sessions", async function () {
+  var f = fixture({
+    vendors: [
+      { id: "claude", displayName: "Claude", installed: true },
+      { id: "codex", displayName: "Codex", installed: true },
+    ],
+    catalogs: {
+      codex: { status: "ready", models: [{ value: "gpt-5.6", resolvedModel: "gpt-5.6-codex", displayName: "GPT-5.6" }], error: "" },
+    },
+  });
+  f.handler.handleMessage(f.ws, { type: "home_mate_model_set", mateId: "mate-a", vendor: "codex", model: "gpt-5.6-codex", requestId: "set-codex" });
+  await settle();
+  assert.deepEqual(f.updates[0].patch, { vendor: "codex", model: "gpt-5.6" });
+  assert.equal(f.messages[0].type, "mate_updated");
+  assert.equal(f.messages[0].mate.vendor, "codex");
+  assert.deepEqual(f.messages[1], { type: "home_mate_model_result", mateId: "mate-a", requestId: "set-codex", ok: true, vendor: "codex", model: "gpt-5.6" });
+  f.handler.handleMessage(f.ws, { type: "home_mate_new_session", mateId: "mate-a", requestId: "new-codex" });
+  await settle();
+  assert.equal(f.created[0].vendor, "codex");
+  assert.equal(f.created[0].model, "gpt-5.6");
+});
+
+test("vendor-only, unavailable-vendor, and cross-catalog selections never persist", async function () {
+  var options = {
+    vendors: [
+      { id: "claude", displayName: "Claude", installed: true },
+      { id: "codex", displayName: "Codex", installed: true },
+    ],
+    catalogs: { codex: { status: "ready", models: ["gpt-5.6"], error: "" } },
+  };
+  var missing = fixture(options);
+  missing.handler.handleMessage(missing.ws, { type: "home_mate_model_set", mateId: "mate-a", vendor: "codex", model: "", requestId: "missing-model" });
+  await settle();
+  assert.equal(missing.updates.length, 0);
+  assert.equal(missing.messages[0].ok, false);
+
+  var unavailable = fixture(options);
+  unavailable.handler.handleMessage(unavailable.ws, { type: "home_mate_model_set", mateId: "mate-a", vendor: "gemini", model: "gemini-2", requestId: "bad-vendor" });
+  await settle();
+  assert.equal(unavailable.updates.length, 0);
+  assert.match(unavailable.messages[0].error, /not configured/);
+
+  var mismatched = fixture(options);
+  mismatched.handler.handleMessage(mismatched.ws, { type: "home_mate_model_set", mateId: "mate-a", vendor: "codex", model: "sonnet", requestId: "cross-catalog" });
+  await settle();
+  assert.equal(mismatched.updates.length, 0);
+  assert.match(mismatched.messages[0].error, /not available/);
 });
 
 test("Mate model resolver repairs invalid records with the saved catalog default then first entry", async function () {
@@ -153,6 +232,20 @@ test("catalog failures create no Home session and return an actionable correlate
   assert.equal(f.messages[0].requestId, "new-error");
   assert.equal(f.messages[0].code, "model_unavailable");
   assert.match(f.messages[0].text, /authentication expired/);
+});
+
+test("automatic Home open resolves a concrete model and enables the correlated send path", async function () {
+  var f = fixture({ mateModel: null, catalog: { status: "ready", models: ["sonnet"], defaultModel: "sonnet", error: "" } });
+  f.handler.handleMessage(f.ws, { type: "home_mate_open", mateId: "mate-a", requestId: "open-resolve" });
+  await settle();
+  var history = f.messages.filter(function (message) { return message.type === "home_mate_history"; })[0];
+  assert.equal(history.requestId, "open-resolve");
+  assert.equal(history.vendor, "claude");
+  assert.equal(history.model, "sonnet");
+  assert.equal(f.getMate().model, "sonnet");
+  f.handler.handleMessage(f.ws, { type: "home_mate_send", mateId: "mate-a", sessionId: history.sessionId, requestId: "open-resolve", text: "Hello" });
+  await settle();
+  assert.deepEqual(f.dispatched, ["sonnet"]);
 });
 
 test("catalog outages do not block exact or default resume of concrete sessions", async function () {

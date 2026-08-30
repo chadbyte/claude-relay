@@ -404,3 +404,89 @@ test("a result keeps processing active while a queued turn continues", function(
   assert.strictEqual(processingChanges, 1);
   assert.strictEqual(recorded[recorded.length - 1].type, "done");
 });
+
+test("Mate result notifications retain the assistant preview alongside canonical done events", function() {
+  var recorded = [];
+  var notified = [];
+  var bridge = createSDKBridge({
+    cwd: process.cwd(),
+    slug: "mate-mate-a",
+    mateDisplayName: "Clay",
+    sessionManager: {
+      sendAndRecord: function(session, msg) { recorded.push(msg); },
+      sendToSession: function() {},
+      broadcastSessionList: function() {},
+    },
+    adapter: { vendor: "claude" },
+    send: function() {},
+    onProcessingChanged: function() {},
+    getNotificationsModule: function() {
+      return { notify: function(type, payload) { notified.push({ type: type, payload: payload }); } };
+    },
+  });
+  var session = {
+    localId: 21,
+    ownerId: "u1",
+    isProcessing: true,
+    _awaitingTurnResult: true,
+    _queuedTurnCount: 0,
+    pendingAskUser: {},
+    pendingPermissions: {},
+    pendingElicitations: {},
+    activeTaskToolIds: {},
+    taskIdMap: {},
+    responsePreview: "Assistant output visible in the Home notification",
+    history: [],
+    turnCount: 0,
+  };
+  bridge.processSDKMessage(session, { yokeType: "result", cost: 1, duration: 10 });
+  assert.deepStrictEqual(recorded.slice(-2).map(function(message) { return message.type; }), ["result", "done"]);
+  assert.equal(notified.length, 1);
+  assert.equal(notified[0].type, "response_done");
+  assert.equal(notified[0].payload.preview, "Assistant output visible in the Home notification");
+  assert.equal(notified[0].payload.mateId, "mate-a");
+});
+
+test("a visibly presented exact Home response skips completion notifications but still finishes", function() {
+  var recorded = [];
+  var notified = [];
+  var pushed = [];
+  var bridge = createSDKBridge({
+    cwd: process.cwd(),
+    slug: "mate-mate-a",
+    mateDisplayName: "Clay",
+    sessionManager: {
+      sendAndRecord: function(session, msg) { recorded.push(msg); },
+      sendToSession: function() {},
+      broadcastSessionList: function() {},
+    },
+    adapter: { vendor: "claude" },
+    send: function() {},
+    onProcessingChanged: function() {},
+    shouldSuppressResponseNotification: function(session) { return session.localId === 22; },
+    pushModule: { sendPush: function(payload) { pushed.push(payload); } },
+    getNotificationsModule: function() {
+      return { notify: function(type, payload) { notified.push({ type: type, payload: payload }); } };
+    },
+  });
+  var session = {
+    localId: 22,
+    ownerId: "u1",
+    isProcessing: true,
+    _awaitingTurnResult: true,
+    _queuedTurnCount: 0,
+    pendingAskUser: {},
+    pendingPermissions: {},
+    pendingElicitations: {},
+    activeTaskToolIds: {},
+    taskIdMap: {},
+    responsePreview: "Already visible in Home",
+    history: [],
+    turnCount: 0,
+  };
+  bridge.processSDKMessage(session, { yokeType: "result", cost: 1, duration: 10 });
+  assert.deepEqual(recorded.slice(-2).map(function(message) { return message.type; }), ["result", "done"]);
+  assert.equal(session.isProcessing, false);
+  assert.equal(notified.length, 0);
+  assert.equal(pushed.length, 0);
+});

@@ -11,8 +11,8 @@ function fixture(options) {
     defaultVendor: "claude",
     modelsByVendor: {},
     capabilitiesByVendor: {},
-    availableVendors: ["claude"],
-    installedVendors: ["claude"],
+    availableVendors: options.availableVendors || ["claude"],
+    installedVendors: options.installedVendors || ["claude"],
   };
   var adapter = options.adapter || {
     init: function() {
@@ -29,7 +29,7 @@ function fixture(options) {
     slug: "model-test",
     sm: sm,
     sdk: options.sdk || { setModel: function(_session, model) { return Promise.resolve({ ok: true, model: model }); } },
-    adapters: { claude: adapter },
+    adapters: options.adapters || { claude: adapter },
     sendTo: function(_ws, msg) { sent.push(msg); },
     getSessionForWs: function() { return session; },
     getLinuxUserForWs: function() { return null; },
@@ -70,6 +70,14 @@ test("vendor catalog lookup can be reused without emitting project model_info", 
   assert.strictEqual(catalog.status, "ready");
   assert.strictEqual(catalog.models[0].value, "fable");
   assert.deepStrictEqual(f.sent, []);
+});
+
+test("vendor availability can be reused without emitting or mutating project picker state", function() {
+  var f = fixture({ availableVendors: ["claude", "codex"], installedVendors: ["claude"] });
+  var vendors = f.attached.getVendorAvailability();
+  assert.deepStrictEqual(vendors.map(function(vendor) { return [vendor.id, vendor.installed]; }), [["claude", true], ["codex", false]]);
+  assert.deepStrictEqual(f.sent, []);
+  assert.deepStrictEqual(f.sm.availableVendors, ["claude", "codex"]);
 });
 
 test("vendor catalog exposes only a concrete validated default model", async function() {
