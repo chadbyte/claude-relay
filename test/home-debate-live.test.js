@@ -155,3 +155,12 @@ test("Home debate identity and phase persist with the exact session", function (
   assert.equal(restored.homeDebatePhase, "live");
   assert.equal(restored.title, "Debate planning");
 });
+
+test("Home debate gives every Mate and participant the same left identity rail", function () {
+  var root = path.join(__dirname, "..");
+  var css = fs.readFileSync(path.join(root, "lib/public/css/home-debate-live.css"), "utf8");
+  assert.match(css, /\.home-debate-live-turn\.msg-assistant,[\s\S]*grid-template-columns: 34px minmax\(0, 1fr\)/);
+  assert.match(css, /\.home-debate-live-turn > \.dm-bubble-avatar,[\s\S]*\.home-debate-live-user > \.dm-bubble-avatar \{[\s\S]*width: 34px;[\s\S]*height: 34px;/);
+  assert.doesNotMatch(css, /home-debate-live-user\.msg-user \{ grid-template-columns: minmax|home-debate-live-user \.dm-bubble-content \{ display: contents|home-debate-live-user \.dm-bubble-header \{ grid-column/);
+  assert.match(css, /@media \(max-width: 600px\)[\s\S]*\.home-debate-live-turn\.msg-assistant,[\s\S]*\.home-debate-live-user\.msg-user \{ grid-template-columns: 32px minmax\(0, 1fr\); gap: 9px;/);
+});

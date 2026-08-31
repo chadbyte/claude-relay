@@ -21,7 +21,7 @@ var fontLicenseSource = fs.readFileSync(path.join(root, "lib/public/fonts/source
 var homeMarkup = indexSource.slice(indexSource.indexOf('<div id="home-hub"'), indexSource.indexOf('<div id="whats-new-article"'));
 
 test("Home sidebar follows a continuous action, Mate, and conversation hierarchy", function () {
-  assert.match(homeMarkup, /home-sidebar-brand[\s\S]*id="home-sidebar-all"[\s\S]*id="home-sidebar-collapse"[\s\S]*id="home-sidebar-new"[\s\S]*id="home-sidebar-debate"[\s\S]*home-sidebar-mate-label[\s\S]*home-mate-list[\s\S]*home-sidebar-recent-label/);
+  assert.match(homeMarkup, /home-sidebar-brand[\s\S]*id="home-sidebar-all"[\s\S]*id="home-sidebar-collapse"[\s\S]*id="home-sidebar-new"[\s\S]*id="home-sidebar-debate"[\s\S]*id="home-tools-btn"[\s\S]*home-sidebar-mate-label[\s\S]*home-mate-list[\s\S]*home-sidebar-recent-label/);
   assert.doesNotMatch(homeMarkup, /home-sidebar-capsules/);
   assert.doesNotMatch(cssSource, /home-sidebar-activity/);
   assert.match(homeMarkup, /id="home-mate-list"[^>]*role="list"/);
@@ -30,9 +30,10 @@ test("Home sidebar follows a continuous action, Mate, and conversation hierarchy
   assert.doesNotMatch(homeMarkup, /home-mate-chat-actions/);
 });
 
-test("Home sidebar action pair uses consistent Lucide geometry and exact copy", function () {
+test("Home sidebar primary actions use consistent Lucide geometry and exact copy", function () {
   assert.match(homeMarkup, /id="home-sidebar-new"[^>]*title="New Chat"[^>]*aria-label="Start a new chat with the current Mate"[\s\S]*home-sidebar-action-icon[^>]*aria-hidden="true"[\s\S]*data-lucide="message-square-plus"[\s\S]*>New Chat<\/span>/);
   assert.match(homeMarkup, /id="home-sidebar-debate"[^>]*title="Start a debate"[^>]*aria-label="Start a debate"[\s\S]*home-sidebar-action-icon[^>]*aria-hidden="true"[\s\S]*data-lucide="messages-square"[\s\S]*>Debates<\/span>/);
+  assert.match(homeMarkup, /id="home-tools-btn"[^>]*title="Capsules"[^>]*aria-label="Capsules"[^>]*aria-expanded="false"[\s\S]*home-sidebar-action-icon[^>]*aria-hidden="true"[\s\S]*data-lucide="box"[\s\S]*id="home-tools-label">Capsules<\/span>/);
   assert.doesNotMatch(homeMarkup.slice(homeMarkup.indexOf('id="home-sidebar-new"'), homeMarkup.indexOf('id="home-sidebar-mate-label"')), /data-lucide="(?:square-pen|mic)"|New conversation|Start debate/);
   assert.match(cssSource, /\.home-sidebar-primary-actions \{[\s\S]*gap: 2px;[\s\S]*padding: 4px 4px 0;/);
   assert.match(cssSource, /\.home-sidebar-action \{[\s\S]*gap: 8px;[\s\S]*min-height: 34px;[\s\S]*padding: 5px 8px;[\s\S]*font-size: 12px;[\s\S]*font-weight: 530;[\s\S]*line-height: 1\.35;/);

@@ -84,10 +84,13 @@ test("ordinary Home bubbles use exact restored Mate and current user identity sa
     assert.match(mate.className, /home-chat-ordinary-mate/);
 
     var user = identity.createHomeOrdinaryBubble({ role: "user", text: "My answer" }, restoredMate, restoredMate.profile.displayName, "09:42");
-    assert.equal(user.querySelector(".dm-bubble-avatar").src, "data:user-a");
-    assert.equal(user.querySelector(".dm-bubble-name").textContent, "You");
+    assert.equal(user.querySelector(".dm-bubble-avatar"), null);
+    assert.equal(user.querySelector(".dm-bubble-name"), null);
+    assert.equal(user.querySelector(".dm-bubble-header"), null);
     assert.equal(user.attributes["aria-label"], "Message from You");
     assert.equal(user.querySelector(".bubble").children[0].textContent, "My answer");
+    assert.equal(user.children.length, 1);
+    assert.equal(user.children[0].children[0], user.querySelector(".bubble"));
   } finally {
     global.document = originalDocument;
     global.window = originalWindow;
@@ -121,11 +124,15 @@ test("ordinary identity styles expose shared headers without affecting Debate-ow
   var chat = fs.readFileSync(path.join(root, "lib/public/modules/home-mate-chat.js"), "utf8");
   var identity = fs.readFileSync(path.join(root, "lib/public/modules/home-chat-identity.js"), "utf8");
   assert.match(identity, /mateAvatarUrl\(mate, 34\)/);
-  assert.match(identity, /userAvatarUrl\(currentUser\(\), 34\)/);
+  assert.doesNotMatch(identity, /userAvatarUrl|currentUser/);
+  assert.match(identity, /var row = isUser \? createUserBubble\(\{[\s\S]*text: message\.text \|\| "",[\s\S]*\}\) : createAssistantBubble/);
   assert.match(identity, /row\.setAttribute\("role", "article"\)/);
   assert.match(css, /\.home-chat-ordinary-message > \.dm-bubble-avatar \{[\s\S]*display: block;[\s\S]*width: 34px;[\s\S]*height: 34px;/);
   assert.match(css, /\.home-chat-ordinary-message \.dm-bubble-header \{[\s\S]*display: flex;/);
-  assert.match(css, /@media \(max-width: 768px\)[\s\S]*\.home-chat-ordinary-message[\s\S]*grid-template-columns: 32px minmax\(0, 1fr\)/);
+  assert.match(css, /\.home-chat-ordinary-message \{[\s\S]*grid-template-columns: 34px minmax\(0, 1fr\)/);
+  assert.match(css, /\.home-chat-ordinary-user \{[\s\S]*display: flex;[\s\S]*justify-content: flex-end;/);
+  assert.match(css, /\.home-chat-ordinary-user > \.dm-bubble-content \{[\s\S]*align-items: flex-end;/);
+  assert.doesNotMatch(css, /home-chat-ordinary-user[^}]*grid-template|home-chat-ordinary-user > \.dm-bubble-avatar|home-chat-ordinary-user \.dm-bubble-header/);
   assert.doesNotMatch(css, /\.home-mate-chat-transcript\.home-chat-bubble-layout \.dm-bubble-avatar,\s*\.home-mate-chat-transcript\.home-chat-bubble-layout \.dm-bubble-header\s*\{\s*display:\s*none/);
   assert.match(chat, /if \(message\.role === "proposal" \|\| message\.role === "question"\) return createHomeDebateTranscriptCard/);
   assert.match(chat, /if \(\["debate_header", "debate_turn", "debate_user"\][\s\S]*return createHomeDebateLiveCard/);

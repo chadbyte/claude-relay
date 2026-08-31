@@ -134,9 +134,10 @@
               <button id="home-sidebar-collapse" class="home-sidebar-icon-btn" type="button" title="Collapse sidebar" aria-label="Collapse Home sidebar"><i data-lucide="panel-left-close"></i></button>
             </div>
           </div>
-          <nav class="home-sidebar-primary-actions" aria-label="Home conversation actions">
+          <nav class="home-sidebar-primary-actions" aria-label="Home actions">
             <button id="home-sidebar-new" class="home-sidebar-action home-sidebar-new" type="button" title="New Chat" aria-label="Start a new chat with the current Mate" disabled><span class="home-sidebar-action-icon" aria-hidden="true"><i data-lucide="message-square-plus"></i></span><span>New Chat</span></button>
             <button id="home-sidebar-debate" class="home-sidebar-action" type="button" title="Start a debate" aria-label="Start a debate" disabled><span class="home-sidebar-action-icon" aria-hidden="true"><i data-lucide="messages-square"></i></span><span>Debates</span></button>
+            <button id="home-tools-btn" class="home-sidebar-action" type="button" title="Capsules" aria-label="Capsules" aria-expanded="false" aria-controls="home-tool-workbench"><span class="home-sidebar-action-icon" aria-hidden="true"><i data-lucide="box"></i></span><span id="home-tools-label">Capsules</span><span id="home-tools-activity" class="home-tools-activity" aria-hidden="true"></span></button>
           </nav>
           <section class="home-sidebar-section home-sidebar-mate-section" aria-labelledby="home-sidebar-mate-label">
             <div id="home-sidebar-mate-label" class="home-sidebar-label">Mates</div>
@@ -154,19 +155,10 @@
           </section>
         </aside>
         <div id="home-workspace" class="home-workspace">
+          <button id="home-sidebar-expand" class="home-sidebar-expand" type="button" title="Show sidebar" aria-label="Show Home sidebar" aria-describedby="home-sidebar-expand-brand-label"><i data-lucide="panel-left-open"></i><span id="home-sidebar-expand-brand-label" class="home-sidebar-brand-wordmark home-sidebar-expand-wordmark">Clay Studio</span></button>
+          <button id="home-project-reveal" class="home-project-reveal hidden" type="button" title="Reveal project" aria-label="Reveal project"><i data-lucide="chevron-down" aria-hidden="true"></i><span>Project</span></button>
           <div id="home-conversation-region" class="home-conversation-region">
             <div id="home-mate-chat" class="home-mate-chat">
-              <div class="home-mate-chat-header" id="home-mate-chat-header">
-                <button id="home-sidebar-expand" class="home-sidebar-expand" type="button" title="Show sidebar" aria-label="Show Home sidebar" aria-describedby="home-sidebar-expand-brand-label"><i data-lucide="panel-left-open"></i><span id="home-sidebar-expand-brand-label" class="home-sidebar-brand-wordmark home-sidebar-expand-wordmark">Clay Studio</span></button>
-                <div class="home-mate-chat-controls">
-                  <button id="home-tools-btn" class="home-tools-trigger" type="button" aria-expanded="false" aria-controls="home-tool-workbench">
-                    <i data-lucide="box"></i><span id="home-tools-label">Capsules</span><span id="home-tools-activity" class="home-tools-activity" aria-hidden="true"></span>
-                  </button>
-                  <button id="home-minimize-btn" class="home-minimize-trigger" type="button" title="Return to project" aria-label="Return to project">
-                    <i data-lucide="arrow-down-left"></i><span>Return</span>
-                  </button>
-                </div>
-              </div>
               <div class="home-mate-chat-stage">
                 <div class="home-mate-chat-messages" id="home-mate-chat-messages"></div>
                 <div class="home-mate-chat-composer-frame">

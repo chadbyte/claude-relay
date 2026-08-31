@@ -262,6 +262,9 @@ test("Home live debate reducer renders multiple speaker identities without trans
     assert.equal(userNodes.some(function (node) { return node.textContent === "You"; }), true);
     assert.equal(userNodes.some(function (node) { return node.textContent === "Participant"; }), true);
     assert.ok(userNodes.find(function (node) { return node.tagName === "IMG"; }).src);
+    assert.equal(user.children[0], user.querySelector(".dm-bubble-avatar"));
+    assert.equal(user.children[1].children[0], user.querySelector(".dm-bubble-header"));
+    assert.equal(user.children[1].children[1], user.querySelector(".bubble"));
     assert.notEqual(finalizedNodes.find(function (node) { return node.tagName === "IMG"; }).src, activeNodes.find(function (node) { return node.tagName === "IMG"; }).src);
     messages = module.applyHomeDebateEvent(messages, { eventType: "debate_ended", reason: "user_stopped" });
     assert.equal(module.homeDebatePhase(messages), "ended");

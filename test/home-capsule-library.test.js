@@ -15,12 +15,16 @@ var chatSource = fs.readFileSync(path.join(root, "lib/public/modules/home-mate-c
 var cssSource = fs.readFileSync(path.join(root, "lib/public/css/home-capsule-library.css"), "utf8");
 var homeMarkup = indexSource.slice(indexSource.indexOf('<div id="home-hub"'), indexSource.indexOf('<div id="whats-new-article"'));
 
-test("top Capsules entry is the sole accessible Workbench controller", function () {
-  assert.match(homeMarkup, /id="home-tools-btn"[^>]*aria-expanded="false"[^>]*aria-controls="home-tool-workbench"[\s\S]*id="home-tools-label">Capsules<\/span>/);
+test("sidebar Capsules entry is the sole accessible Workbench controller", function () {
+  assert.match(homeMarkup, /home-sidebar-primary-actions[\s\S]*id="home-tools-btn"[^>]*aria-expanded="false"[^>]*aria-controls="home-tool-workbench"[\s\S]*id="home-tools-label">Capsules<\/span>/);
   assert.match(homeMarkup, /id="home-tools-activity"/);
   assert.doesNotMatch(homeMarkup, /id="home-sidebar-capsules"/);
-  assert.doesNotMatch(sidebarSource, /openHomeCapsules|home-sidebar-capsules/);
-  assert.match(dockSource, /home-tools-btn"\)\.addEventListener\("click", function \(\) \{[\s\S]*dockOpen'[\s\S]*closeHomeDock\(\);[\s\S]*else openHomeCapsules\(\)/);
+  assert.equal((homeMarkup.match(/id="home-tools-btn"/g) || []).length, 1);
+  assert.match(sidebarSource, /toggleHomeCapsules/);
+  assert.match(sidebarSource, /home-tools-btn"\)\.addEventListener\("click", toggleCapsulesFromSidebar\)/);
+  assert.match(sidebarSource, /var opening = store\.get\('dockOpen'\) !== true;[\s\S]*toggleHomeCapsules\(\);[\s\S]*closeNarrowDrawer\(!opening\)/);
+  assert.match(dockSource, /export function toggleHomeCapsules\(\)[\s\S]*if \(store\.get\('dockOpen'\)\) closeHomeDock\(\);[\s\S]*else openHomeCapsules\(\)/);
+  assert.doesNotMatch(dockSource, /home-tools-btn"\)\.addEventListener/);
 });
 
 test("Capsules resumes the last installed Capsule or opens Library without a fake persisted tool", function () {
@@ -83,7 +87,7 @@ test("Library selection opens the real registered Capsule and keeps dock tabs", 
   assert.match(dockSource, /dockLibraryOpen: false/);
 });
 
-test("hidden Capsule activity lives on the invariant top Capsules trigger", function () {
+test("hidden Capsule activity lives on the invariant sidebar Capsules trigger", function () {
   assert.match(homeMarkup, /id="home-tools-label">Capsules<\/span><span id="home-tools-activity"/);
   assert.doesNotMatch(homeMarkup, /home-sidebar-capsules/);
   assert.match(dockSource, /getElementById\("home-tools-activity"\)/);
@@ -114,5 +118,6 @@ test("Capsule Library is responsive and moves focus into visible Workbench conte
   assert.match(dockSource, /home-capsule-library-title[\s\S]*title\.focus\(\)/);
   assert.match(dockSource, /home-dock-switcher \.home-dock-tool\.active[\s\S]*activeTab\.focus\(\)/);
   assert.match(cssSource, /@media \(max-width: 768px\)/);
-  assert.match(dockSource, /if \(store\.get\('dockOpen'\)\) closeHomeDock\(\);[\s\S]*else openHomeCapsules\(\)/);
+  assert.match(dockSource, /export function toggleHomeCapsules\(\)[\s\S]*if \(store\.get\('dockOpen'\)\) closeHomeDock\(\);[\s\S]*else openHomeCapsules\(\)/);
+  assert.match(sidebarSource, /closeNarrowDrawer\(!opening\)/);
 });

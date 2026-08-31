@@ -23,6 +23,7 @@ var bubbleSource = fs.readFileSync(path.join(root, "lib/public/modules/chat-bubb
 var homeSidebarSource = fs.readFileSync(path.join(root, "lib/public/modules/home-sidebar.js"), "utf8");
 var paletteSource = fs.readFileSync(path.join(root, "lib/public/modules/command-palette.js"), "utf8");
 var cssSource = fs.readFileSync(path.join(root, "lib/public/css/home-hub.css"), "utf8");
+var sidebarCssSource = fs.readFileSync(path.join(root, "lib/public/css/home-sidebar.css"), "utf8");
 var matesCssSource = fs.readFileSync(path.join(root, "lib/public/css/mates.css"), "utf8");
 var avatarCssSource = fs.readFileSync(path.join(root, "lib/public/css/avatar-imprints.css"), "utf8");
 var homeMarkup = indexSource.slice(indexSource.indexOf('<div id="home-hub"'), indexSource.indexOf('<div id="whats-new-article"'));
@@ -32,12 +33,13 @@ test("home markup uses the first-depth Mate list and unified chat stage", functi
   assert.doesNotMatch(homeMarkup, /id="home-mate-chat-switcher"|data-home-mate-switcher/);
   assert.match(indexSource, /class="home-mate-chat-stage"/);
   assert.match(indexSource, /id="home-mate-chat-suggestions"/);
-  assert.match(homeMarkup, /class="home-mate-chat-controls"[\s\S]*id="home-tools-btn"/);
-  assert.match(homeMarkup, /id="home-tools-btn"[\s\S]*id="home-minimize-btn"/);
-  assert.match(homeMarkup, /id="home-sidebar-expand"[^>]*aria-label="Show Home sidebar"[^>]*aria-describedby="home-sidebar-expand-brand-label"[\s\S]*home-sidebar-expand-wordmark[\s\S]*class="home-mate-chat-controls"[\s\S]*id="home-tools-label">Capsules<[\s\S]*<span>Return<\/span>/);
-  assert.match(homeMarkup, /id="home-tools-label">Capsules<\/span>/);
-  assert.match(homeMarkup, /id="home-minimize-btn"[^>]*title="Return to project"[^>]*aria-label="Return to project"[\s\S]*data-lucide="arrow-down-left"[\s\S]*<span>Return<\/span>/);
-  assert.match(cssSource, /\.home-minimize-trigger \{[\s\S]*gap: 5px;[\s\S]*border: 1px solid var\(--border-subtle\);[\s\S]*font-size: 11px/);
+  assert.match(homeMarkup, /home-sidebar-primary-actions[\s\S]*id="home-tools-btn"[^>]*aria-expanded="false"[^>]*aria-controls="home-tool-workbench"[\s\S]*id="home-tools-label">Capsules<\/span>/);
+  assert.equal((homeMarkup.match(/id="home-tools-btn"/g) || []).length, 1);
+  assert.match(homeMarkup, /id="home-sidebar-expand"[^>]*aria-label="Show Home sidebar"[^>]*aria-describedby="home-sidebar-expand-brand-label"[\s\S]*home-sidebar-expand-wordmark/);
+  assert.match(homeMarkup, /id="home-project-reveal"[^>]*title="Reveal project"[^>]*aria-label="Reveal project"[\s\S]*data-lucide="chevron-down"[\s\S]*<span>Project<\/span>/);
+  assert.doesNotMatch(homeMarkup, /home-mate-chat-header|home-mate-chat-controls|home-minimize-btn|home-minimize-trigger/);
+  assert.match(cssSource, /\.home-project-reveal \{[\s\S]*position: absolute;[\s\S]*top: 8px;[\s\S]*right: 10px;[\s\S]*border: 1px solid var\(--border-subtle\);/);
+  assert.match(cssSource, /\.home-dock-actions \.home-project-reveal \{[\s\S]*position: static;[\s\S]*box-shadow: none;/);
   assert.doesNotMatch(indexSource, /id="home-bar"|id="home-projects-btn"|id="home-search-btn"/);
   assert.doesNotMatch(cssSource, /#home-bar|\.home-bar-|\.home-projects-|#home-projects-btn/);
   assert.doesNotMatch(homeMarkup, /notif-center-btn|user-settings-btn|home-bar/);
@@ -47,12 +49,26 @@ test("home markup uses the first-depth Mate list and unified chat stage", functi
 test("home minimizes and resumes without resetting its mounted work", function () {
   assert.match(hubSource, /homeHubSuspended/);
   assert.match(hubSource, /export function minimizeHomeHub\(\)/);
-  assert.match(hubSource, /home-minimize-btn"\)\.classList\.toggle\("hidden", !store\.get\('currentSlug'\)\)/);
+  assert.match(hubSource, /home-project-reveal/);
+  assert.match(hubSource, /reveal\.classList\.toggle\("hidden", !store\.get\('currentSlug'\)\)/);
+  assert.match(hubSource, /home-project-reveal"\)\.addEventListener\("click", minimizeHomeHub\)/);
   assert.match(hubSource, /route = "\/p\/" \+ slug \+ "\/"/);
+  assert.match(hubSource, /getElementById\("input"\)[\s\S]*projectInput\.focus\(\{ preventScroll: true \}\)/);
   assert.match(hubSource, /if \(!resume && store\.get\('homeSurfaceRestoreRequested'\) !== true\) \{[\s\S]*requestTools\(\)[\s\S]*renderDock\(\)/);
   assert.doesNotMatch(hubSource, /resetHomeDockFocus|closeHomeChat/);
   assert.match(connectionSource, /resumeHomeChat\(\)/);
   assert.match(chatSource, /export function resumeHomeChat\(\)/);
+});
+
+test("Home sheet overlays its project without reserving a main toolbar row", function () {
+  assert.doesNotMatch(homeMarkup, /home-mate-chat-header|home-mate-chat-controls/);
+  assert.doesNotMatch(cssSource, /\.home-mate-chat-header/);
+  assert.match(cssSource, /\.home-workspace \{[\s\S]*position: relative;[\s\S]*min-height: 0;[\s\S]*overflow: hidden;/);
+  assert.match(cssSource, /\.home-conversation-region \{[\s\S]*min-height: 0;[\s\S]*overflow: hidden;/);
+  assert.match(cssSource, /\.home-mate-chat \{[\s\S]*min-height: 0;[\s\S]*overflow: hidden;/);
+  assert.match(cssSource, /\.home-mate-chat-stage \{[\s\S]*min-height: 0;[\s\S]*overflow: hidden;/);
+  assert.match(cssSource, /\.home-mate-chat-messages \{[\s\S]*flex: 1 1 auto;[\s\S]*min-height: 0;[\s\S]*overflow-y: auto;/);
+  assert.match(sidebarCssSource, /#home-hub\.dock-focus \.home-sidebar-expand \{ display: none; \}/);
 });
 
 test("home shell only toggles reversible project chrome", function () {
