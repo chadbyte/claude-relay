@@ -51,6 +51,8 @@ Wires all modules, sets up session manager and SDK bridge, dispatches messages.
 | `project-file-watch.js` | File and directory fs.watch wrappers |
 | `project-session-spawn.js` | Agent-driven sibling session creation, safety policy, and concurrency queue |
 | `project-models.js` | Vendor model discovery, loading/error responses, model matching, and selection acknowledgements |
+| `workspace-query-service.js` + `project-workspace-query.js` + `workspace-query-mcp-server.js` | Exact-owner workspace/session read projections, query-bound Mate MCP tools, stable opaque session references, and Clay-only global search capability |
+| `workspace-assignment-service.js` + `project-delegated-session.js` + `project-delegated-follow-up.js` | Durable per-user assignment proposals, exact-session approval routing, private model-resolved delegated sessions, and strictly eligible existing-session follow-ups |
 | `project-worker-proposal.js` | Fable-triggered inline Worker suggestions, approval routing, and execution handoff |
 | `session-spawn-mcp-server.js` | SDK-free `clay-sessions` MCP tool definitions for spawning and checking sessions |
 | `session-handoff-mcp-server.js` | SDK-free `clay-handoff` MCP tool definition for reading a session's handoff source chain |
