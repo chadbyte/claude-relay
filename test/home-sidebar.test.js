@@ -16,11 +16,11 @@ var fontLicenseSource = fs.readFileSync(path.join(root, "lib/public/fonts/source
 var homeMarkup = indexSource.slice(indexSource.indexOf('<div id="home-hub"'), indexSource.indexOf('<div id="whats-new-article"'));
 
 test("Home sidebar follows a continuous action, Mate, and conversation hierarchy", function () {
-  assert.match(homeMarkup, /home-sidebar-brand[\s\S]*id="home-sidebar-all"[\s\S]*id="home-sidebar-collapse"[\s\S]*id="home-sidebar-new"[\s\S]*id="home-sidebar-memory"[\s\S]*id="home-sidebar-knowledge"[\s\S]*id="home-sidebar-model"[\s\S]*id="home-sidebar-settings"[\s\S]*id="home-sidebar-debate"[\s\S]*home-sidebar-mate-label[\s\S]*home-mate-list[\s\S]*home-sidebar-recent-label/);
+  assert.match(homeMarkup, /home-sidebar-brand[\s\S]*id="home-sidebar-all"[\s\S]*id="home-sidebar-collapse"[\s\S]*id="home-sidebar-new"[\s\S]*id="home-sidebar-debate"[\s\S]*home-sidebar-mate-label[\s\S]*home-mate-list[\s\S]*home-sidebar-recent-label/);
   assert.doesNotMatch(homeMarkup, /home-sidebar-capsules/);
   assert.doesNotMatch(cssSource, /home-sidebar-activity/);
   assert.match(homeMarkup, /id="home-mate-list"[^>]*role="list"/);
-  assert.doesNotMatch(homeMarkup, /home-sidebar-mate-overflow|All conversations<\/span>/);
+  assert.doesNotMatch(homeMarkup, /id="home-sidebar-(?:model|memory|knowledge|settings)"|All conversations<\/span>/);
   assert.equal((homeMarkup.match(/id="home-sidebar-all"/g) || []).length, 1);
   assert.doesNotMatch(homeMarkup, /home-mate-chat-actions/);
 });

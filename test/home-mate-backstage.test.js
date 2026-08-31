@@ -4,194 +4,136 @@ var path = require("node:path");
 var test = require("node:test");
 
 var root = path.join(__dirname, "..");
-var read = function (relativePath) { return fs.readFileSync(path.join(root, relativePath), "utf8"); };
+function read(relativePath) { return fs.readFileSync(path.join(root, relativePath), "utf8"); }
 var indexSource = read("lib/public/index.html");
-var appSource = read("lib/public/app.js");
+var hubSource = read("lib/public/modules/app-home-hub.js");
 var chatSource = read("lib/public/modules/home-mate-chat.js");
-var dockSource = read("lib/public/modules/home-dock.js");
-var propertiesSource = read("lib/public/modules/home-mate-properties.js");
-var modelPickerSource = read("lib/public/modules/home-mate-model-picker.js");
-var managementSource = read("lib/public/modules/mate-management.js");
-var sidebarMatesSource = read("lib/public/modules/sidebar-mates.js");
-var sidebarPresenceSource = read("lib/public/modules/sidebar-presence.js");
 var sidebarSource = read("lib/public/modules/home-sidebar.js");
+var settingsSource = read("lib/public/modules/home-mate-settings.js");
+var menuSource = read("lib/public/modules/home-mate-settings-menu.js");
+var modelPickerSource = read("lib/public/modules/home-mate-model-picker.js");
+var routerSource = read("lib/public/modules/app-message-router.js");
+var managementSource = read("lib/public/modules/mate-management.js");
 var messagesSource = read("lib/public/modules/app-messages.js");
-var messageRouterSource = read("lib/public/modules/app-message-router.js");
-var connectionSource = read("lib/public/modules/app-connection.js");
 var serverSource = read("lib/server-home-chat.js");
-var cssSource = read("lib/public/css/home-mate-backstage.css");
-var hubCssSource = read("lib/public/css/home-hub.css");
+var settingsCss = read("lib/public/css/home-mate-settings.css");
 var styleSource = read("lib/public/style.css");
 var homeMarkup = indexSource.slice(indexSource.indexOf('<div id="home-hub"'), indexSource.indexOf('<div id="whats-new-article"'));
 
-test("first-depth selected Mate actions open backstage and keep Debate coherent", function () {
-  assert.match(chatSource, /export function openHomeMateAction\(kind, options\)/);
-  assert.match(chatSource, /kind === "memory" \|\| kind === "knowledge" \|\| kind === "model" \|\| kind === "settings"[\s\S]*openHomeMateProperty\(kind, mate\.id, getMateName\(mate\), options\)/);
-  assert.match(chatSource, /window\.dispatchEvent\(new CustomEvent\("clay:home-debate"\)\)/);
-  assert.match(chatSource, /openDebateModal\(\{[\s\S]*dmContext: messages\.map/);
-  assert.doesNotMatch(chatSource + homeMarkup, /home-mate-actions-menu|role="menuitem"|home-sidebar-mate-overflow/);
-  assert.match(sidebarSource, /openMateActionFromSidebar\("memory"\)/);
-  assert.match(sidebarSource, /openMateActionFromSidebar\("knowledge"\)/);
-  assert.match(sidebarSource, /openMateActionFromSidebar\("model"\)/);
-  assert.match(sidebarSource, /openMateActionFromSidebar\("settings"\)/);
-  assert.match(sidebarSource, /openMateActionFromSidebar\("debate"\)/);
+test("first-depth keeps New conversation and Debate while Mate properties live in settings", function () {
+  assert.match(homeMarkup, /id="home-sidebar-new"[\s\S]*id="home-sidebar-debate"/);
+  assert.doesNotMatch(homeMarkup, /id="home-sidebar-(?:model|memory|knowledge|settings)"/);
+  assert.match(hubSource, /createHomeMateSettingsTrigger\(mate\)/);
+  assert.match(hubSource, /item\.appendChild\(row\);[\s\S]*item\.appendChild\(createHomeMateSettingsTrigger\(mate\)\)/);
+  assert.match(chatSource, /if \(kind !== "debate"\) return false/);
+  assert.doesNotMatch(sidebarSource, /openMateActionFromSidebar\("(?:model|memory|knowledge|settings)"\)/);
 });
 
-test("Mate action triggers keep their surfaces hosted by Workbench", function () {
-  assert.match(propertiesSource, /openHomeBackstage\(\{ label: kindLabel\(kind\), render: renderBackstage, onClose: clearActiveState \}\)/);
-  assert.match(dockSource, /backstageView\.render\(contentEl, closeHomeBackstage\)/);
-  assert.match(appSource, /dockBackstageOpen: false/);
-  assert.match(homeMarkup, />Memory<\/span>[\s\S]*>Knowledge<\/span>[\s\S]*>Mate settings<\/span>/);
-  assert.doesNotMatch(sidebarSource, /openHomeMateProperty|home_mate_memory|home_mate_knowledge/);
-  assert.doesNotMatch(propertiesSource, /document\.body\.appendChild|home-mate-property-overlay/);
+test("per-row overflow is separate, accessible, and never selects its target Mate", function () {
+  assert.match(menuSource, /className = "home-mate-list-overflow"/);
+  assert.match(menuSource, /home-mate-list-overflow-mark[\s\S]*aria-hidden="true">•••<\/span>/);
+  assert.doesNotMatch(menuSource.slice(menuSource.indexOf("export function createHomeMateSettingsTrigger")), /iconHtml\("ellipsis"\)|data-lucide="ellipsis"/);
+  assert.match(menuSource, /aria-haspopup", "menu"/);
+  assert.match(menuSource, /aria-expanded", "false"/);
+  assert.match(menuSource, /setAttribute\("role", "menu"\)/);
+  assert.match(menuSource, /setAttribute\("role", "menuitem"\)/);
+  assert.match(menuSource, /event\.stopPropagation\(\)/);
+  assert.match(menuSource, /openHomeMateSettings\(mate\.id, opener\)/);
+  assert.doesNotMatch(menuSource, /openHomeChat|rememberHomeMate|homePreferredMateId|dockActiveToolId/);
+  assert.match(hubSource, /row\.addEventListener\("click", function \(\) \{ selectHomeMate\(mate\.id\); \}\)/);
 });
 
-test("ephemeral backstage state preserves the real Capsule preference and tabs", function () {
-  assert.match(dockSource, /function preference\(\)[\s\S]*dockOpen:[\s\S]*dockWidth:[\s\S]*activeToolId: store\.get\('dockActiveToolId'\) \|\| null/);
-  assert.match(dockSource, /export function openHomeBackstage\(view\)[\s\S]*dockOpen: true,[\s\S]*dockFocus: false,[\s\S]*dockBackstageOpen: true/);
-  assert.doesNotMatch(dockSource, /openHomeBackstage\(view\)[\s\S]{0,300}dockActiveToolId:/);
-  assert.match(dockSource, /for \(var i = 0; i < tools\.length; i\+\+\)[\s\S]*dataset\.dockToolId = tool\.id/);
-  assert.doesNotMatch(propertiesSource, /registerDockTool|dockActiveToolId|activeToolId|toolId/);
-  assert.doesNotMatch(propertiesSource + dockSource, /["'](?:memory|knowledge|settings)-capsule["']/);
+test("row menu supports keyboard, outside close, focus return, and rerender cleanup", function () {
+  assert.match(menuSource, /event\.key !== "ArrowDown" && event\.key !== "ArrowUp" && event\.key !== "Home" && event\.key !== "End"/);
+  assert.match(menuSource, /event\.key === "Escape"[\s\S]*closeMenu\(true\)/);
+  assert.match(menuSource, /document\.addEventListener\("pointerdown", handleMenuOutside, true\)/);
+  assert.match(menuSource, /document\.removeEventListener\("pointerdown", handleMenuOutside, true\)/);
+  assert.match(menuSource, /trigger && trigger\.isConnected[\s\S]*trigger\.focus\(\{ preventScroll: true \}\)/);
+  assert.match(hubSource, /disposeHomeMateSettingsMenu\(\);[\s\S]*list\.innerHTML = ""/);
+  assert.match(hubSource, /focusedOverflow[\s\S]*findMateOverflow/);
 });
 
-test("backstage immediately preserves Library when no active Capsule exists", function () {
-  assert.match(dockSource, /var backstageReturnTarget = null/);
-  assert.match(dockSource, /var activeId = store\.get\('dockActiveToolId'\)/);
-  assert.match(dockSource, /activeId && toolsById\[activeId\][\s\S]*\{ type: "library" \}/);
-  assert.match(dockSource, /dockLibraryOpen: backstageReturnTarget\.type === "library"/);
-  assert.match(dockSource, /var returnTarget = backstageReturnTarget[\s\S]*dockLibraryOpen: !returnToCapsule/);
-  assert.match(dockSource, /if \(!returnToCapsule\)[\s\S]*home-capsule-library-title[\s\S]*libraryTitle\.focus\(\)/);
+test("Mate settings is a centered modal with General, Model, Memory, and Knowledge", function () {
+  assert.match(settingsSource, /setAttribute\("role", "dialog"\)/);
+  assert.match(settingsSource, /setAttribute\("aria-modal", "true"\)/);
+  assert.match(settingsSource, /var sections = \["general", "model", "memory", "knowledge"\]/);
+  assert.match(settingsSource, /event\.key !== "Tab"/);
+  assert.match(settingsSource, /event\.shiftKey[\s\S]*last\.focus\(\)/);
+  assert.match(settingsSource, /!event\.shiftKey[\s\S]*first\.focus\(\)/);
+  assert.match(settingsSource, /event\.target === overlay\) closeHomeMateSettings\(\)/);
+  assert.match(settingsSource, /Close Mate settings/);
+  assert.match(settingsSource, /opener && opener\.isConnected[\s\S]*opener\.focus\(\{ preventScroll: true \}\)/);
+  assert.doesNotMatch(settingsSource, /openHomeBackstage|registerDockTool|localStorage|alert\(|confirm\(|prompt\(/);
 });
 
-test("backstage returns to its valid active Capsule without changing persistence", function () {
-  assert.match(dockSource, /\{ type: "capsule", toolId: activeId \}/);
-  assert.match(dockSource, /returnTarget\.type === "capsule" && toolsById\[returnTarget\.toolId\]/);
-  assert.match(dockSource, /dockActiveToolId: returnToCapsule \? returnTarget\.toolId : store\.get\('dockActiveToolId'\)/);
-  assert.match(dockSource, /setDockState\(\{[\s\S]*dockLibraryOpen: !returnToCapsule,[\s\S]*dockBackstageOpen: false,[\s\S]*\}, false\)/);
-  assert.match(dockSource, /focusActiveCapsuleTab\(\)/);
-});
-
-test("Escape unwinds only a topmost backstage layer", function () {
-  assert.match(dockSource, /\[role="dialog"\], \[role="menu"\], \.profile-popover, \.project-ctx-menu/);
-  assert.match(dockSource, /if \(hasVisibleEscapeLayer\(\)\) return;[\s\S]*dockBackstageOpen'[\s\S]*closeHomeBackstage\(\)[\s\S]*if \(!store\.get\('dockFocus'\)\) return;[\s\S]*returnHomeDockToSplit\(\)/);
-  assert.match(dockSource, /dockOpen'\) && store\.get\('dockBackstageOpen'\) && backstageView\)[\s\S]*event\.preventDefault\(\)[\s\S]*event\.stopPropagation\(\)/);
-});
-
-test("Memory and Knowledge reuse the existing owned read-only protocols", function () {
-  assert.match(propertiesSource, /type: "home_mate_memory_list", mateId: mateId/);
-  assert.match(propertiesSource, /type: "home_mate_knowledge_list", mateId: mateId/);
+test("Memory and Knowledge remain owned read-only protocols with exact correlation", function () {
+  assert.match(settingsSource, /type: "home_mate_memory_list", mateId: dialogMateId, requestId: memoryRequestId/);
+  assert.match(settingsSource, /type: "home_mate_knowledge_list", mateId: dialogMateId, requestId: knowledgeRequestId/);
+  assert.match(settingsSource, /msg\.mateId !== dialogMateId \|\| msg\.requestId !== memoryRequestId/);
+  assert.match(settingsSource, /msg\.mateId !== dialogMateId \|\| msg\.requestId !== knowledgeRequestId/);
+  assert.match(messagesSource, /from '\.\/home-mate-settings\.js'/);
   assert.match(messagesSource, /case "home_mate_memory_state":[\s\S]*handleHomeMateMemoryState\(msg\)/);
   assert.match(messagesSource, /case "home_mate_knowledge_state":[\s\S]*handleHomeMateKnowledgeState\(msg\)/);
+  assert.match(serverSource, /msg\.type === "home_mate_memory_list"[\s\S]*requestId: msg\.requestId \|\| null/);
+  assert.match(serverSource, /msg\.type === "home_mate_knowledge_list"[\s\S]*requestId: msg\.requestId \|\| null/);
   assert.match(serverSource, /findMateProject\(userId, msg\.mateId, true\)/);
-  assert.match(serverSource, /msg\.type === "home_mate_memory_list"[\s\S]*found\.ctx\.getMemoryState\(\)/);
-  assert.match(serverSource, /msg\.type === "home_mate_knowledge_list"[\s\S]*found\.ctx\.listKnowledgeFiles\(\)/);
-  assert.doesNotMatch(propertiesSource, /home_mate_(memory|knowledge)_(save|update|delete|create)/);
+  assert.doesNotMatch(settingsSource, /home_mate_(?:memory|knowledge)_(?:save|update|delete|create)/);
 });
 
-test("Mate model backstage offers correlated Vendor and Model recovery without partial persistence", function () {
-  var requestSource = modelPickerSource.slice(modelPickerSource.indexOf("export function requestHomeMateModels"), modelPickerSource.indexOf("function selectMateModel"));
-  assert.match(propertiesSource, /from '\.\/home-mate-model-picker\.js'/);
-  assert.match(modelPickerSource, /type: "home_mate_models_get", mateId: activeMateId, vendor: requestedVendor, requestId: requestId/);
-  assert.match(modelPickerSource, /type: "home_mate_model_set", mateId: activeMateId, vendor: state\.vendor, model: model, requestId: selectionRequestId/);
-  assert.match(modelPickerSource, /msg\.requestId !== requestId/);
-  assert.match(modelPickerSource, /msg\.requestId !== selectionRequestId/);
-  assert.match(modelPickerSource, /Used for new conversations\. Existing conversations keep their current vendor and model\./);
-  assert.match(modelPickerSource, /appendHeading\(body, "Vendor"\)/);
-  assert.match(modelPickerSource, /appendHeading\(body, "Model"\)/);
-  assert.match(modelPickerSource, /state\.status = "loading"[\s\S]*Loading " \+ vendorLabel/);
-  assert.match(modelPickerSource, /home-mate-model-retry[\s\S]*Try again/);
-  assert.match(modelPickerSource, /homeModelFocus = "catalog-status"[\s\S]*tabIndex = -1/);
-  assert.match(modelPickerSource, /role", "alert"/);
-  assert.match(modelPickerSource, /aria-pressed/);
-  assert.match(modelPickerSource, /aria-live", "polite"/);
-  assert.match(propertiesSource, /focusedModel[\s\S]*focusedVendor[\s\S]*focus\(\{ preventScroll: true \}\)/);
-  assert.match(propertiesSource, /focusedModelControl[\s\S]*data-home-model-focus[\s\S]*focus\(\{ preventScroll: true \}\)/);
-  assert.match(modelPickerSource, /vendor\.id !== state\.vendor\) requestHomeMateModels/);
-  assert.match(modelPickerSource, /requestHomeMateModels\(vendor, rerender, focusAfter\)[\s\S]*selectionRequestId\) return/);
-  assert.doesNotMatch(requestSource, /selectionRequestId = null/);
-  assert.match(modelPickerSource, /homeMateVendor = vendor\.id[\s\S]*button\.disabled = !!selectionRequestId/);
-  assert.match(modelPickerSource, /selectionModel = model[\s\S]*rerenderAndFocus\(rerender, "selection-status", ""\)/);
-  assert.match(modelPickerSource, /status\.dataset\.homeMateModel = selectionModel[\s\S]*status\.tabIndex = -1/);
-  assert.doesNotMatch(modelPickerSource, /\[data-home-mate-(?:vendor|model)='" \+/);
-  assert.match(modelPickerSource, /querySelectorAll\(selector\)[\s\S]*dataset\[datasetKey\] === value/);
-  assert.match(modelPickerSource, /rerenderAndFocus\(rerender, "model", model\)/);
-  assert.doesNotMatch(modelPickerSource, /updateMate|mate_update|currentModel|model-picker/);
-  assert.doesNotMatch(messagesSource, /home_mate_models_state|home_mate_model_result|handleHomeMateModelsState|handleHomeMateModelResult/);
-  assert.match(connectionSource, /import \{ processMessage \} from '\.\/app-message-router\.js'/);
-  assert.match(messageRouterSource, /msg\.type === "home_mate_models_state"[\s\S]*handleHomeMateModelsState\(msg\);[\s\S]*return true/);
-  assert.match(messageRouterSource, /msg\.type === "home_mate_model_result"[\s\S]*handleHomeMateModelResult\(msg\);[\s\S]*return true/);
-  assert.match(messageRouterSource, /if \(handleHomeProtocolMessage\(msg\)\) return;[\s\S]*processAppMessage\(msg\)/);
-  assert.equal((messageRouterSource.match(/home_mate_models_state/g) || []).length, 1);
-  assert.equal((messageRouterSource.match(/home_mate_model_result/g) || []).length, 1);
-  assert.equal((messageRouterSource.match(/handleHomeMateModelsState\(msg\)/g) || []).length, 1);
-  assert.equal((messageRouterSource.match(/handleHomeMateModelResult\(msg\)/g) || []).length, 1);
-});
-
-test("late backstage responses cannot replace another Mate or section", function () {
-  assert.match(propertiesSource, /activeKind !== "memory" \|\| msg\.mateId !== activeMateId/);
-  assert.match(propertiesSource, /activeKind !== "knowledge" \|\| msg\.mateId !== activeMateId/);
-  assert.match(chatSource, /homeChatMateId'\) !== mateId\) closeHomeMateBackstage\(\)/);
-  assert.match(dockSource, /function clearBackstageView\(\)[\s\S]*previous\.onClose\(\)/);
-  assert.match(dockSource, /function activateTool\(toolId\) \{[\s\S]*clearBackstageView\(\)/);
-  assert.match(dockSource, /export function closeHomeDock\(\) \{[\s\S]*clearBackstageView\(\)/);
-  assert.match(propertiesSource, /function refreshActiveBody\(\)[\s\S]*\.home-mate-backstage-body/);
-  assert.match(propertiesSource, /memoryState = \{[\s\S]*refreshActiveBody\(\)/);
-  assert.doesNotMatch(propertiesSource, /handleHomeMateMemoryState\(msg\)[\s\S]{0,240}renderBackstage/);
-});
-
-test("Home settings reuse project Mate management and custom confirmation", function () {
-  assert.match(propertiesSource, /editMateProfile\(edit, mate\)/);
-  assert.match(propertiesSource, /confirmMateRemoval\(remove, mate, closeHomeMateBackstage\)/);
-  assert.match(sidebarMatesSource, /from '\.\/mate-management\.js'/);
-  assert.match(sidebarMatesSource, /showMateManagementMenu\(anchorEl, mate/);
-  assert.match(sidebarMatesSource, /closeUserCtxMenu\(\)[\s\S]*closeMateManagementMenu\(\)/);
-  assert.match(managementSource, /editMateProfile\(anchorEl, mate\)/);
-  assert.match(managementSource, /confirmMateRemoval\(anchorEl, mate, options\.onRemoved\)/);
+test("General reuses shared profile and custom removal flows with primary restrictions", function () {
+  assert.match(settingsSource, /mate && mate\.primary[\s\S]*This primary Mate is managed by Clay/);
+  assert.match(settingsSource, /editMateProfile\(edit, mate\)/);
+  assert.match(settingsSource, /confirmMateRemoval\(remove, mate, closeHomeMateSettings\)/);
+  assert.match(settingsSource, /mate\.builtinKey \? "Remove Mate" : "Delete Mate"/);
   assert.match(managementSource, /showMateProfilePopover\(anchorEl, mate/);
   assert.match(managementSource, /showConfirm\(/);
   assert.match(managementSource, /type: "mate_update"/);
   assert.match(managementSource, /type: "mate_delete"/);
-  assert.doesNotMatch(propertiesSource + managementSource, /\b(?:alert|confirm|prompt)\s*\(/);
 });
 
-test("backstage has explicit return, close lifecycle, and focus handoff", function () {
-  assert.match(propertiesSource, /Return to Workbench/);
-  assert.match(propertiesSource, /data-home-backstage-focus/);
-  assert.match(dockSource, /data-home-backstage-focus[\s\S]*focusTarget\.focus\(\)/);
-  assert.match(dockSource, /export function closeHomeBackstage\(\)[\s\S]*home-capsule-library-title[\s\S]*libraryTitle\.focus\(\)[\s\S]*focusActiveCapsuleTab\(\)/);
-  assert.match(dockSource, /home-dock-collapse"\)\.addEventListener\("click", closeHomeDock\)/);
-  assert.match(dockSource, /homeControl[\s\S]*homeControl\.focus\(\)/);
-  assert.match(propertiesSource, /aria-labelledby", "home-mate-backstage-title"/);
-  assert.match(propertiesSource, /aria-label", "Mate backstage sections"/);
-  assert.match(propertiesSource, /aria-current", "page"/);
+test("Model shares the settings dialog without Workbench property plumbing", function () {
+  assert.match(settingsSource, /renderHomeMateModelPicker\(body, renderDialogContent\)/);
+  assert.match(settingsSource, /resetHomeMateModelPicker\(mateId, getMateName\(mate\), mate, options && options\.sessionId\)/);
+  assert.match(settingsSource, /requestHomeMateModels/);
+  assert.match(settingsSource, /clearHomeMateModelPicker\(\)/);
+  assert.match(routerSource, /from '\.\/home-mate-settings\.js'/);
+  assert.doesNotMatch(settingsSource + chatSource, /openHomeBackstage|closeHomeBackstage|openHomeMateProperty|home-mate-properties/);
+  assert.match(modelPickerSource, /type: "home_mate_models_get"/);
+  assert.match(modelPickerSource, /type: "home_mate_model_set"/);
 });
 
-test("mobile backstage uses full-screen Workbench and closes the navigation drawer", function () {
-  assert.match(hubCssSource, /@media \(max-width: 768px\)[\s\S]*#home-hub\.dock-split \.home-tool-workbench[\s\S]*width: 100%[\s\S]*border: 0/);
-  assert.match(cssSource, /@media \(max-width: 768px\)[\s\S]*\.home-mate-backstage[\s\S]*width: 100%/);
-  assert.match(propertiesSource, /matchMedia\("\(max-width: 768px\)"\)/);
-  assert.match(propertiesSource, /updateHomeSurfacePreference\(\{ sidebarCollapsed: true \}\)/);
-  assert.match(styleSource, /@import url\("css\/home-mate-backstage\.css"\)/);
+test("responsive dialog masks the mobile drawer transiently without persisting Home state", function () {
+  assert.match(settingsCss, /\.home-mate-list-overflow \{[\s\S]*color: var\(--text-secondary\);[\s\S]*opacity: 0;[\s\S]*transition: opacity 120ms ease-out/);
+  assert.match(settingsCss, /\.home-mate-list-item:hover \.home-mate-list-overflow,[\s\S]*\.home-mate-list-item:focus-within \.home-mate-list-overflow,[\s\S]*\.home-mate-list-overflow:focus-visible,[\s\S]*\.home-mate-list-overflow\[aria-expanded="true"\] \{ opacity: 1; \}/);
+  assert.doesNotMatch(settingsCss, /\.home-mate-list-item\.is-active \.home-mate-list-overflow/);
+  assert.match(settingsCss, /@media \(hover: none\), \(pointer: coarse\) \{[\s\S]*\.home-mate-list-overflow \{ opacity: 0\.68; \}/);
+  assert.match(settingsCss, /@media \(max-width: 768px\)[\s\S]*\.home-mate-list-overflow \{ opacity: 1; \}/);
+  assert.match(settingsCss, /@media \(prefers-reduced-motion: reduce\)[\s\S]*\.home-mate-list-overflow \{ transition: none; \}/);
+  assert.match(settingsCss, /\.home-mate-list-overflow-mark \{[\s\S]*font-size: 9px;[\s\S]*font-weight: 700/);
+  assert.doesNotMatch(settingsCss, /\.home-mate-list-overflow \.lucide/);
+  assert.match(settingsCss, /\.home-mate-settings-overlay[\s\S]*place-items: center/);
+  assert.match(settingsCss, /\.home-mate-settings-dialog[\s\S]*width: min\(720px/);
+  assert.match(settingsCss, /@media \(max-width: 768px\)[\s\S]*\.home-mate-settings-dialog[\s\S]*width: 100%;[\s\S]*height: 100%/);
+  assert.match(settingsCss, /home-settings-drawer-masked \.home-sidebar/);
+  assert.match(settingsSource, /setTransientDrawerMask\(true\)/);
+  assert.match(settingsSource, /setTransientDrawerMask\(false\)/);
+  assert.doesNotMatch(settingsSource, /updateHomeSurfacePreference|sidebarCollapsed|dockActiveToolId/);
+  assert.match(styleSource, /@import url\("css\/home-mate-settings\.css"\)/);
 });
 
-test("Stage 8 client modules follow dependency and size constraints", function () {
+test("Mate settings modules stay direct-import, safe, and under 500 lines", function () {
   var files = [
-    "lib/public/modules/home-dock.js",
+    "lib/public/modules/app-home-hub.js",
     "lib/public/modules/home-mate-chat.js",
-    "lib/public/modules/home-mate-properties.js",
-    "lib/public/modules/home-mate-model-picker.js",
-    "lib/public/modules/mate-management.js",
-    "lib/public/modules/sidebar-mates.js",
-    "lib/public/modules/sidebar-presence.js",
+    "lib/public/modules/home-mate-settings.js",
+    "lib/public/modules/home-mate-settings-menu.js",
   ];
   for (var i = 0; i < files.length; i++) {
     var source = read(files[i]);
     assert.ok(source.split("\n").length < 500, files[i] + " must remain under 500 lines");
     assert.doesNotMatch(source, /\b(?:const|let)\b|=>|localStorage/);
+    assert.doesNotMatch(source, /init[A-Z][A-Za-z]+\(ctx\)|var _ctx/);
   }
-  assert.match(propertiesSource, /from '\.\/store\.js'/);
-  assert.match(propertiesSource, /from '\.\/ws-ref\.js'/);
-  assert.doesNotMatch(propertiesSource, /init[A-Z][A-Za-z]+\(ctx\)|var _ctx/);
-  assert.match(sidebarPresenceSource, /export function renderSidebarPresence/);
+  assert.ok(settingsCss.split("\n").length < 500);
+  assert.doesNotMatch(settingsCss, /Source Serif|Georgia|#[0-9a-f]{3,8}/i);
 });

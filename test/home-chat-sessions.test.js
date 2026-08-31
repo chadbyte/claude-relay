@@ -92,6 +92,16 @@ test("Mate conversation list includes only the requesting user's visible session
   });
 });
 
+test("Mate settings memory and knowledge responses preserve request correlation", function () {
+  var f = fixture();
+  f.handler.handleMessage(f.ws, { type: "home_mate_memory_list", mateId: "mate-a", requestId: "memory-a" });
+  f.handler.handleMessage(f.ws, { type: "home_mate_knowledge_list", mateId: "mate-a", requestId: "knowledge-a" });
+  assert.deepStrictEqual(f.messages.map(function (message) { return [message.type, message.mateId, message.requestId]; }), [
+    ["home_mate_memory_state", "mate-a", "memory-a"],
+    ["home_mate_knowledge_state", "mate-a", "knowledge-a"],
+  ]);
+});
+
 test("Explicit Mate conversation open restores the exact requested session", async function () {
   var f = fixture();
   f.handler.handleMessage(f.ws, { type: "home_mate_session_open", mateId: "mate-a", sessionId: "session-old", requestId: "open-old" });

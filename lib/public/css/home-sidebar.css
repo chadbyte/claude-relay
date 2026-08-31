@@ -138,25 +138,6 @@
   height: 15px;
 }
 
-.home-sidebar-action-copy {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.home-sidebar-action-value {
-  overflow: hidden;
-  color: var(--text-dimmer);
-  font-size: 9px;
-  font-weight: 500;
-  line-height: 1.25;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.home-sidebar-model-action { min-height: 40px; }
-
 .home-sidebar-action:disabled {
   cursor: default;
   opacity: 0.42;

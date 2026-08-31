@@ -119,8 +119,9 @@ test("first-depth Home Mate list preserves management and activity affordances",
   assert.match(hubSource, /home-mate-list-unread/);
   assert.match(hubSource, /if \(mate\.model\)[\s\S]*home-mate-list-model[\s\S]*model\.textContent = mate\.model/);
   assert.match(hubSource, /getActiveMentionMateIds/);
-  assert.match(homeMarkup, /id="home-sidebar-memory"[\s\S]*id="home-sidebar-knowledge"[\s\S]*id="home-sidebar-model"[\s\S]*id="home-sidebar-settings"[\s\S]*id="home-sidebar-debate"/);
-  assert.doesNotMatch(homeMarkup + homeSidebarSource, /home-sidebar-mate-overflow|openHomeMateActions/);
+  assert.match(homeMarkup, /id="home-sidebar-debate"/);
+  assert.doesNotMatch(homeMarkup, /id="home-sidebar-(?:model|memory|knowledge|settings)"/);
+  assert.match(hubSource, /createHomeMateSettingsTrigger\(mate\)/);
   assert.match(homeSidebarSource, /openHomeMateAction/);
 });
 
@@ -183,17 +184,13 @@ test("empty home chat renders contextual greeting and working suggestions", func
 
 test("Mate and new-conversation actions live in the Home sidebar", function () {
   assert.match(homeMarkup, /id="home-sidebar-new"/);
-  assert.match(homeMarkup, /id="home-sidebar-memory"[^>]*disabled[\s\S]*>Memory<\/span>/);
-  assert.match(homeMarkup, /id="home-sidebar-knowledge"[^>]*disabled[\s\S]*>Knowledge<\/span>/);
-  assert.match(homeMarkup, /id="home-sidebar-model"[^>]*disabled[\s\S]*>Model<\/span>/);
-  assert.match(homeMarkup, /id="home-sidebar-settings"[^>]*disabled[\s\S]*>Mate settings<\/span>/);
   assert.match(homeMarkup, /id="home-sidebar-debate"[^>]*disabled[\s\S]*>Start debate<\/span>/);
-  assert.doesNotMatch(homeMarkup, /home-sidebar-mate-overflow/);
+  assert.doesNotMatch(homeMarkup, /id="home-sidebar-(?:model|memory|knowledge|settings)"/);
   assert.doesNotMatch(homeMarkup, /id="home-mate-chat-actions"/);
   assert.match(homeSidebarSource, /startNewHomeConversation/);
   assert.match(homeSidebarSource, /openHomeMateAction/);
-  assert.match(chatSource, /export function openHomeMateAction\(kind, options\)/);
-  assert.match(chatSource, /kind === "memory" \|\| kind === "knowledge" \|\| kind === "model" \|\| kind === "settings"/);
+  assert.match(chatSource, /export function openHomeMateAction\(kind\)/);
+  assert.match(chatSource, /openHomeMateSettings\(mate\.id, sessionModelChooseEl/);
   assert.match(chatSource, /kind !== "debate"/);
 });
 
