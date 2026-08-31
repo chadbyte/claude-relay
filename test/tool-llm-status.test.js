@@ -36,7 +36,7 @@ test("LLM Capsule status uses correlated alias routing and runtime alias handoff
   assert.match(tools, /onLlmRequest:[\s\S]*setAlias\(alias\)/);
   assert.match(runtime, /config\.onLlmRequest\(msg\.args && msg\.args\.model/);
   assert.match(router, /msg\.type === "tool_llm_config_state"[\s\S]*handleToolLlmConfigState\(msg\)/);
-  assert.match(project, /msg\.type === "tool_llm_config_get"[\s\S]*opts\.onDmMessage\(ws, msg\)/);
+  assert.match(project, /msg\.type === "tool_llm_config_get"[\s\S]*opts\.onDmMessage\(ws, msg, slug\)/);
   assert.match(schema, /"tool_llm_config_get"[\s\S]*"tool_llm_config_state"/);
 });
 

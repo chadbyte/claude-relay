@@ -94,11 +94,13 @@ test("mate tool MCP exposes driving and approved authoring tools with installed 
   assert.match(installDescription, /safe JSON nodes/);
   assert.match(installDescription, /tone neutral\/accent\/info\/success\/warning\/danger/);
   assert.match(installDescription, /Arbitrary class, style, HTML/);
-  assert.match(installDescription, /section, callout, icon/);
+  assert.match(installDescription, /form, tabs, tab, dialog, menu/);
   assert.match(installDescription, /model-select is only for worker Capsules/);
   assert.match(installDescription, /fast\/standard\/deep capability aliases/);
   assert.match(installDescription, /vendor model IDs/);
-  assert.match(installDescription, /when conditionally renders/);
+  assert.match(installDescription, /all\/any\/not\/equals\/notEquals\/in\/gt\/gte\/lt\/lte/);
+  assert.match(installDescription, /bounded dynamic options/);
+  assert.match(installDescription, /bar\/line\/donut\/progress\/metric/);
   assert.match(installDescription, /api\.setState\(nextState\)/);
   assert.match(installDescription, /uncaught action error restores the pre-action UI state/);
 });

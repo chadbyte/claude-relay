@@ -19,7 +19,7 @@
           "type": "row",
           "props": { "align": "end", "gap": "sm" },
           "children": [
-            { "type": "input", "id": "scratch-input", "bind": "draft", "action": "setDraft", "props": { "label": "New note", "hint": "Captured notes stay in this Capsule.", "placeholder": "Write something…" } },
+            { "type": "input", "id": "scratch-input", "bind": "draft", "action": "setDraft", "props": { "label": "New note", "hint": "Captured notes stay in this Capsule.", "placeholder": "Write something…", "validation": { "maxLength": 2000, "message": "Notes can contain up to 2,000 characters." } } },
             { "type": "button", "id": "add-note", "action": "add", "props": { "label": "Add note", "variant": "primary", "icon": "plus" } }
           ]
         }
@@ -29,11 +29,12 @@
       "type": "section",
       "props": { "label": "Notes", "accessibleLabel": "Saved notes", "gap": "sm" },
       "children": [
+        { "type": "input", "id": "scratch-filter", "bind": "filter", "action": "setFilter", "props": { "label": "Filter notes", "inputType": "search", "placeholder": "Find a note…" } },
         { "type": "empty-state", "bind": "items", "props": { "icon": "notebook-pen", "title": "Nothing captured yet", "text": "Add a note to begin your scratchpad." } },
         {
           "type": "list",
           "bind": "items",
-          "props": { "variant": "cards", "gap": "sm" },
+          "props": { "variant": "cards", "gap": "sm", "filter": { "$bind": "filter" }, "filterKey": "text", "sortKey": "createdAt", "sortDirection": "desc", "pageSize": 50 },
           "children": [
             {
               "type": "card",

@@ -133,6 +133,7 @@ test("worker rerenders cannot replace a live Korean IME node or drop rapid Hangu
   var fakeDocument = {
     activeElement: null,
     createElement: function (tagName) { return new FakeElement(tagName, fakeDocument); },
+    createElementNS: function (namespace, tagName) { return new FakeElement(tagName, fakeDocument); },
   };
   global.document = fakeDocument;
   try {
@@ -218,6 +219,70 @@ test("detached composed controls do not dispatch stale actions", async function 
   input.value = "안녕";
   input.emit("input");
   assert.deepStrictEqual(commits, []);
+});
+
+test("typed number and range controls emit finite numbers without weakening text input", async function () {
+  var originalDocument = global.document;
+  var fakeDocument = { activeElement: null, createElement: function (tagName) { return new FakeElement(tagName, fakeDocument); } };
+  global.document = fakeDocument;
+  try {
+    var rendererUrl = pathToFileURL(path.join(__dirname, "../lib/public/modules/tool-renderer.js")).href;
+    var renderer = await import(rendererUrl);
+    var values = [];
+    var container = new FakeElement("div", fakeDocument);
+    renderer.renderToolUi("typed", { type: "input", id: "amount", bind: "amount", action: "setAmount", props: { label: "Amount", inputType: "range" } }, { amount: 3 }, function (action, args) { values.push(args.value); }, container);
+    var input = container.querySelectorAll("[data-tool-control-id]")[0];
+    input.value = "8";
+    input.emit("input");
+    input.value = "";
+    input.emit("input");
+    assert.deepStrictEqual(values, [8, ""]);
+  } finally {
+    global.document = originalDocument;
+  }
+});
+
+test("advanced host renderer creates accessible tabs, dialog, pagination, and bounded chart DOM", async function () {
+  var originalDocument = global.document;
+  var fakeDocument = {
+    activeElement: null,
+    createElement: function (tagName) { return new FakeElement(tagName, fakeDocument); },
+    createElementNS: function (namespace, tagName) { return new FakeElement(tagName, fakeDocument); },
+    addEventListener: function () {},
+    removeEventListener: function () {},
+  };
+  global.document = fakeDocument;
+  try {
+    var advancedUrl = pathToFileURL(path.join(__dirname, "../lib/public/modules/tool-renderer-advanced.js")).href;
+    var advanced = await import(advancedUrl);
+    var container = new FakeElement("div", fakeDocument);
+    var emitted = [];
+    var context = { toolId: "advanced", state: { tab: "summary", page: 1, total: 25, metrics: [{ day: "Mon", count: 4 }] }, item: null, container: container, activeControlId: null, disposers: [], emit: function (action, args) { emitted.push({ action: action, args: args }); } };
+    var renderNode = function () { var copy = new FakeElement("span", fakeDocument); copy.textContent = "Panel"; return copy; };
+    var tabs = advanced.renderAdvancedNode({ type: "tabs", bind: "tab", action: "setTab", children: [{ type: "tab", props: { label: "Summary", value: "summary" }, children: [{ type: "text" }] }] }, { label: "Views" }, context, renderNode);
+    var tabNodes = flatten(tabs);
+    assert.ok(tabNodes.some(function (node) { return node.role === "tablist"; }));
+    assert.ok(tabNodes.some(function (node) { return node.role === "tab" && node["aria-selected"] === "true"; }));
+    assert.ok(tabNodes.some(function (node) { return node.role === "tabpanel"; }));
+
+    var dialog = advanced.renderAdvancedNode({ type: "dialog", children: [] }, { label: "Confirm", open: true, closeAction: "close" }, context, renderNode);
+    container.appendChild(dialog);
+    var dialogNode = flatten(dialog).filter(function (node) { return node.role === "dialog"; })[0];
+    assert.ok(dialogNode);
+    assert.strictEqual(dialogNode["aria-modal"], "true");
+    assert.match(dialogNode["aria-labelledby"], /^tool-dialog-title-advanced-dialog-/);
+
+    var pagination = advanced.renderAdvancedNode({ type: "pagination", bind: "page" }, { label: "Pages", total: 25, pageSize: 10, pageAction: "setPage" }, context, renderNode);
+    assert.strictEqual(pagination.tagName, "NAV");
+    assert.ok(flatten(pagination).some(function (node) { return node["aria-current"] === "page"; }));
+
+    var chart = advanced.renderAdvancedNode({ type: "chart", bind: "metrics" }, { label: "Activity", kind: "bar", categoryKey: "day", valueKey: "count", maxItems: 50 }, context, renderNode);
+    var marks = flatten(chart).filter(function (node) { return node.tagName === "RECT"; });
+    assert.strictEqual(marks.length, 1);
+    assert.ok(flatten(chart).some(function (node) { return node.tagName === "LI" && node.textContent === "Mon: 4"; }));
+  } finally {
+    global.document = originalDocument;
+  }
 });
 
 test("declarative UI v2 renders fixed semantics, accessible hints, and safe text", async function () {

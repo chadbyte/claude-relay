@@ -330,12 +330,58 @@ textarea.tool-input { min-height: 92px; resize: vertical; }
 .tool-table th, .tool-table td { padding: 8px; border-bottom: 1px solid var(--border-subtle); text-align: left; }
 .tool-table th { color: var(--text-muted); font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
 
+.tool-form { display: flex; flex-direction: column; gap: 12px; }
+.tool-form-error { color: var(--error); font-size: 11px; }
+.tool-field-error { color: var(--error); font-size: 11px; line-height: 1.4; }
+.tool-input[aria-invalid="true"], .tool-select[aria-invalid="true"] { border-color: var(--error); }
+.tool-tab-list { display: flex; gap: 4px; border-bottom: 1px solid var(--border-subtle); overflow-x: auto; }
+.tool-tab { padding: 8px 10px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--text-muted); font: inherit; font-size: 12px; cursor: pointer; }
+.tool-tab[aria-selected="true"] { border-bottom-color: var(--accent); color: var(--text); font-weight: 650; }
+.tool-tab:focus-visible, .tool-menu-item:focus-visible, .tool-dialog-close:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tool-tab-panel { padding-top: 14px; }
+.tool-dialog-overlay { position: fixed; inset: 0; z-index: 9100; display: grid; place-items: center; padding: 20px; background: rgba(var(--shadow-rgb), .34); }
+.tool-dialog { position: relative; width: min(560px, 100%); max-height: min(720px, calc(100vh - 40px)); overflow: auto; padding: 22px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg); box-shadow: 0 18px 55px rgba(var(--shadow-rgb), .22); }
+.tool-dialog-title { margin: 0 72px 4px 0; font-size: 16px; }
+.tool-dialog-description { margin: 0 72px 18px 0; color: var(--text-muted); font-size: 12px; }
+.tool-dialog-close { position: absolute; top: 14px; right: 14px; padding: 6px 8px; border: 0; border-radius: 7px; background: transparent; color: var(--text-muted); font: inherit; cursor: pointer; }
+.tool-dialog-close:hover { background: var(--bg-hover); color: var(--text); }
+.tool-menu { position: relative; width: fit-content; }
+.tool-menu-popup { position: absolute; z-index: 20; top: calc(100% + 5px); right: 0; display: grid; min-width: 170px; padding: 5px; border: 1px solid var(--border); border-radius: 9px; background: var(--bg); box-shadow: 0 10px 28px rgba(var(--shadow-rgb), .14); }
+.tool-menu-item { padding: 8px 9px; border: 0; border-radius: 6px; background: transparent; color: var(--text); font: inherit; font-size: 12px; text-align: left; cursor: pointer; }
+.tool-menu-item:hover, .tool-menu-item:focus { background: var(--bg-hover); }
+.tool-pagination { display: flex; align-items: center; justify-content: space-between; gap: 10px; color: var(--text-muted); font-size: 11px; }
+.tool-pagination .tool-button[aria-current="page"] { background: var(--accent-bg); color: var(--accent); }
+.tool-pagination-size { width: auto; }
+.tool-chart { margin: 0; padding: 12px; border: 1px solid var(--border-subtle); border-radius: 10px; }
+.tool-chart figcaption { margin-bottom: 10px; color: var(--text); font-size: 12px; font-weight: 650; }
+.tool-chart-svg { display: block; width: 100%; height: 150px; overflow: visible; }
+.tool-chart-bar-mark { fill: var(--accent); }
+.tool-chart-line-path { fill: none; stroke: var(--accent); stroke-width: 2; vector-effect: non-scaling-stroke; }
+.tool-chart-line-point { fill: var(--bg); stroke: var(--accent); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+.tool-chart-donut { width: min(180px, 100%); margin-inline: auto; transform: rotate(-90deg); }
+.tool-chart-donut-track, .tool-chart-donut-segment { fill: none; stroke-width: 6; }
+.tool-chart-donut-track { stroke: var(--border-subtle); }
+.tool-chart-donut-segment { stroke: var(--accent); }
+.tool-chart-color-1 { stroke: var(--accent2); }
+.tool-chart-color-2 { stroke: var(--success); }
+.tool-chart-color-3 { stroke: var(--warning); }
+.tool-chart-color-4 { stroke: var(--error); }
+.tool-chart-color-5 { stroke: var(--text-muted); }
+.tool-chart-color-6 { stroke: var(--accent-hover); }
+.tool-chart-color-7 { stroke: var(--text-dimmer); }
+.tool-chart-metric { display: block; color: var(--text); font-size: 28px; font-weight: 650; line-height: 1; }
+.tool-chart-progress { width: 100%; height: 10px; accent-color: var(--accent); }
+.tool-chart-data { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
 @media (max-width: 600px) {
   .home-tool-display { padding-inline: 2px; }
   .tool-row:not(.tool-row--wrap) { align-items: stretch; flex-direction: column; }
   .tool-row .tool-button { width: 100%; }
   .tool-card { padding: 12px; }
   .tool-heading--role-display { font-size: 24px; }
+  .tool-dialog-overlay { padding: 0; align-items: end; }
+  .tool-dialog { width: 100%; max-height: 92vh; border-radius: 14px 14px 0 0; }
+  .tool-pagination { flex-wrap: wrap; justify-content: flex-start; }
 }
 
 @media (prefers-reduced-motion: reduce) {

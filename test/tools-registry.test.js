@@ -377,6 +377,59 @@ test("v4 migration preserves customized or deleted Translator Capsules", functio
   assert.strictEqual(fs.existsSync(path.join(deletedRoot, "translator")), false);
 });
 
+test("v5 migration upgrades only exact untouched built-in UI and logic fingerprints", function () {
+  var userCtx = ctx("builtin-advanced-ui-upgrade");
+  var root = registry.resolveToolsRoot(userCtx);
+  fs.mkdirSync(root, { recursive: true });
+  fs.writeFileSync(path.join(root, ".capsules-v4"), "translator\nscratchpad\n");
+  fs.cpSync(path.join(__dirname, "../lib/capsules/translator"), path.join(root, "translator"), { recursive: true });
+  fs.cpSync(path.join(__dirname, "../lib/capsules/scratchpad"), path.join(root, "scratchpad"), { recursive: true });
+
+  var translatorUiPath = path.join(root, "translator/ui.json");
+  var translatorUi = fs.readFileSync(translatorUiPath, "utf8")
+    .replace('      "when": { "notEquals": { "path": "result", "value": "" } },\n', "")
+    .replace(',\n                "validation": { "minLength": 1, "maxLength": 10000, "message": "Enter up to 10,000 characters to translate." }', "");
+  fs.writeFileSync(translatorUiPath, translatorUi, "utf8");
+
+  var scratchUiPath = path.join(root, "scratchpad/ui.json");
+  var scratchUi = fs.readFileSync(scratchUiPath, "utf8")
+    .replace(', "validation": { "maxLength": 2000, "message": "Notes can contain up to 2,000 characters." }', "")
+    .replace('        { "type": "input", "id": "scratch-filter", "bind": "filter", "action": "setFilter", "props": { "label": "Filter notes", "inputType": "search", "placeholder": "Find a note…" } },\n', "")
+    .replace('"props": { "variant": "cards", "gap": "sm", "filter": { "$bind": "filter" }, "filterKey": "text", "sortKey": "createdAt", "sortDirection": "desc", "pageSize": 50 }', '"props": { "variant": "cards", "gap": "sm" }');
+  fs.writeFileSync(scratchUiPath, scratchUi, "utf8");
+  var scratchLogicPath = path.join(root, "scratchpad/logic.js");
+  var scratchLogic = fs.readFileSync(scratchLogicPath, "utf8")
+    .replace("initialState: { draft: '', filter: '', items: [] }", "initialState: { draft: '', items: [] }")
+    .replace("return { draft: state.draft || '', filter: state.filter || '', items: await api.storage.list() };", "return { draft: state.draft || '', items: await api.storage.list() };")
+    .replace("return { draft: args.value || '', filter: state.filter || '', items: state.items || [] };", "return { draft: args.value || '', items: state.items || [] };")
+    .replace("    setFilter: function (state, args) {\n      return { draft: state.draft || '', filter: args.value || '', items: state.items || [] };\n    },\n", "")
+    .replace("return { draft: '', filter: state.filter || '', items: await api.storage.list() };", "return { draft: '', items: await api.storage.list() };")
+    .replace("return { draft: state.draft || '', filter: state.filter || '', items: await api.storage.list() };", "return { draft: state.draft || '', items: await api.storage.list() };");
+  fs.writeFileSync(scratchLogicPath, scratchLogic, "utf8");
+
+  registry.listTools(userCtx);
+  assert.match(fs.readFileSync(translatorUiPath, "utf8"), /notEquals/);
+  assert.match(fs.readFileSync(scratchUiPath, "utf8"), /scratch-filter/);
+  assert.match(fs.readFileSync(scratchLogicPath, "utf8"), /setFilter/);
+
+  var customCtx = ctx("builtin-advanced-ui-custom");
+  var customRoot = registry.resolveToolsRoot(customCtx);
+  fs.mkdirSync(customRoot, { recursive: true });
+  fs.writeFileSync(path.join(customRoot, ".capsules-v4"), "scratchpad\n");
+  fs.cpSync(path.join(__dirname, "../lib/capsules/scratchpad"), path.join(customRoot, "scratchpad"), { recursive: true });
+  var customUiPath = path.join(customRoot, "scratchpad/ui.json");
+  fs.writeFileSync(customUiPath, fs.readFileSync(customUiPath, "utf8").replace("Scratchpad", "Personal Pad"), "utf8");
+  registry.listTools(customCtx);
+  assert.match(fs.readFileSync(customUiPath, "utf8"), /Personal Pad/);
+
+  var deletedCtx = ctx("builtin-advanced-ui-deleted");
+  var deletedRoot = registry.resolveToolsRoot(deletedCtx);
+  fs.mkdirSync(deletedRoot, { recursive: true });
+  fs.writeFileSync(path.join(deletedRoot, ".capsules-v4"), "scratchpad\n");
+  assert.ok(!registry.listTools(deletedCtx).some(function (item) { return item.id === "scratchpad"; }));
+  assert.strictEqual(fs.existsSync(path.join(deletedRoot, "scratchpad")), false);
+});
+
 test("tool install rejects server runtime", function () {
   var serverTool = validTool("unsafe-server");
   serverTool.manifest.runtime = "server";

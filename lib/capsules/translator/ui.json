@@ -55,7 +55,8 @@
                 "hint": "Type or paste the passage you want translated.",
                 "placeholder": "Enter text to translate…",
                 "rows": 6,
-                "required": true
+                "required": true,
+                "validation": { "minLength": 1, "maxLength": 10000, "message": "Enter up to 10,000 characters to translate." }
               }
             },
             {
@@ -71,6 +72,7 @@
     },
     {
       "type": "card",
+      "when": { "notEquals": { "path": "result", "value": "" } },
       "props": { "variant": "output", "tone": "accent", "padding": "lg" },
       "children": [
         {
