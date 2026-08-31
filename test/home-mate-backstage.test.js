@@ -20,7 +20,7 @@ var settingsCss = read("lib/public/css/home-mate-settings.css");
 var styleSource = read("lib/public/style.css");
 var homeMarkup = indexSource.slice(indexSource.indexOf('<div id="home-hub"'), indexSource.indexOf('<div id="whats-new-article"'));
 
-test("first-depth keeps New conversation and Debate while Mate properties live in settings", function () {
+test("first-depth keeps New Chat and Debates while Mate properties live in settings", function () {
   assert.match(homeMarkup, /id="home-sidebar-new"[\s\S]*id="home-sidebar-debate"/);
   assert.doesNotMatch(homeMarkup, /id="home-sidebar-(?:model|memory|knowledge|settings)"/);
   assert.match(hubSource, /createHomeMateSettingsTrigger\(mate\)/);

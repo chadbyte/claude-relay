@@ -17,6 +17,7 @@ test("home dock preferences default to the closed conversation state", function 
   var fixture = harness();
   assert.deepStrictEqual(fixture.preferences.getHomeDockPreference("u1"), {
     dockOpen: false,
+    dockFocus: false,
     dockWidth: null,
     activeToolId: null,
   });
@@ -26,13 +27,14 @@ test("home dock preferences roundtrip per user and preserve partial updates", fu
   var fixture = harness();
   var first = fixture.preferences.setHomeDockPreference("u1", {
     dockOpen: true,
+    dockFocus: true,
     dockWidth: 612.4,
     activeToolId: "board",
   });
-  assert.deepStrictEqual(first.preference, { dockOpen: true, dockWidth: 612, activeToolId: "board" });
+  assert.deepStrictEqual(first.preference, { dockOpen: true, dockFocus: true, dockWidth: 612, activeToolId: "board" });
   var second = fixture.preferences.setHomeDockPreference("u1", { dockOpen: false });
-  assert.deepStrictEqual(second.preference, { dockOpen: false, dockWidth: 612, activeToolId: "board" });
-  assert.deepStrictEqual(fixture.preferences.getHomeDockPreference("u2"), { dockOpen: false, dockWidth: null, activeToolId: null });
+  assert.deepStrictEqual(second.preference, { dockOpen: false, dockFocus: false, dockWidth: 612, activeToolId: "board" });
+  assert.deepStrictEqual(fixture.preferences.getHomeDockPreference("u2"), { dockOpen: false, dockFocus: false, dockWidth: null, activeToolId: null });
   assert.strictEqual(fixture.getSaves(), 2);
 });
 
@@ -43,7 +45,7 @@ test("home dock preferences normalize unsafe values", function () {
     dockWidth: 9000,
     activeToolId: "../../board",
   });
-  assert.deepStrictEqual(result.preference, { dockOpen: false, dockWidth: 1600, activeToolId: null });
+  assert.deepStrictEqual(result.preference, { dockOpen: false, dockFocus: false, dockWidth: 1600, activeToolId: null });
 });
 
 test("home dock WebSocket messages roundtrip and broadcast only to the same user", function () {
@@ -67,9 +69,9 @@ test("home dock WebSocket messages roundtrip and broadcast only to the same user
 
   assert.strictEqual(handler.handleMessage(owner, {
     type: "home_dock_set",
-    preference: { dockOpen: true, dockWidth: 640, activeToolId: "board" },
+    preference: { dockOpen: true, dockFocus: true, dockWidth: 640, activeToolId: "board" },
   }), true);
-  assert.deepStrictEqual(ownerMessages[0].preference, { dockOpen: true, dockWidth: 640, activeToolId: "board" });
+  assert.deepStrictEqual(ownerMessages[0].preference, { dockOpen: true, dockFocus: true, dockWidth: 640, activeToolId: "board" });
   assert.deepStrictEqual(secondOwnerMessages[0].preference, ownerMessages[0].preference);
   assert.strictEqual(otherMessages.length, 0);
 
@@ -77,6 +79,6 @@ test("home dock WebSocket messages roundtrip and broadcast only to the same user
   assert.strictEqual(handler.handleMessage(owner, { type: "home_dock_get" }), true);
   assert.deepStrictEqual(ownerMessages[0], {
     type: "home_dock_state",
-    preference: { dockOpen: true, dockWidth: 640, activeToolId: "board" },
+    preference: { dockOpen: true, dockFocus: true, dockWidth: 640, activeToolId: "board" },
   });
 });

@@ -105,7 +105,7 @@ test("popstate and same-tab Home suspension retain their conservative restoratio
   assert.match(appSource, /window\.addEventListener\("popstate"[\s\S]*if \(!newSlug\) \{[\s\S]*showHomeHub\(true\);[\s\S]*return;/);
   assert.match(appSource, /if \(isHomeHubVisible\(\)\) hideHomeHub\(\)/);
   assert.match(hubSource, /var resume = homeHubSuspended \|\| homeHubVisible/);
-  assert.match(hubSource, /if \(!resume\) \{[\s\S]*requestTools\(\)[\s\S]*requestHomeDockPreference\(\)[\s\S]*renderDock\(\)/);
+  assert.match(hubSource, /if \(!resume && store\.get\('homeSurfaceRestoreRequested'\) !== true\) \{[\s\S]*requestTools\(\)[\s\S]*requestHomeDockPreference\(\)[\s\S]*renderDock\(\)/);
   assert.match(hubSource, /homeHubSuspended = true/);
   assert.doesNotMatch(hubSource, /hideHomeHub\(\)[\s\S]{0,500}(?:closeHomeChat|closeHomeDock|resetHomeDockFocus)/);
 });

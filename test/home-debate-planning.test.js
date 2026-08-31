@@ -8,6 +8,11 @@ function settle() {
   return new Promise(function (resolve) { setImmediate(resolve); });
 }
 
+function markTopicAnswered(session) {
+  session.history.push({ type: "tool_executing", id: "topic-ready", name: "AskUserQuestion", input: { questions: [{ question: "Topic?", options: [] }] } });
+  session.history.push({ type: "ask_user_answered", toolId: "topic-ready", answers: { 0: "User topic" } });
+}
+
 function fixture(options) {
   var opts = options || {};
   var clay = { id: "builtin:clay", builtinKey: "clay", name: "Clay", vendor: "claude", model: "sonnet" };
@@ -38,9 +43,11 @@ function fixture(options) {
     saveSessionFile: function () {},
   };
   var proposalStarts = [];
+  var debateControls = [];
   var proposal = attachDebateProposal({
     cwd: "/mates/builtin:clay",
     isMate: true,
+    isHostAgent: true,
     sendTo: function () {},
     buildMateCtx: function () { return {}; },
     getMate: function (ctx, id) { return id === "panel-1" || id === "builtin:clay" ? { id: id } : null; },
@@ -74,6 +81,7 @@ function fixture(options) {
       pending.resolve({ behavior: "deny", message: "answered" });
       return true;
     },
+    handleHomeDebateControl: function (ws, msg, session) { debateControls.push({ ws: ws, msg: msg, session: session }); return true; },
   };
   var mateList = [other, clay];
   var handler = attachHomeChat({
@@ -94,7 +102,7 @@ function fixture(options) {
   });
   var messages = [];
   var ws = { readyState: 1, _clayUser: { id: "u1" }, send: function (value) { messages.push(JSON.parse(value)); } };
-  return { handler: handler, ws: ws, messages: messages, sessions: sessions, starts: starts, records: records, proposal: proposal, proposalStarts: proposalStarts, setCatalogError: function (value) { catalogError = value; }, setStartError: function (value) { startError = value; }, emit: function (localId, event) { var session = sessions.get(localId); session.history.push(event); if (subscribers[localId]) subscribers[localId](event); }, adapter: { createToolServer: function (definition) { return definition; } } };
+  return { handler: handler, ws: ws, messages: messages, sessions: sessions, starts: starts, records: records, proposal: proposal, proposalStarts: proposalStarts, debateControls: debateControls, setCatalogError: function (value) { catalogError = value; }, setStartError: function (value) { startError = value; }, emit: function (localId, event) { var session = sessions.get(localId); session.history.push(event); if (subscribers[localId]) subscribers[localId](event); }, adapter: { createToolServer: function (definition) { return definition; } } };
 }
 
 test("Home Start debate creates a fresh exact Clay planning session with a hidden one-shot initiation", async function () {
@@ -105,22 +113,24 @@ test("Home Start debate creates a fresh exact Clay planning session with a hidde
   assert.equal(session.ownerId, "u1");
   assert.equal(session.title, "Debate planning");
   assert.equal(session.debateSetupMode, true);
+  assert.equal(session.homeDebatePlanning, true);
   assert.equal(session.vendor, "claude");
   assert.equal(session.model, "sonnet");
   assert.equal(f.starts.length, 1);
   assert.equal(f.starts[0].session, session);
   assert.equal(f.starts[0].prompt, planningPrompt);
   assert.match(planningPrompt, /^\/clay-debate-setup/);
-  assert.match(planningPrompt, /one focused question/i);
-  assert.match(planningPrompt, /canonical AskUserQuestion interaction for every user-facing question or interaction/);
-  assert.match(planningPrompt, /native AskUserQuestion tool/);
-  assert.match(planningPrompt, /session-bound ask_user_questions tool/);
-  assert.match(planningPrompt, /Do not claim the question tool is unavailable/);
-  assert.match(planningPrompt, /Never ask the user a question in ordinary assistant chat text/);
+  assert.match(planningPrompt, /first action must be one call to the exact session-bound ask_user_questions tool/);
+  assert.match(planningPrompt, /options: \[\] for a freeform answer/);
+  assert.match(planningPrompt, /do not inspect workspace history, shared knowledge, Mate expertise, files, or other context/);
+  assert.match(planningPrompt, /do not infer or suggest possible topics/);
+  assert.match(planningPrompt, /Never narrate, preface, acknowledge, or explain/);
+  assert.match(planningPrompt, /Never put a question or any other user-facing interaction in ordinary assistant text/);
   assert.doesNotMatch(planningPrompt, /Do not use AskUserQuestion/);
   assert.match(planningPrompt, /propose_debate/);
   assert.doesNotMatch(planningPrompt, /brief\.json/i);
   assert.match(planningPrompt, /Do not write a brief file/);
+  assert.doesNotMatch(planningPrompt, /product direction|architecture|growth/i);
   assert.equal(session.history.some(function (event) { return event.type === "user_message"; }), false);
   assert.equal(session.history.filter(function (event) { return event.type === "home_debate_planning_started"; }).length, 1);
   var history = f.messages.filter(function (message) { return message.type === "home_mate_history"; }).pop();
@@ -199,21 +209,53 @@ test("Clay's planning AskUserQuestion projects into the exact Home transcript an
   await settle();
   var session = Array.from(f.sessions.values())[0];
   var resolved = null;
-  session.pendingAskUser["ask-1"] = { input: { questions: [{ question: "What should the debate produce?" }] }, resolve: function (value) { resolved = value; } };
+  var topicInput = { questions: [{ header: "Topic", question: "What would you like the debate to be about?", options: [] }] };
+  session.pendingAskUser["ask-1"] = { input: topicInput, resolve: function (value) { resolved = value; } };
   f.messages.length = 0;
   f.emit(session.localId, { type: "delta", text: "Let us shape this carefully." });
-  f.emit(session.localId, { type: "tool_executing", id: "ask-1", name: "AskUserQuestion", input: { questions: [{ header: "Outcome", question: "What should the debate produce?", options: [{ label: "Decision" }, { label: "Trade-offs" }] }] } });
+  f.emit(session.localId, { type: "tool_executing", id: "ask-1", name: "AskUserQuestion", input: topicInput });
   var question = f.messages.find(function (message) { return message.type === "home_debate_question"; });
+  assert.equal(f.messages.some(function (message) { return message.type === "home_mate_delta"; }), false);
   assert.equal(question.sessionId, "local:1");
   assert.equal(question.requestId, "stream");
-  assert.equal(question.questions[0].options.length, 2);
-  f.handler.handleMessage(f.ws, { type: "home_debate_question_response", mateId: "builtin:clay", sessionId: "local:1", requestId: "stream", toolId: "ask-1", answers: { 0: "Decision" } });
+  assert.equal(question.questions[0].options.length, 0);
+  f.handler.handleMessage(f.ws, { type: "home_debate_question_response", mateId: "builtin:clay", sessionId: "local:1", requestId: "stream", toolId: "ask-1", answers: { 0: "도시 주거 정책" } });
   assert.deepEqual(resolved, { behavior: "deny", message: "answered" });
   var answered = f.messages.find(function (message) { return message.type === "home_debate_question_resolved"; });
   assert.equal(answered.status, "answered");
-  assert.deepEqual(answered.answers, { 0: "Decision" });
+  assert.deepEqual(answered.answers, { 0: "도시 주거 정책" });
+  f.messages.length = 0;
+  f.handler.handleMessage(f.ws, { type: "home_mate_session_open", mateId: "builtin:clay", sessionId: "local:1", requestId: "stream" });
+  await settle();
+  var restoredTopic = f.messages.find(function (message) { return message.type === "home_mate_history"; }).messages[0];
+  assert.equal(restoredTopic.questions[0].options.length, 0);
+  assert.deepEqual(restoredTopic.answers, { 0: "도시 주거 정책" });
+  f.messages.length = 0;
+  f.emit(session.localId, { type: "tool_executing", id: "ask-2", name: "AskUserQuestion", input: { questions: [{ header: "Format", question: "Which format?", options: [{ label: "Round table" }, { label: "Pro/con" }] }] } });
   f.emit(session.localId, { type: "done" });
   assert.equal(f.messages.filter(function (message) { return message.type === "home_mate_done"; }).pop().text, "");
+});
+
+test("answered question ignores late prior-turn result and done before the next question", async function () {
+  var f = fixture();
+  f.handler.handleMessage(f.ws, { type: "home_mate_debate_plan", requestId: "late-terminal" });
+  await settle();
+  var session = Array.from(f.sessions.values())[0];
+  session.pendingAskUser["ask-late"] = { input: { questions: [{ question: "Topic?", options: [] }] }, resolve: function () {} };
+  f.emit(session.localId, { type: "tool_executing", id: "ask-late", name: "AskUserQuestion", input: { questions: [{ question: "Topic?", options: [] }] } });
+  f.handler.handleMessage(f.ws, { type: "home_debate_question_response", sessionId: "local:1", requestId: "late-terminal", toolId: "ask-late", answers: { 0: "Housing" } });
+  f.messages.length = 0;
+  f.emit(session.localId, { type: "delta", text: "I am using an internal skill and tool." });
+  f.emit(session.localId, { type: "result" });
+  f.emit(session.localId, { type: "done" });
+  assert.equal(f.messages.some(function (message) { return message.type === "home_mate_delta"; }), false);
+  assert.equal(f.messages.some(function (message) { return message.type === "home_mate_error"; }), false);
+  f.emit(session.localId, { type: "tool_executing", id: "ask-next", name: "AskUserQuestion", input: { questions: [{ question: "Format?", options: [{ label: "Round table" }, { label: "Pro/con" }] }] } });
+  assert.ok(f.messages.find(function (message) { return message.type === "home_debate_question" && message.toolId === "ask-next"; }));
+  f.handler.handleMessage(f.ws, { type: "home_mate_session_open", mateId: "builtin:clay", sessionId: "local:1", requestId: "late-terminal" });
+  await settle();
+  var history = f.messages.find(function (message) { return message.type === "home_mate_history"; });
+  assert.equal(history.messages.some(function (message) { return message.role === "assistant" && /internal skill/.test(message.text); }), false);
 });
 
 test("Home debate question relay rejects stale, duplicate, and cross-user answers", async function () {
@@ -231,6 +273,26 @@ test("Home debate question relay rejects stale, duplicate, and cross-user answer
   f.handler.handleMessage(f.ws, { type: "home_debate_question_response", sessionId: "local:1", requestId: "question-owner", toolId: "ask-owner", answers: { 0: "Yes" } });
   f.handler.handleMessage(f.ws, { type: "home_debate_question_response", sessionId: "local:1", requestId: "question-owner", toolId: "ask-owner", answers: { 0: "Again" } });
   assert.equal(count, 1);
+});
+
+test("Home live controls require the owned exact active debate session", async function () {
+  var f = fixture();
+  f.handler.handleMessage(f.ws, { type: "home_mate_debate_plan", requestId: "live-control" });
+  await settle();
+  var session = Array.from(f.sessions.values())[0];
+  session.homeDebatePhase = "live";
+  session._debate = { phase: "live" };
+  f.handler.handleMessage(f.ws, { type: "home_debate_control", action: "stop", mateId: "builtin:clay", sessionId: "local:1", requestId: "live-control" });
+  assert.equal(f.debateControls.length, 1);
+  assert.equal(f.debateControls[0].session, session);
+  f.handler.handleMessage(f.ws, { type: "home_debate_control", action: "stop", mateId: "builtin:clay", sessionId: "local:1", requestId: "stale" });
+  assert.equal(f.debateControls.length, 1);
+  assert.equal(f.messages.some(function (message) { return message.code === "debate_not_active"; }), true);
+  var attackerMessages = [];
+  var attacker = { readyState: 1, _clayUser: { id: "u2" }, _homeChatTap: f.ws._homeChatTap, send: function (value) { attackerMessages.push(JSON.parse(value)); } };
+  f.handler.handleMessage(attacker, { type: "home_debate_control", action: "stop", mateId: "builtin:clay", sessionId: "local:1", requestId: "live-control" });
+  assert.equal(f.debateControls.length, 1);
+  assert.equal(attackerMessages.some(function (message) { return message.code === "debate_not_active"; }), true);
 });
 
 test("restored unanswered question becomes actionably expired when its backend callback is gone", async function () {
@@ -259,6 +321,7 @@ test("session-bound propose_debate records an inline Home proposal and exact app
   f.handler.handleMessage(f.ws, { type: "home_mate_debate_plan", requestId: "proposal" });
   await settle();
   var session = Array.from(f.sessions.values())[0];
+  markTopicAnswered(session);
   var server = f.proposal.createMcpServer(f.adapter, session);
   var pending = server.tools[0].handler({ topic: "Architecture direction", panelists: JSON.stringify([{ mateId: "panel-1", role: "Skeptic", brief: "Challenge assumptions" }]) });
   var proposalMessage = f.messages.filter(function (message) { return message.type === "home_debate_proposal"; }).pop();
@@ -274,11 +337,24 @@ test("session-bound propose_debate records an inline Home proposal and exact app
   assert.equal(resolved.action, "start");
 });
 
+test("Home planning cannot propose before the user supplies a topic", async function () {
+  var f = fixture();
+  f.handler.handleMessage(f.ws, { type: "home_mate_debate_plan", requestId: "proposal-before-topic" });
+  await settle();
+  var session = Array.from(f.sessions.values())[0];
+  var server = f.proposal.createMcpServer(f.adapter, session);
+  var result = await server.tools[0].handler({ topic: "Invented topic", panelists: JSON.stringify([{ mateId: "panel-1" }]) });
+  assert.equal(result.isError, true);
+  assert.match(result.content[0].text, /debate topic/);
+  assert.equal(f.messages.some(function (message) { return message.type === "home_debate_proposal"; }), false);
+});
+
 test("Home proposal relay rejects stale exact sessions without consuming the real pending proposal", async function () {
   var f = fixture();
   f.handler.handleMessage(f.ws, { type: "home_mate_debate_plan", requestId: "proposal-stale" });
   await settle();
   var session = Array.from(f.sessions.values())[0];
+  markTopicAnswered(session);
   var server = f.proposal.createMcpServer(f.adapter, session);
   var pending = server.tools[0].handler({ topic: "Secure routing", panelists: JSON.stringify([{ mateId: "panel-1" }]) });
   var proposalMessage = f.messages.filter(function (message) { return message.type === "home_debate_proposal"; }).pop();
@@ -294,6 +370,7 @@ test("Home proposal relay rejects a stale request for the same exact session", a
   f.handler.handleMessage(f.ws, { type: "home_mate_debate_plan", requestId: "current-request" });
   await settle();
   var session = Array.from(f.sessions.values())[0];
+  markTopicAnswered(session);
   var server = f.proposal.createMcpServer(f.adapter, session);
   var pending = server.tools[0].handler({ topic: "Correlation", panelists: JSON.stringify([{ mateId: "panel-1" }]) });
   var proposalMessage = f.messages.filter(function (message) { return message.type === "home_debate_proposal"; }).pop();
@@ -308,6 +385,7 @@ test("Home proposal approval survives local to durable session identity promotio
   f.handler.handleMessage(f.ws, { type: "home_mate_debate_plan", requestId: "promote" });
   await settle();
   var session = Array.from(f.sessions.values())[0];
+  markTopicAnswered(session);
   var server = f.proposal.createMcpServer(f.adapter, session);
   var pending = server.tools[0].handler({ topic: "Durable identity", panelists: JSON.stringify([{ mateId: "panel-1" }]) });
   var proposalMessage = f.messages.filter(function (message) { return message.type === "home_debate_proposal"; }).pop();
@@ -323,6 +401,7 @@ test("Home proposal relay rejects another user without consuming the owner's pro
   f.handler.handleMessage(f.ws, { type: "home_mate_debate_plan", requestId: "owner" });
   await settle();
   var session = Array.from(f.sessions.values())[0];
+  markTopicAnswered(session);
   var server = f.proposal.createMcpServer(f.adapter, session);
   var pending = server.tools[0].handler({ topic: "Ownership", panelists: JSON.stringify([{ mateId: "panel-1" }]) });
   var proposalMessage = f.messages.filter(function (message) { return message.type === "home_debate_proposal"; }).pop();
@@ -334,11 +413,12 @@ test("Home proposal relay rejects another user without consuming the owner's pro
   assert.match(result.content[0].text, /cancelled/i);
 });
 
-test("proposal boundary preserves the preface once and clears pending without a duplicate final", async function () {
+test("proposal boundary suppresses the preface and clears pending without a duplicate final", async function () {
   var f = fixture();
   f.handler.handleMessage(f.ws, { type: "home_mate_debate_plan", requestId: "boundary" });
   await settle();
   var session = Array.from(f.sessions.values())[0];
+  markTopicAnswered(session);
   f.messages.length = 0;
   f.emit(session.localId, { type: "delta", text: "I have a complete brief." });
   var server = f.proposal.createMcpServer(f.adapter, session);

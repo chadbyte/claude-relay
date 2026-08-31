@@ -136,10 +136,12 @@ test("conversation actions remain independent and expose text-safe copyable deta
 test("conversation action source preserves row, sheet, local-only, and responsive contracts", function () {
   var actions = read("lib/public/modules/home-session-actions.js");
   var sidebar = read("lib/public/modules/home-sidebar.js");
+  var sidebarList = read("lib/public/modules/home-sidebar-chat-list.js");
   var sheet = read("lib/public/modules/home-conversations-sheet.js");
   var css = read("lib/public/css/home-session-actions.css");
-  assert.match(sidebar, /className = "home-sidebar-recent-item"[\s\S]*item\.appendChild\(row\);[\s\S]*createHomeSessionActionsTrigger\(conversation\)/);
-  assert.match(sidebar, /disposeHomeSessionActionsMenu\(\);[\s\S]*list\.innerHTML = ""/);
+  assert.match(sidebar, /renderHomeSidebarChats\(openConversationFromSidebar\)/);
+  assert.match(sidebarList, /className = "home-sidebar-recent-item"[\s\S]*item\.appendChild\(row\);[\s\S]*createHomeSessionActionsTrigger\(chat\)/);
+  assert.match(sidebarList, /disposeHomeSessionActionsMenu\(\);[\s\S]*list\.innerHTML = ""/);
   assert.match(actions, /textContent = "View details"/);
   assert.match(actions, /Session reference[\s\S]*Session ID[\s\S]*Not assigned yet — this conversation is still local\.[\s\S]*Local ID/);
   assert.match(actions, /copyToClipboard\(copyValue\)[\s\S]*copy\.textContent = "Copied"/);

@@ -10,6 +10,7 @@ function createHarness(options) {
   var proposal = attachDebateProposal({
     cwd: options.cwd || "/projects/example",
     isMate: !!options.isMate,
+    isHostAgent: !!options.isHostAgent,
     sendTo: function (ws, msg) { sent.push(msg); },
     buildMateCtx: function (userId) { return { userId: userId }; },
     getMate: function (mateCtx, mateId) { return mates[mateId] || null; },
@@ -90,6 +91,43 @@ test("Mate project proposals use the current Mate as moderator", async function 
   await resultPromise;
 
   assert.equal(harness.starts[0].moderatorId, "mate_self");
+});
+
+test("Home planning proposal tools fail closed unless bound to an owned builtin Clay session", async function () {
+  var harness = createHarness({
+    cwd: "/mates/builtin:clay",
+    isMate: true,
+    isHostAgent: true,
+    mates: { "builtin:clay": { id: "builtin:clay" }, mate_panel: { id: "mate_panel" } },
+  });
+  harness.session.homeDebatePlanning = true;
+  harness.session.debateSetupMode = true;
+  harness.session.history = [
+    { type: "tool_executing", id: "topic", name: "AskUserQuestion" },
+    { type: "ask_user_answered", toolId: "topic", answers: { 0: "Housing" } },
+  ];
+  var unbound = harness.proposal.getToolDefs(null)[0];
+  var noSession = await unbound.handler(proposalArgs());
+  assert.equal(noSession.isError, true);
+  assert.match(noSession.content[0].text, /active Clay session/i);
+
+  var nonClay = createHarness({
+    cwd: "/mates/custom-mate",
+    isMate: true,
+    isHostAgent: false,
+    mates: { "custom-mate": { id: "custom-mate" }, mate_panel: { id: "mate_panel" } },
+  });
+  nonClay.session.homeDebatePlanning = true;
+  nonClay.session.debateSetupMode = true;
+  nonClay.session.history = harness.session.history.slice();
+  var rejected = await nonClay.proposal.getToolDefs(nonClay.session)[0].handler(proposalArgs());
+  assert.equal(rejected.isError, true);
+  assert.match(rejected.content[0].text, /owned Clay planning session/i);
+
+  harness.session.ownerId = "other-user";
+  var wrongOwner = await harness.proposal.getToolDefs(harness.session)[0].handler(proposalArgs());
+  assert.equal(wrongOwner.isError, true);
+  assert.match(wrongOwner.content[0].text, /owned Clay planning session/i);
 });
 
 test("invalid panelist payloads are rejected before creating a proposal", async function () {

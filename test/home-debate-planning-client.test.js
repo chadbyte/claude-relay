@@ -15,12 +15,32 @@ function FakeElement(tag) {
   this.dataset = {};
   this.value = "";
   this.tabIndex = 0;
+  var element = this;
+  this.classList = {
+    add: function () {
+      for (var i = 0; i < arguments.length; i++) if ((" " + element.className + " ").indexOf(" " + arguments[i] + " ") === -1) element.className += (element.className ? " " : "") + arguments[i];
+    },
+    remove: function () {},
+    toggle: function () {},
+  };
 }
 FakeElement.prototype.appendChild = function (child) { this.children.push(child); child.parentNode = this; return child; };
+FakeElement.prototype.insertBefore = function (child, before) { var index = this.children.indexOf(before); if (index === -1) return this.appendChild(child); this.children.splice(index, 0, child); child.parentNode = this; return child; };
 FakeElement.prototype.setAttribute = function (name, value) { this.attributes[name] = String(value); };
 FakeElement.prototype.addEventListener = function (name, handler) { this.listeners[name] = handler; };
 FakeElement.prototype.click = function () { if (this.listeners.click) this.listeners.click({ currentTarget: this }); };
 FakeElement.prototype.focus = function (options) { this.focusOptions = options; };
+FakeElement.prototype.querySelector = function (selector) {
+  var className = selector.charAt(0) === "." ? selector.slice(1) : null;
+  var role = selector.match(/^\[role="([^"]+)"\]$/);
+  var nodes = flatten(this);
+  for (var i = 1; i < nodes.length; i++) {
+    if (className && (" " + nodes[i].className + " ").indexOf(" " + className + " ") !== -1) return nodes[i];
+    if (role && nodes[i].attributes.role === role[1]) return nodes[i];
+  }
+  return null;
+};
+FakeElement.prototype.querySelectorAll = function () { return []; };
 
 function flatten(root) {
   var result = [root];
@@ -30,7 +50,13 @@ function flatten(root) {
 
 test("Home debate proposal card is safe, accessible, keyboard-native, and server-confirmed", async function () {
   var originals = { document: global.document, requestAnimationFrame: global.requestAnimationFrame, lucide: global.lucide };
-  global.document = { createElement: function (tag) { return new FakeElement(tag); } };
+  global.document = {
+    createElement: function (tag) { return new FakeElement(tag); },
+    getElementById: function () { return null; },
+    querySelector: function () { return null; },
+    querySelectorAll: function () { return []; },
+    addEventListener: function () {},
+  };
   global.requestAnimationFrame = function () { return 1; };
   global.lucide = { createIcons: function () {} };
   try {
@@ -101,6 +127,159 @@ test("Home AskUserQuestion card safely submits options or Other and restores per
   }
 });
 
+test("Home freeform debate question renders one labeled textarea without options or Other", async function () {
+  var originalDocument = global.document;
+  global.document = { createElement: function (tag) { return new FakeElement(tag); } };
+  try {
+    var module = await import(pathToFileURL(path.join(__dirname, "../lib/public/modules/home-debate-planning.js")).href);
+    var calls = [];
+    var message = { role: "question", toolId: "topic-freeform", status: "pending", questions: [{ header: "Topic", question: "What would you like the debate to be about?", options: [] }] };
+    var card = module.createHomeDebateQuestionCard(message, function (selected, action, opener, answers) { calls.push(answers); });
+    var nodes = flatten(card);
+    var textarea = nodes.find(function (node) { return node.tagName === "TEXTAREA"; });
+    var submit = nodes.find(function (node) { return node.className === "home-debate-question-submit"; });
+    assert.ok(textarea);
+    assert.equal(submit.disabled, true);
+    assert.equal(nodes.some(function (node) { return node.className === "home-debate-question-option"; }), false);
+    assert.equal(nodes.some(function (node) { return node.textContent === "Other"; }), false);
+    assert.equal(nodes.some(function (node) { return node.textContent === "Your answer"; }), true);
+    textarea.value = "도시 주거 정책";
+    textarea.listeners.input();
+    assert.equal(submit.disabled, false);
+    var prevented = false;
+    textarea.listeners.keydown({ key: "Enter", ctrlKey: true, metaKey: false, preventDefault: function () { prevented = true; } });
+    assert.equal(prevented, true);
+    assert.deepEqual(calls, [{ 0: "도시 주거 정책" }]);
+  } finally {
+    global.document = originalDocument;
+  }
+});
+
+test("answered debate question keeps an ephemeral preparing state until the next correlated event", async function () {
+  var originalDocument = global.document;
+  global.document = { createElement: function (tag) { return new FakeElement(tag); } };
+  try {
+    var module = await import(pathToFileURL(path.join(__dirname, "../lib/public/modules/home-debate-planning.js")).href);
+    module.clearHomeDebatePlanningPending();
+    var changes = 0;
+    var message = { role: "question", toolId: "pending-next", status: "pending", questions: [{ question: "Topic?", options: [] }] };
+    var responder = module.createHomeDebateResponder(function () { return true; }, function () { return {}; }, function () { changes++; });
+    var card = module.createHomeDebateQuestionCard(message, responder);
+    var nodes = flatten(card);
+    var input = nodes.find(function (node) { return node.tagName === "TEXTAREA"; });
+    var submit = nodes.find(function (node) { return node.className === "home-debate-question-submit"; });
+    input.value = "Housing";
+    input.listeners.input();
+    submit.click();
+    assert.equal(message.status, "submitting");
+    assert.equal(module.isHomeDebatePlanningPending(), true);
+    assert.equal(changes, 1);
+    var row = module.createHomeDebatePlanningPendingRow();
+    var activityNodes = flatten(row);
+    assert.equal(row.attributes.role, "status");
+    assert.equal(row.attributes["aria-live"], "polite");
+    assert.equal(row.attributes["aria-atomic"], "true");
+    assert.equal(row.attributes["aria-label"], "Clay is preparing the next question");
+    assert.match(row.className, /home-debate-activity-next/);
+    assert.equal(activityNodes.some(function (node) { return node.textContent === "Clay"; }), true);
+    assert.equal(activityNodes.some(function (node) { return node.textContent === "Preparing the next question"; }), true);
+    assert.equal(activityNodes.filter(function (node) { return node.tagName === "I"; }).length, 3);
+    assert.equal(module.createHomeDebatePlanningPendingRow().attributes["aria-live"], "off");
+    module.syncHomeDebatePlanningPending({ debatePhase: "planning", isProcessing: true, messages: [{ role: "question", status: "answered" }] });
+    assert.equal(module.isHomeDebatePlanningPending(), true);
+    module.syncHomeDebatePlanningPending({ debatePhase: "planning", isProcessing: false, messages: [{ role: "question", status: "answered" }] });
+    assert.equal(module.isHomeDebatePlanningPending(), true);
+    module.clearHomeDebatePlanningPending();
+    assert.equal(module.isHomeDebatePlanningPending(), false);
+  } finally { global.document = originalDocument; }
+});
+
+test("Home live debate reducer renders multiple speaker identities without transcript controls", async function () {
+  var originalDocument = global.document;
+  var originalWindow = global.window;
+  var storageKey = "local" + "Storage";
+  var originalStorage = global[storageKey];
+  var originalMarked = global.marked;
+  var originalMermaid = global.mermaid;
+  var originalPurifier = global.DOMPurify;
+  global.document = {
+    createElement: function (tag) { return new FakeElement(tag); },
+    getElementById: function () { return null; },
+    querySelector: function () { return null; },
+    querySelectorAll: function () { return []; },
+    addEventListener: function () {},
+  };
+  global.window = { addEventListener: function () {}, matchMedia: function () { return { matches: false }; } };
+  global[storageKey] = { getItem: function () { return null; }, setItem: function () {} };
+  global.marked = { use: function () {}, parse: function (value) { return value; } };
+  global.mermaid = { initialize: function () {} };
+  global.DOMPurify = { sanitize: function (value) { return value; } };
+  try {
+    var storeModule = await import(pathToFileURL(path.join(__dirname, "../lib/public/modules/store.js")).href);
+    storeModule.store.set({ cachedMatesList: [], cachedAllUsers: [{ id: "user-a", displayName: "Ari", avatarSeed: "ari" }], myUserId: "user-a" });
+    var module = await import(pathToFileURL(path.join(__dirname, "../lib/public/modules/home-debate-live.js")).href);
+    var messages = [];
+    messages = module.applyHomeDebateEvent(messages, { eventType: "debate_started", topic: "<b>Housing</b>", moderatorId: "builtin:clay", moderatorName: "Clay", panelists: [{ mateId: "panel-1", name: "Panel", role: "Analyst" }] });
+    messages = module.applyHomeDebateEvent(messages, { eventType: "debate_turn", turnId: "d:1", speakerMateId: "builtin:clay", mateName: "Clay", role: "moderator", round: 1, avatarStyle: "imprint", avatarSeed: "clay-seed", avatarCustom: "data:image/svg+xml,clay-exact" });
+    messages = module.applyHomeDebateEvent(messages, { eventType: "debate_activity", turnId: "d:1", activity: "Thinking" });
+    messages = module.applyHomeDebateEvent(messages, { eventType: "debate_stream", turnId: "d:1", delta: "Hello " });
+    messages = module.applyHomeDebateEvent(messages, { eventType: "debate_turn_done", turnId: "d:1", text: "Hello panel" });
+    messages = module.applyHomeDebateEvent(messages, { eventType: "debate_turn", turnId: "d:2", speakerMateId: "panel-1", mateName: "Panel", role: "Analyst", round: 1, avatarStyle: "imprint", avatarSeed: "panel-seed", avatarCustom: "data:image/svg+xml,panel-exact" });
+    assert.equal(messages.filter(function (message) { return message.role === "debate_turn"; }).length, 2);
+    assert.equal(messages[1].text, "Hello panel");
+    assert.equal(messages[1].status, "done");
+    assert.equal(module.isHomeDebateLive(messages), true);
+    var header = module.createHomeDebateLiveCard(messages[0], true);
+    var headerNodes = flatten(header);
+    assert.equal(headerNodes.some(function (node) { return node.textContent === "<b>Housing</b>"; }), true);
+    assert.equal(headerNodes.some(function (node) { return node.tagName === "BUTTON"; }), false);
+    var finalized = module.createHomeDebateLiveCard(messages[1], true);
+    var finalizedNodes = flatten(finalized);
+    assert.equal(finalized.attributes["aria-label"], "Clay, Moderator, round 1");
+    assert.equal(finalizedNodes.find(function (node) { return node.tagName === "IMG"; }).src, "data:image/svg+xml,clay-exact");
+    assert.equal(finalizedNodes.some(function (node) { return node.textContent === "Clay"; }), true);
+    assert.equal(finalizedNodes.some(function (node) { return node.textContent === "Moderator · Round 1"; }), true);
+    assert.equal(finalizedNodes.some(function (node) { return node.className === "home-debate-live-activity"; }), false);
+
+    var active = module.createHomeDebateLiveCard(messages[2], false);
+    var activeNodes = flatten(active);
+    var activeContent = active.querySelector(".dm-bubble-content");
+    var activity = active.querySelector(".home-debate-live-activity");
+    var markdown = active.querySelector(".md-content");
+    assert.equal(active.attributes["aria-label"], "Panel, Analyst, round 1");
+    assert.equal(activeNodes.find(function (node) { return node.tagName === "IMG"; }).src, "data:image/svg+xml,panel-exact");
+    assert.equal(activeNodes.some(function (node) { return node.textContent === "Panel"; }), true);
+    assert.equal(activeNodes.some(function (node) { return node.textContent === "Analyst · Round 1"; }), true);
+    assert.equal(activity.parentNode, activeContent);
+    assert.ok(activeContent.children.indexOf(activity) < activeContent.children.indexOf(markdown));
+    assert.equal(flatten(activity).filter(function (node) { return node.tagName === "I"; }).length, 3);
+
+    messages = module.applyHomeDebateEvent(messages, { eventType: "debate_user_floor_done", text: "I want to add one constraint." });
+    var userMessage = messages.filter(function (message) { return message.role === "debate_user"; }).pop();
+    var user = module.createHomeDebateLiveCard(userMessage, true);
+    var userNodes = flatten(user);
+    assert.equal(user.attributes["aria-label"], "You, participant");
+    assert.equal(userNodes.some(function (node) { return node.textContent === "You"; }), true);
+    assert.equal(userNodes.some(function (node) { return node.textContent === "Participant"; }), true);
+    assert.ok(userNodes.find(function (node) { return node.tagName === "IMG"; }).src);
+    assert.notEqual(finalizedNodes.find(function (node) { return node.tagName === "IMG"; }).src, activeNodes.find(function (node) { return node.tagName === "IMG"; }).src);
+    messages = module.applyHomeDebateEvent(messages, { eventType: "debate_ended", reason: "user_stopped" });
+    assert.equal(module.homeDebatePhase(messages), "ended");
+  } finally {
+    global.document = originalDocument;
+    global.window = originalWindow;
+    global[storageKey] = originalStorage;
+    global.marked = originalMarked;
+    global.mermaid = originalMermaid;
+    global.DOMPurify = originalPurifier;
+  }
+  var css = fs.readFileSync(path.join(__dirname, "../lib/public/css/home-debate-live.css"), "utf8");
+  assert.match(css, /prefers-reduced-motion: reduce/);
+  assert.match(css, /grid-template-columns:\s*34px minmax\(0, 1fr\)/);
+  assert.match(css, /home-debate-live-turn > \.dm-bubble-avatar[\s\S]*display:\s*block/);
+  assert.match(css, /@media \(max-width: 600px\)[\s\S]*grid-template-columns:\s*32px minmax\(0, 1fr\)/);
+});
+
 test("Home debate responder sends exact session correlation once and locks the question", async function () {
   var module = await import(pathToFileURL(path.join(__dirname, "../lib/public/modules/home-debate-planning.js")).href);
   var sent = [];
@@ -168,6 +347,7 @@ test("Home Start debate source selects builtin Clay, uses the native protocol, a
   var project = fs.readFileSync(path.join(root, "lib/project.js"), "utf8");
   var schema = fs.readFileSync(path.join(root, "lib/ws-schema.js"), "utf8");
   var debateEngine = fs.readFileSync(path.join(root, "lib/project-debate.js"), "utf8");
+  var sessions = fs.readFileSync(path.join(root, "lib/sessions.js"), "utf8");
   var css = fs.readFileSync(path.join(root, "lib/public/css/home-debate-planning.css"), "utf8");
   assert.match(chat, /builtinKey === "clay"/);
   assert.match(chat, /type: "home_mate_debate_plan"/);
@@ -178,10 +358,10 @@ test("Home Start debate source selects builtin Clay, uses the native protocol, a
   assert.match(project, /home_debate_question_response[\s\S]*opts\.onDmMessage\(ws, msg\)/);
   assert.match(project, /session && session\.debateSetupMode === true \? _askUser\.getToolDefs\(session\) : \[\]/);
   assert.match(schema, /"home_debate_question_response"[\s\S]*"home_debate_question"[\s\S]*"home_debate_question_resolved"/);
-  assert.match(debateEngine, /function startDebateLive\(session, targetWs\)[\s\S]*createSession\(liveOpts, targetWs \|\| null\)/);
-  assert.match(project, /_clayHomeDebateSlug[\s\S]*homeDebateCtx\.handleMessage\(ws, msg\)/);
-  assert.match(project, /homeDebateClients[\s\S]*_clayHomeDebateSlug === slug[\s\S]*ws\.send\(data\)/);
-  assert.match(debateEngine, /_homeChatTap\.mateSlug === ctx\.slug[\s\S]*registerHomeDebateClient\(homeWs\)[\s\S]*startDebateLive\(session, homeWs\)/);
+  assert.match(debateEngine, /var reuseHomeSession = session\.homeDebatePlanning === true[\s\S]*if \(reuseHomeSession\)[\s\S]*session\.homeDebatePhase = "live"[\s\S]*else \{[\s\S]*createSession\(liveOpts, targetWs \|\| null\)/);
+  assert.match(project, /home_debate_question_response" \|\| msg\.type === "home_debate_control"[\s\S]*opts\.onDmMessage\(ws, msg\)/);
+  assert.match(schema, /"home_debate_control"[\s\S]*"home_debate_event"/);
+  assert.match(sessions, /if \(session\.homeDebatePlanning === true\) return;/);
   assert.match(css, /\.home-debate-proposal button:focus-visible/);
   assert.match(css, /@media \(max-width: 600px\)[\s\S]*\.home-debate-proposal/);
   assert.match(css, /\.home-debate-question button:focus-visible/);
@@ -196,8 +376,19 @@ test("Home debate launch immediately renders a dedicated correlated loading tran
     module.beginHomeDebateLaunch("plan-loading");
     assert.equal(module.isHomeDebateLaunching(), true);
     var row = module.createHomeDebateLaunchRow();
+    var nodes = flatten(row);
     assert.equal(row.attributes.role, "status");
-    assert.equal(flatten(row).some(function (node) { return node.textContent === "Preparing debate…"; }), true);
+    assert.equal(row.attributes["aria-live"], "polite");
+    assert.equal(row.attributes["aria-atomic"], "true");
+    assert.equal(row.attributes["aria-label"], "Clay is preparing your debate");
+    assert.match(row.className, /home-debate-activity-launch/);
+    assert.equal(nodes.some(function (node) { return node.textContent === "Clay"; }), true);
+    assert.equal(nodes.some(function (node) { return node.textContent === "Preparing your debate"; }), true);
+    var avatar = nodes.find(function (node) { return node.className === "home-debate-activity-avatar"; });
+    assert.equal(avatar.src, "/clay-studio-symbol.png");
+    assert.equal(avatar.alt, "");
+    assert.equal(nodes.filter(function (node) { return node.tagName === "I"; }).length, 3);
+    assert.equal(module.createHomeDebateLaunchRow().attributes["aria-live"], "off");
     assert.equal(module.settleHomeDebateLaunch({ requestId: "stale" }), false);
     assert.equal(module.isHomeDebateLaunching(), true);
     module.syncHomeDebateLaunchHistory({ requestId: "plan-loading", debatePlanning: true, messages: [] });
@@ -210,6 +401,21 @@ test("Home debate launch immediately renders a dedicated correlated loading tran
   var chat = fs.readFileSync(path.join(__dirname, "../lib/public/modules/home-mate-chat.js"), "utf8");
   assert.match(chat, /var hasConversation = debateLaunching \|\| messages\.length/);
   assert.match(chat, /inputEl\.disabled = debateLaunching \|\|/);
-  assert.match(chat, /debateLaunching \? "Preparing debate…"/);
+  assert.match(chat, /debateLaunching \? "Preparing your debate…"/);
   assert.match(chat, /if \(debateLaunching\) \{\s*transcript\.appendChild\(createHomeDebateLaunchRow\(\)\)/);
+  var launch = fs.readFileSync(path.join(__dirname, "../lib/public/modules/home-debate-launch.js"), "utf8");
+  var planning = fs.readFileSync(path.join(__dirname, "../lib/public/modules/home-debate-planning.js"), "utf8");
+  var css = fs.readFileSync(path.join(__dirname, "../lib/public/css/home-debate-planning.css"), "utf8");
+  var activityCss = css.slice(css.indexOf(".home-debate-activity"), css.indexOf(".home-debate-proposal"));
+  assert.match(launch, /createHomeDebateActivityRow\("Preparing your debate", "Clay is preparing your debate"/);
+  assert.match(planning, /createHomeDebateActivityRow\("Preparing the next question", "Clay is preparing the next question"/);
+  assert.match(activityCss, /display: grid/);
+  assert.match(activityCss, /align-self: flex-start/);
+  assert.match(activityCss, /var\(--text-primary\)/);
+  assert.match(activityCss, /var\(--accent\)/);
+  assert.match(activityCss, /var\(--border\)/);
+  assert.doesNotMatch(activityCss, /justify-content:\s*center|min-height:\s*120px|#[0-9a-f]{3,8}|serif/i);
+  assert.doesNotMatch(css, /\.home-debate-preparing|\.home-debate-planning-pending/);
+  assert.match(css, /prefers-reduced-motion: reduce[\s\S]*\.home-debate-activity-dots i/);
+  assert.match(css, /@media \(max-width: 600px\)[\s\S]*\.home-debate-activity/);
 });

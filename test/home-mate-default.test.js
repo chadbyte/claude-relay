@@ -49,7 +49,7 @@ test("Home exposes every visible Mate first-depth only in the sidebar", function
   assert.match(hub, /function getVisibleMates\(\)[\s\S]*!mate\.archived/);
   assert.match(hub, /for \(var i = 0; i < visibleMates\.length; i\+\+\)[\s\S]*createMateListRow\(visibleMates\[i\]/);
   assert.match(hub, /row\.type = "button"[\s\S]*home-mate-list-avatar[\s\S]*home-mate-list-name/);
-  assert.match(sidebarCss, /\.home-mate-list \{[\s\S]*max-height: 214px;[\s\S]*overflow-y: auto;/);
+  assert.match(sidebarCss, /\.home-mate-list \{[\s\S]*min-height: var\(--home-mate-list-height\);[\s\S]*max-height: var\(--home-mate-list-height\);[\s\S]*overflow-y: auto;/);
 });
 
 test("first-depth Mate selection reuses Home chat preference and mobile close paths", function () {
@@ -72,8 +72,8 @@ test("new conversation belongs to the selected Mate context", function () {
   var newIndex = markup.indexOf('id="home-sidebar-new"');
   var conversationsIndex = markup.indexOf('id="home-sidebar-recent-label"');
   assert.ok(newIndex < mateListIndex && mateListIndex < conversationsIndex);
-  assert.match(markup, /id="home-sidebar-new"[^>]*home-sidebar-new[^>]*aria-label="Start a new conversation with the current Mate"[^>]*disabled/);
-  assert.match(hub, /\["home-sidebar-new", "Start a new conversation with "\]/);
+  assert.match(markup, /id="home-sidebar-new"[^>]*home-sidebar-new[^>]*title="New Chat"[^>]*aria-label="Start a new chat with the current Mate"[^>]*disabled/);
+  assert.match(hub, /\["home-sidebar-new", "Start a new chat with "\]/);
   assert.match(hub, /control\.disabled = !mate;[\s\S]*control\.setAttribute\("aria-label", mate \? controls\[i\]\[1\] \+ name/);
   assert.match(sidebar, /home-sidebar-new"\)\.addEventListener\("click", startConversationFromSidebar\)/);
   assert.match(sidebar, /startNewHomeConversation\(\);[\s\S]*closeNarrowDrawer\(true\)/);

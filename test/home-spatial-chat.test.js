@@ -14,6 +14,8 @@ var shellSource = fs.readFileSync(path.join(root, "lib/public/modules/home-shell
 var dockSource = fs.readFileSync(path.join(root, "lib/public/modules/home-dock.js"), "utf8");
 var dockResizeSource = fs.readFileSync(path.join(root, "lib/public/modules/home-dock-resize.js"), "utf8");
 var chatSource = fs.readFileSync(path.join(root, "lib/public/modules/home-mate-chat.js"), "utf8");
+var identitySource = fs.readFileSync(path.join(root, "lib/public/modules/home-chat-identity.js"), "utf8");
+var debateLiveSource = fs.readFileSync(path.join(root, "lib/public/modules/home-debate-live.js"), "utf8");
 var renderingSource = fs.readFileSync(path.join(root, "lib/public/modules/app-rendering.js"), "utf8");
 var cardsSource = fs.readFileSync(path.join(root, "lib/public/modules/app-message-cards.js"), "utf8");
 var runtimeSource = fs.readFileSync(path.join(root, "lib/public/modules/chat-render-runtime.js"), "utf8");
@@ -47,7 +49,7 @@ test("home minimizes and resumes without resetting its mounted work", function (
   assert.match(hubSource, /export function minimizeHomeHub\(\)/);
   assert.match(hubSource, /home-minimize-btn"\)\.classList\.toggle\("hidden", !store\.get\('currentSlug'\)\)/);
   assert.match(hubSource, /route = "\/p\/" \+ slug \+ "\/"/);
-  assert.match(hubSource, /if \(!resume\) \{[\s\S]*requestTools\(\)[\s\S]*renderDock\(\)/);
+  assert.match(hubSource, /if \(!resume && store\.get\('homeSurfaceRestoreRequested'\) !== true\) \{[\s\S]*requestTools\(\)[\s\S]*renderDock\(\)/);
   assert.doesNotMatch(hubSource, /resetHomeDockFocus|closeHomeChat/);
   assert.match(connectionSource, /resumeHomeChat\(\)/);
   assert.match(chatSource, /export function resumeHomeChat\(\)/);
@@ -60,7 +62,8 @@ test("home shell only toggles reversible project chrome", function () {
   assert.match(cssSource, /body\.home-active #top-bar,[\s\S]*body\.home-active #icon-strip,[\s\S]*body\.home-active #sidebar-column/);
   assert.match(cssSource, /body\.home-active \.title-bar-content/);
   assert.match(appSource, /if \(!newSlug\) \{\s*showHomeHub\(true\);\s*return;/);
-  assert.match(appSource, /if \(!slugMatch\) \{\s*showHomeHub\(true\);/);
+  assert.match(appSource, /initHomeSurfaceBoot\(\);/);
+  assert.doesNotMatch(appSource, /if \(!slugMatch\) \{\s*showHomeHub\(true\);/);
   assert.match(appSource, /document\.body\.dataset\.homeProjectSlug/);
   assert.match(serverSource, /data-home-project-slug/);
   assert.doesNotMatch(indexSource, /home-hub-close/);
@@ -138,9 +141,11 @@ test("legacy home mate rail selectors are gone from client styles", function () 
 test("Home and project chat share the fixed bubble Markdown renderer", function () {
   assert.match(renderingSource, /from ['"]\.\/chat-bubble-renderer\.js['"]/);
   assert.match(chatSource, /from ['"]\.\/chat-bubble-renderer\.js['"]/);
+  assert.match(identitySource, /from ['"]\.\/chat-bubble-renderer\.js['"]/);
   assert.match(renderingSource, /createAssistantBubble\(\{/);
-  assert.match(chatSource, /createAssistantBubble\(\{/);
-  assert.match(chatSource, /createUserBubble\(\{ text: message\.text \|\| "", time: timeText \}\)/);
+  assert.match(chatSource, /createHomeOrdinaryBubble\(message, mate, mateName, timeText\)/);
+  assert.match(identitySource, /createAssistantBubble\(\{/);
+  assert.match(identitySource, /createUserBubble\(\{/);
   assert.match(bubbleSource, /content\.className = "md-content"/);
   assert.match(bubbleSource, /content\.innerHTML = renderMarkdown\(text \|\| ""\)/);
   assert.match(bubbleSource, /highlightCodeBlocks\(content\)/);
@@ -166,7 +171,8 @@ test("Home and project chat share the fixed bubble Markdown renderer", function 
   assert.doesNotMatch(chatSource, /content\.textContent = message\.text|home-chat-message-assistant|home-chat-message-user|home-chat-message-content/);
   assert.ok(bubbleSource.split("\n").length < 500);
   assert.doesNotMatch(bubbleSource, /\b(?:const|let)\b|=>|localStorage/);
-  assert.match(chatSource, /home-chat-typing/);
+  assert.match(chatSource, /createHomeOrdinaryTyping\(mate, mateName\)/);
+  assert.match(debateLiveSource, /home-chat-typing/);
 });
 
 test("empty home chat renders contextual greeting and working suggestions", function () {
@@ -184,7 +190,7 @@ test("empty home chat renders contextual greeting and working suggestions", func
 
 test("Mate and new-conversation actions live in the Home sidebar", function () {
   assert.match(homeMarkup, /id="home-sidebar-new"/);
-  assert.match(homeMarkup, /id="home-sidebar-debate"[^>]*disabled[\s\S]*>Start debate<\/span>/);
+  assert.match(homeMarkup, /id="home-sidebar-debate"[^>]*title="Start a debate"[^>]*aria-label="Start a debate"[^>]*disabled[\s\S]*>Debates<\/span>/);
   assert.doesNotMatch(homeMarkup, /id="home-sidebar-(?:model|memory|knowledge|settings)"/);
   assert.doesNotMatch(homeMarkup, /id="home-mate-chat-actions"/);
   assert.match(homeSidebarSource, /startNewHomeConversation/);
