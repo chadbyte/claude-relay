@@ -97,9 +97,9 @@ test("assistant completion cannot steal focus after the one-shot restore", async
 
 test("Home submit path reports acceptance only after send and keeps pending composer focusable", function () {
   var source = fs.readFileSync(path.join(root, "lib/public/modules/home-mate-chat.js"), "utf8");
-  assert.match(source, /if \(!mateId \|\| !text \|\| streaming \|\| !hasCommittedSessionModel\(\)\) return false/);
+  assert.match(source, /if \(!mateId \|\| !text \|\| streaming \|\| hasPendingHomeDebateQuestion\(messages\) \|\| !hasCommittedSessionModel\(\)\) return false/);
   assert.match(source, /if \(!sendMessage\([\s\S]*\)\) return false/);
   assert.match(source, /renderHomeChat\(\);\s*return true/);
   assert.match(source, /bindHomeComposerSubmission\(inputEl, sendBtn, submitMessage\)/);
-  assert.match(source, /inputEl\.disabled = !mateId \|\| !hasCommittedSessionModel\(\)/);
+  assert.match(source, /inputEl\.disabled = debateLaunching \|\| !mateId \|\| awaitingQuestion \|\| !hasCommittedSessionModel\(\)/);
 });

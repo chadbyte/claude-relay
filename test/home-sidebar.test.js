@@ -130,7 +130,7 @@ test("mobile navigation closes the drawer while Escape stays on Home", function 
   assert.match(sidebarSource, /openHomeConversation\(mateId, sessionId\);[\s\S]*closeNarrowDrawer\(true\)/);
   assert.match(sidebarSource, /startNewHomeConversation\(\);[\s\S]*closeNarrowDrawer\(true\)/);
   assert.match(sidebarSource, /export function closeHomeSidebarAfterSelection\(\)[\s\S]*closeNarrowDrawer\(true\)/);
-  assert.match(sidebarSource, /function openMateActionFromSidebar\(kind\)[\s\S]*openHomeMateAction\(kind\)[\s\S]*closeNarrowDrawer\(false\)/);
+  assert.match(sidebarSource, /function openMateActionFromSidebar\(kind\)[\s\S]*openHomeMateAction\(kind\)[\s\S]*closeNarrowDrawer\(kind === "debate"\)/);
   assert.match(sidebarSource, /openHomeConversationsSheet\(openConversationFromSidebar, event\.currentTarget\)/);
   assert.match(sidebarSource, /event\.key !== "Escape"[\s\S]*document\.body\.classList\.contains\("home-active"\)[\s\S]*closeNarrowDrawer\(true\)/);
   assert.doesNotMatch(sidebarSource, /showProject|history\.back|location\./);

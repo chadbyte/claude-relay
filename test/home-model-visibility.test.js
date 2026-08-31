@@ -15,6 +15,7 @@ var messagesSource = source("lib/public/modules/app-messages.js");
 var settingsSource = source("lib/public/modules/home-mate-settings.js");
 var modelPickerSource = source("lib/public/modules/home-mate-model-picker.js");
 var serverSource = source("lib/server-home-chat.js");
+var serverEventsSource = source("lib/server-home-chat-events.js");
 var serverModelsSource = source("lib/server-home-models.js");
 var sidebarCss = source("lib/public/css/home-sidebar.css");
 var hubCss = source("lib/public/css/home-hub.css");
@@ -40,8 +41,8 @@ test("composer presents concrete, loading, or accessible Choose model states", f
   assert.match(chatSource, /clay:home-mate-model-confirmed[\s\S]*handleHomeMateModelConfirmed\(event\.detail \|\| \{\}\)/);
   assert.match(chatSource, /handleHomeMateModelConfirmed\(msg\)[\s\S]*confirmedHomeSessionModel[\s\S]*homeChatSessionVendor: confirmed\.vendor[\s\S]*homeChatSessionModel: confirmed\.model/);
   assert.doesNotMatch(chatSource.slice(chatSource.indexOf("export function handleHomeMateModelConfirmed")), /msg\.ok/);
-  assert.match(chatSource, /inputEl\.disabled = !mateId \|\| !hasCommittedSessionModel\(\)/);
-  assert.match(chatSource, /sendBtn\.disabled = !mateId \|\| streaming \|\| !hasCommittedSessionModel\(\)/);
+  assert.match(chatSource, /inputEl\.disabled = !mateId \|\| awaitingQuestion \|\| !hasCommittedSessionModel\(\)/);
+  assert.match(chatSource, /sendBtn\.disabled = !mateId \|\| streaming \|\| awaitingQuestion \|\| !hasCommittedSessionModel\(\)/);
 });
 
 test("Home session model state resets before every Mate, session, and new-conversation open", function () {
@@ -58,11 +59,11 @@ test("correlated history owns the displayed model and stale sessions cannot over
   assert.match(chatSource, /function isCurrentSessionMessage\(msg\)[\s\S]*isOwnedHomeSessionMessage/);
   assert.match(streamStateSource, /msg\.requestId && msg\.requestId !== active\.requestId[\s\S]*msg\.sessionId !== active\.sessionId/);
   assert.match(chatSource, /handleHomeMateHistory\(msg\)[\s\S]*homeChatSessionModel: typeof msg\.model[\s\S]*homeChatSessionVendor: typeof msg\.vendor[\s\S]*homeChatSessionModelLoading: false/);
-  assert.match(serverSource, /transformEvent\(event, mateId, session, requestId, stableSessionId\)[\s\S]*model: session && session\.model \? session\.model : null,[\s\S]*vendor: session && session\.vendor \? session\.vendor : null/);
+  assert.match(serverEventsSource, /transformEvent\(event, mateId, session, requestId, stableSessionId\)[\s\S]*model: session && session\.model \? session\.model : null,[\s\S]*vendor: session && session\.vendor \? session\.vendor : null/);
 });
 
 test("Home failures preserve request correlation while older uncorrelated errors remain compatible", function () {
-  assert.match(serverSource, /function sendError\(ws, mateId, text, requestId, sessionId, code\)[\s\S]*sessionId: sessionId \|\| null,[\s\S]*requestId: requestId \|\| null/);
+  assert.match(serverSource, /function sendError\(ws, mateId, text, requestId, sessionId, code, details\)[\s\S]*sessionId: sessionId \|\| null,[\s\S]*requestId: requestId \|\| null/);
   assert.match(serverSource, /"Conversation not available\.", msg\.requestId \|\| null, msg\.sessionId \|\| null, "session_not_found"/);
   assert.match(serverSource, /var sendRequestId = msg\.requestId \|\| \(sendTap && sendTap\.requestId\) \|\| null/);
   assert.match(chatSource, /home_mate_send", mateId: mateId, sessionId: store\.get\('homeChatSessionId'\), requestId: activeSessionRequestId/);
