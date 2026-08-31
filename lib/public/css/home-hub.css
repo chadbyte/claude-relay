@@ -51,6 +51,8 @@ body.home-surface-boot-pending #connect-overlay.hidden {
 
 .home-workspace {
   --home-dock-width: clamp(520px, 46vw, 760px);
+  --home-dock-edge-inset: 8px;
+  --home-close-dock-gap: 8px;
   position: relative;
   flex: 1 1 auto;
   display: flex;
@@ -146,7 +148,11 @@ body.home-surface-boot-pending #connect-overlay.hidden {
     max-width: 58vw;
     height: calc(100% - 16px);
     align-self: center;
-    margin: 8px 8px 8px 12px;
+    margin: 8px var(--home-dock-edge-inset) 8px 12px;
+  }
+
+  #home-hub.dock-split .home-close-control {
+    right: calc(var(--home-dock-width) + var(--home-dock-edge-inset) + var(--home-close-dock-gap));
   }
 
   #home-hub.dock-split .home-mate-chat-transcript,
@@ -173,7 +179,7 @@ body.home-surface-boot-pending #connect-overlay.hidden {
   background: var(--bg);
 }
 
-.home-project-reveal {
+.home-close-control {
   position: absolute;
   top: 8px;
   right: 10px;
@@ -195,7 +201,7 @@ body.home-surface-boot-pending #connect-overlay.hidden {
   transition: transform 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
 }
 
-.home-project-reveal:hover {
+.home-close-control:hover {
   border-color: var(--border-subtle);
   background: rgba(var(--overlay-rgb), 0.045);
   color: var(--text-secondary);
@@ -203,27 +209,15 @@ body.home-surface-boot-pending #connect-overlay.hidden {
   transform: translateY(1px);
 }
 
-.home-project-reveal:focus-visible {
+.home-close-control:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
-.home-project-reveal .lucide {
+.home-close-control .lucide {
   width: 14px;
   height: 14px;
 }
-
-.home-dock-actions .home-project-reveal {
-  position: static;
-  z-index: auto;
-  height: 30px;
-  min-height: 30px;
-  padding: 0 7px;
-  border: 0;
-  box-shadow: none;
-}
-
-.home-dock-actions .home-project-reveal:hover { box-shadow: none; }
 
 .home-mate-chat-stage {
   flex: 1 1 auto;
@@ -931,7 +925,7 @@ body.home-surface-boot-pending #connect-overlay.hidden {
   #home-hub.dock-split .home-tool-workbench {
     position: absolute;
     top: 8px;
-    right: 8px;
+    right: var(--home-dock-edge-inset);
     bottom: 8px;
     z-index: 3;
     width: min(var(--home-dock-width), 65vw);
@@ -941,6 +935,10 @@ body.home-surface-boot-pending #connect-overlay.hidden {
       -18px 16px 42px rgba(var(--shadow-rgb), 0.16),
       2px 2px 4px rgba(var(--shadow-rgb), 0.08),
       inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+
+  #home-hub.dock-split .home-close-control {
+    right: calc(min(var(--home-dock-width), 65vw) + var(--home-dock-edge-inset) + var(--home-close-dock-gap));
   }
 }
 
@@ -977,6 +975,9 @@ body.home-surface-boot-pending #connect-overlay.hidden {
     animation: none;
   }
 
+  #home-hub.dock-split .home-close-control,
+  #home-hub.dock-focus .home-close-control { display: none; }
+
   #home-hub.dock-split .home-dock-return { display: inline-flex; }
   #home-hub.dock-split #home-dock-focus { display: none; }
   .home-dock-header { gap: 4px; padding-inline: 6px; }
@@ -996,7 +997,9 @@ body.home-surface-boot-pending #connect-overlay.hidden {
   }
 }
 
+#home-hub.dock-focus .home-close-control { display: none; }
+
 @media (prefers-reduced-motion: reduce) {
   .home-tool-workbench { animation: none; }
-  .home-project-reveal { transition: none; }
+  .home-close-control { transition: none; }
 }

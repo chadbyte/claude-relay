@@ -36,10 +36,20 @@ test("home markup uses the first-depth Mate list and unified chat stage", functi
   assert.match(homeMarkup, /home-sidebar-primary-actions[\s\S]*id="home-tools-btn"[^>]*aria-expanded="false"[^>]*aria-controls="home-tool-workbench"[\s\S]*id="home-tools-label">Capsules<\/span>/);
   assert.equal((homeMarkup.match(/id="home-tools-btn"/g) || []).length, 1);
   assert.match(homeMarkup, /id="home-sidebar-expand"[^>]*aria-label="Show Home sidebar"[^>]*aria-describedby="home-sidebar-expand-brand-label"[\s\S]*home-sidebar-expand-wordmark/);
-  assert.match(homeMarkup, /id="home-project-reveal"[^>]*title="Reveal project"[^>]*aria-label="Reveal project"[\s\S]*data-lucide="chevron-down"[\s\S]*<span>Project<\/span>/);
+  assert.match(homeMarkup, /id="home-close-control"[^>]*class="home-close-control hidden"[^>]*title="Close Home"[^>]*aria-label="Close Home"[\s\S]*data-lucide="x"[^>]*aria-hidden="true"[\s\S]*<span>Close<\/span>/);
+  assert.equal((homeMarkup.match(/id="home-close-control"/g) || []).length, 1);
+  var workbenchMarkup = homeMarkup.slice(homeMarkup.indexOf('<section id="home-tool-workbench"'), homeMarkup.indexOf('</section>', homeMarkup.indexOf('<section id="home-tool-workbench"')) + 10);
+  assert.doesNotMatch(workbenchMarkup, /home-close-control|Close Home/);
   assert.doesNotMatch(homeMarkup, /home-mate-chat-header|home-mate-chat-controls|home-minimize-btn|home-minimize-trigger/);
-  assert.match(cssSource, /\.home-project-reveal \{[\s\S]*position: absolute;[\s\S]*top: 8px;[\s\S]*right: 10px;[\s\S]*border: 1px solid var\(--border-subtle\);/);
-  assert.match(cssSource, /\.home-dock-actions \.home-project-reveal \{[\s\S]*position: static;[\s\S]*box-shadow: none;/);
+  assert.match(cssSource, /\.home-workspace \{[\s\S]*--home-dock-width: clamp\(520px, 46vw, 760px\);[\s\S]*--home-dock-edge-inset: 8px;[\s\S]*--home-close-dock-gap: 8px;/);
+  assert.match(cssSource, /\.home-close-control \{[\s\S]*position: absolute;[\s\S]*top: 8px;[\s\S]*right: 10px;[\s\S]*border: 1px solid var\(--border-subtle\);/);
+  assert.match(cssSource, /@media \(min-width: 1340px\) \{[\s\S]*margin: 8px var\(--home-dock-edge-inset\) 8px 12px;[\s\S]*#home-hub\.dock-split \.home-close-control \{\s*right: calc\(var\(--home-dock-width\) \+ var\(--home-dock-edge-inset\) \+ var\(--home-close-dock-gap\)\);/);
+  assert.match(cssSource, /@media \(min-width: 769px\) and \(max-width: 1339px\) \{[\s\S]*right: var\(--home-dock-edge-inset\);[\s\S]*#home-hub\.dock-split \.home-close-control \{\s*right: calc\(min\(var\(--home-dock-width\), 65vw\) \+ var\(--home-dock-edge-inset\) \+ var\(--home-close-dock-gap\)\);/);
+  assert.match(cssSource, /#home-hub\.dock-focus \.home-close-control \{ display: none; \}/);
+  assert.match(cssSource, /@media \(max-width: 768px\) \{[\s\S]*#home-hub\.dock-split \.home-close-control,[\s\S]*#home-hub\.dock-focus \.home-close-control \{ display: none; \}/);
+  assert.doesNotMatch(cssSource, /\.home-dock-actions \.home-close-control|\.home-project-reveal/);
+  assert.doesNotMatch(hubSource, /dockActions|parentNode !==|insertBefore\(close|insertBefore\(reveal|is-docked/);
+  assert.doesNotMatch(homeMarkup + hubSource + cssSource, /Reveal project|data-lucide="chevron-down"[^\n]*Close|>Project<\/span>|home-project-reveal/);
   assert.doesNotMatch(indexSource, /id="home-bar"|id="home-projects-btn"|id="home-search-btn"/);
   assert.doesNotMatch(cssSource, /#home-bar|\.home-bar-|\.home-projects-|#home-projects-btn/);
   assert.doesNotMatch(homeMarkup, /notif-center-btn|user-settings-btn|home-bar/);
@@ -49,9 +59,10 @@ test("home markup uses the first-depth Mate list and unified chat stage", functi
 test("home minimizes and resumes without resetting its mounted work", function () {
   assert.match(hubSource, /homeHubSuspended/);
   assert.match(hubSource, /export function minimizeHomeHub\(\)/);
-  assert.match(hubSource, /home-project-reveal/);
-  assert.match(hubSource, /reveal\.classList\.toggle\("hidden", !store\.get\('currentSlug'\)\)/);
-  assert.match(hubSource, /home-project-reveal"\)\.addEventListener\("click", minimizeHomeHub\)/);
+  assert.match(hubSource, /function syncHomeCloseControl\(\)[\s\S]*getElementById\("home-close-control"\)[\s\S]*classList\.toggle\("hidden", !store\.get\('currentSlug'\)\)/);
+  assert.match(hubSource, /home-close-control"\)\.addEventListener\("click", minimizeHomeHub\)/);
+  assert.match(hubSource, /state\.currentSlug !== prev\.currentSlug\) syncHomeCloseControl\(\)/);
+  assert.doesNotMatch(hubSource, /syncHomeCloseControl[\s\S]{0,180}dockOpen|dockOpen[\s\S]{0,180}syncHomeCloseControl/);
   assert.match(hubSource, /route = "\/p\/" \+ slug \+ "\/"/);
   assert.match(hubSource, /getElementById\("input"\)[\s\S]*projectInput\.focus\(\{ preventScroll: true \}\)/);
   assert.match(hubSource, /if \(!resume && store\.get\('homeSurfaceRestoreRequested'\) !== true\) \{[\s\S]*requestTools\(\)[\s\S]*renderDock\(\)/);
@@ -117,6 +128,8 @@ test("home dock exposes conversation, split, and focused tool states", function 
   assert.match(dockResizeSource, /window\.innerWidth \* 0\.58/);
   assert.match(dockResizeSource, /workbench\.getBoundingClientRect\(\)/);
   assert.match(dockResizeSource, /pointerOffset/);
+  assert.match(dockResizeSource, /workspace\.style\.setProperty\("--home-dock-width", resolved \+ "px"\)/);
+  assert.match(dockSource, /applyHomeDockWidth\(store\.get\('dockWidth'\)\)/);
   assert.match(cssSource, /\.home-tool-workbench \{[\s\S]*border: 1px solid var\(--border\);[\s\S]*border-radius: 12px;[\s\S]*box-shadow:/);
   assert.match(cssSource, /@keyframes home-workbench-in/);
   assert.match(cssSource, /#home-hub\.dock-split \.home-dock-divider::after \{[\s\S]*background: transparent;/);
