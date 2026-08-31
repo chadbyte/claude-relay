@@ -202,7 +202,7 @@ test("home chat CSS centers the transcript and keeps one composer surface", func
   assert.match(cssSource, /\.home-mate-chat-composer\s*\{[\s\S]*?border-radius: 22px/);
   assert.match(cssSource, /\.home-mate-chat\.is-empty \.home-mate-chat-stage/);
   assert.match(cssSource, /\.home-mate-chat\.is-empty \.home-mate-chat-stage\s*\{[\s\S]*?padding-bottom: 18%/);
-  assert.match(cssSource, /#home-hub\s*\{[\s\S]*?padding: calc\(14px \+ var\(--safe-top\)\) 24px 24px/);
+  assert.match(cssSource, /#home-hub\s*\{[\s\S]*?padding: calc\(6px \+ var\(--safe-top\)\) 12px 16px/);
 });
 
 test("home app imports the compatible Mate-list renderer", function () {

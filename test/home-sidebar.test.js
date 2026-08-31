@@ -7,9 +7,11 @@ var root = path.join(__dirname, "..");
 var indexSource = fs.readFileSync(path.join(root, "lib/public/index.html"), "utf8");
 var sidebarSource = fs.readFileSync(path.join(root, "lib/public/modules/home-sidebar.js"), "utf8");
 var sheetSource = fs.readFileSync(path.join(root, "lib/public/modules/home-conversations-sheet.js"), "utf8");
+var actionsSource = fs.readFileSync(path.join(root, "lib/public/modules/home-session-actions.js"), "utf8");
 var chatSource = fs.readFileSync(path.join(root, "lib/public/modules/home-mate-chat.js"), "utf8");
 var surfaceSource = fs.readFileSync(path.join(root, "lib/public/modules/home-surface.js"), "utf8");
 var cssSource = fs.readFileSync(path.join(root, "lib/public/css/home-sidebar.css"), "utf8");
+var actionsCss = fs.readFileSync(path.join(root, "lib/public/css/home-session-actions.css"), "utf8");
 var wordmarkPath = path.join(root, "lib/public/clay-studio-wordmark.svg");
 var fontPath = path.join(root, "lib/public/fonts/source-serif-4/SourceSerif4Caption-Semibold.ttf.woff2");
 var fontLicenseSource = fs.readFileSync(path.join(root, "lib/public/fonts/source-serif-4/LICENSE.md"), "utf8");
@@ -55,17 +57,18 @@ test("desktop Home sidebar boundary reaches the frame edges without mobile bleed
 });
 
 test("Home sidebar presents a global Mate-attributed conversation archive", function () {
-  var allConversationsSource = sidebarSource.slice(sidebarSource.indexOf("function allConversations"), sidebarSource.indexOf("function renderRecentConversations"));
   assert.match(homeMarkup, /id="home-sidebar-recent-label"[^>]*>Conversations<\/div>/);
-  assert.match(sidebarSource, /allConversations\(\)\.slice\(0, 5\)/);
-  assert.match(allConversationsSource, /var mates = visibleMates\(\)/);
-  assert.match(allConversationsSource, /mateName: mateNames\[mateIds\[j\]\]/);
-  assert.match(allConversationsSource, /result\.sort\(function \(a, b\) \{ return b\.lastActivity - a\.lastActivity; \}\)/);
-  assert.doesNotMatch(allConversationsSource, /homeChatMateId|homeChatSessionId/);
+  assert.match(sidebarSource, /getHomeSessionConversations\(\)\.slice\(0, 5\)/);
+  assert.match(actionsSource, /function mateNames\(\)[\s\S]*!mates\[i\] \|\| mates\[i\]\.archived/);
+  assert.match(actionsSource, /mateName: names\[mateIds\[i\]\]/);
+  assert.match(actionsSource, /result\.sort\(function \(a, b\) \{ return b\.lastActivity - a\.lastActivity; \}\)/);
   assert.match(sidebarSource, /home-sidebar-recent-copy/);
   assert.match(sidebarSource, /home-sidebar-recent-title/);
   assert.match(sidebarSource, /home-sidebar-recent-mate/);
-  assert.match(sidebarSource, /conversation\.mateId === activeMateId && conversation\.sessionId === activeSessionId/);
+  assert.match(sidebarSource, /className = "home-sidebar-recent-item"[\s\S]*conversation\.mateId === activeMateId && conversation\.sessionId === activeSessionId[\s\S]*row\.setAttribute\("aria-current", "page"\)/);
+  assert.match(sidebarSource, /createHomeSessionActionsTrigger\(conversation\)/);
+  assert.match(actionsCss, /\.home-sidebar-recent-item\.is-active[\s\S]*background: rgba\(var\(--overlay-rgb\), 0\.05\)/);
+  assert.doesNotMatch(cssSource, /home-sidebar-recent-row\.is-active/);
   assert.match(sidebarSource, /openConversationFromSidebar\(conversation\.mateId, conversation\.sessionId\)/);
   assert.match(sidebarSource, /openHomeConversation\(mateId, sessionId\)/);
   assert.match(chatSource, /export function openHomeConversation\(mateId, sessionId\)/);
@@ -89,6 +92,8 @@ test("All conversations is a searchable custom sheet", function () {
   assert.match(sheetSource, /searchInput\.type = "search"/);
   assert.match(sheetSource, /conversation\.title\.toLowerCase/);
   assert.match(sheetSource, /onSelect\(conversation\.mateId, conversation\.sessionId\)/);
+  assert.match(sheetSource, /createHomeSessionActionsTrigger\(conversation,[\s\S]*detailsOpener: detailsReturn,[\s\S]*beforeOpenDetails: function \(\) \{ closeSheet\(false\); \}/);
+  assert.match(sheetSource, /className = "home-conversations-sheet-item"/);
   assert.doesNotMatch(sheetSource, /alert\(|confirm\(|prompt\(/);
 });
 
@@ -98,7 +103,7 @@ test("All conversations traps focus and restores its opener on every close path"
   assert.match(sheetSource, /event\.key !== "Tab"/);
   assert.match(sheetSource, /event\.shiftKey[\s\S]*last\.focus\(\)/);
   assert.match(sheetSource, /!event\.shiftKey[\s\S]*first\.focus\(\)/);
-  assert.match(sheetSource, /opener[\s\S]*opener\.focus\(\)/);
+  assert.match(sheetSource, /restoreFocus !== false[\s\S]*opener\.focus\(\)/);
   assert.match(sheetSource, /backdrop\.addEventListener\("click", closeSheet\)/);
   assert.match(sheetSource, /close\.addEventListener\("click", closeSheet\)/);
   assert.match(sheetSource, /event\.key === "Escape"[\s\S]*closeSheet\(\)/);

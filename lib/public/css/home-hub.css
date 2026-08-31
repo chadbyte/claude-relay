@@ -22,7 +22,7 @@ body.home-active #main-area { border: 0; border-radius: 0; }
   overflow: hidden;
   background: var(--bg);
   z-index: 200;
-  padding: calc(14px + var(--safe-top)) 24px 24px;
+  padding: calc(6px + var(--safe-top)) 12px 16px;
   border-top-left-radius: 8px;
   animation: hubFadeIn 0.25s ease;
 }
@@ -870,7 +870,7 @@ body.home-active #main-area { border: 0; border-radius: 0; }
 }
 
 @media (max-width: 900px) {
-  #home-hub { padding: calc(12px + var(--safe-top)) 12px calc(68px + var(--safe-bottom, 0px)); }
+  #home-hub { padding: calc(6px + var(--safe-top)) 8px calc(68px + var(--safe-bottom, 0px)); }
 
   .home-hub-inner {
     height: 100%;

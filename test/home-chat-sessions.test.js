@@ -86,10 +86,29 @@ test("Mate conversation list includes only the requesting user's visible session
     type: "home_mate_sessions_state",
     mateId: "mate-a",
     sessions: [
-      { id: "session-new", title: "Newer", lastActivity: 30, isProcessing: false },
-      { id: "session-old", title: "Older", lastActivity: 10, isProcessing: false },
+      { id: "session-new", cliSessionId: "session-new", localId: 2, title: "Newer", vendor: "codex", model: "gpt-5.6", createdAt: 0, lastActivity: 30, isProcessing: false },
+      { id: "session-old", cliSessionId: "session-old", localId: 1, title: "Older", vendor: "claude", model: "sonnet", createdAt: 0, lastActivity: 10, isProcessing: false },
     ],
   });
+});
+
+test("Mate conversation details expose local-only identity without weakening ownership filtering", function () {
+  var f = fixture();
+  f.addSession({ localId: 6, cliSessionId: null, ownerId: "u1", title: "Local\ndraft\u0000", createdAt: 35, lastActivity: 60, vendor: "claude", model: "haiku", isProcessing: true, history: [] });
+  f.handler.handleMessage(f.ws, { type: "home_mate_sessions_list", mateId: "mate-a" });
+  var sessions = f.messages[0].sessions;
+  assert.deepStrictEqual(sessions[0], {
+    id: "local:6",
+    cliSessionId: null,
+    localId: 6,
+    title: "Local draft",
+    vendor: "claude",
+    model: "haiku",
+    createdAt: 35,
+    lastActivity: 60,
+    isProcessing: true,
+  });
+  assert.strictEqual(sessions.some(function (session) { return session.title === "Other user's chat" || session.title === "Hidden"; }), false);
 });
 
 test("Mate settings memory and knowledge responses preserve request correlation", function () {
@@ -166,6 +185,10 @@ test("fresh Home taps promote session identity before streaming notification-vis
   ]);
   assert.equal(f.getSession(6).responsePreview, "The visible assistant reply");
   assert.equal(f.ws._homeChatTap.sessionReference, "durable-fresh");
+  var refreshed = f.messages.find(function (message) { return message.type === "home_mate_sessions_state"; });
+  assert.equal(refreshed.sessions[0].id, "durable-fresh");
+  assert.equal(refreshed.sessions[0].cliSessionId, "durable-fresh");
+  assert.equal(refreshed.sessions[0].localId, 6);
 });
 
 test("Home final events recover canonical history text when a live delta was missed", async function () {
@@ -266,7 +289,7 @@ test("single-user Mate conversation lists include only ownerless sessions", func
   var f = fixture({ singleUser: true });
   f.handler.handleMessage(f.ws, { type: "home_mate_sessions_list", mateId: "mate-a" });
   assert.deepStrictEqual(f.messages[0].sessions, [
-    { id: "session-single", title: "Single-user chat", lastActivity: 20, isProcessing: false },
+    { id: "session-single", cliSessionId: "session-single", localId: 5, title: "Single-user chat", vendor: null, model: null, createdAt: 0, lastActivity: 20, isProcessing: false },
   ]);
 });
 
