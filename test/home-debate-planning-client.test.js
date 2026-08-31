@@ -348,6 +348,7 @@ test("Home Start debate source selects builtin Clay, uses the native protocol, a
   var sidebar = fs.readFileSync(path.join(root, "lib/public/modules/home-sidebar.js"), "utf8");
   var router = fs.readFileSync(path.join(root, "lib/public/modules/app-message-router.js"), "utf8");
   var project = fs.readFileSync(path.join(root, "lib/project.js"), "utf8");
+  var sdkBridge = fs.readFileSync(path.join(root, "lib/sdk-bridge.js"), "utf8");
   var schema = fs.readFileSync(path.join(root, "lib/ws-schema.js"), "utf8");
   var debateEngine = fs.readFileSync(path.join(root, "lib/project-debate.js"), "utf8");
   var sessions = fs.readFileSync(path.join(root, "lib/sessions.js"), "utf8");
@@ -359,7 +360,10 @@ test("Home Start debate source selects builtin Clay, uses the native protocol, a
   assert.match(router, /home_debate_question[\s\S]*handleHomeDebateTranscript/);
   assert.match(router, /home_debate_proposal_resolved[\s\S]*handleHomeDebateTranscript/);
   assert.match(project, /home_debate_question_response[\s\S]*opts\.onDmMessage\(ws, msg\)/);
-  assert.match(project, /session && session\.debateSetupMode === true \? _askUser\.getToolDefs\(session\) : \[\]/);
+  assert.match(project, /onUserInputRequest: function \(session, request, respond\)[\s\S]*_askUser\.createHandler\(session\)/);
+  assert.doesNotMatch(project, /_askUser\.getToolDefs\(session\)/);
+  assert.match(sdkBridge, /requestedUserInputMode = session\.debateSetupMode \? "fallback" : "auto"/);
+  assert.match(sdkBridge, /yoke\.userInput\.fallbackToolDefs\(sessionUserInputHandler\)/);
   assert.match(schema, /"home_debate_question_response"[\s\S]*"home_debate_question"[\s\S]*"home_debate_question_resolved"/);
   assert.match(debateEngine, /var reuseHomeSession = session\.homeDebatePlanning === true[\s\S]*if \(reuseHomeSession\)[\s\S]*session\.homeDebatePhase = "live"[\s\S]*else \{[\s\S]*createSession\(liveOpts, targetWs \|\| null\)/);
   assert.match(project, /home_debate_question_response" \|\| msg\.type === "home_debate_control"[\s\S]*opts\.onDmMessage\(ws, msg\)/);

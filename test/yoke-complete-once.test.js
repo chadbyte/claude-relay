@@ -60,6 +60,24 @@ test("completeOnce accepts a final-only assistant response", async function() {
   assert.strictEqual(result.text, "Final only");
 });
 
+test("completeOnce rejects interactive input and closes the one-shot query", async function() {
+  var capture = { prompts: [] };
+  var adapter = {
+    vendor: "interactive",
+    createQuery: function() { throw new Error("unused"); },
+    createOneShotQuery: function(opts) {
+      capture.opts = opts;
+      opts.onUserInputRequest({ id: "ask-once", questions: [{ id: "answer", question: "Continue?", options: [] }] }, {
+        cancel: function(reason) { capture.cancelReason = reason; },
+      });
+      return Promise.resolve({ handle: handleFor([{ yokeType: "result" }], capture), backendPersistence: "ephemeral" });
+    },
+  };
+  await assert.rejects(yoke.completeOnce(adapter, { prompt: "one" }), /interactive user input/);
+  assert.match(capture.cancelReason, /cannot request interactive/);
+  assert.strictEqual(capture.closed, 1);
+});
+
 test("completeOnce never registers a Clay session even when the backend reports an identity", async function() {
   var capture = { prompts: [] };
   var registrations = 0;

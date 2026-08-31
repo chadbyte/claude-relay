@@ -6,6 +6,7 @@ var attachDebateProposal = require("../lib/project-debate-proposal").attachDebat
 var historyToHomeChat = require("../lib/server-home-chat-events").historyToHomeChat;
 var transformEvent = require("../lib/server-home-chat-events").transformEvent;
 var createSDKBridge = require("../lib/sdk-bridge").createSDKBridge;
+var yokeUserInput = require("../lib/yoke/user-input");
 
 function fixture() {
   var recorded = [];
@@ -37,6 +38,21 @@ test("canonical AskUserQuestion response accepts the exact pending tool once", f
   assert.match(result.message, /Decision/);
 });
 
+test("project persistence resumes one canonical Yoke request and rejects stale answers", async function () {
+  var f = fixture();
+  var askUser = attachAskUser({ record: function (session, event) { session.history.push(event); } });
+  var session = { localId: 11, history: [], pendingAskUser: {} };
+  var pending = yokeUserInput.dispatchUserInput(askUser.createHandler(session), {
+    questions: [{ id: "topic", header: "Topic", question: "What topic?", options: [] }],
+  }, { requestId: "yoke-ask" });
+  assert.equal(f.sessions.respondToAskUser(session, { toolId: "yoke-ask", answers: { topic: "Housing" } }), true);
+  assert.equal(f.sessions.respondToAskUser(session, { toolId: "yoke-ask", answers: { topic: "Again" } }), false);
+  assert.deepEqual(await pending, { status: "submitted", answers: { topic: ["Housing"] } });
+  assert.equal(session.pendingAskUser["yoke-ask"], undefined);
+  assert.equal(session.history[0].name, "AskUserQuestion");
+  assert.equal(f.recorded[0].type, "ask_user_answered");
+});
+
 test("MCP AskUserQuestion answer continues canonically without a duplicate Home user bubble", function () {
   var f = fixture();
   var input = { questions: [{ question: "Outcome?", options: [{ label: "Decision" }, { label: "Trade-offs" }] }] };
@@ -58,13 +74,16 @@ test("Mate AskUserQuestion MCP records against its query-bound session, never a 
   var exact = { localId: 7, history: [], pendingAskUser: {} };
   var unrelated = { localId: 8, history: [], pendingAskUser: {} };
   var server = askUser.createMcpServer(adapter, exact);
-  var result = await server.tools[0].handler({ questions: [{ header: "Outcome", question: "What result?", options: [{ label: "Decision", description: "Choose" }, { label: "Trade-offs", description: "Compare" }] }] });
-  assert.equal(result.isError, undefined);
+  var resultPromise = server.tools[0].handler({ questions: [{ header: "Outcome", question: "What result?", options: [{ label: "Decision", description: "Choose" }, { label: "Trade-offs", description: "Compare" }] }] });
+  await Promise.resolve();
   assert.equal(records.length, 1);
   assert.equal(records[0].session, exact);
   assert.equal(records[0].event.name, "AskUserQuestion");
   assert.equal(Object.keys(exact.pendingAskUser).length, 1);
   assert.equal(Object.keys(unrelated.pendingAskUser).length, 0);
+  exact.pendingAskUser[Object.keys(exact.pendingAskUser)[0]].respond({ 0: "Decision" });
+  var result = await resultPromise;
+  assert.equal(result.isError, undefined);
   var unbound = askUser.createMcpServer(adapter, null);
   var rejected = await unbound.tools[0].handler({ questions: [{ question: "No session", options: [{ label: "A" }, { label: "B" }] }] });
   assert.equal(rejected.isError, true);
@@ -112,6 +131,7 @@ test("planning SDK query binds AskUser and proposal tools to the same exact Home
   };
   var adapter = {
     vendor: "codex",
+    userInputCapability: { mode: "native", native: true },
     createQuery: function (options) { captured.push(options); return Promise.resolve(handle); },
   };
   var bridge = createSDKBridge({
@@ -120,18 +140,17 @@ test("planning SDK query binds AskUser and proposal tools to the same exact Home
     adapter: adapter,
     adapters: { codex: adapter },
     send: function () {},
-    getSessionToolDefs: function (session) {
-      return proposal.getToolDefs(session).concat(session.debateSetupMode === true ? askUser.getToolDefs(session) : []);
-    },
+    getSessionToolDefs: function (session) { return proposal.getToolDefs(session); },
+    onUserInputRequest: function (boundSession, request, respond) { return askUser.createHandler(boundSession)(request, respond); },
   });
   var session = { localId: 31, ownerId: "owner-a", vendor: "codex", model: "gpt-test", debateSetupMode: true, homeDebatePlanning: true, history: [], pendingAskUser: {}, isProcessing: false };
   await bridge.startQuery(session, "hidden debate setup");
   assert.equal(captured.length, 1);
+  assert.equal(captured[0].userInputMode, "fallback");
   assert.deepEqual(captured[0].dynamicTools.map(function (tool) { return tool.name; }), ["propose_debate", "ask_user_questions"]);
   var input = { questions: [{ header: "Topic", question: "What would you like to debate?", options: [{ label: "Product direction", description: "Choose a roadmap" }, { label: "Architecture", description: "Discuss systems" }, { label: "Growth", description: "Explore acquisition" }] }] };
-  var permission = await captured[0].canUseTool("ask_user_questions", input, { toolUseID: "dynamic-call" });
-  assert.equal(permission.behavior, "allow");
-  await captured[0].callDynamicTool("ask_user_questions", input);
+  var firstCall = captured[0].callDynamicTool("ask_user_questions", input);
+  await Promise.resolve();
   assert.equal(projected.length, 1);
   assert.equal(projected[0].type, "home_debate_question");
   assert.equal(projected[0].requestId, "plan-sdk");
@@ -141,11 +160,16 @@ test("planning SDK query binds AskUser and proposal tools to the same exact Home
   assert.equal(session.history[0].input.questions[0].options.length, 0);
   assert.doesNotMatch(JSON.stringify(session.history[0].input), /Product direction|Architecture|Growth/);
   var firstQuestionId = session.history[0].id;
+  session.pendingAskUser[firstQuestionId].respond({ 0: "Housing affordability" });
+  await firstCall;
   manager.sendAndRecord(session, { type: "ask_user_answered", toolId: firstQuestionId, answers: { 0: "Housing affordability" } });
-  await captured[0].callDynamicTool("ask_user_questions", {
+  var secondCall = captured[0].callDynamicTool("ask_user_questions", {
     questions: [{ header: "Format", question: "How should the panel approach it?", options: [{ label: "Trade-offs", description: "Compare policies" }, { label: "Recommendation", description: "Choose a path" }] }],
   });
+  await Promise.resolve();
   var secondQuestion = session.history.filter(function (event) { return event.type === "tool_executing"; })[1];
+  session.pendingAskUser[secondQuestion.id].respond({ 0: "Trade-offs" });
+  await secondCall;
   manager.sendAndRecord(session, { type: "ask_user_answered", toolId: secondQuestion.id, answers: { 0: "Trade-offs" } });
 
   session.cliSessionId = "01a05622-durable";
@@ -172,7 +196,7 @@ test("planning SDK query binds AskUser and proposal tools to the same exact Home
   assert.equal(session.homeDebatePhase, "live");
 });
 
-test("native AskUserQuestion callback remains available for Claude-style planning queries", async function () {
+test("native structured input callback remains available for an ordinary Claude query", async function () {
   var captured = [];
   var manager = {
     defaultVendor: "claude", currentPermissionMode: "default", permissionRequestIndex: {},
@@ -180,17 +204,35 @@ test("native AskUserQuestion callback remains available for Claude-style plannin
     saveSessionFile: function () {}, broadcastSessionList: function () {}, sendToSession: function () {}, sendAndRecord: function () {},
   };
   var handle = { pushMessage: function () { return true; }, close: function () {}, [Symbol.asyncIterator]: function () { return { next: function () { return new Promise(function () {}); } }; } };
-  var adapter = { vendor: "claude", createQuery: function (options) { captured.push(options); return Promise.resolve(handle); } };
-  var bridge = createSDKBridge({ cwd: process.cwd(), sessionManager: manager, adapter: adapter, adapters: { claude: adapter }, send: function () {} });
-  var session = { localId: 32, vendor: "claude", model: "sonnet", debateSetupMode: true, homeDebatePlanning: true, history: [], pendingAskUser: {}, isProcessing: false };
-  await bridge.startQuery(session, "hidden debate setup");
-  var firstNative = await captured[0].canUseTool("AskUserQuestion", { questions: [] }, { toolUseID: "native-first" });
-  assert.equal(firstNative.behavior, "deny");
-  assert.match(firstNative.message, /session-bound ask_user_questions/);
-  session.history.push({ type: "tool_executing", id: "topic", name: "AskUserQuestion", input: { questions: [{ question: "Topic", options: [] }] } });
-  session.history.push({ type: "ask_user_answered", toolId: "topic", answers: { 0: "Housing" } });
-  var pending = captured[0].canUseTool("AskUserQuestion", { questions: [] }, { toolUseID: "native-ask" });
+  var askUser = attachAskUser({ record: function (boundSession, event) { boundSession.history.push(event); } });
+  var adapter = { vendor: "claude", userInputCapability: { mode: "native", native: true }, createQuery: function (options) { captured.push(options); return Promise.resolve(handle); } };
+  var defaultAdapter = { vendor: "legacy", createQuery: function () { throw new Error("wrong adapter"); } };
+  var bridge = createSDKBridge({
+    cwd: process.cwd(), sessionManager: manager, adapter: defaultAdapter, adapters: { claude: adapter }, send: function () {},
+    onUserInputRequest: function (boundSession, request, respond) { return askUser.createHandler(boundSession)(request, respond); },
+  });
+  var session = { localId: 32, vendor: "claude", model: "sonnet", history: [], pendingAskUser: {}, isProcessing: false };
+  await bridge.startQuery(session, "ordinary question");
+  assert.equal(captured[0].userInputMode, "native");
+  var answer = null;
+  var respond = function (value) { answer = value; };
+  respond.cancel = function () {};
+  captured[0].onUserInputRequest({ id: "native-ask", questions: [{ id: "topic", header: "Topic", question: "What topic?", options: [] }] }, respond);
   assert.ok(session.pendingAskUser["native-ask"]);
-  session.pendingAskUser["native-ask"].resolve({ behavior: "deny", message: "answered" });
-  assert.equal((await pending).message, "answered");
+  session.pendingAskUser["native-ask"].respond({ topic: "Housing" });
+  assert.deepEqual(answer, { topic: "Housing" });
+
+  var typedContent = null;
+  var elicitationRespond = function () {};
+  elicitationRespond.cancel = function () {};
+  elicitationRespond.onSettle = function () {};
+  elicitationRespond.submitContent = function (content) { typedContent = content; };
+  var elicitation = captured[0].onUserInputRequest({
+    id: "elicit-form", presentation: "elicitation", questions: [{ id: "count", question: "Count?", options: [] }],
+    diagnostics: { elicitation: { serverName: "Example", message: "Configure", mode: "form", requestedSchema: { type: "object", properties: { count: { type: "number" } } } } },
+  }, elicitationRespond);
+  var elicitationId = Object.keys(session.pendingElicitations)[0];
+  session.pendingElicitations[elicitationId].resolve({ action: "accept", content: { count: 2 } });
+  await elicitation;
+  assert.deepEqual(typedContent, { count: 2 });
 });

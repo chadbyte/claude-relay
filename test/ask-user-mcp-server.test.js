@@ -4,7 +4,7 @@ var getToolDefs = require("../lib/ask-user-mcp-server").getToolDefs;
 
 test("ask_user_questions accepts freeform zero options and structured choices", async function () {
   var accepted = [];
-  var tool = getToolDefs(function (input) { accepted.push(input); return Promise.resolve({ content: [{ type: "text", text: "ok" }] }); })[0];
+  var tool = getToolDefs(function (input, respond) { accepted.push(input); respond({ 0: "Answer" }); })[0];
   var freeform = await tool.handler({ questions: [{ header: "Topic", question: "What would you like to debate?", options: [] }] });
   var structured = await tool.handler({ questions: [{ header: "Format", question: "Which format?", options: [{ label: "Round table", description: "Explore" }, { label: "Pro/con", description: "Choose sides" }] }] });
   assert.equal(freeform.isError, undefined);
