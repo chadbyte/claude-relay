@@ -342,10 +342,11 @@ test("debate planning restores the composer with preventScroll without stealing 
   }
 });
 
-test("Home Start debate source selects builtin Clay, uses the native protocol, and closes the mobile drawer toward chat", function () {
+test("Home archive New debate selects builtin Clay while the sidebar only opens the archive", function () {
   var root = path.join(__dirname, "..");
   var chat = fs.readFileSync(path.join(root, "lib/public/modules/home-mate-chat.js"), "utf8");
   var sidebar = fs.readFileSync(path.join(root, "lib/public/modules/home-sidebar.js"), "utf8");
+  var archive = fs.readFileSync(path.join(root, "lib/public/modules/home-debates-archive.js"), "utf8");
   var router = fs.readFileSync(path.join(root, "lib/public/modules/app-message-router.js"), "utf8");
   var project = fs.readFileSync(path.join(root, "lib/project.js"), "utf8");
   var sdkBridge = fs.readFileSync(path.join(root, "lib/sdk-bridge.js"), "utf8");
@@ -356,7 +357,9 @@ test("Home Start debate source selects builtin Clay, uses the native protocol, a
   assert.match(chat, /builtinKey === "clay"/);
   assert.match(chat, /type: "home_mate_debate_plan"/);
   assert.doesNotMatch(chat, /openDebateModal|clay:home-debate/);
-  assert.match(sidebar, /closeNarrowDrawer\(kind === "debate"\)/);
+  assert.match(sidebar, /openHomeDebatesArchive\(\);[\s\S]*closeNarrowDrawer\(false\)/);
+  assert.doesNotMatch(sidebar, /home_mate_debate_plan|openHomeMateAction/);
+  assert.match(archive, /function startNewDebate\(\)[\s\S]*setHomeSubSurface\("chat"\);[\s\S]*openHomeMateAction\("debate"\)/);
   assert.match(router, /home_debate_question[\s\S]*handleHomeDebateTranscript/);
   assert.match(router, /home_debate_proposal_resolved[\s\S]*handleHomeDebateTranscript/);
   assert.match(project, /home_debate_question_response[\s\S]*opts\.onDmMessage\(ws, msg\)/);

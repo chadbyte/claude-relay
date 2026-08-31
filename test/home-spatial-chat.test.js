@@ -141,7 +141,7 @@ test("first-depth Home Mate list preserves management and activity affordances",
   assert.match(homeMarkup, /id="home-sidebar-debate"/);
   assert.doesNotMatch(homeMarkup, /id="home-sidebar-(?:model|memory|knowledge|settings)"/);
   assert.match(hubSource, /createHomeMateSettingsTrigger\(mate\)/);
-  assert.match(homeSidebarSource, /openHomeMateAction/);
+  assert.match(homeSidebarSource, /openHomeDebatesArchive/);
 });
 
 test("home surface no longer propagates mate colors", function () {
@@ -206,11 +206,11 @@ test("empty home chat renders contextual greeting and working suggestions", func
 
 test("Mate and new-conversation actions live in the Home sidebar", function () {
   assert.match(homeMarkup, /id="home-sidebar-new"/);
-  assert.match(homeMarkup, /id="home-sidebar-debate"[^>]*title="Start a debate"[^>]*aria-label="Start a debate"[^>]*disabled[\s\S]*>Debates<\/span>/);
+  assert.match(homeMarkup, /id="home-sidebar-debate"[^>]*title="Browse debates"[^>]*aria-label="Browse debates"[^>]*aria-pressed="false"[\s\S]*>Debates<\/span>/);
   assert.doesNotMatch(homeMarkup, /id="home-sidebar-(?:model|memory|knowledge|settings)"/);
   assert.doesNotMatch(homeMarkup, /id="home-mate-chat-actions"/);
   assert.match(homeSidebarSource, /startNewHomeConversation/);
-  assert.match(homeSidebarSource, /openHomeMateAction/);
+  assert.match(homeSidebarSource, /openHomeDebatesArchive/);
   assert.match(chatSource, /export function openHomeMateAction\(kind\)/);
   assert.match(chatSource, /openHomeMateSettings\(mate\.id, sessionModelChooseEl/);
   assert.match(chatSource, /kind !== "debate"/);

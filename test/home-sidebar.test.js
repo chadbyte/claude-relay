@@ -32,7 +32,7 @@ test("Home sidebar follows a continuous action, Mate, and conversation hierarchy
 
 test("Home sidebar primary actions use consistent Lucide geometry and exact copy", function () {
   assert.match(homeMarkup, /id="home-sidebar-new"[^>]*title="New Chat"[^>]*aria-label="Start a new chat with the current Mate"[\s\S]*home-sidebar-action-icon[^>]*aria-hidden="true"[\s\S]*data-lucide="message-square-plus"[\s\S]*>New Chat<\/span>/);
-  assert.match(homeMarkup, /id="home-sidebar-debate"[^>]*title="Start a debate"[^>]*aria-label="Start a debate"[\s\S]*home-sidebar-action-icon[^>]*aria-hidden="true"[\s\S]*data-lucide="messages-square"[\s\S]*>Debates<\/span>/);
+  assert.match(homeMarkup, /id="home-sidebar-debate"[^>]*title="Browse debates"[^>]*aria-label="Browse debates"[^>]*aria-pressed="false"[\s\S]*home-sidebar-action-icon[^>]*aria-hidden="true"[\s\S]*data-lucide="messages-square"[\s\S]*>Debates<\/span>/);
   assert.match(homeMarkup, /id="home-tools-btn"[^>]*title="Capsules"[^>]*aria-label="Capsules"[^>]*aria-expanded="false"[\s\S]*home-sidebar-action-icon[^>]*aria-hidden="true"[\s\S]*data-lucide="box"[\s\S]*id="home-tools-label">Capsules<\/span>/);
   assert.doesNotMatch(homeMarkup.slice(homeMarkup.indexOf('id="home-sidebar-new"'), homeMarkup.indexOf('id="home-sidebar-mate-label"')), /data-lucide="(?:square-pen|mic)"|New conversation|Start debate/);
   assert.match(cssSource, /\.home-sidebar-primary-actions \{[\s\S]*gap: 2px;[\s\S]*padding: 4px 4px 0;/);
@@ -265,7 +265,7 @@ test("mobile navigation closes the drawer while Escape stays on Home", function 
   assert.match(sidebarSource, /openHomeConversation\(mateId, sessionId\);[\s\S]*closeNarrowDrawer\(true\)/);
   assert.match(sidebarSource, /startNewHomeConversation\(\);[\s\S]*closeNarrowDrawer\(true\)/);
   assert.match(sidebarSource, /export function closeHomeSidebarAfterSelection\(\)[\s\S]*closeNarrowDrawer\(true\)/);
-  assert.match(sidebarSource, /function openMateActionFromSidebar\(kind\)[\s\S]*openHomeMateAction\(kind\)[\s\S]*closeNarrowDrawer\(kind === "debate"\)/);
+  assert.match(sidebarSource, /function openDebatesFromSidebar\(\)[\s\S]*openHomeDebatesArchive\(\);[\s\S]*closeNarrowDrawer\(false\)/);
   assert.match(sidebarSource, /openHomeConversationsSheet\(openConversationFromSidebar, event\.currentTarget\)/);
   assert.match(sidebarSource, /event\.key !== "Escape"[\s\S]*document\.body\.classList\.contains\("home-active"\)[\s\S]*closeNarrowDrawer\(true\)/);
   assert.doesNotMatch(sidebarSource, /showProject|history\.back|location\./);

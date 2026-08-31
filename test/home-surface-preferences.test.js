@@ -22,6 +22,7 @@ test("Home surface preferences default to no durable conversation selection", fu
     activeSessionByMate: {},
     sidebarCollapsed: false,
     chatScope: "all",
+    subSurface: "chat",
   });
 });
 
@@ -33,6 +34,7 @@ test("Home surface preferences preserve exact sessions per Mate across partial u
     activeMateId: "mate-a",
     activeSessionByMate: { "mate-a": "session-a" },
     chatScope: "current",
+    subSurface: "debates",
   });
   var result = fixture.preferences.setHomeSurfacePreference("u1", {
     activeMateId: "mate-b",
@@ -46,9 +48,11 @@ test("Home surface preferences preserve exact sessions per Mate across partial u
     activeSessionByMate: { "mate-a": "session-a", "mate-b": "session-b" },
     sidebarCollapsed: true,
     chatScope: "current",
+    subSurface: "debates",
   });
   assert.deepStrictEqual(fixture.preferences.getHomeSurfacePreference("u2").activeSessionByMate, {});
   assert.strictEqual(fixture.preferences.getHomeSurfacePreference("u2").chatScope, "all");
+  assert.strictEqual(fixture.preferences.getHomeSurfacePreference("u2").subSurface, "chat");
   assert.strictEqual(fixture.getSaves(), 2);
 });
 
@@ -61,6 +65,7 @@ test("Home surface preferences discard malformed identifiers and session referen
     activeSessionByMate: { "mate-a": "valid-session", "../mate": "bad", "mate-b": "\n" },
     sidebarCollapsed: "yes",
     chatScope: "nearby",
+    subSurface: "elsewhere",
   });
   assert.deepStrictEqual(result.preference, {
     surface: null,
@@ -69,6 +74,7 @@ test("Home surface preferences discard malformed identifiers and session referen
     activeSessionByMate: { "mate-a": "valid-session" },
     sidebarCollapsed: false,
     chatScope: "all",
+    subSurface: "chat",
   });
 });
 
@@ -86,14 +92,16 @@ test("Home surface WebSocket requests roundtrip only to the requesting client", 
   });
   assert.strictEqual(handler.handleMessage(ws, {
     type: "home_surface_set",
-    preference: { surface: "home", projectSlug: "project-a", activeMateId: "mate-a", activeSessionByMate: { "mate-a": "session-a" }, chatScope: "current" },
+    preference: { surface: "home", projectSlug: "project-a", activeMateId: "mate-a", activeSessionByMate: { "mate-a": "session-a" }, chatScope: "current", subSurface: "debates" },
   }), true);
   assert.deepStrictEqual(messages[0].preference.activeSessionByMate, { "mate-a": "session-a" });
   assert.strictEqual(messages[0].preference.surface, "home");
   assert.strictEqual(messages[0].preference.projectSlug, "project-a");
   assert.strictEqual(messages[0].preference.chatScope, "current");
+  assert.strictEqual(messages[0].preference.subSurface, "debates");
   messages.length = 0;
   handler.handleMessage(ws, { type: "home_surface_get" });
   assert.strictEqual(messages[0].preference.activeMateId, "mate-a");
   assert.strictEqual(messages[0].preference.chatScope, "current");
+  assert.strictEqual(messages[0].preference.subSurface, "debates");
 });

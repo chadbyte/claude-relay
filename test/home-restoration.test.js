@@ -15,9 +15,9 @@ test("Home defers an early Mate selection until durable session preferences load
   var surface = source("lib/public/modules/home-surface.js");
   var connection = source("lib/public/modules/app-connection.js");
   assert.match(chat, /if \(store\.get\('homeSurfaceLoaded'\)\) resumeHomeChat\(\);/);
-  assert.match(hub, /state\.homeSurfaceLoaded !== prev\.homeSurfaceLoaded[\s\S]*if \(state\.homeChatMateId\) resumeHomeChat\(\);/);
+  assert.match(hub, /state\.homeSurfaceLoaded !== prev\.homeSurfaceLoaded[\s\S]*if \(!restoreHomeDebatesArchive\(\) && state\.homeChatMateId\) resumeHomeChat\(\);/);
   assert.match(surface, /homePreferredMateId = store\.get\('homePreferredMateId'\) \|\| preference\.activeMateId \|\| store\.get\('homeChatMateId'\)/);
-  assert.match(connection, /requestHomeSurfacePreference\(\);[\s\S]*if \(store\.get\('homeSurfaceLoaded'\)\) resumeHomeChat\(\);/);
+  assert.match(connection, /requestHomeSurfacePreference\(\);[\s\S]*if \(store\.get\('homeSurfaceLoaded'\) && !isHomeDebatesSurface\(\)\) resumeHomeChat\(\);/);
 });
 
 test("Home surface writes send only changed preference fields", function () {
