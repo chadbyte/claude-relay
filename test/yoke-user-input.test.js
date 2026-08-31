@@ -5,6 +5,7 @@ var claudeUserInput = require("../lib/yoke/claude-user-input");
 var codexUserInput = require("../lib/yoke/codex-user-input");
 var createClaudeAdapter = require("../lib/yoke/adapters/claude").createClaudeAdapter;
 var codexAdapterModule = require("../lib/yoke/adapters/codex");
+var createSDKBridge = require("../lib/sdk-bridge").createSDKBridge;
 
 function choices(count) {
   var result = [];
@@ -168,4 +169,22 @@ test("capability selection chooses one native or fallback path truthfully", func
   assert.equal(userInput.createFallbackServer(legacyAdapter, function () {}).name, "yoke-user-input");
   assert.equal(createClaudeAdapter({ cwd: process.cwd() }).userInputCapability.transport, "AskUserQuestion/onElicitation");
   assert.equal(codexAdapterModule.createCodexAdapter({ cwd: process.cwd() }).userInputCapability.transport, "item/tool/requestUserInput");
+});
+
+test("Clay auto-approves every exact Yoke structured-input transport name", function () {
+  var bridge = createSDKBridge({
+    cwd: process.cwd(),
+    sessionManager: {},
+    adapter: {},
+    send: function () {},
+  });
+  var names = [
+    "ask_user_questions",
+    "mcp__yoke-user-input__ask_user_questions",
+    "mcp__clay-ask-user__ask_user_questions",
+  ];
+  for (var i = 0; i < names.length; i++) {
+    assert.equal(bridge.checkToolWhitelist(names[i], {}).behavior, "allow");
+  }
+  assert.equal(bridge.checkToolWhitelist("ask_user_questions_extra", {}), null);
 });
