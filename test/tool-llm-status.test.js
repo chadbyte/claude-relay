@@ -45,3 +45,18 @@ test("declarative renderer uses composition-safe binding and scroll-stable focus
   assert.match(source, /bindToolTextInput\(input/);
   assert.match(source, /focus\(\{ preventScroll: true \}\)/);
 });
+
+test("Home suppresses fallback status for authored model selectors and disposes mounted surfaces", async function () {
+  var root = path.join(__dirname, "..");
+  var tree = await import(pathToFileURL(path.join(root, "lib/public/modules/tool-ui-tree.js")).href);
+  var tools = fs.readFileSync(path.join(root, "lib/public/modules/home-tools.js"), "utf8");
+  var css = fs.readFileSync(path.join(root, "lib/public/css/home-hub.css"), "utf8");
+  assert.strictEqual(tree.shouldInjectToolLlmStatus({ manifest: { permissions: ["llm"] }, uiTree: { type: "text" } }), true);
+  assert.strictEqual(tree.shouldInjectToolLlmStatus({ manifest: { permissions: ["llm"] }, uiTree: { type: "stack", children: [{ type: "model-select" }] } }), false);
+  assert.strictEqual(tree.shouldInjectToolLlmStatus({ manifest: { permissions: [] }, uiTree: { type: "text" } }), false);
+  assert.strictEqual(tree.isToolModelAlias("deep"), true);
+  assert.strictEqual(tree.isToolModelAlias("vendor/model"), false);
+  assert.match(tools, /shouldInjectToolLlmStatus\(definition\)/);
+  assert.match(tools, /llmStatuses\[toolId\]\.dispose\(\)/);
+  assert.doesNotMatch(css, /\.tool-llm-status\s*\{[^}]*border:/s);
+});

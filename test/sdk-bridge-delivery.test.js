@@ -54,6 +54,37 @@ test("pushMessage retires a query handle that rejects delivery", function() {
   assert.strictEqual(session.messageQueue, null);
 });
 
+test("session runtime refresh retires idle handles and defers busy handles to the next turn", function() {
+  var bridge = createBridge();
+  var idleClosed = 0;
+  var idle = {
+    queryInstance: { close: function () { idleClosed++; } },
+    abortController: {},
+    messageQueue: {},
+    isProcessing: false,
+  };
+  assert.strictEqual(bridge.refreshSessionRuntime(idle), true);
+  assert.strictEqual(idleClosed, 1);
+  assert.strictEqual(idle.queryInstance, null);
+  assert.strictEqual(idle._runtimeRefreshRequested, false);
+
+  var busyClosed = 0;
+  var busy = {
+    localId: 23,
+    queryInstance: { pushMessage: function () { return true; }, close: function () { busyClosed++; } },
+    abortController: {},
+    messageQueue: {},
+    isProcessing: true,
+  };
+  assert.strictEqual(bridge.refreshSessionRuntime(busy), true);
+  assert.strictEqual(busyClosed, 0);
+  assert.strictEqual(busy._runtimeRefreshRequested, true);
+  assert.strictEqual(bridge.pushMessage(busy, "next turn"), false);
+  assert.strictEqual(busyClosed, 1);
+  assert.strictEqual(busy.queryInstance, null);
+  assert.strictEqual(busy._runtimeRefreshRequested, false);
+});
+
 test("a started session persists its identity and refreshes split anchors immediately", function() {
   var saved = [];
   var assigned = [];

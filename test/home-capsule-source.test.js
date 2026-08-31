@@ -49,11 +49,19 @@ FakeElement.prototype.setAttribute = function (name, value) { this.attributes[na
 FakeElement.prototype.removeAttribute = function (name) { delete this.attributes[name]; };
 FakeElement.prototype.getAttribute = function (name) { return this.attributes[name] === undefined ? null : this.attributes[name]; };
 FakeElement.prototype.focus = function (options) { this.ownerDocument.activeElement = this; this.focusOptions = options || null; };
+FakeElement.prototype.contains = function (target) {
+  if (target === this) return true;
+  for (var i = 0; i < this.children.length; i++) {
+    if (this.children[i].contains(target)) return true;
+  }
+  return false;
+};
 FakeElement.prototype.querySelectorAll = function (selector) {
   var matches = [];
   function visit(node) {
     if (selector === "[data-capsule-runtime-surface]" && node.dataset.capsuleRuntimeSurface !== undefined) matches.push(node);
     if (selector === '[role="tab"]' && node.getAttribute("role") === "tab") matches.push(node);
+    if (selector === '[role="menuitem"]' && node.getAttribute("role") === "menuitem") matches.push(node);
     for (var i = 0; i < node.children.length; i++) visit(node.children[i]);
   }
   visit(this);
@@ -73,7 +81,19 @@ test("Workbench source inspector is text-safe, focus-restoring, and keeps runtim
   var originalLucide = global.lucide;
   var originalWindow = global.window;
   var highlightCalls = [];
-  var fakeDocument = { activeElement: null, createElement: function (tag) { return new FakeElement(tag, fakeDocument); } };
+  var documentListeners = Object.create(null);
+  var fakeDocument = {
+    activeElement: null,
+    createElement: function (tag) { return new FakeElement(tag, fakeDocument); },
+    addEventListener: function (type, handler) { documentListeners[type] = documentListeners[type] || []; documentListeners[type].push(handler); },
+    removeEventListener: function (type, handler) {
+      documentListeners[type] = (documentListeners[type] || []).filter(function (item) { return item !== handler; });
+    },
+    emit: function (type, event) {
+      var listeners = (documentListeners[type] || []).slice();
+      for (var i = 0; i < listeners.length; i++) listeners[i](event || {});
+    },
+  };
   global.document = fakeDocument;
   global.requestAnimationFrame = function (callback) { callback(); return 1; };
   global.lucide = { createIcons: function () {} };
@@ -105,10 +125,50 @@ test("Workbench source inspector is text-safe, focus-restoring, and keeps runtim
     assert.strictEqual(root.children.length, 1);
     assert.strictEqual(chrome.children[0].className, "home-capsule-chrome-controls");
     assert.strictEqual(root.children.indexOf(chrome.children[0]), -1);
-    var sourceButton = chrome.children[0].children[0];
-    assert.strictEqual(sourceButton.getAttribute("aria-label"), "View source for Safe Source");
-    assert.strictEqual(sourceButton.title, "View Capsule source");
-    sourceButton.emit("click");
+    var toolbar = chrome.children[0];
+    var actionsButton = toolbar.children[1];
+    var actionsMenu = toolbar.children[2];
+    var sourceItem = actionsMenu.children[0];
+    assert.strictEqual(toolbar.children[0].className, "home-capsule-access");
+    assert.strictEqual(actionsButton.getAttribute("aria-label"), "Safe Source Capsule actions");
+    assert.strictEqual(actionsButton.getAttribute("aria-haspopup"), "menu");
+    assert.strictEqual(actionsButton.getAttribute("aria-expanded"), "false");
+    assert.strictEqual(actionsMenu.getAttribute("role"), "menu");
+    assert.strictEqual(sourceItem.getAttribute("role"), "menuitem");
+    assert.strictEqual(sourceItem.tabIndex, -1);
+    assert.match(sourceItem.innerHTML, /View source/);
+    assert.doesNotMatch(actionsButton.innerHTML, />Source</);
+    var openKey = actionsButton.emit("keydown", { key: "ArrowDown" });
+    assert.strictEqual(openKey.defaultPrevented, true);
+    assert.strictEqual(actionsMenu.hidden, false);
+    assert.strictEqual(actionsButton.getAttribute("aria-expanded"), "true");
+    assert.strictEqual(fakeDocument.activeElement, sourceItem);
+    var menuEscape = actionsMenu.emit("keydown", { key: "Escape", target: sourceItem });
+    assert.strictEqual(menuEscape.defaultPrevented, true);
+    assert.strictEqual(actionsMenu.hidden, true);
+    assert.strictEqual(fakeDocument.activeElement, actionsButton);
+    var enterKey = actionsButton.emit("keydown", { key: "Enter" });
+    assert.notStrictEqual(enterKey.defaultPrevented, true);
+    actionsButton.emit("click");
+    assert.strictEqual(actionsMenu.hidden, false);
+    var arrowDown = actionsMenu.emit("keydown", { key: "ArrowDown", target: sourceItem });
+    var arrowUp = actionsMenu.emit("keydown", { key: "ArrowUp", target: sourceItem });
+    var homeKey = actionsMenu.emit("keydown", { key: "Home", target: sourceItem });
+    var endKey = actionsMenu.emit("keydown", { key: "End", target: sourceItem });
+    assert.strictEqual(arrowDown.defaultPrevented, true);
+    assert.strictEqual(arrowUp.defaultPrevented, true);
+    assert.strictEqual(homeKey.defaultPrevented, true);
+    assert.strictEqual(endKey.defaultPrevented, true);
+    actionsButton.emit("click");
+    assert.strictEqual(actionsMenu.hidden, true);
+    actionsButton.emit("click");
+    fakeDocument.emit("pointerdown", { target: new FakeElement("div", fakeDocument) });
+    assert.strictEqual(actionsMenu.hidden, true);
+    var spaceKey = actionsButton.emit("keydown", { key: " " });
+    assert.notStrictEqual(spaceKey.defaultPrevented, true);
+    actionsButton.emit("click");
+    assert.strictEqual(actionsMenu.hidden, false);
+    sourceItem.emit("click");
     assert.strictEqual(sent[0].type, "tool_source_get");
     assert.strictEqual(runtime.hidden, true);
     assert.strictEqual(root.children.indexOf(runtime) !== -1, true);
@@ -162,8 +222,16 @@ test("Workbench source inspector is text-safe, focus-restoring, and keeps runtim
     assert.strictEqual(escape.defaultPrevented, true);
     assert.strictEqual(runtime.hidden, false);
     assert.strictEqual(root.children.indexOf(runtime) !== -1, true);
-    assert.strictEqual(fakeDocument.activeElement, sourceButton);
-    assert.deepStrictEqual(sourceButton.focusOptions, { preventScroll: true });
+    assert.strictEqual(fakeDocument.activeElement, actionsButton);
+    assert.deepStrictEqual(actionsButton.focusOptions, { preventScroll: true });
+    assert.strictEqual(actionsMenu.hidden, true);
+    actionsButton.emit("click");
+    sourceItem.emit("click");
+    var loadingInspector = root.children[root.children.length - 1];
+    loadingInspector.children[0].children[0].emit("click");
+    assert.strictEqual(runtime.hidden, false);
+    assert.strictEqual(fakeDocument.activeElement, actionsButton);
+    assert.strictEqual(actionsMenu.hidden, true);
 
     var serverRoot = new FakeElement("div", fakeDocument);
     var serverChrome = new FakeElement("div", fakeDocument);
@@ -171,15 +239,26 @@ test("Workbench source inspector is text-safe, focus-restoring, and keeps runtim
     serverDisplay.dataset.capsuleRuntimeSurface = "true";
     sourceModule.mountCapsuleHostControls("board", { manifest: { id: "board", name: "Board", runtime: "server" }, metadata: { mateEditingAllowed: false } }, serverChrome, serverRoot);
     serverRoot.appendChild(serverDisplay);
-    assert.strictEqual(serverChrome.children[0].children.length, 1);
+    assert.strictEqual(serverChrome.children[0].children.length, 2);
+    assert.strictEqual(serverChrome.children[0].children[0].className, "home-capsule-actions-trigger");
+    assert.strictEqual(serverChrome.children[0].children[1].getAttribute("role"), "menu");
     serverChrome.children[0].children[0].emit("click");
+    serverChrome.children[0].children[1].children[0].emit("click");
     var serverRequest = sent[sent.length - 1];
     sourceModule.handleToolSourceState({ type: "tool_source_state", toolId: "board", requestId: serverRequest.requestId, ok: true, manifest: { id: "board", name: "Board", runtime: "server" }, uiTree: { type: "board" }, logicSource: null, logicAvailable: false, revision: "server-revision" });
     var serverInspector = serverRoot.children[serverRoot.children.length - 1];
     var serverTabs = serverInspector.querySelectorAll('[role="tab"]');
     serverTabs[2].emit("click");
     assert.strictEqual(serverInspector.children[serverInspector.children.length - 1].textContent, "Logic is server-managed and is not available as authored Capsule source.");
-    assert.strictEqual(serverChrome.children[0].children.length, 1);
+    assert.strictEqual(serverChrome.children[0].children.length, 2);
+
+    var disposeRoot = new FakeElement("div", fakeDocument);
+    var disposeChrome = new FakeElement("div", fakeDocument);
+    sourceModule.mountCapsuleHostControls("dispose-menu", { manifest: { id: "dispose-menu", name: "Dispose Menu", runtime: "server" } }, disposeChrome, disposeRoot);
+    disposeChrome.children[0].children[0].emit("click");
+    assert.strictEqual(documentListeners.pointerdown.length, 1);
+    sourceModule.disposeCapsuleHostControls("dispose-menu");
+    assert.strictEqual(documentListeners.pointerdown.length, 0);
   } finally {
     global.document = originalDocument;
     global.requestAnimationFrame = originalRaf;
@@ -207,7 +286,10 @@ test("source inspector styling remains responsive and protocol routing stays nar
   assert.match(index, /id="home-dock-switcher"[\s\S]*id="home-dock-context"[\s\S]*class="home-dock-actions"/);
   assert.match(hubCss, /\.home-dock-context\[hidden\] \{ display: none; \}/);
   assert.match(hubCss, /@media \(max-width: 768px\)[\s\S]*\.home-dock-return span \{ display: none; \}/);
-  assert.match(css, /@media \(max-width: 1100px\)[\s\S]*\.home-capsule-source-label,[\s\S]*display: none/);
+  assert.match(css, /\.home-capsule-actions-trigger[\s\S]*width: 28px/);
+  assert.match(css, /\.home-capsule-actions-menu \{[\s\S]*position: absolute[\s\S]*right: 0/);
+  assert.match(css, /\.home-capsule-actions-menu\[hidden\] \{ display: none; \}/);
+  assert.doesNotMatch(css, /home-capsule-source-action|home-capsule-source-label/);
   assert.match(css, /@media \(max-width: 600px\)[\s\S]*\.home-capsule-access-copy/);
   assert.match(dock, /function clearDockContext\(contextEl\)[\s\S]*onChromeHide\(\)[\s\S]*contextEl\.innerHTML = "";[\s\S]*contextEl\.hidden = true/);
   assert.match(dock, /contextEl\.hidden = false;[\s\S]*selected\.render\(contentEl, contextEl\)/);
@@ -215,6 +297,11 @@ test("source inspector styling remains responsive and protocol routing stays nar
   assert.match(tools, /onChromeHide: function \(\) \{ disposeCapsuleHostControls\(toolId\); \}/);
   assert.doesNotMatch(tools, /mountCapsuleHostControls\(toolId, definition, root\)/);
   assert.doesNotMatch(css, /Source Serif|Georgia|#[0-9a-f]{3,8}/i);
+  assert.match(sourceModule, /aria-haspopup", "menu"/);
+  assert.match(sourceModule, /setAttribute\("role", "menu"\)/);
+  assert.match(sourceModule, /setAttribute\("role", "menuitem"\)/);
+  assert.match(sourceModule, /document\.removeEventListener\("pointerdown", host\.outsideMenuHandler, true\)/);
+  assert.doesNotMatch(sourceModule, /home-capsule-source-action|home-capsule-source-label/);
   assert.match(sourceModule, /language = index === 2 \? "javascript" : "json"/);
   assert.match(sourceModule, /code\.textContent = text[\s\S]*highlighter\.highlightElement\(code\)/);
   assert.match(sourceModule, /removeAttribute\("data-highlighted"\)/);
@@ -231,7 +318,12 @@ test("Mate access switch waits for server confirmation and reports errors", asyn
   var originalDocument = global.document;
   var originalRaf = global.requestAnimationFrame;
   var originalLucide = global.lucide;
-  var fakeDocument = { activeElement: null, createElement: function (tag) { return new FakeElement(tag, fakeDocument); } };
+  var fakeDocument = {
+    activeElement: null,
+    createElement: function (tag) { return new FakeElement(tag, fakeDocument); },
+    addEventListener: function () {},
+    removeEventListener: function () {},
+  };
   global.document = fakeDocument;
   global.requestAnimationFrame = function (callback) { callback(); return 1; };
   global.lucide = { createIcons: function () {} };
@@ -245,10 +337,10 @@ test("Mate access switch waits for server confirmation and reports errors", asyn
     var definition = { manifest: { id: "permission", name: "Permission", runtime: "worker" }, metadata: { mateEditingAllowed: false } };
     sourceModule.mountCapsuleHostControls("permission", definition, chrome, root);
     assert.strictEqual(root.children.length, 0);
-    var access = chrome.children[0].children[1].children[0];
+    var access = chrome.children[0].children[0].children[0];
     assert.strictEqual(access.getAttribute("aria-label"), "Allow Mate editing for Permission");
     assert.strictEqual(access.getAttribute("aria-describedby"), "home-capsule-access-help-permission");
-    assert.strictEqual(chrome.children[0].children[1].children[2].textContent, "Allows Mates to inspect and propose edits to this Capsule source.");
+    assert.strictEqual(chrome.children[0].children[0].children[2].textContent, "Allows Mates to inspect and propose edits to this Capsule source.");
     access.checked = true;
     access.emit("change");
     assert.strictEqual(access.checked, false);
@@ -258,12 +350,12 @@ test("Mate access switch waits for server confirmation and reports errors", asyn
     assert.strictEqual(access.checked, true);
     assert.strictEqual(access.disabled, false);
     assert.strictEqual(access.getAttribute("aria-checked"), "true");
-    assert.strictEqual(chrome.children[0].children[1].children[1].children[1].textContent, "On");
+    assert.strictEqual(chrome.children[0].children[0].children[1].children[1].textContent, "On");
     access.checked = false;
     access.emit("change");
     sourceModule.handleToolMateAccessState({ type: "tool_mate_access_state", toolId: "permission", ok: false, error: "Save failed" });
     assert.strictEqual(access.checked, true);
-    assert.strictEqual(chrome.children[0].children[1].children[1].children[1].textContent, "Save failed");
+    assert.strictEqual(chrome.children[0].children[0].children[1].children[1].textContent, "Save failed");
   } finally {
     global.document = originalDocument;
     global.requestAnimationFrame = originalRaf;

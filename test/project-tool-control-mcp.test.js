@@ -46,10 +46,17 @@ test("project Mate MCP boundary routes source and authoring signatures without M
     remove: function (userId, toolId) { calls.push(["remove", userId, toolId]); return { removed: toolId }; },
   });
 
+  var listed = await valueFrom(namedTool(server, "clay_tool_list"), {});
+  var translator = listed.filter(function (item) { return item.id === "translator"; })[0];
+  assert.match(translator.description, /Translate passages/);
+  assert.match(translator.useWhen, /Korean-English translation/);
+  assert.match(translator.skills, /clay_tool_snapshot/);
+  assert.deepStrictEqual(calls[0], ["list", "default"]);
+
   var source = await valueFrom(namedTool(server, "clay_tool_source"), { toolId: "boundary-source" });
   assert.strictEqual(source.manifest.id, "boundary-source");
   assert.match(source.logicSource, /boundary: true/);
-  assert.deepStrictEqual(calls[0], ["source", "default", "boundary-source"]);
+  assert.deepStrictEqual(calls[1], ["source", "default", "boundary-source"]);
 
   await valueFrom(namedTool(server, "clay_tool_install"), {
     manifest: { id: "install-id", name: "Install" }, uiTree: { type: "stack" }, logicSource: "var tool = { initialState: {}, actions: {} };",
@@ -59,7 +66,7 @@ test("project Mate MCP boundary routes source and authoring signatures without M
     uiTree: { type: "stack" }, logicSource: "var tool = { initialState: {}, actions: {} };",
   });
   await valueFrom(namedTool(server, "clay_tool_uninstall"), { toolId: "remove-id" });
-  assert.deepStrictEqual(calls.slice(1), [
+  assert.deepStrictEqual(calls.slice(2), [
     ["install", "default", "install-id"],
     ["update", "default", "update-id", "revision-1"],
     ["remove", "default", "remove-id"],

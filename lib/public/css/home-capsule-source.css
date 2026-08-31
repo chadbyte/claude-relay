@@ -1,5 +1,6 @@
 /* Workbench chrome for Capsule source and Mate access controls. */
 .home-capsule-chrome-controls {
+  position: relative;
   display: flex;
   flex: 0 0 auto;
   align-items: center;
@@ -7,7 +8,7 @@
   min-width: 0;
 }
 
-.home-capsule-source-action,
+.home-capsule-actions-trigger,
 .home-capsule-source-back {
   display: inline-flex;
   align-items: center;
@@ -24,17 +25,60 @@
   cursor: pointer;
 }
 
-.home-capsule-source-action:hover,
+.home-capsule-actions-trigger:hover,
+.home-capsule-actions-trigger[aria-expanded="true"],
 .home-capsule-source-back:hover { background: var(--bg-hover); color: var(--text); }
-.home-capsule-source-action:focus-visible,
+.home-capsule-actions-trigger:focus-visible,
+.home-capsule-actions-item:focus-visible,
 .home-capsule-source-back:focus-visible,
 .home-capsule-source-tab:focus-visible,
 .home-capsule-access input:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
-.home-capsule-source-action .lucide,
+.home-capsule-actions-trigger .lucide,
 .home-capsule-source-back .lucide { width: 14px; height: 14px; }
+
+.home-capsule-actions-trigger {
+  justify-content: center;
+  width: 28px;
+  padding-inline: 6px;
+}
+
+.home-capsule-actions-menu {
+  position: absolute;
+  z-index: 24;
+  top: calc(100% + 5px);
+  right: 0;
+  min-width: 148px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-elevated, var(--bg));
+  box-shadow: 0 8px 24px rgba(var(--shadow-rgb), .16);
+}
+.home-capsule-actions-menu[hidden] { display: none; }
+
+.home-capsule-actions-item {
+  display: flex;
+  width: 100%;
+  min-height: 30px;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+.home-capsule-actions-item:hover,
+.home-capsule-actions-item:focus-visible { background: var(--bg-hover); color: var(--text); }
+.home-capsule-actions-item .lucide { width: 14px; height: 14px; }
 
 .home-capsule-access {
   display: flex;
@@ -171,9 +215,7 @@
 .home-capsule-source-code:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 
 @media (max-width: 1100px) {
-  .home-capsule-source-label,
   .home-capsule-access-status { display: none; }
-  .home-capsule-source-action { width: 28px; padding-inline: 6px; }
 }
 
 @media (max-width: 600px) {

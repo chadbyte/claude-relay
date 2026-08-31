@@ -24,6 +24,12 @@ function harness(timeoutMs) {
     },
   };
   projects.set("home", projectContext);
+  var catalogRefreshes = 0;
+  projects.set("mate-test", {
+    forEachClient: function () {},
+    getStatus: function () { return { isMate: true, projectOwnerId: null }; },
+    refreshCapsuleCatalog: function () { catalogRefreshes++; },
+  });
   var users = {
     isMultiUser: function () { return false; },
     findUserById: function () { return null; },
@@ -39,7 +45,7 @@ function harness(timeoutMs) {
   var handlers = {
     list: function () {
       return toolsHandler.installedManifests("default").map(function (manifest) {
-        return { id: manifest.id, name: manifest.name, runtime: manifest.runtime, permissions: manifest.permissions || [], skills: manifest.skills || "" };
+        return { id: manifest.id, name: manifest.name, description: manifest.description || "", useWhen: manifest.useWhen || "", runtime: manifest.runtime, permissions: manifest.permissions || [], skills: manifest.skills || "" };
       });
     },
     snapshot: function (toolId) {
@@ -56,7 +62,7 @@ function harness(timeoutMs) {
     update: function (toolId, input) { return toolsHandler.updateForMate("default", toolId, input); },
     uninstall: function (toolId) { return toolsHandler.removeForMate("default", toolId); },
   };
-  return { sockets: sockets, projectClients: projectClients, projectContext: projectContext, board: boardHandler, tools: toolsHandler, defs: getToolDefs(handlers) };
+  return { sockets: sockets, projectClients: projectClients, projectContext: projectContext, board: boardHandler, tools: toolsHandler, defs: getToolDefs(handlers), catalogRefreshes: function () { return catalogRefreshes; } };
 }
 
 function tool(defs, name) {
@@ -77,13 +83,21 @@ test("mate tool MCP exposes driving and approved authoring tools with installed 
   assert.ok(listed.value.some(function (item) { return item.id === "board" && item.runtime === "server"; }));
   var scratchpad = listed.value.filter(function (item) { return item.id === "scratchpad"; })[0];
   assert.match(scratchpad.skills, /clay_tool_set/);
+  assert.match(scratchpad.description, /persistent notes/);
+  assert.match(scratchpad.useWhen, /save, review, or remove notes/);
   var translator = listed.value.filter(function (item) { return item.id === "translator"; })[0];
   assert.deepStrictEqual(translator.permissions, ["llm"]);
   var installDescription = tool(ctx.defs, "clay_tool_install").description;
+  assert.match(tool(ctx.defs, "clay_tool_list").description, /full detailed usage recipes/);
+  assert.match(installDescription, /description\?: concise single-line purpose/);
+  assert.match(installDescription, /useWhen\?: concise single-line trigger/);
   assert.match(installDescription, /safe JSON nodes/);
   assert.match(installDescription, /tone neutral\/accent\/info\/success\/warning\/danger/);
   assert.match(installDescription, /Arbitrary class, style, HTML/);
   assert.match(installDescription, /section, callout, icon/);
+  assert.match(installDescription, /model-select is only for worker Capsules/);
+  assert.match(installDescription, /fast\/standard\/deep capability aliases/);
+  assert.match(installDescription, /vendor model IDs/);
   assert.match(installDescription, /when conditionally renders/);
   assert.match(installDescription, /api\.setState\(nextState\)/);
   assert.match(installDescription, /uncaught action error restores the pre-action UI state/);
@@ -122,6 +136,7 @@ test("Mate source and update obey the user gate, revisions, and preserve storage
     logicSource: "var tool = { initialState: { edited: true }, actions: {} };",
   });
   assert.strictEqual(updated.value.manifest.name, "Edited Widget");
+  assert.strictEqual(ctx.catalogRefreshes(), 2);
   assert.notStrictEqual(updated.value.revision, source.value.revision);
   assert.strictEqual(fs.readFileSync(path.join(root, "editable-widget", "data.db"), "utf8"), "keep\n");
   var stale = await result(tool(ctx.defs, "clay_tool_update"), {
@@ -189,6 +204,40 @@ test("Mate access broadcasts only to authenticated sockets for the same user", a
   assert.deepStrictEqual(otherMessages, []);
 });
 
+test("Capsule catalog refresh is scoped to the owning Mate projects", function () {
+  var ownerRefreshes = 0;
+  var otherRefreshes = 0;
+  var projects = new Map();
+  projects.set("broken-mate", {
+    forEachClient: function () {},
+    getStatus: function () { throw new Error("refresh unavailable"); },
+    refreshCapsuleCatalog: function () { throw new Error("must not be reached"); },
+  });
+  projects.set("owner-mate", {
+    forEachClient: function () {},
+    getStatus: function () { return { isMate: true, projectOwnerId: "owner" }; },
+    refreshCapsuleCatalog: function () { ownerRefreshes++; },
+  });
+  projects.set("other-mate", {
+    forEachClient: function () {},
+    getStatus: function () { return { isMate: true, projectOwnerId: "other" }; },
+    refreshCapsuleCatalog: function () { otherRefreshes++; },
+  });
+  var users = {
+    isMultiUser: function () { return true; },
+    findUserById: function (id) { return { id: id, linuxUser: null }; },
+  };
+  var tools = serverTools.attachTools({ users: users, projects: projects });
+  var installed = tools.installForMate("owner", {
+    manifest: { id: "owner-catalog-tool", name: "Owner Catalog Tool" },
+    logicSource: "var tool = { initialState: {}, actions: {} };",
+    uiTree: { type: "stack" },
+  });
+  assert.strictEqual(installed.manifest.id, "owner-catalog-tool");
+  assert.strictEqual(ownerRefreshes, 1);
+  assert.strictEqual(otherRefreshes, 0);
+});
+
 test("mate capsule install uses registry validation and broadcasts live changes", async function () {
   var ctx = harness();
   var sent = [];
@@ -199,6 +248,7 @@ test("mate capsule install uses registry validation and broadcasts live changes"
     logicSource: "var tool = { initialState: {}, actions: {} };",
   });
   assert.strictEqual(installed.value.manifest.id, "mate-widget");
+  assert.strictEqual(ctx.catalogRefreshes(), 1);
   assert.strictEqual(sent[0].type, "tool_installed");
 
   var replacement = await result(tool(ctx.defs, "clay_tool_install"), {
@@ -219,6 +269,7 @@ test("mate capsule install uses registry validation and broadcasts live changes"
 
   var removed = await result(tool(ctx.defs, "clay_tool_uninstall"), { toolId: "mate-widget" });
   assert.strictEqual(removed.value.removed, true);
+  assert.strictEqual(ctx.catalogRefreshes(), 2);
   assert.strictEqual(sent[1].type, "tool_removed");
 });
 

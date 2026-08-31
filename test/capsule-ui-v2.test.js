@@ -21,9 +21,10 @@ test("shipped Translator and Scratchpad demonstrate UI v2 without changing contr
   var translatorTypes = [];
   walk(translator, function (node) { if (node.id) translatorIds.push(node.id); translatorTypes.push(node.type); });
   walk(scratchpad, function (node) { if (node.id) scratchpadIds.push(node.id); });
-  assert.deepStrictEqual(translatorIds.sort(), ["source-text", "translate", "translation-direction"]);
+  assert.deepStrictEqual(translatorIds.sort(), ["source-text", "translate", "translation-direction", "translation-model"]);
   assert.deepStrictEqual(scratchpadIds.sort(), ["add-note", "scratch-input"]);
   assert.ok(translatorTypes.indexOf("section") !== -1);
+  assert.ok(translatorTypes.indexOf("model-select") !== -1);
   assert.ok(translatorTypes.indexOf("divider") === -1);
   assert.strictEqual(translator.children[0].children[1].props.role, "display");
   assert.strictEqual(translator.children[1].props.variant, "raised");

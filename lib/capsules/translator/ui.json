@@ -20,6 +20,17 @@
           "props": { "gap": "md" },
           "children": [
             {
+              "type": "model-select",
+              "id": "translation-model",
+              "bind": "model",
+              "action": "setModel",
+              "props": {
+                "label": "Model",
+                "hint": "Choose the capability Clay should use for translations.",
+                "required": true
+              }
+            },
+            {
               "type": "select",
               "id": "translation-direction",
               "bind": "direction",

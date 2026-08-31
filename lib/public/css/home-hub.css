@@ -766,15 +766,11 @@ body.home-active #main-area { border: 0; border-radius: 0; }
 }
 
 .tool-llm-status {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 4px 12px;
-  align-items: center;
-  margin: 0 0 12px;
-  padding: 8px 10px;
-  border: 1px solid var(--border-subtle);
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--bg-hover) 52%, var(--bg));
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  align-items: baseline;
+  margin: 0 2px 10px;
 }
 
 .tool-llm-identity {
@@ -830,21 +826,11 @@ body.home-active #main-area { border: 0; border-radius: 0; }
 }
 
 .tool-llm-error {
-  grid-column: 1 / -1;
+  flex-basis: 100%;
   margin: 1px 0 0;
   color: var(--danger);
   font-size: 11px;
   line-height: 1.35;
-}
-
-@media (max-width: 600px) {
-  .tool-llm-status {
-    grid-template-columns: 1fr;
-  }
-
-  .tool-llm-actions {
-    justify-content: flex-start;
-  }
 }
 
 .home-tool-error {

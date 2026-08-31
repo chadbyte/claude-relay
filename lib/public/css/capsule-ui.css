@@ -187,6 +187,25 @@
 }
 .tool-input:disabled,
 .tool-select:disabled { cursor: not-allowed; opacity: .55; background: var(--bg-hover); }
+.tool-model-select { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.tool-model-select-feedback {
+  color: var(--danger);
+  font-size: 10px;
+  line-height: 1.4;
+}
+.tool-model-select-retry {
+  align-self: flex-start;
+  padding: 2px 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 650;
+  cursor: pointer;
+}
+.tool-model-select-retry:hover,
+.tool-model-select-retry:focus-visible { color: var(--text); text-decoration: underline; text-underline-offset: 2px; }
 textarea.tool-input { min-height: 92px; resize: vertical; }
 .tool-field--size-xs .tool-input, .tool-field--size-xs .tool-select { padding: 6px 8px; font-size: 11px; }
 .tool-field--size-sm .tool-input, .tool-field--size-sm .tool-select { padding: 7px 9px; font-size: 12px; }

@@ -67,6 +67,18 @@ function FakeElement(tagName, ownerDocument) {
   this.focusOptions = null;
   this.className = "";
   this.textContent = "";
+  var self = this;
+  this.classList = {
+    add: function (name) { if (self.className.split(/\s+/).indexOf(name) === -1) self.className = (self.className + " " + name).trim(); },
+    remove: function (name) { self.className = self.className.split(/\s+/).filter(function (item) { return item && item !== name; }).join(" "); },
+    toggle: function (name, force) {
+      if (force === false) this.remove(name);
+      else if (force === true) this.add(name);
+      else if (self.className.split(/\s+/).indexOf(name) === -1) this.add(name);
+      else this.remove(name);
+    },
+    contains: function (name) { return self.className.split(/\s+/).indexOf(name) !== -1; },
+  };
 }
 
 FakeElement.prototype.appendChild = function (child) {
@@ -275,6 +287,73 @@ test("v1 declarative defaults remain renderable", async function () {
     var nodes = flatten(container);
     assert.ok(nodes.some(function (node) { return node.className === "tool-card"; }));
     assert.ok(nodes.some(function (node) { return node.textContent === "Legacy"; }));
+  } finally {
+    global.document = originalDocument;
+  }
+});
+
+test("model-select resolves fixed aliases, ignores stale replies, dispatches normally, and preserves focus", async function () {
+  var originalDocument = global.document;
+  var fakeDocument = { activeElement: null, createElement: function (tagName) { return new FakeElement(tagName, fakeDocument); } };
+  global.document = fakeDocument;
+  try {
+    var root = path.join(__dirname, "../lib/public/modules/");
+    var wsRef = await import(pathToFileURL(path.join(root, "ws-ref.js")).href);
+    var status = await import(pathToFileURL(path.join(root, "tool-llm-status.js")).href);
+    var renderer = await import(pathToFileURL(path.join(root, "tool-renderer.js")).href);
+    var sent = [];
+    wsRef.setWs({ readyState: 1, send: function (payload) { sent.push(JSON.parse(payload)); } });
+    var container = new FakeElement("div", fakeDocument);
+    var actions = [];
+    var tree = { type: "stack", children: [
+      { type: "model-select", id: "model", bind: "model", action: "setModel", props: { label: "Model", hint: "Used for this Capsule." } },
+      { type: "select", id: "direction", bind: "direction", action: "setDirection", props: { label: "Direction", options: ["ko-en", "en-ko"] } },
+    ] };
+    renderer.renderToolUi("model-test", tree, { model: "fast", direction: "ko-en" }, function (action, args) { actions.push({ action: action, args: args }); }, container);
+    assert.deepStrictEqual(sent.map(function (message) { return message.alias; }), ["fast", "standard", "deep"]);
+    var controls = container.querySelectorAll("[data-tool-control-id]");
+    var model = controls.filter(function (control) { return control.dataset.toolControlId === "model"; })[0];
+    var direction = controls.filter(function (control) { return control.dataset.toolControlId === "direction"; })[0];
+    assert.deepStrictEqual(model.children.map(function (option) { return option.value; }), ["fast", "standard", "deep"]);
+    assert.match(model.children[0].textContent, /Checking model/);
+    status.handleToolLlmConfigState({ alias: "fast", requestId: "stale", status: "ready", vendorName: "Wrong", modelName: "Wrong" });
+    assert.doesNotMatch(model.children[0].textContent, /Wrong/);
+    status.handleToolLlmConfigState({ alias: "fast", requestId: sent[0].requestId, status: "ready", vendorName: "Claude Code", modelName: "Haiku" });
+    assert.strictEqual(model.children[0].textContent, "Fast · Claude Code · Haiku");
+
+    direction.value = "en-ko";
+    assert.doesNotThrow(function () { direction.emit("change"); });
+    assert.strictEqual(actions[0].action, "setDirection");
+    model.value = "deep";
+    model.emit("change");
+    assert.strictEqual(actions[1].action, "setModel");
+    assert.strictEqual(actions[1].args.value, "deep");
+
+    status.handleToolLlmConfigState({ alias: "deep", requestId: sent[2].requestId, status: "error", error: "Deep model is unavailable." });
+    var nodes = flatten(container);
+    var retry = nodes.filter(function (node) { return node.className.indexOf("tool-model-select-retry") !== -1; })[0];
+    var feedback = nodes.filter(function (node) { return node.className.indexOf("tool-model-select-feedback") !== -1; })[0];
+    assert.strictEqual(retry.classList.contains("hidden"), false);
+    assert.strictEqual(feedback.textContent, "Deep model is unavailable.");
+    retry.emit("click");
+    assert.strictEqual(sent[sent.length - 1].alias, "deep");
+
+    model.focus();
+    renderer.renderToolUi("model-test", tree, { model: "deep", direction: "en-ko" }, function () {}, container);
+    var restored = container.querySelectorAll("[data-tool-control-id]").filter(function (control) { return control.dataset.toolControlId === "model"; })[0];
+    assert.strictEqual(fakeDocument.activeElement, restored);
+    assert.deepStrictEqual(restored.focusOptions, { preventScroll: true });
+
+    var detachedOption = model.children[0];
+    status.requestToolLlmConfiguration("fast");
+    var currentRequest = sent[sent.length - 1];
+    var detachedText = detachedOption.textContent;
+    renderer.renderToolUi("model-test", tree, { model: "fast", direction: "ko-en" }, function () {}, container);
+    status.handleToolLlmConfigState({ alias: "fast", requestId: currentRequest.requestId, status: "ready", vendorName: "OpenAI", modelName: "Mini" });
+    assert.strictEqual(detachedOption.textContent, detachedText);
+    var currentModel = container.querySelectorAll("[data-tool-control-id]").filter(function (control) { return control.dataset.toolControlId === "model"; })[0];
+    assert.strictEqual(currentModel.children[0].textContent, "Fast · OpenAI · Mini");
+    renderer.disposeToolUi(container);
   } finally {
     global.document = originalDocument;
   }
