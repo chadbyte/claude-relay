@@ -62,6 +62,19 @@ test("Codex bridge tool listing and calls retain the exact source session", asyn
   await assert.rejects(f.attached.callBridgeTool({ localId: 7, ownerId: "owner" }, "list_projects", {}), /not found/);
 });
 
+test("Codex dynamic workspace tools retain handlers and explicit auto-approval identities", async function () {
+  var f = fixture("clay");
+  var tools = f.attached.getDynamicToolDefs(f.session);
+  var search = tools.filter(function (tool) { return tool.name === "search_workspace_history"; })[0];
+  assert.equal(search.permissionName, "mcp__clay-workspace__search_workspace_history");
+  assert.equal(typeof search.handler, "function");
+  var response = await search.handler({ query: "fruit" });
+  assert.equal(response.isError, undefined);
+  var history = f.attached.getHistoryDynamicToolDefs(f.session);
+  assert.ok(history.length > 0);
+  assert.match(history[0].permissionName, /^mcp__clay-history__/);
+});
+
 test("ordinary Mate project boundary exposes common tools but no Clay compatibility or global tools", function () {
   var f = fixture("arch");
   var normalize = function () { return { type: "object" }; };

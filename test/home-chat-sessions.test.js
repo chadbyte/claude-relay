@@ -9,6 +9,7 @@ function settle() {
 function fixture(options) {
   var opts = options || {};
   var mate = { id: "mate-a", name: "A", vendor: "claude", model: "sonnet" };
+  if (opts.clay) mate.builtinKey = "clay";
   var sessions = new Map([
     [1, { localId: 1, cliSessionId: "session-old", ownerId: "u1", title: "Older", lastActivity: 10, vendor: "claude", model: "sonnet", history: [] }],
     [2, { localId: 2, cliSessionId: "session-new", ownerId: "u1", title: "Newer", lastActivity: 30, vendor: "codex", model: "gpt-5.6", history: [{ type: "user_message", text: "Hello" }] }],
@@ -18,16 +19,23 @@ function fixture(options) {
   ]);
   var subscribed = null;
   var subscription = null;
+  var subscriptions = {};
   var recorded = [];
   var manager = {
     sessions: sessions,
     subscribeSession: function (id, callback) {
       subscribed = id;
       subscription = callback;
-      return function () {};
+      subscriptions[id] = callback;
+      return function () { if (subscriptions[id] === callback) delete subscriptions[id]; };
     },
     saveSessionFile: function () {},
-    createSession: function () { throw new Error("unexpected session creation"); },
+    createSession: function (createOptions) {
+      if (!opts.allowCreate) throw new Error("unexpected session creation");
+      var session = { localId: 6, ownerId: createOptions.ownerId, vendor: createOptions.vendor, model: createOptions.model, history: [], isProcessing: false };
+      sessions.set(6, session);
+      return session;
+    },
     sendAndRecord: function (session, event) {
       recorded.push(event);
       session.history.push(event);
@@ -66,6 +74,7 @@ function fixture(options) {
     messages: messages,
     getSubscribed: function () { return subscribed; },
     emit: function (event) { if (subscription) subscription(event); },
+    emitFor: function (sessionId, event) { if (subscriptions[sessionId]) subscriptions[sessionId](event); },
     emitRecorded: function (event) {
       var session = sessions.get(subscribed);
       if (event.type === "session_id") session.cliSessionId = event.cliSessionId;
@@ -131,6 +140,37 @@ test("Explicit Mate conversation open restores the exact requested session", asy
   assert.strictEqual(f.messages[0].requestId, "open-old");
   assert.strictEqual(f.messages[0].vendor, "claude");
   assert.strictEqual(f.messages[0].model, "sonnet");
+});
+
+test("global Ask Clay keeps its stream subscription when Home opens another conversation", async function () {
+  var starts = [];
+  var f = fixture({
+    clay: true,
+    allowCreate: true,
+    sdk: { startQuery: function (session, text) { starts.push({ session: session, text: text }); } },
+  });
+  f.handler.handleMessage(f.ws, { type: "home_clay_ask", requestId: "search-request", text: "Find fruit" });
+  await settle();
+  assert.equal(starts.length, 1);
+  assert.equal(f.ws._searchClayTap.sessionId, 6);
+  f.handler.handleMessage(f.ws, { type: "home_mate_session_open", mateId: "mate-a", sessionId: "session-old", requestId: "home-request" });
+  await settle();
+  assert.equal(f.ws._homeChatTap.sessionId, 1);
+  assert.equal(f.ws._searchClayTap.sessionId, 6);
+  f.messages.length = 0;
+  f.getSession(6).responsePreview = "The fruit conversation is here.";
+  f.getSession(6).history.push({ type: "delta", text: "The fruit conversation is here." });
+  f.emitFor(6, { type: "done" });
+  var reply = f.messages.find(function (message) { return message.type === "home_mate_done"; });
+  assert.equal(reply.requestId, "search-request");
+  assert.equal(reply.text, "The fruit conversation is here.");
+  f.getSession(6).isProcessing = false;
+  f.handler.handleMessage(f.ws, { type: "home_mate_send", mateId: "mate-a", sessionId: "local:6", requestId: "search-request", text: "Which one?" });
+  await settle();
+  assert.equal(starts.length, 2);
+  assert.equal(starts[1].session.localId, 6);
+  assert.equal(f.getSession(1).history.length, 0);
+  assert.equal(f.getSession(6).history[f.getSession(6).history.length - 1].text, "Which one?");
 });
 
 test("exact Home sessions retain distinct committed model metadata", async function () {

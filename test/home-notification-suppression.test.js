@@ -50,7 +50,7 @@ test("project context delegates Home presentation on the response WebSocket", fu
   var projectSource = fs.readFileSync(path.join(__dirname, "../lib/project.js"), "utf8");
   var delegation = projectSource.slice(projectSource.indexOf("// --- DM messages"), projectSource.indexOf("// --- @Mention"));
   assert.match(delegation, /msg\.type === "home_mate_present"/);
-  assert.match(delegation, /home_mate_present[\s\S]*opts\.onDmMessage\(ws, msg\)/);
+  assert.match(delegation, /home_mate_present[\s\S]*opts\.onDmMessage\(ws, msg, slug\)/);
   var handler = attachHomeChat({
     users: { isMultiUser: function () { return true; } },
     mates: {},
@@ -72,6 +72,6 @@ test("Home reports only visible-document presentation and resyncs lifecycle chan
   assert.match(source, /type: "home_mate_present", visible: homeHubVisible && !document\.hidden/);
   assert.match(source, /document\.addEventListener\("visibilitychange", syncHomePresentation\)/);
   assert.match(source, /state\.connected !== prev\.connected && state\.connected && homeHubVisible/);
-  assert.match(source, /homeHub\.classList\.remove\("hidden"\);\s*syncHomePresentation\(\)/);
+  assert.match(source, /homeHub\.classList\.remove\("hidden"\);[\s\S]{0,120}syncHomePresentation\(\)/);
   assert.match(source, /homeHub\.classList\.add\("hidden"\);\s*syncHomePresentation\(\)/);
 });

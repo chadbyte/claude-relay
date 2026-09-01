@@ -163,6 +163,38 @@ test("main SDK queries pass the scoped environment through readiness and resumed
   assert.strictEqual(queryOptions.resumeSessionId, "resume-31");
 });
 
+test("main SDK queries expose session dynamic tools and use their canonical approval identity", async function() {
+  var queryOptions = null;
+  var adapter = {
+    vendor: "codex",
+    userInputCapability: { mode: "native", native: true },
+    createQuery: function(options) { queryOptions = options; return Promise.resolve(createEndingHandle([])); },
+  };
+  var session = { localId: 32, vendor: "codex", pendingAskUser: {}, pendingPermissions: {}, pendingElicitations: {} };
+  var bridge = createSDKBridge({
+    cwd: process.cwd(),
+    sessionManager: {
+      sessions: new Map([[32, session]]), availableModels: [], saveSessionFile: function() {},
+      broadcastSessionList: function() {}, sendAndRecord: function() {}, sendToSession: function() {},
+    },
+    adapter: adapter,
+    adapters: { codex: adapter },
+    getSessionToolDefs: function() {
+      return [{
+        name: "search_workspace_history",
+        description: "Search owned history",
+        inputSchema: {},
+        permissionName: "mcp__clay-workspace__search_workspace_history",
+        handler: function() { return Promise.resolve({ content: [] }); },
+      }];
+    },
+    send: function() {},
+  });
+  await bridge.startQuery(session, "Find prior work", null, null);
+  assert.deepEqual(queryOptions.dynamicTools.map(function(tool) { return tool.name; }), ["search_workspace_history"]);
+  assert.equal((await queryOptions.canUseTool("search_workspace_history", {}, {})).behavior, "allow");
+});
+
 test("rewind queries receive the scoped environment when they create a temporary handle", async function() {
   var capturedOptions = null;
   var handle = createEndingHandle([]);

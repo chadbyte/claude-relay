@@ -155,6 +155,7 @@ Bootstraps UI, initializes store, wires remaining Tier 3 modules. All business l
 | `home-chat-scroll.js` | User-intent-aware Home transcript following, scroll preservation, and new-activity affordance |
 | `home-debate-models.js` | Safe per-participant model selectors and override collection for Home debate approval |
 | `home-mate-creation.js` | Clay-led Mate creation proposal card, exact response routing, and restored status |
+| `search-clay-chat.js` | Query-bound compact Clay conversation inside global search, with exact-session expansion to Home |
 | `app-rate-limit.js` | Rate limit UI, countdown timers, scheduled message bubbles, fast mode indicator |
 | `app-cursors.js` | Remote cursor presence, text selection sharing, cursor toggle UI |
 | `app-rendering.js` | Message rendering, streaming, scroll management, pre-thinking dots, suggestion chips, system messages |

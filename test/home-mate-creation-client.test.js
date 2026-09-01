@@ -83,5 +83,5 @@ test("all visible Mate creation entry points route to the Clay Home interview", 
   assert.doesNotMatch(sidebar, /home-sidebar-new-mate/);
   var hub = fs.readFileSync(path.join(__dirname, "../lib/public/modules/app-home-hub.js"), "utf8");
   assert.match(hub, /createNewMateRow[\s\S]*openHomeMateAction\("mate"\)/);
-  assert.match(palette, /id: "create-mate", label: "New Mate"/);
+  assert.doesNotMatch(palette, /New Mate|create-mate/);
 });
