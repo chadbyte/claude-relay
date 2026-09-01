@@ -53,6 +53,7 @@ Wires all modules, sets up session manager and SDK bridge, dispatches messages.
 | `project-session-spawn.js` | Agent-driven sibling session creation, safety policy, and concurrency queue |
 | `project-models.js` | Vendor model discovery, loading/error responses, model matching, and selection acknowledgements |
 | `workspace-query-service.js` + `project-workspace-query.js` + `workspace-query-mcp-server.js` | Exact-owner workspace/session read projections, query-bound Mate MCP tools, stable opaque session references, and Clay-only global search capability |
+| `server-home-clay-session-links.js` | Exact-source, owner-validated navigation for opaque session references rendered in Clay responses |
 | `workspace-assignment-service.js` + `project-delegated-session.js` + `project-delegated-follow-up.js` | Durable per-user assignment proposals, exact-session approval routing, private model-resolved delegated sessions, and strictly eligible existing-session follow-ups |
 | `tool-ui-spec.js` + `tool-ui-spec-advanced.js` | Canonical safe Capsule declarative vocabulary, bounded condition/dynamic-value validation, field and collection constraints |
 | `public/modules/tool-renderer.js` + `tool-renderer-advanced.js` + `tool-renderer-chart.js` + `tool-ui-evaluator.js` | Host-rendered Capsule controls, accessible advanced primitives, truthful fixed chart geometry, safe state evaluation, and defensive collection normalization |

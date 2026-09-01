@@ -41,6 +41,8 @@ test("project workspace creates a fail-closed static descriptor and exact bound 
   assert.equal((await staticFollowUp.handler({ projectSlug: "target", targetSessionRef: "session:x", title: "No", task: "No" })).isError, true);
 
   var boundServer = f.attached.createMcpServer(adapter, f.session);
+  var sessionTools = boundServer.tools.filter(function (tool) { return ["list_project_sessions", "search_project_history", "read_project_session", "search_workspace_history", "list_workspace_activity"].indexOf(tool.name) !== -1; });
+  for (var i = 0; i < sessionTools.length; i++) assert.match(sessionTools[i].description, /\[clayos\/<sessionRef> — short label\]/);
   var result = await boundServer.tools[0].handler({ limit: 10 });
   assert.equal(result.isError, undefined);
   assert.equal(JSON.parse(result.content[0].text).projects.length, 1);

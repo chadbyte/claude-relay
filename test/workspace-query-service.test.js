@@ -33,6 +33,10 @@ function multiUserFixture() {
   projects.set("owned", project("owned", "user-a", [owned, other, legacy], { visibility: "public" }));
   projects.set("other-public", project("other-public", "user-b", [{ localId: 21, ownerId: "user-b", title: "Public other", history: [{ type: "user_message", text: "PUBLIC_SECRET" }] }], { visibility: "public" }));
   projects.set("other-shared", project("other-shared", "user-b", [{ localId: 22, ownerId: "user-b", title: "Shared other", history: [] }], { allowedUsers: ["user-a"] }));
+  projects.set("public-container", project("public-container", null, [
+    { localId: 23, ownerId: "user-a", title: "Project work", lastActivity: 15, history: [{ type: "user_message", text: "PROJECT_SESSION_MATCH" }] },
+    { localId: 24, ownerId: "user-b", title: "Foreign project work", history: [{ type: "user_message", text: "FOREIGN_PROJECT_SECRET" }] },
+  ], { visibility: "public" }));
   projects.set("worktree", project("worktree", "user-a", [{ localId: 31, ownerId: "user-a", history: [] }], { isWorktree: true }));
   projects.set("mate-a", project("mate-a", "user-a", [{ localId: 41, ownerId: "user-a", title: "Clay source", history: [] }], { isMate: true, mateId: "clay-a" }));
   projects.set("mate-custom", project("mate-custom", "user-a", [{ localId: 42, ownerId: "user-a", title: "Custom source", history: [] }], { isMate: true, mateId: "custom-a" }));
@@ -45,6 +49,9 @@ function multiUserFixture() {
   var service = attachWorkspaceQueryService({
     getProjects: function () { return projects; },
     isMultiUser: function () { return true; },
+    canAccessProject: function (userId, status) {
+      return status.visibility === "public" || status.projectOwnerId === userId || (status.allowedUsers || []).indexOf(userId) !== -1;
+    },
     resolveMate: function (userId, mateId) { return mates[userId + ":" + mateId] || null; },
     assignmentService: {
       propose: function (principal, args) { assignmentCalls.push({ method: "new", principal: principal, args: args }); return { assignmentId: "new" }; },
@@ -65,16 +72,20 @@ test("workspace binding derives an exact owner from authoritative Mate and sessi
   assert.equal(f.service.bindSource({ projectSlug: "mate-a", projectOwnerId: "user-a", isMate: true, mateId: "missing" }), null);
 });
 
-test("multi-user workspace lists only exact-owner projects and sessions", function () {
+test("multi-user workspace includes exact-owned sessions in accessible project containers", function () {
   var f = multiUserFixture();
   var projects = f.bound.listProjects({ limit: 50 }).projects;
-  assert.deepEqual(projects.map(function (item) { return item.projectSlug; }).sort(), ["mate-a", "mate-custom", "owned"]);
+  assert.deepEqual(projects.map(function (item) { return item.projectSlug; }).sort(), ["mate-a", "mate-custom", "owned", "public-container"]);
   var sessions = f.bound.listProjectSessions({ projectSlug: "owned" }).sessions;
   assert.deepEqual(sessions.map(function (item) { return item.title; }), ["Owned Session"]);
   assert.equal(sessions[0].vendor, "claude forged");
   assert.equal(sessions[0].model, "sonnet");
   assert.match(sessions[0].sessionRef, /^session:[A-Za-z0-9_-]{24}$/);
   assert.doesNotMatch(sessions[0].sessionRef, /11|runtime-secret-id/);
+  var projectSessions = f.bound.listProjectSessions({ projectSlug: "public-container" }).sessions;
+  assert.deepEqual(projectSessions.map(function (item) { return item.title; }), ["Project work"]);
+  assert.equal(f.bound.searchWorkspaceHistory({ query: "PROJECT_SESSION_MATCH", limit: 50 }).results.length, 1);
+  assert.deepEqual(f.bound.searchWorkspaceHistory({ query: "FOREIGN_PROJECT_SECRET", limit: 50 }).results, []);
   assert.throws(function () { f.bound.listProjectSessions({ projectSlug: "other-public" }); }, /owned workspace/);
 });
 
@@ -87,6 +98,23 @@ test("opaque session references survive local-ID reloads and arbitrary raw IDs a
   assert.throws(function () { f.bound.readProjectSession({ projectSlug: "owned", sessionRef: "11" }); }, /Session not found/);
   assert.throws(function () { f.bound.readProjectSession({ projectSlug: "owned", sessionRef: "local:11" }); }, /Session not found/);
   assert.throws(function () { f.bound.readProjectSession({ projectSlug: "owned", sessionRef: "session:arbitrary" }); }, /Session not found/);
+});
+
+test("opaque references resolve to owner-validated navigation without trusting caller identity", function () {
+  var f = multiUserFixture();
+  var ref = f.bound.listProjectSessions({ projectSlug: "owned" }).sessions[0].sessionRef;
+  var target = f.bound.resolveSessionNavigation({ sessionRef: ref });
+  assert.deepEqual(target, {
+    projectSlug: "owned",
+    projectTitle: "owned Title",
+    isMate: false,
+    mateId: null,
+    sessionId: 11,
+    homeSessionId: "runtime-secret-id",
+    title: "Owned Session",
+  });
+  assert.throws(function () { f.bound.resolveSessionNavigation({ sessionRef: "session:arbitrary" }); }, /Invalid session reference/);
+  assert.throws(function () { f.bound.resolveSessionNavigation({ sessionRef: "session:AAAAAAAAAAAAAAAAAAAAAAAA" }); }, /owned workspace/);
 });
 
 test("local-only references are opaque but explicitly ephemeral", function () {
@@ -136,9 +164,11 @@ test("workspace activity and project pagination are bounded and newest-first", f
   assert.equal(first.projects[0].projectSlug, "owned");
   assert.ok(first.nextCursor);
   var second = f.bound.listProjects({ limit: 1, cursor: first.nextCursor });
-  assert.equal(second.projects[0].projectSlug, "mate-a");
+  assert.equal(second.projects[0].projectSlug, "public-container");
+  var third = f.bound.listProjects({ limit: 1, cursor: second.nextCursor });
+  assert.equal(third.projects[0].projectSlug, "mate-a");
   var activity = f.bound.listWorkspaceActivity({ limit: 50 });
-  assert.deepEqual(activity.sessions.map(function (session) { return session.lastActivity; }), [20, 0, 0]);
+  assert.deepEqual(activity.sessions.map(function (session) { return session.lastActivity; }), [20, 15, 0, 0]);
 });
 
 test("custom Mates receive project tools but cannot claim builtin Clay global authority", function () {
