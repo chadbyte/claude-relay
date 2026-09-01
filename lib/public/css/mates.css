@@ -2909,30 +2909,11 @@ body.mate-dm-active .activity-inline:not(.mention-activity-bar):not(.mate-pre-ac
   }
 }
 
-/* === Mates UI gate === */
-/* body.mates-disabled is set when the user flips the Mates toggle off in
-   User Settings → Mates. body.is-multi-user is set when the deploy hosts
-   more than one user. Single-user collapses the whole Mates surface;
-   multi-user keeps Mates-adjacent containers visible (they still host
-   other users) but greys out and disables the Mates-specific bits. */
-
-/* Always hide pure-Mates UI: rotating switch hint, individual mate
-   avatars in the icon strip, and the "Ask Mate" button in the chat
-   input. These never contain anything
-   but mates, so they collapse in both modes. */
-body.mates-disabled .icon-strip-mate,
-body.mates-disabled #icon-strip-hint-mate,
-body.mates-disabled #ask-mate-btn {
-  display: none !important;
-}
-
-/* Single-user only: collapse the whole icon-strip mate wrapper since it
-   shares space with the user-strip but has no other users to display in
-   single-user mode. The DM picker stays visible in both modes so the
-   user always has a way to discover the toggle (single-user can't reach
-   the picker today since the + button lives inside the wrapper, but if
-   that ever changes the same disabled UX applies). */
-body.mates-disabled:not(.is-multi-user) #icon-strip-mate-section {
+/* === Project Mate DM gate === */
+/* This preference hides only legacy/project-local Mate DM shortcuts.
+   Home, Mate mentions, creation, debates, and memory remain available. */
+body.project-mate-dms-disabled .icon-strip-mate,
+body.project-mate-dms-disabled #icon-strip-hint-mate {
   display: none !important;
 }
 

@@ -20,3 +20,28 @@ test("global settings omit vendor-specific model defaults", function() {
   assert.doesNotMatch(settingsSource, /set_server_default_model|renderModelList\("ss"/);
   assert.doesNotMatch(messageSource, /updateSettingsModels/);
 });
+
+test("Mate preference controls only project DM entry points", function() {
+  var html = read("lib/public/index.html");
+  var settings = read("lib/public/modules/user-settings.js");
+  var profile = read("lib/public/modules/profile.js");
+  var app = read("lib/public/app.js");
+  var css = read("lib/public/css/mates.css");
+  var mention = read("lib/public/modules/mention.js");
+  var dm = read("lib/public/modules/app-dm.js");
+  var switcher = read("lib/public/modules/project-switcher.js");
+  var wizard = read("lib/public/modules/mate-wizard.js");
+
+  assert.match(html, /Mate DMs in projects/);
+  assert.match(html, /Home, Debates, mentions, and Mate memory stay available/);
+  assert.doesNotMatch(html, /Use Mates|hides every Mates surface/);
+  assert.match(app, /projectMateDmsEnabled: false/);
+  assert.match(settings, /store\.set\(\{ projectMateDmsEnabled: want \}\)/);
+  assert.match(profile, /classList\.toggle\('project-mate-dms-disabled', !matesOn\)/);
+  assert.match(css, /body\.project-mate-dms-disabled #icon-strip-hint-mate/);
+  assert.doesNotMatch(css, /project-mate-dms-disabled #ask-mate-btn|project-mate-dms-disabled[^\n]*home/);
+  assert.doesNotMatch(mention, /matesEnabled|projectMateDmsEnabled/);
+  assert.match(dm, /isMateTarget\)[\s\S]*projectMateDmsEnabled[\s\S]*showHomeHub\(\)/);
+  assert.match(switcher, /mode === 'mate' && store\.get\('projectMateDmsEnabled'\) === false/);
+  assert.doesNotMatch(wizard, /mates-disabled|project-mate-dms-disabled/);
+});
