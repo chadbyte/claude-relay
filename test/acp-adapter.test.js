@@ -158,6 +158,14 @@ test("OpenCode derives session resume support from the ACP handshake", async fun
   await adapter.shutdown();
 });
 
+test("ACP adapter forwards the scoped environment to its process manager", async function() {
+  FakeManager.instances = [];
+  var adapter = createAcpAdapter("opencode", adapterOptions(getProfile("opencode")));
+  await adapter.init({ env: { PROJECT_TOKEN: "scoped" } });
+  assert.strictEqual(FakeManager.instances[0].opts.env.PROJECT_TOKEN, "scoped");
+  await adapter.shutdown();
+});
+
 test("OpenCode rejects late configuration that restores permissive agent rules", async function() {
   FakeManager.instances = [];
   var options = adapterOptions(getProfile("opencode"));

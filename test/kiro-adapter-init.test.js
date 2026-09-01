@@ -8,7 +8,7 @@ var yoke = require("../lib/yoke");
 function createHarness(outcomes) {
   var instances = [];
 
-  function FakeAcpServer() {
+  function FakeAcpServer(binaryPath, options) {
     var proc = new EventEmitter();
     proc.exitCode = null;
     proc.signalCode = null;
@@ -21,6 +21,7 @@ function createHarness(outcomes) {
     };
 
     this.proc = proc;
+    this.options = options;
     this.started = false;
     this.index = instances.length;
     instances.push(this);
@@ -73,6 +74,14 @@ test("a failed init does not poison the next retry", async function() {
   assert.notStrictEqual(secondAttempt, firstAttempt);
   await secondAttempt;
   assert.strictEqual(harness.instances.length, 2);
+});
+
+test("Kiro forwards the scoped environment to its ACP process", async function() {
+  var harness = createHarness([null]);
+  var adapter = harness.createAdapter();
+  await adapter.init({ env: { PROJECT_TOKEN: "scoped" } });
+  assert.strictEqual(harness.instances[0].options.env.PROJECT_TOKEN, "scoped");
+  await adapter.shutdown();
 });
 
 test("a failed init stops the spawned ACP child", async function() {

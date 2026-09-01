@@ -85,6 +85,104 @@ test("session runtime refresh retires idle handles and defers busy handles to th
   assert.strictEqual(busy._runtimeRefreshRequested, false);
 });
 
+test("environment refresh retires only idle sessions and reclaims idle adapter processes", async function() {
+  var idleClosed = 0;
+  var busyClosed = 0;
+  var reclaims = 0;
+  var sessions = new Map();
+  sessions.set(1, { queryInstance: { close: function() { idleClosed++; } }, isProcessing: false });
+  sessions.set(2, { queryInstance: { close: function() { busyClosed++; } }, isProcessing: true });
+  var bridge = createSDKBridge({
+    cwd: process.cwd(),
+    sessionManager: { sessions: sessions },
+    adapter: { vendor: "codex" },
+    adapters: {
+      codex: { shutdownIfIdle: function(idleMs) { assert.strictEqual(idleMs, 0); reclaims++; return Promise.resolve(true); } },
+      acp: { shutdownIfIdle: function(idleMs) { assert.strictEqual(idleMs, 0); reclaims++; return Promise.resolve(true); } },
+      kiro: { shutdownIfIdle: function(idleMs) { assert.strictEqual(idleMs, 0); reclaims++; return Promise.resolve(true); } },
+    },
+    send: function() {},
+  });
+
+  assert.strictEqual(bridge.refreshEnvironmentRuntime(), true);
+  await new Promise(function(resolve) { setImmediate(resolve); });
+  assert.strictEqual(idleClosed, 1);
+  assert.strictEqual(busyClosed, 0);
+  assert.strictEqual(sessions.get(1).queryInstance, null);
+  assert.strictEqual(sessions.get(2)._runtimeRefreshRequested, true);
+  assert.strictEqual(reclaims, 3);
+  sessions.get(2).isProcessing = false;
+  assert.strictEqual(bridge.pushMessage(sessions.get(2), "after completion"), false);
+  assert.strictEqual(busyClosed, 1);
+  assert.strictEqual(sessions.get(2).queryInstance, null);
+});
+
+test("main SDK queries pass the scoped environment through readiness and resumed createQuery", async function() {
+  var initOptions = null;
+  var queryOptions = null;
+  var handle = createEndingHandle([]);
+  var adapter = {
+    vendor: "codex",
+    init: function(options) {
+      initOptions = options;
+      return Promise.resolve({ models: ["gpt-test"], capabilities: {} });
+    },
+    supportedModels: function() { return Promise.resolve(["gpt-test"]); },
+    createQuery: function(options) { queryOptions = options; return Promise.resolve(handle); },
+  };
+  var sessions = new Map();
+  var session = {
+    localId: 31,
+    vendor: "codex",
+    cliSessionId: "resume-31",
+    pendingAskUser: {},
+    pendingPermissions: {},
+    pendingElicitations: {},
+  };
+  sessions.set(session.localId, session);
+  var sm = {
+    sessions: sessions,
+    availableModels: [],
+    saveSessionFile: function() {},
+    broadcastSessionList: function() {},
+    sendAndRecord: function() {},
+    sendToSession: function() {},
+  };
+  var bridge = createSDKBridge({
+    cwd: process.cwd(),
+    sessionManager: sm,
+    adapter: adapter,
+    adapters: { codex: adapter },
+    getRuntimeEnv: function() { return { PROJECT_TOKEN: "scoped" }; },
+    send: function() {},
+  });
+
+  await bridge.startQuery(session, "A resumed request", null, null);
+  assert.deepStrictEqual(initOptions.env, { PROJECT_TOKEN: "scoped" });
+  assert.deepStrictEqual(queryOptions.env, { PROJECT_TOKEN: "scoped" });
+  assert.strictEqual(queryOptions.resumeSessionId, "resume-31");
+});
+
+test("rewind queries receive the scoped environment when they create a temporary handle", async function() {
+  var capturedOptions = null;
+  var handle = createEndingHandle([]);
+  var adapter = {
+    vendor: "claude",
+    createQuery: function(options) { capturedOptions = options; return Promise.resolve(handle); },
+  };
+  var bridge = createSDKBridge({
+    cwd: process.cwd(),
+    sessionManager: { sendAndRecord: function() {}, sendToSession: function() {} },
+    adapter: adapter,
+    getRuntimeEnv: function() { return { PROJECT_TOKEN: "rewind" }; },
+    send: function() {},
+  });
+  var result = await bridge.getOrCreateRewindQuery({ cliSessionId: "resume-rewind" });
+  assert.deepStrictEqual(capturedOptions.env, { PROJECT_TOKEN: "rewind" });
+  assert.strictEqual(capturedOptions.resumeSessionId, "resume-rewind");
+  result.cleanup();
+});
+
 test("a started session persists its identity and refreshes split anchors immediately", function() {
   var saved = [];
   var assigned = [];
@@ -130,6 +228,21 @@ test("mention sessions preserve the mapped Linux user", async function() {
 
   assert.ok(mentionSession);
   assert.strictEqual(capturedOptions.linuxUser, "clay-alice");
+});
+
+test("mention sessions receive the scoped runtime environment", async function() {
+  var capturedOptions = null;
+  var handle = createEndingHandle([]);
+  var bridge = createSDKBridge({
+    cwd: process.cwd(),
+    sessionManager: {},
+    adapter: { vendor: "codex", createQuery: function(options) { capturedOptions = options; return Promise.resolve(handle); } },
+    getRuntimeEnv: function() { return { PROJECT_TOKEN: "not logged" }; },
+    send: function() {},
+  });
+
+  await bridge.createMentionSession({ claudeMd: "", initialContext: "context", initialMessage: "question", onDelta: function() {}, onDone: function() {}, onError: function() {} });
+  assert.deepStrictEqual(capturedOptions.env, { PROJECT_TOKEN: "not logged" });
 });
 
 test("pushMessage retires a query handle that throws during delivery", function() {

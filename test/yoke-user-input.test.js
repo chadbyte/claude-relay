@@ -100,6 +100,33 @@ test("Claude adapter installs the real native callbacks and fallback mode omits 
   fallbackHandle.close();
 });
 
+test("Claude in-process queries receive the resolved process environment", async function () {
+  var captured = null;
+  var sdk = {
+    query: function(args) {
+      captured = args.options;
+      return { close: function() {}, [Symbol.asyncIterator]: async function* () {} };
+    },
+  };
+  var adapter = createClaudeAdapter({ cwd: process.cwd(), loadSDK: function() { return Promise.resolve(sdk); } });
+  var handle = await adapter.createQuery({ env: { PROJECT_TOKEN: "scoped" } });
+  assert.deepEqual(captured.env, { PROJECT_TOKEN: "scoped" });
+  handle.close();
+});
+
+test("Claude OS-user worker query options receive the resolved environment", function () {
+  var kit = require("../lib/yoke/adapters/claude").contractTestKit;
+  var options = kit.buildWorkerQueryOptions({
+    env: { PROJECT_TOKEN: "scoped" },
+    resumeSessionId: "resume-1",
+  }, {
+    settingSources: ["user"],
+    originalHome: null,
+  }, "/workspace");
+  assert.deepEqual(options.env, { PROJECT_TOKEN: "scoped" });
+  assert.strictEqual(options.resume, "resume-1");
+});
+
 test("Codex 0.147 requestUserInput maps the exact thread and response payload", async function () {
   var responses = [];
   var errors = [];

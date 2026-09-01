@@ -857,10 +857,7 @@
           <!-- Environment -->
           <div class="ps-section" data-section="environment">
             <h2>Environment</h2>
-            <p class="ps-section-desc">Store API keys, tokens, and config for this project. Paste a <code>.env</code> file to import multiple variables at once.</p>
-            <div class="settings-hint ps-env-notice hidden" id="ps-env-override-notice">
-              <i data-lucide="info"></i> A <code>.envrc</code> file exists in the project directory and will take precedence over these settings.
-            </div>
+            <p class="ps-section-desc">Store API keys, tokens, and config for coding-agent processes in this project. Changes apply to newly created processes; active processes, terminals, the daemon, and the browser keep their current environment.</p>
             <div class="ps-env-tabs">
               <button class="ps-env-tab active" data-tab="project">Project</button>
               <button class="ps-env-tab" data-tab="shared">Shared</button>
@@ -875,7 +872,7 @@
               </div>
             </div>
             <div class="ps-env-tab-content" data-tab="shared">
-              <p class="settings-hint" style="margin-bottom: 12px;">Shared variables apply to all projects. Project-level variables take precedence.</p>
+              <p class="settings-hint" style="margin-bottom: 12px;">Shared variables apply to newly created coding-agent processes in all projects. Project-level variables take precedence.</p>
               <div class="ps-env-header">
                 <button class="settings-btn-sm" id="ps-shared-env-add-btn"><i data-lucide="plus"></i> Add Variable</button>
                 <span class="ps-save-status" id="ps-shared-env-save-status"></span>
@@ -1386,7 +1383,7 @@
         </div>
         <div class="server-settings-section" data-section="environment">
           <h2>Environment</h2>
-          <p class="settings-hint" style="margin-bottom: 16px;">Define environment variables shared across all projects. Project-level variables take precedence over shared ones.</p>
+          <p class="settings-hint" style="margin-bottom: 16px;">Define variables for newly created coding-agent processes across all projects. Project-level variables take precedence. Active processes, terminals, the daemon, and the browser keep their current environment.</p>
           <div class="ps-env-header">
             <button class="settings-btn-sm" id="ss-env-add-btn"><i data-lucide="plus"></i> Add Variable</button>
             <span class="ps-save-status" id="ss-env-save-status"></span>
