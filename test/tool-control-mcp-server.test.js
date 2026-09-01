@@ -7,7 +7,6 @@ var path = require("path");
 var testRoot = fs.mkdtempSync(path.join(os.tmpdir(), "clay-tool-control-test-"));
 process.env.CLAY_HOME = testRoot;
 
-var serverBoard = require("../lib/server-board");
 var serverTools = require("../lib/server-tools");
 var getToolDefs = require("../lib/tool-control-mcp-server").getToolDefs;
 
@@ -34,11 +33,9 @@ function harness(timeoutMs) {
     isMultiUser: function () { return false; },
     findUserById: function () { return null; },
   };
-  var boardHandler = serverBoard.attachBoard({ users: users, projects: projects });
   var toolsHandler = serverTools.attachTools({
     users: users,
     projects: projects,
-    boardHandler: boardHandler,
     controlTimeoutMs: timeoutMs || 15000,
   });
   var installedIds = toolsHandler.installedManifests("default").map(function (manifest) { return manifest.id; });
@@ -78,7 +75,7 @@ function harness(timeoutMs) {
     update: function (toolId, input) { return toolsHandler.updateForMate("default", toolId, input); },
     uninstall: function (toolId) { return toolsHandler.removeForMate("default", toolId); },
   };
-  return { sockets: sockets, projectClients: projectClients, projectContext: projectContext, board: boardHandler, tools: toolsHandler, defs: getToolDefs(handlers), catalogRefreshes: function () { return catalogRefreshes; } };
+  return { sockets: sockets, projectClients: projectClients, projectContext: projectContext, tools: toolsHandler, defs: getToolDefs(handlers), catalogRefreshes: function () { return catalogRefreshes; } };
 }
 
 function tool(defs, name) {
@@ -96,7 +93,7 @@ test("mate tool MCP exposes driving and approved authoring tools with installed 
     "clay_tool_list", "clay_tool_snapshot", "clay_tool_act", "clay_tool_set", "clay_tool_source", "clay_tool_install", "clay_tool_update", "clay_tool_uninstall",
   ]);
   var listed = await result(tool(ctx.defs, "clay_tool_list"), {});
-  assert.ok(listed.value.some(function (item) { return item.id === "board" && item.runtime === "server"; }));
+  assert.ok(!listed.value.some(function (item) { return item.id === "board"; }));
   var testCapsule = listed.value.filter(function (item) { return item.id === "test-capsule"; })[0];
   assert.match(testCapsule.skills, /clay_tool_set/);
   assert.match(testCapsule.description, /test records/);
@@ -180,23 +177,11 @@ test("user source is always readable while Mate access toggles are server-confir
   assert.strictEqual(sent[0].ok, true);
   assert.match(sent[0].logicSource, /var tool/);
   sent.length = 0;
-  ctx.tools.handleMessage(ws, { type: "tool_source_get", toolId: "board", requestId: "source-server" });
-  for (var bi = 0; bi < 50 && sent.length === 0; bi++) await new Promise(function (resolve) { setTimeout(resolve, 5); });
-  assert.strictEqual(sent[0].ok, true);
-  assert.strictEqual(sent[0].logicAvailable, false);
-  assert.strictEqual(sent[0].logicSource, null);
-  assert.strictEqual(sent[0].manifest.runtime, "server");
-  sent.length = 0;
   assert.strictEqual(ctx.tools.handleMessage(ws, { type: "tool_mate_access_set", toolId: "test-capsule", allowed: true, requestId: "access-user" }), true);
   for (var j = 0; j < 50 && sent.length === 0; j++) await new Promise(function (resolve) { setTimeout(resolve, 5); });
   assert.strictEqual(sent[0].type, "tool_mate_access_state");
   assert.strictEqual(sent[0].ok, true);
   assert.strictEqual(sent[0].metadata.mateEditingAllowed, true);
-  sent.length = 0;
-  ctx.tools.handleMessage(ws, { type: "tool_mate_access_set", toolId: "board", allowed: true, requestId: "access-server" });
-  for (var k = 0; k < 50 && sent.length === 0; k++) await new Promise(function (resolve) { setTimeout(resolve, 5); });
-  assert.strictEqual(sent[0].ok, false);
-  assert.match(sent[0].error, /Server-managed Capsules/);
 });
 
 test("Mate access broadcasts only to authenticated sockets for the same user", async function () {
@@ -294,38 +279,6 @@ test("mate capsule install uses registry validation and broadcasts live changes"
   assert.strictEqual(removed.value.removed, true);
   assert.strictEqual(ctx.catalogRefreshes(), 2);
   assert.strictEqual(sent[1].type, "tool_removed");
-});
-
-test("board MCP actions preserve mate done rules and record attribution", async function () {
-  var ctx = harness();
-  var events = [];
-  ctx.sockets.push({
-    readyState: 1,
-    send: function (payload) { events.push(JSON.parse(payload)); },
-  });
-  var created = await result(tool(ctx.defs, "clay_tool_act"), {
-    toolId: "board",
-    actionId: "create",
-    args: { title: "Mate-owned card" },
-  });
-  assert.strictEqual(created.value.result.createdBy, "mate_test");
-  assert.strictEqual(events[0].callerId, "mate_test");
-
-  var moved = await result(tool(ctx.defs, "clay_tool_act"), {
-    toolId: "board",
-    actionId: "move",
-    args: { cardId: created.value.result._id, column: "done" },
-  });
-  assert.strictEqual(moved.response.isError, true);
-  assert.match(moved.response.content[0].text, /Only the user can move a card to done/);
-
-  var proposed = await result(tool(ctx.defs, "clay_tool_act"), {
-    toolId: "board",
-    actionId: "propose_done",
-    args: { cardId: created.value.result._id },
-  });
-  assert.strictEqual(proposed.value.result.pendingDone, true);
-  assert.strictEqual(proposed.value.result.createdBy, "mate_test");
 });
 
 test("tool_install rejects a server-runtime manifest over WebSocket", async function () {

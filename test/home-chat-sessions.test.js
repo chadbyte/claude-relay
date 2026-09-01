@@ -293,6 +293,49 @@ test("Home send records one canonical user turn and restores user plus assistant
   ]);
 });
 
+test("Capsule creation starts one exact Mate conversation without mutating a Capsule", async function () {
+  var starts = [];
+  var f = fixture({ allowCreate: true, sdk: {
+    startQuery: function (session, text) { starts.push({ session: session, text: text }); },
+    pushMessage: function () { throw new Error("unexpected push"); },
+  } });
+  f.handler.handleMessage(f.ws, {
+    type: "home_mate_new_session",
+    mateId: "mate-a",
+    requestId: "capsule-create-1",
+    intent: { type: "capsule_creation", description: "  A weekly review board  " },
+  });
+  await settle();
+  assert.equal(f.getSubscribed(), 6);
+  assert.deepEqual(f.getRecorded(), [{ type: "user_message", text: "A weekly review board" }]);
+  assert.equal(starts.length, 1);
+  assert.equal(starts[0].session.localId, 6);
+  assert.match(starts[0].text, /durable Capsule interface/);
+  assert.match(starts[0].text, /A weekly review board/);
+  assert.match(starts[0].text, /explicitly approved/);
+  var history = f.messages.find(function (message) { return message.type === "home_mate_history"; });
+  assert.equal(history.mateId, "mate-a");
+  assert.equal(history.sessionId, "local:6");
+  assert.equal(history.requestId, "capsule-create-1");
+  assert.deepEqual(history.messages, [{ role: "user", text: "A weekly review board" }]);
+  assert.equal(history.isProcessing, true);
+});
+
+test("invalid Capsule creation intent is correlated and creates no conversation", async function () {
+  var f = fixture({ allowCreate: true, sdk: { startQuery: function () { throw new Error("unexpected start"); } } });
+  f.handler.handleMessage(f.ws, {
+    type: "home_mate_new_session",
+    mateId: "mate-a",
+    requestId: "capsule-create-empty",
+    intent: { type: "capsule_creation", description: "   " },
+  });
+  await settle();
+  assert.equal(f.getSession(6), undefined);
+  assert.equal(f.messages[0].type, "home_mate_error");
+  assert.equal(f.messages[0].requestId, "capsule-create-empty");
+  assert.equal(f.messages[0].code, "capsule_description_required");
+});
+
 test("Home push-to-existing-query records one canonical user turn", async function () {
   var pushCalls = 0;
   var f = fixture({ sdk: {

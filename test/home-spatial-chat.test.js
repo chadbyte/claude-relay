@@ -139,11 +139,6 @@ test("home dock exposes conversation, split, and focused tool states", function 
   assert.doesNotMatch(dockSource, /localStorage/);
 });
 
-test("board suggestion opens the dock without replacing its message send", function () {
-  assert.match(chatSource, /text === "Add a card to the board"\) openHomeDock\("board"\)/);
-  assert.match(chatSource, /submitMessage\(\)/);
-});
-
 test("first-depth Home Mate list preserves management and activity affordances", function () {
   assert.match(hubSource, /home-mate-list-avatar/);
   assert.match(hubSource, /home-mate-list-activity/);
@@ -210,8 +205,7 @@ test("empty home chat renders contextual greeting and working suggestions", func
   assert.match(chatSource, /wordmark\.textContent = "Clay Studio"/);
   assert.match(chatSource, /if \(hasConversation\) \{[\s\S]*appendMessage[\s\S]*\} else \{\s*renderEmptyState/);
   assert.match(chatSource, /What should we work on,/);
-  assert.match(chatSource, /shortBio\(mate\)/);
-  assert.match(chatSource, /Add a card to the board/);
+  assert.match(chatSource, /getHomeMateShortBio\(mate\)/);
   assert.match(chatSource, /Make me a small tool/);
   assert.match(chatSource, /submitSuggestion\(suggestion\)/);
 });

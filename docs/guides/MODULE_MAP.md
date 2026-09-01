@@ -54,6 +54,7 @@ Wires all modules, sets up session manager and SDK bridge, dispatches messages.
 | `project-models.js` | Vendor model discovery, loading/error responses, model matching, and selection acknowledgements |
 | `workspace-query-service.js` + `project-workspace-query.js` + `workspace-query-mcp-server.js` | Exact-owner workspace/session read projections, query-bound Mate MCP tools, stable opaque session references, and Clay-only global search capability |
 | `server-home-clay-session-links.js` | Exact-source, owner-validated navigation for opaque session references rendered in Clay responses |
+| `server-home-capsule-creation.js` | Validates bounded Capsule creation intents and builds the approval-preserving Mate conversation context |
 | `workspace-assignment-service.js` + `project-delegated-session.js` + `project-delegated-follow-up.js` | Durable per-user assignment proposals, exact-session approval routing, private model-resolved delegated sessions, and strictly eligible existing-session follow-ups |
 | `tool-ui-spec.js` + `tool-ui-spec-advanced.js` | Canonical safe Capsule declarative vocabulary, bounded condition/dynamic-value validation, field and collection constraints |
 | `public/modules/tool-renderer.js` + `tool-renderer-advanced.js` + `tool-renderer-chart.js` + `tool-ui-evaluator.js` | Host-rendered Capsule controls, accessible advanced primitives, truthful fixed chart geometry, safe state evaluation, and defensive collection normalization |
@@ -156,6 +157,8 @@ Bootstraps UI, initializes store, wires remaining Tier 3 modules. All business l
 | `home-chat-scroll.js` | User-intent-aware Home transcript following, scroll preservation, and new-activity affordance |
 | `home-debate-models.js` | Safe per-participant model selectors and override collection for Home debate approval |
 | `home-mate-creation.js` | Clay-led Mate creation proposal card, exact response routing, and restored status |
+| `home-capsule-creation-intent.js` | Resolves the server-restored selected Mate and hands Workbench Capsule descriptions into an exact Home conversation |
+| `home-capsule-library.js` | Create-first Workbench library surface and installed Capsule inventory |
 | `search-clay-chat.js` | Query-bound compact Clay conversation inside global search, with exact-session expansion to Home |
 | `app-rate-limit.js` | Rate limit UI, countdown timers, scheduled message bubbles, fast mode indicator |
 | `app-cursors.js` | Remote cursor presence, text selection sharing, cursor toggle UI |

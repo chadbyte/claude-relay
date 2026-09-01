@@ -216,20 +216,15 @@ test("registry scans dropped folders, reports invalid folders, and sees deletion
   assert.ok(!registry.listTools(userCtx).some(function (item) { return item.id === "dropped-tool"; }));
 });
 
-test("Board is the only built-in Capsule seeded and user deletion stays durable", function () {
+test("no sample Capsules are seeded", function () {
   var userCtx = ctx("builtin-seed");
   var first = registry.listTools(userCtx);
-  assert.ok(first.some(function (item) { return item.id === "board" && item.runtime === "server"; }));
+  assert.ok(!first.some(function (item) { return item.id === "board"; }));
   assert.ok(!first.some(function (item) { return item.id === "scratchpad"; }));
   assert.ok(!first.some(function (item) { return item.id === "translator"; }));
-  var board = registry.getTool(userCtx, "board");
-  assert.match(board.manifest.description, /Organize work/);
-  assert.match(board.manifest.useWhen, /task planning/);
-  registry.removeTool(userCtx, "board");
-  assert.ok(!registry.listTools(userCtx).some(function (item) { return item.id === "board"; }));
 });
 
-test("v6 deletes removed built-in Capsules including saved data and customized copies", function () {
+test("v7 deletes removed built-in Capsules including saved data and customized copies", function () {
   var userCtx = ctx("removed-builtins");
   var root = registry.resolveToolsRoot(userCtx);
   var translatorDirectory = path.join(root, "translator");
@@ -241,12 +236,18 @@ test("v6 deletes removed built-in Capsules including saved data and customized c
   var scratchpadDirectory = path.join(root, "scratchpad");
   fs.mkdirSync(scratchpadDirectory, { recursive: true });
   fs.writeFileSync(path.join(scratchpadDirectory, "data.db"), "saved notes\n", "utf8");
+  var boardDirectory = path.join(root, "board");
+  fs.mkdirSync(boardDirectory, { recursive: true });
+  fs.writeFileSync(path.join(boardDirectory, "data.db"), "saved cards\n", "utf8");
+  fs.rmSync(path.join(root, ".capsules-v7"), { force: true });
 
   var listed = registry.listTools(userCtx);
+  assert.ok(!listed.some(function (item) { return item.id === "board"; }));
   assert.ok(!listed.some(function (item) { return item.id === "translator"; }));
   assert.ok(!listed.some(function (item) { return item.id === "scratchpad"; }));
   assert.strictEqual(fs.existsSync(translatorDirectory), false);
   assert.strictEqual(fs.existsSync(scratchpadDirectory), false);
+  assert.strictEqual(fs.existsSync(boardDirectory), false);
 });
 
 test("tool install rejects server runtime", function () {

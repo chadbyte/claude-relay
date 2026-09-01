@@ -710,6 +710,11 @@ body.home-surface-boot-pending #connect-overlay.hidden {
 
 .home-dock-tool:hover { color: var(--text); }
 
+.home-dock-tool.is-capsule-home {
+  flex: 0 0 auto;
+  margin-right: 2px;
+}
+
 .home-dock-tool.active {
   color: var(--text);
 }

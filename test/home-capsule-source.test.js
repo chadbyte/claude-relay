@@ -246,7 +246,7 @@ test("Workbench source inspector is text-safe, focus-restoring, and keeps runtim
     var serverChrome = new FakeElement("div", fakeDocument);
     var serverDisplay = new FakeElement("div", fakeDocument);
     serverDisplay.dataset.capsuleRuntimeSurface = "true";
-    sourceModule.mountCapsuleHostControls("board", { manifest: { id: "board", name: "Board", runtime: "server" }, metadata: { mateEditingAllowed: false } }, serverChrome, serverRoot);
+    sourceModule.mountCapsuleHostControls("trusted-view", { manifest: { id: "trusted-view", name: "Trusted View", runtime: "server" }, metadata: { mateEditingAllowed: false } }, serverChrome, serverRoot);
     serverRoot.appendChild(serverDisplay);
     assert.strictEqual(serverChrome.children[0].children.length, 2);
     assert.strictEqual(serverChrome.children[0].children[0].className, "home-capsule-actions-trigger");
@@ -256,7 +256,7 @@ test("Workbench source inspector is text-safe, focus-restoring, and keeps runtim
     serverChrome.children[0].children[0].emit("click");
     serverChrome.children[0].children[1].children[0].emit("click");
     var serverRequest = sent[sent.length - 1];
-    sourceModule.handleToolSourceState({ type: "tool_source_state", toolId: "board", requestId: serverRequest.requestId, ok: true, manifest: { id: "board", name: "Board", runtime: "server" }, uiTree: { type: "board" }, logicSource: null, logicAvailable: false, revision: "server-revision" });
+    sourceModule.handleToolSourceState({ type: "tool_source_state", toolId: "trusted-view", requestId: serverRequest.requestId, ok: true, manifest: { id: "trusted-view", name: "Trusted View", runtime: "server" }, uiTree: { type: "stack" }, logicSource: null, logicAvailable: false, revision: "server-revision" });
     var serverInspector = serverRoot.children[serverRoot.children.length - 1];
     var serverTabs = serverInspector.querySelectorAll('[role="tab"]');
     serverTabs[2].emit("click");

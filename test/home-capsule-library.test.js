@@ -2,6 +2,7 @@ var test = require("node:test");
 var assert = require("node:assert/strict");
 var fs = require("node:fs");
 var path = require("node:path");
+var pathToFileURL = require("node:url").pathToFileURL;
 
 var root = path.join(__dirname, "..");
 var indexSource = fs.readFileSync(path.join(root, "lib/public/index.html"), "utf8");
@@ -10,6 +11,7 @@ var dockSource = fs.readFileSync(path.join(root, "lib/public/modules/home-dock.j
 var resizeSource = fs.readFileSync(path.join(root, "lib/public/modules/home-dock-resize.js"), "utf8");
 var sidebarSource = fs.readFileSync(path.join(root, "lib/public/modules/home-sidebar.js"), "utf8");
 var librarySource = fs.readFileSync(path.join(root, "lib/public/modules/home-capsule-library.js"), "utf8");
+var creationIntentSource = fs.readFileSync(path.join(root, "lib/public/modules/home-capsule-creation-intent.js"), "utf8");
 var toolsSource = fs.readFileSync(path.join(root, "lib/public/modules/home-tools.js"), "utf8");
 var chatSource = fs.readFileSync(path.join(root, "lib/public/modules/home-mate-chat.js"), "utf8");
 var cssSource = fs.readFileSync(path.join(root, "lib/public/css/home-capsule-library.css"), "utf8");
@@ -80,6 +82,60 @@ test("Capsule Library is a native host surface over shared installed-tool state"
   assert.doesNotMatch(librarySource, /tool_install|tool_remove|uninstall|localStorage|alert\(|confirm\(|prompt\(/);
 });
 
+test("Capsule Home is the permanent leftmost Workbench tab", function () {
+  assert.match(dockSource, /appendCapsuleHomeTab\(switcherEl, libraryOpen && !backstageOpen\);[\s\S]*for \(var i = 0; i < tools\.length; i\+\+\)/);
+  assert.match(dockSource, /tab\.dataset\.dockHome = "true"/);
+  assert.match(dockSource, /tab\.setAttribute\("aria-label", "Capsule Home"\)/);
+  assert.match(dockSource, /renderToolIdentity\(\{ name: "Home", lucideIcon: "house" \}\)/);
+  assert.match(dockSource, /tab\.addEventListener\("click", openHomeCapsuleLibrary\)/);
+  assert.match(librarySource, /title\.textContent = "Capsule Home"/);
+  assert.doesNotMatch(dockSource, /tools\.unshift|registerDockTool\([^)]*home/i);
+});
+
+test("Capsule Library starts with a Mate conversation composer in empty and populated states", function () {
+  assert.match(librarySource, /definitionTitle\.textContent = "What is a Capsule\?"/);
+  assert.match(librarySource, /A Capsule is a small, persistent app that a Mate creates with you/);
+  assert.match(librarySource, /keeps its interface and data beyond the conversation/);
+  assert.match(librarySource, /label\.textContent = "Create with Mate"/);
+  assert.match(librarySource, /Your current Mate will open a new conversation and shape it with you/);
+  assert.match(librarySource, /input\.placeholder = "Describe the interface you need"/);
+  assert.match(librarySource, /root\.appendChild\(createComposer\(\)\)[\s\S]*if \(!capsules\.length\) \{ container\.appendChild\(root\); return; \}/);
+  assert.match(librarySource, /inventoryTitle\.textContent = "Installed Capsules"/);
+  assert.doesNotMatch(librarySource, /No Capsules are installed|example prompt|localStorage/);
+  assert.match(librarySource, /event\.isComposing/);
+  assert.match(cssSource, /\.home-capsule-library-definition[\s\S]*\.home-capsule-library-create-guidance[\s\S]*\.home-capsule-library-inventory/);
+});
+
+test("Capsule creation targets only the currently open visible Mate", function () {
+  assert.match(creationIntentSource, /findHomeMate\(visible, currentMateId\)/);
+  assert.match(creationIntentSource, /homeSurfaceLoaded/);
+  assert.match(creationIntentSource, /homeChatMateId/);
+  assert.match(creationIntentSource, /HOME_CAPSULE_CREATION_EVENT/);
+  assert.doesNotMatch(creationIntentSource, /homePreferredMateId|resolveHomeMate|builtinKey === "clay"|keyword|locale|localStorage/);
+});
+
+test("Capsule creation never falls back from the currently open Mate", async function () {
+  var module = await import(pathToFileURL(path.join(root, "lib/public/modules/home-capsule-creation-intent.js")).href);
+  var mates = [
+    { id: "mate-current", archived: false },
+    { id: "mate-preferred", archived: false, builtinKey: "clay" },
+  ];
+  assert.equal(module.resolveCapsuleCreationMate(mates, "mate-current"), mates[0]);
+  assert.equal(module.resolveCapsuleCreationMate(mates, "mate-missing"), null);
+  mates[0].archived = true;
+  assert.equal(module.resolveCapsuleCreationMate(mates, "mate-current"), null);
+});
+
+test("Capsule creation hands off through an exact fresh Home conversation", function () {
+  var capsuleStart = chatSource.slice(chatSource.indexOf("export function startHomeCapsuleCreation"), chatSource.indexOf("function bindComposer"));
+  assert.match(capsuleStart, /export function startHomeCapsuleCreation\(mateId, description\)/);
+  assert.match(capsuleStart, /mateId !== store\.get\('homeChatMateId'\)/);
+  assert.match(capsuleStart, /type: "home_mate_new_session"[\s\S]*mateId: mateId[\s\S]*type: "capsule_creation", description: description/);
+  assert.match(capsuleStart, /rememberHomeMate\(mateId\)/);
+  assert.doesNotMatch(capsuleStart, /store\.set\(\{ homeChatMateId: mateId \}\)/);
+  assert.doesNotMatch(creationIntentSource + chatSource, /tool_install|tool_update|clay_tool_install|clay_tool_update/);
+});
+
 test("Library selection opens the real registered Capsule and keeps dock tabs", function () {
   assert.match(dockSource, /function openLibraryCapsule\(toolId\)[\s\S]*activateTool\(toolId\)[\s\S]*focusActiveCapsuleTab\(\)/);
   assert.match(dockSource, /for \(var i = 0; i < tools\.length; i\+\+\)[\s\S]*dataset\.dockToolId = tool\.id/);
@@ -99,13 +155,12 @@ test("hidden Capsule activity lives on the invariant sidebar Capsules trigger", 
   assert.match(dockSource, /dockHasActivity: false/);
 });
 
-test("Stage 7 preserves Workbench controls, suggestions, runtime, and durable dock preference", function () {
+test("Stage 7 preserves Workbench controls, runtime, and durable dock preference", function () {
   assert.match(dockSource, /initHomeDockResize\(\)/);
   assert.match(dockSource, /home-dock-collapse/);
   assert.match(dockSource, /home-dock-focus/);
   assert.match(dockSource, /home-dock-return/);
   assert.match(resizeSource, /home_dock_set|clay:home-dock-width-commit/);
-  assert.match(chatSource, /openHomeDock\("board"\)/);
   assert.match(toolsSource, /createToolRuntime/);
   assert.match(toolsSource, /handleToolStorageResult/);
   assert.match(dockSource, /dockOpen: store\.get\('dockOpen'\) === true,[\s\S]*dockWidth: store\.get\('dockWidth'\),[\s\S]*activeToolId:/);

@@ -12,8 +12,6 @@ function source(relativePath) {
 var appSource = source("lib/public/app.js");
 var avatarSource = source("lib/public/modules/avatar.js");
 var avatarGeneratorSource = source("lib/public/modules/avatar-imprint.js");
-var boardSource = source("lib/public/modules/home-board.js");
-var boardCssSource = source("lib/public/css/home-board.css");
 var builtinSource = source("lib/builtin-mates.js");
 var dockSource = source("lib/public/modules/home-dock.js");
 var homeCssSource = source("lib/public/css/home-hub.css");
@@ -23,47 +21,10 @@ var iconCssSource = source("lib/public/css/icon-strip.css");
 var indexSource = source("lib/public/index.html");
 var sheetSource = source("lib/public/modules/home-conversations-sheet.js");
 var sidebarSource = source("lib/public/modules/home-sidebar.js");
-var styleSource = source("lib/public/style.css");
 
-test("board uses flat drafting lanes and raised cards", function () {
-  assert.match(boardCssSource, /\.board-column \{[\s\S]*border: 0;[\s\S]*background: transparent;/);
-  assert.match(boardCssSource, /\.board-card \{[\s\S]*border: 1px solid var\(--border-subtle\);[\s\S]*box-shadow:/);
-  assert.match(boardCssSource, /\.board-card:focus-visible[\s\S]*outline|\.board-card:focus-visible[\s\S]*box-shadow/);
-  assert.match(boardCssSource, /\.board-card:focus-within \.board-card-delete/);
-  assert.match(styleSource, /@import url\("css\/home-board\.css"\)/);
-  assert.doesNotMatch(homeCssSource, /\.board-card\s*\{|\.board-column\s*\{/);
-});
-
-test("board cards and columns expose accessible structure and controls", function () {
-  assert.match(boardSource, /element\.setAttribute\("role", "region"\)/);
-  assert.match(boardSource, /element\.setAttribute\("aria-label", "Work board"\)/);
-  assert.match(boardSource, /role="list" aria-label=/);
-  assert.match(boardSource, /draggable="true" tabindex="0" role="listitem"/);
-  assert.match(boardSource, /aria-keyshortcuts="Alt\+ArrowLeft Alt\+ArrowRight"/);
-  assert.match(boardSource, /class="board-card-delete"[\s\S]*aria-label="Delete /);
-  assert.match(boardSource, /textarea class="board-composer-input"[\s\S]*aria-label="Card title"/);
-  assert.match(boardSource, /showConfirm\("Delete this card\?"/);
-  assert.doesNotMatch(boardSource, /\b(?:alert|confirm|prompt)\s*\(/);
-});
-
-test("keyboard card movement and composer cancellation preserve focus", function () {
-  assert.match(boardSource, /e\.target !== cardEl/);
-  assert.match(boardSource, /e\.altKey[\s\S]*e\.key !== "ArrowLeft"[\s\S]*moveCardByKeyboard/);
-  assert.match(boardSource, /focusCardTarget = \{ cardId: cardId, column: targetColumn \}/);
-  assert.match(boardSource, /column\.dataset\.column !== focusCardTarget\.column[\s\S]*cards\[i\]\.focus\(\)/);
-  assert.match(boardSource, /e\.key === "Escape"[\s\S]*e\.preventDefault\(\)[\s\S]*closeComposer\(composerColumn\)/);
-  assert.match(boardSource, /function closeComposer\(focusColumn\)[\s\S]*buttons\[i\]\.focus\(\)/);
-});
-
-test("board remains usable in tablet and mobile Workbench widths", function () {
+test("Workbench remains usable in tablet and mobile widths", function () {
   assert.match(indexSource, /<div class="home-dock-content" id="home-dock-content"><\/div>/);
-  assert.match(boardSource, /element\.className = "home-board"/);
-  assert.match(boardCssSource, /#home-dock-content:has\(> \.home-board\) \{[\s\S]*container-name: home-board-host;[\s\S]*container-type: inline-size;/);
-  assert.doesNotMatch(boardCssSource, /\.home-tool-display:has\(> \.home-board\)/);
-  assert.match(boardCssSource, /@container home-board-host \(max-width: 620px\)[\s\S]*grid-template-columns: repeat\(3, minmax\(190px, 1fr\)\)[\s\S]*overflow-x: auto[\s\S]*scroll-snap-type: x proximity/);
-  assert.match(boardCssSource, /@media \(max-width: 600px\)[\s\S]*grid-auto-columns: minmax\(min\(82vw, 280px\), 1fr\)[\s\S]*scroll-snap/);
   assert.match(homeCssSource, /@media \(max-width: 768px\)[\s\S]*#home-hub\.dock-split \.home-tool-workbench[\s\S]*width: 100%/);
-  assert.match(boardCssSource, /@media \(prefers-reduced-motion: reduce\)/);
 });
 
 test("generated avatars use a muted source palette while custom images bypass it", function () {
@@ -112,7 +73,6 @@ test("popstate and same-tab Home suspension retain their conservative restoratio
 
 test("Stage 9 client changes keep direct dependencies and module limits", function () {
   var modules = [
-    "lib/public/modules/home-board.js",
     "lib/public/modules/home-dock.js",
     "lib/public/modules/avatar-imprint.js",
   ];
@@ -121,7 +81,4 @@ test("Stage 9 client changes keep direct dependencies and module limits", functi
     assert.ok(moduleSource.split("\n").length < 500, modules[i] + " must stay under 500 lines");
     assert.doesNotMatch(moduleSource, /\b(?:const|let)\b|=>|localStorage/);
   }
-  assert.match(boardSource, /from '\.\/store\.js'/);
-  assert.match(boardSource, /from '\.\/ws-ref\.js'/);
-  assert.doesNotMatch(boardSource, /var _ctx|init[A-Z][A-Za-z]+\(ctx\)/);
 });
