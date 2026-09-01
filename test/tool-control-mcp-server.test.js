@@ -41,6 +41,22 @@ function harness(timeoutMs) {
     boardHandler: boardHandler,
     controlTimeoutMs: timeoutMs || 15000,
   });
+  var installedIds = toolsHandler.installedManifests("default").map(function (manifest) { return manifest.id; });
+  if (installedIds.indexOf("test-capsule") === -1) toolsHandler.installForMate("default", {
+    manifest: {
+      id: "test-capsule", name: "Test Capsule", runtime: "worker",
+      description: "Persist test records.", useWhen: "Use for storage and control tests.",
+      skills: "Use clay_tool_set and clay_tool_snapshot to drive this Capsule.",
+    },
+    uiTree: { type: "stack", children: [{ type: "text", props: { text: "Test" } }] },
+    logicSource: "var tool = { initialState: {}, actions: {} };",
+  });
+  if (installedIds.indexOf("llm-capsule") === -1) toolsHandler.installForMate("default", {
+    manifest: { id: "llm-capsule", name: "LLM Capsule", runtime: "worker", permissions: ["llm"] },
+    uiTree: { type: "stack", children: [{ type: "text", props: { text: "LLM" } }] },
+    logicSource: "var tool = { initialState: {}, actions: {} };",
+  });
+  catalogRefreshes = 0;
   var mateId = "mate_test";
   var handlers = {
     list: function () {
@@ -81,12 +97,12 @@ test("mate tool MCP exposes driving and approved authoring tools with installed 
   ]);
   var listed = await result(tool(ctx.defs, "clay_tool_list"), {});
   assert.ok(listed.value.some(function (item) { return item.id === "board" && item.runtime === "server"; }));
-  var scratchpad = listed.value.filter(function (item) { return item.id === "scratchpad"; })[0];
-  assert.match(scratchpad.skills, /clay_tool_set/);
-  assert.match(scratchpad.description, /persistent notes/);
-  assert.match(scratchpad.useWhen, /save, review, or remove notes/);
-  var translator = listed.value.filter(function (item) { return item.id === "translator"; })[0];
-  assert.deepStrictEqual(translator.permissions, ["llm"]);
+  var testCapsule = listed.value.filter(function (item) { return item.id === "test-capsule"; })[0];
+  assert.match(testCapsule.skills, /clay_tool_set/);
+  assert.match(testCapsule.description, /test records/);
+  assert.match(testCapsule.useWhen, /storage and control tests/);
+  var llmCapsule = listed.value.filter(function (item) { return item.id === "llm-capsule"; })[0];
+  assert.deepStrictEqual(llmCapsule.permissions, ["llm"]);
   var installDescription = tool(ctx.defs, "clay_tool_install").description;
   assert.match(tool(ctx.defs, "clay_tool_list").description, /full detailed usage recipes/);
   assert.match(installDescription, /description\?: concise single-line purpose/);
@@ -158,7 +174,7 @@ test("user source is always readable while Mate access toggles are server-confir
   var sent = [];
   var ws = { readyState: 1, send: function (payload) { sent.push(JSON.parse(payload)); } };
   ctx.sockets.push(ws);
-  assert.strictEqual(ctx.tools.handleMessage(ws, { type: "tool_source_get", toolId: "scratchpad", requestId: "source-user" }), true);
+  assert.strictEqual(ctx.tools.handleMessage(ws, { type: "tool_source_get", toolId: "test-capsule", requestId: "source-user" }), true);
   for (var i = 0; i < 50 && sent.length === 0; i++) await new Promise(function (resolve) { setTimeout(resolve, 5); });
   assert.strictEqual(sent[0].type, "tool_source_state");
   assert.strictEqual(sent[0].ok, true);
@@ -171,7 +187,7 @@ test("user source is always readable while Mate access toggles are server-confir
   assert.strictEqual(sent[0].logicSource, null);
   assert.strictEqual(sent[0].manifest.runtime, "server");
   sent.length = 0;
-  assert.strictEqual(ctx.tools.handleMessage(ws, { type: "tool_mate_access_set", toolId: "scratchpad", allowed: true, requestId: "access-user" }), true);
+  assert.strictEqual(ctx.tools.handleMessage(ws, { type: "tool_mate_access_set", toolId: "test-capsule", allowed: true, requestId: "access-user" }), true);
   for (var j = 0; j < 50 && sent.length === 0; j++) await new Promise(function (resolve) { setTimeout(resolve, 5); });
   assert.strictEqual(sent[0].type, "tool_mate_access_state");
   assert.strictEqual(sent[0].ok, true);
@@ -198,7 +214,12 @@ test("Mate access broadcasts only to authenticated sockets for the same user", a
   };
   var tools = serverTools.attachTools({ users: users, projects: projects });
   tools.installedManifests("owner");
-  assert.strictEqual(tools.handleMessage(owner, { type: "tool_mate_access_set", toolId: "scratchpad", allowed: true, requestId: "owner-access" }), true);
+  tools.installForMate("owner", {
+    manifest: { id: "test-capsule", name: "Test Capsule", runtime: "worker" },
+    uiTree: { type: "stack" }, logicSource: "var tool = { initialState: {}, actions: {} };",
+  });
+  ownerMessages.length = 0;
+  assert.strictEqual(tools.handleMessage(owner, { type: "tool_mate_access_set", toolId: "test-capsule", allowed: true, requestId: "owner-access" }), true);
   for (var i = 0; i < 50 && ownerMessages.length === 0; i++) await new Promise(function (resolve) { setTimeout(resolve, 5); });
   assert.strictEqual(ownerMessages.length, 1);
   assert.strictEqual(ownerMessages[0].requestId, "owner-access");
@@ -331,7 +352,7 @@ test("server LLM bridge rejects capsules without llm permission", async function
   var ws = { readyState: 1, send: function (payload) { sent.push(JSON.parse(payload)); } };
   ctx.tools.handleMessage(ws, {
     type: "tool_llm_op",
-    toolId: "scratchpad",
+    toolId: "test-capsule",
     requestId: "llm-1",
     args: { prompt: "hello", model: "fast" },
   });
@@ -354,7 +375,7 @@ test("server LLM bridge uses one concrete configured vendor model", async functi
   };
   ctx.tools.handleMessage(ws, {
     type: "tool_llm_op",
-    toolId: "translator",
+    toolId: "llm-capsule",
     requestId: "llm-configured",
     args: { prompt: "안녕", model: "fast" },
   });
@@ -362,7 +383,7 @@ test("server LLM bridge uses one concrete configured vendor model", async functi
   assert.strictEqual(calls.length, 1);
   assert.strictEqual(calls[0].socket, ws);
   assert.strictEqual(calls[0].args.model, "fast");
-  assert.deepStrictEqual(sent[0], { type: "tool_llm_result", toolId: "translator", requestId: "llm-configured", data: "Hello" });
+  assert.deepStrictEqual(sent[0], { type: "tool_llm_result", toolId: "llm-capsule", requestId: "llm-configured", data: "Hello" });
 });
 
 test("Capsule model configuration is correlated and does not expose credentials", async function () {
@@ -399,14 +420,14 @@ test("storage failures reply on the correlated tool_storage_result channel", asy
   var ws = { readyState: 1, send: function (payload) { sent.push(JSON.parse(payload)); } };
   ctx.tools.handleMessage(ws, {
     type: "tool_storage_op",
-    toolId: "scratchpad",
+    toolId: "test-capsule",
     op: "unknown-op",
-    seq: "scratchpad:1:7",
+    seq: "test-capsule:1:7",
     args: {},
   });
   for (var i = 0; i < 50 && sent.length === 0; i++) await new Promise(function (resolve) { setTimeout(resolve, 5); });
   assert.strictEqual(sent[0].type, "tool_storage_result");
-  assert.strictEqual(sent[0].seq, "scratchpad:1:7");
+  assert.strictEqual(sent[0].seq, "test-capsule:1:7");
   assert.match(sent[0].error, /Unknown storage operation/);
   assert.ok(!sent.some(function (message) { return message.type === "tools_error"; }));
 });
@@ -414,7 +435,7 @@ test("storage failures reply on the correlated tool_storage_result channel", asy
 test("browser tool control fails clearly without an open home screen", async function () {
   var ctx = harness();
   ctx.tools.installedManifests("default");
-  var snapshot = await result(tool(ctx.defs, "clay_tool_snapshot"), { toolId: "scratchpad" });
+  var snapshot = await result(tool(ctx.defs, "clay_tool_snapshot"), { toolId: "test-capsule" });
   assert.strictEqual(snapshot.response.isError, true);
   assert.match(snapshot.response.content[0].text, /home screen is not open/);
 });
@@ -429,7 +450,7 @@ test("browser tool control correlates caller responses and times out", async fun
     send: function (payload) { sent.push(JSON.parse(payload)); },
   };
   ctx.sockets.push(ws);
-  var pending = ctx.tools.controlForMate("default", "mate_test", "scratchpad", "snapshot", {});
+  var pending = ctx.tools.controlForMate("default", "mate_test", "test-capsule", "snapshot", {});
   assert.strictEqual(sent[0].callerId, "mate_test");
   ctx.tools.handleMessage(ws, {
     type: "tool_control_response",
@@ -438,6 +459,6 @@ test("browser tool control correlates caller responses and times out", async fun
   });
   assert.deepStrictEqual(await pending, { state: { items: [] } });
 
-  var timedOut = ctx.tools.controlForMate("default", "mate_test", "scratchpad", "snapshot", {});
+  var timedOut = ctx.tools.controlForMate("default", "mate_test", "test-capsule", "snapshot", {});
   await assert.rejects(timedOut, /timed out/);
 });

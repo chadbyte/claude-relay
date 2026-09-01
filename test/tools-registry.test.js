@@ -3,7 +3,6 @@ var assert = require("node:assert");
 var fs = require("fs");
 var os = require("os");
 var path = require("path");
-var pathToFileURL = require("url").pathToFileURL;
 
 var testRoot = fs.mkdtempSync(path.join(os.tmpdir(), "clay-tools-registry-test-"));
 process.env.CLAY_HOME = testRoot;
@@ -42,12 +41,7 @@ test("tool registry rejects unsafe IDs and unknown UI nodes", function () {
   assert.throws(function () { registry.installTool(ctx("validation"), hugeTrigger); }, /useWhen must be 240 characters or fewer/);
 });
 
-test("Capsule UI v2 validates semantic presentation and rejects unsafe markup", function () {
-  var translator = JSON.parse(fs.readFileSync(path.join(__dirname, "../lib/capsules/translator/ui.json"), "utf8"));
-  var scratchpad = JSON.parse(fs.readFileSync(path.join(__dirname, "../lib/capsules/scratchpad/ui.json"), "utf8"));
-  assert.strictEqual(registry.validateUiNode(translator), true);
-  assert.strictEqual(registry.validateUiNode(scratchpad), true);
-
+test("Capsule UI validation rejects unsafe markup", function () {
   var unsafeStyle = validTool("unsafe-style");
   unsafeStyle.uiTree.props = { style: "position:fixed" };
   assert.throws(function () { registry.installTool(ctx("validation"), unsafeStyle); }, /Unknown UI property 'style'/);
@@ -222,212 +216,37 @@ test("registry scans dropped folders, reports invalid folders, and sees deletion
   assert.ok(!registry.listTools(userCtx).some(function (item) { return item.id === "dropped-tool"; }));
 });
 
-test("built-in capsule folders seed once and user deletion stays durable", function () {
+test("Board is the only built-in Capsule seeded and user deletion stays durable", function () {
   var userCtx = ctx("builtin-seed");
   var first = registry.listTools(userCtx);
   assert.ok(first.some(function (item) { return item.id === "board" && item.runtime === "server"; }));
-  assert.ok(first.some(function (item) { return item.id === "scratchpad" && item.runtime === "worker"; }));
-  var translator = registry.getTool(userCtx, "translator");
-  assert.ok(translator);
-  assert.deepStrictEqual(translator.manifest.permissions, ["llm"]);
-  assert.strictEqual(translator.manifest.modelAlias, "fast");
-  assert.match(translator.manifest.description, /Translate passages/);
-  assert.match(translator.manifest.useWhen, /Korean-English translation/);
+  assert.ok(!first.some(function (item) { return item.id === "scratchpad"; }));
+  assert.ok(!first.some(function (item) { return item.id === "translator"; }));
   var board = registry.getTool(userCtx, "board");
   assert.match(board.manifest.description, /Organize work/);
   assert.match(board.manifest.useWhen, /task planning/);
-  assert.match(translator.logicSource, /api\.llm\.complete/);
-  registry.removeTool(userCtx, "scratchpad");
-  assert.ok(!registry.listTools(userCtx).some(function (item) { return item.id === "scratchpad"; }));
+  registry.removeTool(userCtx, "board");
+  assert.ok(!registry.listTools(userCtx).some(function (item) { return item.id === "board"; }));
 });
 
-test("old shipped Translator metadata is hydrated in memory without upgrading custom content", async function () {
-  var shippedCtx = ctx("builtin-metadata-hydration");
-  registry.listTools(shippedCtx);
-  var shippedRoot = registry.resolveToolsRoot(shippedCtx);
-  var manifestPath = path.join(shippedRoot, "translator", "manifest.json");
-  var oldManifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
-  delete oldManifest.modelAlias;
-  delete oldManifest.description;
-  delete oldManifest.useWhen;
-  fs.writeFileSync(manifestPath, JSON.stringify(oldManifest, null, 2) + "\n", "utf8");
-
-  var hydrated = registry.getTool(shippedCtx, "translator");
-  var status = await import(pathToFileURL(path.join(__dirname, "../lib/public/modules/tool-llm-status.js")).href);
-  assert.strictEqual(hydrated.manifest.modelAlias, "fast");
-  assert.match(hydrated.manifest.description, /Translate passages/);
-  assert.match(hydrated.manifest.useWhen, /Korean-English translation/);
-  assert.strictEqual(status.initialToolLlmAlias(hydrated.manifest), "fast");
-  assert.strictEqual(JSON.parse(fs.readFileSync(manifestPath, "utf8")).modelAlias, undefined);
-  assert.strictEqual(JSON.parse(fs.readFileSync(manifestPath, "utf8")).description, undefined);
-
-  var customCtx = ctx("custom-translator-metadata");
-  registry.listTools(customCtx);
-  var customRoot = registry.resolveToolsRoot(customCtx);
-  var customManifestPath = path.join(customRoot, "translator", "manifest.json");
-  var customManifest = JSON.parse(fs.readFileSync(customManifestPath, "utf8"));
-  delete customManifest.modelAlias;
-  delete customManifest.description;
-  delete customManifest.useWhen;
-  fs.writeFileSync(customManifestPath, JSON.stringify(customManifest, null, 2) + "\n", "utf8");
-  fs.appendFileSync(path.join(customRoot, "translator", "logic.js"), "\n// User-customized behavior.\n", "utf8");
-  var custom = registry.getTool(customCtx, "translator");
-  assert.strictEqual(custom.manifest.modelAlias, undefined);
-  assert.strictEqual(custom.manifest.description, undefined);
-  assert.strictEqual(custom.manifest.useWhen, undefined);
-  assert.strictEqual(status.initialToolLlmAlias(custom.manifest), null);
-});
-
-test("v2 seed migration adds translator without restoring deleted older capsules", function () {
-  var userCtx = ctx("builtin-upgrade");
+test("v6 deletes removed built-in Capsules including saved data and customized copies", function () {
+  var userCtx = ctx("removed-builtins");
   var root = registry.resolveToolsRoot(userCtx);
-  fs.mkdirSync(root, { recursive: true });
-  fs.writeFileSync(path.join(root, ".capsules-v1"), "board\nscratchpad\n");
+  var translatorDirectory = path.join(root, "translator");
+  fs.mkdirSync(translatorDirectory, { recursive: true });
+  fs.writeFileSync(path.join(translatorDirectory, "manifest.json"), "custom manifest\n", "utf8");
+  fs.writeFileSync(path.join(translatorDirectory, "ui.json"), "custom ui\n", "utf8");
+  fs.writeFileSync(path.join(translatorDirectory, "logic.js"), "custom logic\n", "utf8");
+  fs.writeFileSync(path.join(translatorDirectory, "data.db"), "saved history\n", "utf8");
+  var scratchpadDirectory = path.join(root, "scratchpad");
+  fs.mkdirSync(scratchpadDirectory, { recursive: true });
+  fs.writeFileSync(path.join(scratchpadDirectory, "data.db"), "saved notes\n", "utf8");
+
   var listed = registry.listTools(userCtx);
-  assert.ok(listed.some(function (item) { return item.id === "translator"; }));
-  assert.ok(!listed.some(function (item) { return item.id === "board"; }));
+  assert.ok(!listed.some(function (item) { return item.id === "translator"; }));
   assert.ok(!listed.some(function (item) { return item.id === "scratchpad"; }));
-});
-
-test("v2 marker leaps exact legacy source to current UI and preserves deletions/customizations", function () {
-  var userCtx = ctx("builtin-ui-v2-upgrade");
-  var root = registry.resolveToolsRoot(userCtx);
-  fs.mkdirSync(root, { recursive: true });
-  fs.writeFileSync(path.join(root, ".capsules-v2"), "board\nscratchpad\ntranslator\n");
-  fs.cpSync(path.join(__dirname, "../lib/capsules/translator"), path.join(root, "translator"), { recursive: true });
-  fs.cpSync(path.join(__dirname, "../lib/capsules/scratchpad"), path.join(root, "scratchpad"), { recursive: true });
-  fs.copyFileSync(path.join(__dirname, "fixtures/translator-ui-v1.json"), path.join(root, "translator/ui.json"));
-  fs.copyFileSync(path.join(__dirname, "fixtures/translator-logic-v3.js"), path.join(root, "translator/logic.js"));
-  fs.copyFileSync(path.join(__dirname, "fixtures/scratchpad-ui-v1.json"), path.join(root, "scratchpad/ui.json"));
-  var customScratchpad = JSON.parse(fs.readFileSync(path.join(root, "scratchpad/ui.json"), "utf8"));
-  customScratchpad.children[0].props.text = "My private scratchpad";
-  fs.writeFileSync(path.join(root, "scratchpad/ui.json"), JSON.stringify(customScratchpad, null, 2) + "\n");
-
-  registry.listTools(userCtx);
-  var upgraded = JSON.parse(fs.readFileSync(path.join(root, "translator/ui.json"), "utf8"));
-  assert.strictEqual(upgraded.children[0].children[1].props.role, "display");
-  assert.match(JSON.stringify(upgraded), /model-select/);
-  assert.match(fs.readFileSync(path.join(root, "translator/logic.js"), "utf8"), /setModel/);
-  assert.match(fs.readFileSync(path.join(root, "scratchpad/ui.json"), "utf8"), /My private scratchpad/);
-  assert.strictEqual(fs.existsSync(path.join(root, "board")), false);
-  assert.strictEqual(fs.existsSync(path.join(root, ".capsules-v4")), true);
-});
-
-test("v1 marker upgrades an exact installed legacy Translator as one UI and logic pair", function () {
-  var userCtx = ctx("builtin-v1-existing-translator");
-  var root = registry.resolveToolsRoot(userCtx);
-  fs.mkdirSync(root, { recursive: true });
-  fs.writeFileSync(path.join(root, ".capsules-v1"), "translator\n", "utf8");
-  fs.cpSync(path.join(__dirname, "../lib/capsules/translator"), path.join(root, "translator"), { recursive: true });
-  fs.copyFileSync(path.join(__dirname, "fixtures/translator-ui-v1.json"), path.join(root, "translator/ui.json"));
-  fs.copyFileSync(path.join(__dirname, "fixtures/translator-logic-v3.js"), path.join(root, "translator/logic.js"));
-  registry.listTools(userCtx);
-  assert.match(fs.readFileSync(path.join(root, "translator/ui.json"), "utf8"), /model-select/);
-  assert.match(fs.readFileSync(path.join(root, "translator/logic.js"), "utf8"), /setModel/);
-});
-
-function writePriorTranslator(root, customize) {
-  var destination = path.join(root, "translator");
-  fs.cpSync(path.join(__dirname, "../lib/capsules/translator"), destination, { recursive: true });
-  var ui = fs.readFileSync(path.join(destination, "ui.json"), "utf8");
-  ui = ui.replace(/            \{\n              "type": "model-select",[\s\S]*?            \},\n            \{\n              "type": "select",/, "            {\n              \"type\": \"select\",");
-  fs.writeFileSync(path.join(destination, "ui.json"), ui, "utf8");
-  fs.copyFileSync(path.join(__dirname, "fixtures/translator-logic-v3.js"), path.join(destination, "logic.js"));
-  if (customize === "ui") fs.appendFileSync(path.join(destination, "ui.json"), "\n", "utf8");
-  if (customize === "logic") fs.appendFileSync(path.join(destination, "logic.js"), "\n// Private customization.\n", "utf8");
-  return destination;
-}
-
-test("v4 migration adds Translator model selection only to the exact untouched v3 source", function () {
-  var userCtx = ctx("translator-model-select-upgrade");
-  var root = registry.resolveToolsRoot(userCtx);
-  fs.mkdirSync(root, { recursive: true });
-  fs.writeFileSync(path.join(root, ".capsules-v3"), "translator\n", "utf8");
-  var destination = writePriorTranslator(root);
-  fs.writeFileSync(path.join(destination, "data.db"), "saved history\n", "utf8");
-  registry.setMateEditingAllowed(userCtx, "translator", true);
-
-  var listed = registry.listTools(userCtx);
-  var translator = registry.getTool(userCtx, "translator");
-  assert.ok(listed.some(function (item) { return item.id === "translator"; }));
-  assert.match(JSON.stringify(translator.uiTree), /model-select/);
-  assert.match(translator.logicSource, /setModel/);
-  assert.strictEqual(fs.readFileSync(path.join(destination, "data.db"), "utf8"), "saved history\n");
-  assert.deepStrictEqual(registry.getToolMetadata(userCtx, "translator"), { mateEditingAllowed: true });
-  assert.strictEqual(fs.existsSync(path.join(root, ".capsules-v4")), true);
-});
-
-test("v4 migration preserves customized or deleted Translator Capsules", function () {
-  var variants = ["ui", "logic"];
-  for (var i = 0; i < variants.length; i++) {
-    var userCtx = ctx("translator-model-custom-" + variants[i]);
-    var root = registry.resolveToolsRoot(userCtx);
-    fs.mkdirSync(root, { recursive: true });
-    fs.writeFileSync(path.join(root, ".capsules-v3"), "translator\n", "utf8");
-    var destination = writePriorTranslator(root, variants[i]);
-    registry.listTools(userCtx);
-    assert.doesNotMatch(fs.readFileSync(path.join(destination, "ui.json"), "utf8"), /model-select/);
-    if (variants[i] === "logic") assert.match(fs.readFileSync(path.join(destination, "logic.js"), "utf8"), /Private customization/);
-  }
-  var deletedCtx = ctx("translator-model-deleted");
-  var deletedRoot = registry.resolveToolsRoot(deletedCtx);
-  fs.mkdirSync(deletedRoot, { recursive: true });
-  fs.writeFileSync(path.join(deletedRoot, ".capsules-v3"), "translator\n", "utf8");
-  assert.ok(!registry.listTools(deletedCtx).some(function (item) { return item.id === "translator"; }));
-  assert.strictEqual(fs.existsSync(path.join(deletedRoot, "translator")), false);
-});
-
-test("v5 migration upgrades only exact untouched built-in UI and logic fingerprints", function () {
-  var userCtx = ctx("builtin-advanced-ui-upgrade");
-  var root = registry.resolveToolsRoot(userCtx);
-  fs.mkdirSync(root, { recursive: true });
-  fs.writeFileSync(path.join(root, ".capsules-v4"), "translator\nscratchpad\n");
-  fs.cpSync(path.join(__dirname, "../lib/capsules/translator"), path.join(root, "translator"), { recursive: true });
-  fs.cpSync(path.join(__dirname, "../lib/capsules/scratchpad"), path.join(root, "scratchpad"), { recursive: true });
-
-  var translatorUiPath = path.join(root, "translator/ui.json");
-  var translatorUi = fs.readFileSync(translatorUiPath, "utf8")
-    .replace('      "when": { "notEquals": { "path": "result", "value": "" } },\n', "")
-    .replace(',\n                "validation": { "minLength": 1, "maxLength": 10000, "message": "Enter up to 10,000 characters to translate." }', "");
-  fs.writeFileSync(translatorUiPath, translatorUi, "utf8");
-
-  var scratchUiPath = path.join(root, "scratchpad/ui.json");
-  var scratchUi = fs.readFileSync(scratchUiPath, "utf8")
-    .replace(', "validation": { "maxLength": 2000, "message": "Notes can contain up to 2,000 characters." }', "")
-    .replace('        { "type": "input", "id": "scratch-filter", "bind": "filter", "action": "setFilter", "props": { "label": "Filter notes", "inputType": "search", "placeholder": "Find a note…" } },\n', "")
-    .replace('"props": { "variant": "cards", "gap": "sm", "filter": { "$bind": "filter" }, "filterKey": "text", "sortKey": "createdAt", "sortDirection": "desc", "pageSize": 50 }', '"props": { "variant": "cards", "gap": "sm" }');
-  fs.writeFileSync(scratchUiPath, scratchUi, "utf8");
-  var scratchLogicPath = path.join(root, "scratchpad/logic.js");
-  var scratchLogic = fs.readFileSync(scratchLogicPath, "utf8")
-    .replace("initialState: { draft: '', filter: '', items: [] }", "initialState: { draft: '', items: [] }")
-    .replace("return { draft: state.draft || '', filter: state.filter || '', items: await api.storage.list() };", "return { draft: state.draft || '', items: await api.storage.list() };")
-    .replace("return { draft: args.value || '', filter: state.filter || '', items: state.items || [] };", "return { draft: args.value || '', items: state.items || [] };")
-    .replace("    setFilter: function (state, args) {\n      return { draft: state.draft || '', filter: args.value || '', items: state.items || [] };\n    },\n", "")
-    .replace("return { draft: '', filter: state.filter || '', items: await api.storage.list() };", "return { draft: '', items: await api.storage.list() };")
-    .replace("return { draft: state.draft || '', filter: state.filter || '', items: await api.storage.list() };", "return { draft: state.draft || '', items: await api.storage.list() };");
-  fs.writeFileSync(scratchLogicPath, scratchLogic, "utf8");
-
-  registry.listTools(userCtx);
-  assert.match(fs.readFileSync(translatorUiPath, "utf8"), /notEquals/);
-  assert.match(fs.readFileSync(scratchUiPath, "utf8"), /scratch-filter/);
-  assert.match(fs.readFileSync(scratchLogicPath, "utf8"), /setFilter/);
-
-  var customCtx = ctx("builtin-advanced-ui-custom");
-  var customRoot = registry.resolveToolsRoot(customCtx);
-  fs.mkdirSync(customRoot, { recursive: true });
-  fs.writeFileSync(path.join(customRoot, ".capsules-v4"), "scratchpad\n");
-  fs.cpSync(path.join(__dirname, "../lib/capsules/scratchpad"), path.join(customRoot, "scratchpad"), { recursive: true });
-  var customUiPath = path.join(customRoot, "scratchpad/ui.json");
-  fs.writeFileSync(customUiPath, fs.readFileSync(customUiPath, "utf8").replace("Scratchpad", "Personal Pad"), "utf8");
-  registry.listTools(customCtx);
-  assert.match(fs.readFileSync(customUiPath, "utf8"), /Personal Pad/);
-
-  var deletedCtx = ctx("builtin-advanced-ui-deleted");
-  var deletedRoot = registry.resolveToolsRoot(deletedCtx);
-  fs.mkdirSync(deletedRoot, { recursive: true });
-  fs.writeFileSync(path.join(deletedRoot, ".capsules-v4"), "scratchpad\n");
-  assert.ok(!registry.listTools(deletedCtx).some(function (item) { return item.id === "scratchpad"; }));
-  assert.strictEqual(fs.existsSync(path.join(deletedRoot, "scratchpad")), false);
+  assert.strictEqual(fs.existsSync(translatorDirectory), false);
+  assert.strictEqual(fs.existsSync(scratchpadDirectory), false);
 });
 
 test("tool install rejects server runtime", function () {

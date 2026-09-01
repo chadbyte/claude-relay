@@ -27,7 +27,12 @@ test("project Mate MCP boundary routes source and authoring signatures without M
   projects.set("home", { forEachClient: function () {} });
   var tools = serverTools.attachTools({ users: users, projects: projects });
   tools.installForMate("default", {
-    manifest: { id: "boundary-source", name: "Boundary Source", runtime: "worker" },
+    manifest: {
+      id: "boundary-source", name: "Boundary Source", runtime: "worker",
+      description: "Exercise the project Capsule boundary.",
+      useWhen: "Use for project boundary tests.",
+      skills: "Use clay_tool_snapshot to inspect the boundary state.",
+    },
     uiTree: { type: "stack", children: [{ type: "text", props: { text: "Boundary" } }] },
     logicSource: "var tool = { initialState: { boundary: true }, actions: {} };",
   });
@@ -47,10 +52,10 @@ test("project Mate MCP boundary routes source and authoring signatures without M
   });
 
   var listed = await valueFrom(namedTool(server, "clay_tool_list"), {});
-  var translator = listed.filter(function (item) { return item.id === "translator"; })[0];
-  assert.match(translator.description, /Translate passages/);
-  assert.match(translator.useWhen, /Korean-English translation/);
-  assert.match(translator.skills, /clay_tool_snapshot/);
+  var boundary = listed.filter(function (item) { return item.id === "boundary-source"; })[0];
+  assert.match(boundary.description, /project Capsule boundary/);
+  assert.match(boundary.useWhen, /boundary tests/);
+  assert.match(boundary.skills, /clay_tool_snapshot/);
   assert.deepStrictEqual(calls[0], ["list", "default"]);
 
   var source = await valueFrom(namedTool(server, "clay_tool_source"), { toolId: "boundary-source" });
