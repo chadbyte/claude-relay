@@ -54,6 +54,167 @@ test("pushMessage retires a query handle that rejects delivery", function() {
   assert.strictEqual(session.messageQueue, null);
 });
 
+test("session runtime refresh retires idle handles and defers busy handles to the next turn", function() {
+  var bridge = createBridge();
+  var idleClosed = 0;
+  var idle = {
+    queryInstance: { close: function () { idleClosed++; } },
+    abortController: {},
+    messageQueue: {},
+    isProcessing: false,
+  };
+  assert.strictEqual(bridge.refreshSessionRuntime(idle), true);
+  assert.strictEqual(idleClosed, 1);
+  assert.strictEqual(idle.queryInstance, null);
+  assert.strictEqual(idle._runtimeRefreshRequested, false);
+
+  var busyClosed = 0;
+  var busy = {
+    localId: 23,
+    queryInstance: { pushMessage: function () { return true; }, close: function () { busyClosed++; } },
+    abortController: {},
+    messageQueue: {},
+    isProcessing: true,
+  };
+  assert.strictEqual(bridge.refreshSessionRuntime(busy), true);
+  assert.strictEqual(busyClosed, 0);
+  assert.strictEqual(busy._runtimeRefreshRequested, true);
+  assert.strictEqual(bridge.pushMessage(busy, "next turn"), false);
+  assert.strictEqual(busyClosed, 1);
+  assert.strictEqual(busy.queryInstance, null);
+  assert.strictEqual(busy._runtimeRefreshRequested, false);
+});
+
+test("environment refresh retires only idle sessions and reclaims idle adapter processes", async function() {
+  var idleClosed = 0;
+  var busyClosed = 0;
+  var reclaims = 0;
+  var sessions = new Map();
+  sessions.set(1, { queryInstance: { close: function() { idleClosed++; } }, isProcessing: false });
+  sessions.set(2, { queryInstance: { close: function() { busyClosed++; } }, isProcessing: true });
+  var bridge = createSDKBridge({
+    cwd: process.cwd(),
+    sessionManager: { sessions: sessions },
+    adapter: { vendor: "codex" },
+    adapters: {
+      codex: { shutdownIfIdle: function(idleMs) { assert.strictEqual(idleMs, 0); reclaims++; return Promise.resolve(true); } },
+      acp: { shutdownIfIdle: function(idleMs) { assert.strictEqual(idleMs, 0); reclaims++; return Promise.resolve(true); } },
+      kiro: { shutdownIfIdle: function(idleMs) { assert.strictEqual(idleMs, 0); reclaims++; return Promise.resolve(true); } },
+    },
+    send: function() {},
+  });
+
+  assert.strictEqual(bridge.refreshEnvironmentRuntime(), true);
+  await new Promise(function(resolve) { setImmediate(resolve); });
+  assert.strictEqual(idleClosed, 1);
+  assert.strictEqual(busyClosed, 0);
+  assert.strictEqual(sessions.get(1).queryInstance, null);
+  assert.strictEqual(sessions.get(2)._runtimeRefreshRequested, true);
+  assert.strictEqual(reclaims, 3);
+  sessions.get(2).isProcessing = false;
+  assert.strictEqual(bridge.pushMessage(sessions.get(2), "after completion"), false);
+  assert.strictEqual(busyClosed, 1);
+  assert.strictEqual(sessions.get(2).queryInstance, null);
+});
+
+test("main SDK queries pass the scoped environment through readiness and resumed createQuery", async function() {
+  var initOptions = null;
+  var queryOptions = null;
+  var handle = createEndingHandle([]);
+  var adapter = {
+    vendor: "codex",
+    init: function(options) {
+      initOptions = options;
+      return Promise.resolve({ models: ["gpt-test"], capabilities: {} });
+    },
+    supportedModels: function() { return Promise.resolve(["gpt-test"]); },
+    createQuery: function(options) { queryOptions = options; return Promise.resolve(handle); },
+  };
+  var sessions = new Map();
+  var session = {
+    localId: 31,
+    vendor: "codex",
+    cliSessionId: "resume-31",
+    pendingAskUser: {},
+    pendingPermissions: {},
+    pendingElicitations: {},
+  };
+  sessions.set(session.localId, session);
+  var sm = {
+    sessions: sessions,
+    availableModels: [],
+    saveSessionFile: function() {},
+    broadcastSessionList: function() {},
+    sendAndRecord: function() {},
+    sendToSession: function() {},
+  };
+  var bridge = createSDKBridge({
+    cwd: process.cwd(),
+    sessionManager: sm,
+    adapter: adapter,
+    adapters: { codex: adapter },
+    getRuntimeEnv: function() { return { PROJECT_TOKEN: "scoped" }; },
+    send: function() {},
+  });
+
+  await bridge.startQuery(session, "A resumed request", null, null);
+  assert.deepStrictEqual(initOptions.env, { PROJECT_TOKEN: "scoped" });
+  assert.deepStrictEqual(queryOptions.env, { PROJECT_TOKEN: "scoped" });
+  assert.strictEqual(queryOptions.resumeSessionId, "resume-31");
+});
+
+test("main SDK queries expose session dynamic tools and use their canonical approval identity", async function() {
+  var queryOptions = null;
+  var adapter = {
+    vendor: "codex",
+    userInputCapability: { mode: "native", native: true },
+    createQuery: function(options) { queryOptions = options; return Promise.resolve(createEndingHandle([])); },
+  };
+  var session = { localId: 32, vendor: "codex", pendingAskUser: {}, pendingPermissions: {}, pendingElicitations: {} };
+  var bridge = createSDKBridge({
+    cwd: process.cwd(),
+    sessionManager: {
+      sessions: new Map([[32, session]]), availableModels: [], saveSessionFile: function() {},
+      broadcastSessionList: function() {}, sendAndRecord: function() {}, sendToSession: function() {},
+    },
+    adapter: adapter,
+    adapters: { codex: adapter },
+    getSessionToolDefs: function() {
+      return [{
+        name: "search_workspace_history",
+        description: "Search owned history",
+        inputSchema: {},
+        permissionName: "mcp__clay-workspace__search_workspace_history",
+        handler: function() { return Promise.resolve({ content: [] }); },
+      }];
+    },
+    send: function() {},
+  });
+  await bridge.startQuery(session, "Find prior work", null, null);
+  assert.deepEqual(queryOptions.dynamicTools.map(function(tool) { return tool.name; }), ["search_workspace_history"]);
+  assert.equal((await queryOptions.canUseTool("search_workspace_history", {}, {})).behavior, "allow");
+});
+
+test("rewind queries receive the scoped environment when they create a temporary handle", async function() {
+  var capturedOptions = null;
+  var handle = createEndingHandle([]);
+  var adapter = {
+    vendor: "claude",
+    createQuery: function(options) { capturedOptions = options; return Promise.resolve(handle); },
+  };
+  var bridge = createSDKBridge({
+    cwd: process.cwd(),
+    sessionManager: { sendAndRecord: function() {}, sendToSession: function() {} },
+    adapter: adapter,
+    getRuntimeEnv: function() { return { PROJECT_TOKEN: "rewind" }; },
+    send: function() {},
+  });
+  var result = await bridge.getOrCreateRewindQuery({ cliSessionId: "resume-rewind" });
+  assert.deepStrictEqual(capturedOptions.env, { PROJECT_TOKEN: "rewind" });
+  assert.strictEqual(capturedOptions.resumeSessionId, "resume-rewind");
+  result.cleanup();
+});
+
 test("a started session persists its identity and refreshes split anchors immediately", function() {
   var saved = [];
   var assigned = [];
@@ -99,6 +260,21 @@ test("mention sessions preserve the mapped Linux user", async function() {
 
   assert.ok(mentionSession);
   assert.strictEqual(capturedOptions.linuxUser, "clay-alice");
+});
+
+test("mention sessions receive the scoped runtime environment", async function() {
+  var capturedOptions = null;
+  var handle = createEndingHandle([]);
+  var bridge = createSDKBridge({
+    cwd: process.cwd(),
+    sessionManager: {},
+    adapter: { vendor: "codex", createQuery: function(options) { capturedOptions = options; return Promise.resolve(handle); } },
+    getRuntimeEnv: function() { return { PROJECT_TOKEN: "not logged" }; },
+    send: function() {},
+  });
+
+  await bridge.createMentionSession({ claudeMd: "", initialContext: "context", initialMessage: "question", onDelta: function() {}, onDone: function() {}, onError: function() {} });
+  assert.deepStrictEqual(capturedOptions.env, { PROJECT_TOKEN: "not logged" });
 });
 
 test("pushMessage retires a query handle that throws during delivery", function() {
@@ -403,4 +579,90 @@ test("a result keeps processing active while a queued turn continues", function(
   assert.strictEqual(session._awaitingTurnResult, false);
   assert.strictEqual(processingChanges, 1);
   assert.strictEqual(recorded[recorded.length - 1].type, "done");
+});
+
+test("Mate result notifications retain the assistant preview alongside canonical done events", function() {
+  var recorded = [];
+  var notified = [];
+  var bridge = createSDKBridge({
+    cwd: process.cwd(),
+    slug: "mate-mate-a",
+    mateDisplayName: "Clay",
+    sessionManager: {
+      sendAndRecord: function(session, msg) { recorded.push(msg); },
+      sendToSession: function() {},
+      broadcastSessionList: function() {},
+    },
+    adapter: { vendor: "claude" },
+    send: function() {},
+    onProcessingChanged: function() {},
+    getNotificationsModule: function() {
+      return { notify: function(type, payload) { notified.push({ type: type, payload: payload }); } };
+    },
+  });
+  var session = {
+    localId: 21,
+    ownerId: "u1",
+    isProcessing: true,
+    _awaitingTurnResult: true,
+    _queuedTurnCount: 0,
+    pendingAskUser: {},
+    pendingPermissions: {},
+    pendingElicitations: {},
+    activeTaskToolIds: {},
+    taskIdMap: {},
+    responsePreview: "Assistant output visible in the Home notification",
+    history: [],
+    turnCount: 0,
+  };
+  bridge.processSDKMessage(session, { yokeType: "result", cost: 1, duration: 10 });
+  assert.deepStrictEqual(recorded.slice(-2).map(function(message) { return message.type; }), ["result", "done"]);
+  assert.equal(notified.length, 1);
+  assert.equal(notified[0].type, "response_done");
+  assert.equal(notified[0].payload.preview, "Assistant output visible in the Home notification");
+  assert.equal(notified[0].payload.mateId, "mate-a");
+});
+
+test("a visibly presented exact Home response skips completion notifications but still finishes", function() {
+  var recorded = [];
+  var notified = [];
+  var pushed = [];
+  var bridge = createSDKBridge({
+    cwd: process.cwd(),
+    slug: "mate-mate-a",
+    mateDisplayName: "Clay",
+    sessionManager: {
+      sendAndRecord: function(session, msg) { recorded.push(msg); },
+      sendToSession: function() {},
+      broadcastSessionList: function() {},
+    },
+    adapter: { vendor: "claude" },
+    send: function() {},
+    onProcessingChanged: function() {},
+    shouldSuppressResponseNotification: function(session) { return session.localId === 22; },
+    pushModule: { sendPush: function(payload) { pushed.push(payload); } },
+    getNotificationsModule: function() {
+      return { notify: function(type, payload) { notified.push({ type: type, payload: payload }); } };
+    },
+  });
+  var session = {
+    localId: 22,
+    ownerId: "u1",
+    isProcessing: true,
+    _awaitingTurnResult: true,
+    _queuedTurnCount: 0,
+    pendingAskUser: {},
+    pendingPermissions: {},
+    pendingElicitations: {},
+    activeTaskToolIds: {},
+    taskIdMap: {},
+    responsePreview: "Already visible in Home",
+    history: [],
+    turnCount: 0,
+  };
+  bridge.processSDKMessage(session, { yokeType: "result", cost: 1, duration: 10 });
+  assert.deepEqual(recorded.slice(-2).map(function(message) { return message.type; }), ["result", "done"]);
+  assert.equal(session.isProcessing, false);
+  assert.equal(notified.length, 0);
+  assert.equal(pushed.length, 0);
 });

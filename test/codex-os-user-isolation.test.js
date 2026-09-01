@@ -44,12 +44,13 @@ test("Codex creates and reuses a separate app-server for each mapped Linux user"
     },
   });
 
-  await adapter.init({ linuxUser: "alice" });
+  await adapter.init({ linuxUser: "alice", env: { PROJECT_TOKEN: "alice-project" } });
   await adapter.init({ linuxUser: "alice" });
   await adapter.init({ linuxUser: "bob" });
 
   assert.strictEqual(servers.length, 2);
   assert.strictEqual(servers[0].options.osUserInfo.user, "alice");
+  assert.strictEqual(servers[0].options.env.PROJECT_TOKEN, "alice-project");
   assert.strictEqual(servers[1].options.osUserInfo.user, "bob");
   assert.notStrictEqual(servers[0], servers[1]);
 });

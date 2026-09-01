@@ -1,6 +1,6 @@
 var test = require("node:test");
 var assert = require("node:assert");
-var { attachModels, modelEntryMatches } = require("../lib/project-models");
+var { attachModels, modelEntryMatches, normalizeCatalogModels, selectCatalogModel } = require("../lib/project-models");
 
 function fixture(options) {
   options = options || {};
@@ -11,13 +11,14 @@ function fixture(options) {
     defaultVendor: "claude",
     modelsByVendor: {},
     capabilitiesByVendor: {},
-    availableVendors: ["claude"],
-    installedVendors: ["claude"],
+    availableVendors: options.availableVendors || ["claude"],
+    installedVendors: options.installedVendors || ["claude"],
   };
   var adapter = options.adapter || {
     init: function() {
       return Promise.resolve({
-        models: [{ value: "fable", resolvedModel: "claude-fable-5", displayName: "Claude Fable" }],
+        models: options.models || [{ value: "fable", resolvedModel: "claude-fable-5", displayName: "Claude Fable" }],
+        defaultModel: options.adapterDefaultModel || "",
         capabilities: { midSessionModelSwitch: true },
       });
     },
@@ -28,7 +29,7 @@ function fixture(options) {
     slug: "model-test",
     sm: sm,
     sdk: options.sdk || { setModel: function(_session, model) { return Promise.resolve({ ok: true, model: model }); } },
-    adapters: { claude: adapter },
+    adapters: options.adapters || { claude: adapter },
     sendTo: function(_ws, msg) { sent.push(msg); },
     getSessionForWs: function() { return session; },
     getLinuxUserForWs: function() { return null; },
@@ -61,6 +62,84 @@ test("model loading returns an actionable error instead of a blank list", async 
   assert.strictEqual(f.sent[0].modelStatus, "error");
   assert.deepStrictEqual(f.sent[0].models, []);
   assert.match(f.sent[0].error, /authentication expired/);
+});
+
+test("vendor catalog lookup can be reused without emitting project model_info", async function() {
+  var f = fixture();
+  var catalog = await f.attached.getVendorCatalog({}, "claude");
+  assert.strictEqual(catalog.status, "ready");
+  assert.strictEqual(catalog.models[0].value, "fable");
+  assert.deepStrictEqual(f.sent, []);
+});
+
+test("vendor availability can be reused without emitting or mutating project picker state", function() {
+  var f = fixture({ availableVendors: ["claude", "codex"], installedVendors: ["claude"] });
+  var vendors = f.attached.getVendorAvailability();
+  assert.deepStrictEqual(vendors.map(function(vendor) { return [vendor.id, vendor.installed]; }), [["claude", true], ["codex", false]]);
+  assert.deepStrictEqual(f.sent, []);
+  assert.deepStrictEqual(f.sm.availableVendors, ["claude", "codex"]);
+});
+
+test("vendor catalog exposes only a concrete validated default model", async function() {
+  var saved = fixture({ currentModel: "claude-sonnet-4", models: [{ value: "fable" }, { value: "sonnet", resolvedModel: "claude-sonnet-4" }], adapterDefaultModel: "fable" });
+  var savedCatalog = await saved.attached.getVendorCatalog({}, "claude");
+  assert.strictEqual(savedCatalog.defaultModel, "sonnet");
+
+  var adapter = fixture({ currentModel: "removed", models: ["fable", "sonnet"], adapterDefaultModel: "sonnet" });
+  var adapterCatalog = await adapter.attached.getVendorCatalog({}, "claude");
+  assert.strictEqual(adapterCatalog.defaultModel, "sonnet");
+
+  var invalid = fixture({ currentModel: "removed", models: ["fable"], adapterDefaultModel: "also-removed" });
+  var invalidCatalog = await invalid.attached.getVendorCatalog({}, "claude");
+  assert.strictEqual(invalidCatalog.defaultModel, "");
+});
+
+test("Capsule model resolution returns a concrete catalog value without emitting picker state", async function() {
+  var f = fixture({
+    currentModel: "claude-fable-5",
+    models: [{ value: "fable", resolvedModel: "claude-fable-5", displayName: "Claude Fable" }],
+  });
+  var resolved = await f.attached.resolveConfiguredModel({}, "standard");
+  assert.deepStrictEqual(resolved, {
+    status: "ready",
+    vendor: "claude",
+    vendorName: "Claude Code",
+    model: "fable",
+    modelName: "Claude Fable",
+    alias: "standard",
+    error: "",
+  });
+  assert.deepStrictEqual(f.sent, []);
+});
+
+test("Capsule model resolution reports actionable configuration failure", async function() {
+  var f = fixture({
+    adapter: {
+      init: function() { return Promise.reject(new Error("authentication required")); },
+      supportedModels: function() { return Promise.resolve([]); },
+    },
+  });
+  var resolved = await f.attached.resolveConfiguredModel({}, "fast");
+  assert.strictEqual(resolved.status, "error");
+  assert.strictEqual(resolved.model, "");
+  assert.match(resolved.error, /authentication required/);
+});
+
+test("Capsule aliases select different concrete values from rich catalog entries", async function() {
+  var models = [
+    { value: "swift", resolvedModel: "vendor-swift-v2", displayName: "Swift Mini" },
+    { value: "balanced", resolvedModel: "vendor-balanced-v3", displayName: "Balanced Sonnet" },
+    { value: "reasoner", resolvedModel: "vendor-reasoner-v4", displayName: "Reasoner Pro" },
+  ];
+  var f = fixture({ currentModel: "vendor-balanced-v3", models: models });
+  var fast = await f.attached.resolveConfiguredModel({}, "fast");
+  var standard = await f.attached.resolveConfiguredModel({}, "standard");
+  var deep = await f.attached.resolveConfiguredModel({}, "deep");
+  assert.deepStrictEqual([fast.model, standard.model, deep.model], ["swift", "balanced", "reasoner"]);
+  assert.deepStrictEqual([fast.alias, standard.alias, deep.alias], ["fast", "standard", "deep"]);
+  assert.ok([fast.model, standard.model, deep.model].every(function(model) { return typeof model === "string" && model !== "[object Object]"; }));
+  assert.deepStrictEqual(normalizeCatalogModels(models).map(function(model) { return model.value; }), ["swift", "balanced", "reasoner"]);
+  assert.strictEqual(selectCatalogModel(models, "vendor-balanced-v3", "standard").value, "balanced");
 });
 
 test("model selection reports adapter success and failure", async function() {

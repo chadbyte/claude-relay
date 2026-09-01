@@ -94,11 +94,11 @@ test("configured pairs expose partner tools only to the Driver", function () {
   assert.deepStrictEqual(f.attached.getToolDefs(f.driver).map(function (tool) { return tool.name; }), ["send_to_partner", "read_partner", "interrupt_partner", "close_partner"]);
   assert.deepStrictEqual(f.attached.getToolDefs(f.worker), []);
   assert.match(f.attached.getSystemPrompt(f.driver), /Driver/);
-  assert.match(f.attached.getSystemPrompt(f.driver), /completed Worker turn leaves the Worker session available/);
-  assert.match(f.attached.getSystemPrompt(f.driver), /human may also message or stop the Worker directly/);
+  assert.match(f.attached.getSystemPrompt(f.driver), /completed Split Worker turn leaves the Split Worker session available/);
+  assert.match(f.attached.getSystemPrompt(f.driver), /human may also message or stop the Split Worker directly/);
   assert.match(f.attached.getSystemPrompt(f.driver), /Use close_partner immediately/);
-  assert.match(f.attached.getSystemPrompt(f.driver), /never substitute a background session/);
-  assert.match(f.attached.getToolDefs(f.driver)[0].description, /reuse the same Worker for follow-up implementation/);
+  assert.match(f.attached.getSystemPrompt(f.driver), /never substitute a background Sub-agent/);
+  assert.match(f.attached.getToolDefs(f.driver)[0].description, /reuse the same Split Worker for follow-up implementation/);
   assert.strictEqual(f.attached.getSystemPrompt(f.worker), "");
 });
 
@@ -135,6 +135,34 @@ test("send_to_partner creates and opens a visible Worker when the Driver is unpa
   assert.strictEqual(f.pairMessages[0].group.id, "sg_created");
 });
 
+test("paired routing uses visible-session context and partner-tool precedence", function () {
+  var f = fixture(true);
+  var prompt = f.attached.getSystemPrompt(f.driver);
+
+  assert.match(prompt, /Infer the user's intended target from conversational and UI context/);
+  assert.match(prompt, /paired or split pane, its session, its activity or status, or a collaborator the user opened resolve to Clay's Split Worker and the appropriate partner tool/);
+  assert.match(prompt, /When ambiguous and a visible pair exists, prefer the visible Split Worker/);
+  assert.match(prompt, /If the ambiguity would materially change where work runs, ask a concise clarification instead of guessing/);
+});
+
+test("unpaired routing distinguishes visible collaboration from internal delegation", function () {
+  var f = fixture(false, { ungrouped: true });
+  var prompt = f.attached.getSystemPrompt(f.driver);
+
+  assert.match(prompt, /Internal Sub-agents are a distinct execution mechanism, not a lexical category/);
+  assert.match(prompt, /only when the user clearly intends internal or background parallel delegation rather than a visible paired session/);
+  assert.match(prompt, /When the user intends a visible collaborator, call send_to_partner directly/);
+  assert.match(prompt, /ask a concise clarification instead of guessing/);
+});
+
+test("routing guidance does not enumerate language-specific keywords", function () {
+  var f = fixture(true);
+  var prompt = f.attached.getSystemPrompt(f.driver);
+
+  assert.strictEqual(/[^\x00-\x7F]/.test(prompt), false);
+  assert.doesNotMatch(prompt, /always mean|any of those terms|Terminology and routing are strict/);
+});
+
 test("send_to_partner validates its task before creating a Worker", async function () {
   var f = fixture(false, { ungrouped: true });
   var tool = f.attached.getToolDefs(f.driver)[0];
@@ -154,7 +182,7 @@ test("a detached delegated turn pushes its result to the Driver once", async fun
   await new Promise(function (resolve) { setTimeout(resolve, 50); });
 
   assert.strictEqual(f.driverPushes.length, 1);
-  assert.match(f.driverPushes[0], /Worker result:\nPartner result/);
+  assert.match(f.driverPushes[0], /Split Worker result:\nPartner result/);
   assert.strictEqual(f.driver.history.length, 1);
   assert.strictEqual(f.driver.history[0]._internal, true);
   assert.strictEqual(f.driver.history[0].partnerResult, true);
@@ -169,7 +197,7 @@ test("a detached result starts a fresh Driver query when push is rejected", asyn
 
   var driverStarts = f.starts.filter(function (start) { return start.session === f.driver; });
   assert.strictEqual(driverStarts.length, 1);
-  assert.match(driverStarts[0].text, /Worker result:\nPartner result/);
+  assert.match(driverStarts[0].text, /Split Worker result:\nPartner result/);
 });
 
 test("the detached monitor delivers failures even when no normal turn-done event arrives", async function () {
@@ -179,7 +207,7 @@ test("the detached monitor delivers failures even when no normal turn-done event
   await new Promise(function (resolve) { setTimeout(resolve, 550); });
 
   assert.strictEqual(f.driverPushes.length, 1);
-  assert.match(f.driverPushes[0], /Worker error:\nWorker crashed/);
+  assert.match(f.driverPushes[0], /Split Worker error:\nWorker crashed/);
   assert.strictEqual(f.worker._pairDelegation, undefined);
 });
 
@@ -198,7 +226,7 @@ test("the detached monitor reports interruption as partial, not completion", asy
   await new Promise(function (resolve) { setTimeout(resolve, 550); });
 
   assert.strictEqual(f.driverPushes.length, 1);
-  assert.match(f.driverPushes[0], /Worker execution interrupted/);
+  assert.match(f.driverPushes[0], /Split Worker execution interrupted/);
   assert.match(f.driverPushes[0], /PARTIAL/);
   assert.doesNotMatch(f.driverPushes[0], /completed/);
 });

@@ -3,6 +3,7 @@
 @import url("css/title-bar.css?v=20260828-project-header1");
 @import url("css/pane.css");
 @import url("css/worker-proposal.css");
+@import url("css/workspace-assignment.css");
 @import url("css/session-actions.css?v=20260828-contrast1");
 @import url("css/sidebar.css?v=20260828-session-list3");
 @import url("css/overlays.css?v=20260827-brand3");
@@ -23,7 +24,13 @@
 @import url("css/scheduler.css");
 @import url("css/scheduler-modal.css");
 @import url("css/home-hub.css");
-/* @import url("css/home-chat.css"); */ /* FAB chat disabled */
+@import url("css/home-sidebar.css");
+@import url("css/home-session-actions.css");
+@import url("css/home-capsule-library.css");
+@import url("css/home-capsule-source.css");
+@import url("css/capsule-ui.css?v=20260831-v2");
+@import url("css/home-mate-model-picker.css");
+@import url("css/home-mate-settings.css");
 @import url("css/playbook.css");
 @import url("css/stt.css");
 @import url("css/profile.css");
@@ -32,9 +39,13 @@
 @import url("css/session-search.css");
 @import url("css/tooltip.css");
 @import url("css/mates.css?v=20260407");
-@import url("css/command-palette.css");
+@import url("css/command-palette.css?v=20260901-clay-chat2");
 @import url("css/mention.css");
 @import url("css/debate.css");
+@import url("css/home-debate-planning.css");
+@import url("css/home-mate-creation.css");
+@import url("css/home-debate-live.css");
+@import url("css/home-debates-archive.css");
 @import url("css/notifications-center.css");
 @import url("css/tui-attention.css?v=20260829-terminal-canvas1");
 @import url("css/pwa-mobile.css?v=20260824f");

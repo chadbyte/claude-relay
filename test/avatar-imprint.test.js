@@ -29,12 +29,13 @@ test("legacy avatar choices remain part of the identity hash", async function ()
   assert.notEqual(thumbs, imprint);
 });
 
-test("every identity uses the same official graphite, paper, and indigo palette", async function () {
+test("every imprint uses the same muted graphite, paper, and indigo palette", async function () {
   var module = await loadModule();
   var purple = module.imprintSvg({ style: "imprint", seed: "sample-user", size: 64, color: "#7c3aed" });
   var green = module.imprintSvg({ style: "imprint", seed: "sample-user", size: 64, color: "#07e5a3" });
   assert.equal(purple, green);
-  assert.match(purple, /#5857fc/);
+  assert.match(purple, /#72778f/);
+  assert.doesNotMatch(purple, /#5857fc|#07e5a3/);
 });
 
 test("generated avatars are local SVG data URLs with no remote dependency", async function () {
@@ -58,6 +59,23 @@ test("Clay Mate marks use a conventional display-name initial", async function (
   assert.doesNotMatch(arch, /fill="#333330"/);
   assert.doesNotMatch(buzz, /fill="#333330"/);
   assert.notEqual(arch, module.imprintSvg({ seed: "Arch", size: 64 }));
+});
+
+test("built-in Mate initials map to distinct muted source colors", async function () {
+  var module = await loadModule();
+  var expected = {
+    Arch: "#8a806a",
+    Rush: "#887b91",
+    Ward: "#6f8382",
+    Pixel: "#92756d",
+    Buzz: "#6f7489",
+  };
+  var names = Object.keys(expected);
+  for (var i = 0; i < names.length; i++) {
+    var result = module.mateMarkSvg({ seed: names[i], size: 64 });
+    assert.match(result, new RegExp(expected[names[i]]));
+    assert.doesNotMatch(result, /#5857fc|#07e5a3/);
+  }
 });
 
 test("Clay Mate marks are deterministic local SVG data URLs", async function () {

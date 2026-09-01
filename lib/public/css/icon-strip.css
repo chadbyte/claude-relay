@@ -895,11 +895,10 @@
   box-shadow: 0 0 0 2px var(--accent);
 }
 
-/* Primary mate: full color (no desaturate), no ring */
+/* Primary Mate uses its source image without a color-altering filter. */
 .icon-strip-primary-mate {
   opacity: 1;
   border-radius: 8px;
-  filter: saturate(1) !important;
 }
 
 /* Online status dot (bottom-right on avatar, like project blink dot) */

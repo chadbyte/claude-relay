@@ -1,0 +1,344 @@
+/* Restrained row actions and centered Mate settings. */
+
+.home-mate-list-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 28px;
+  align-items: center;
+  border-radius: 8px;
+}
+
+.home-mate-list-item.is-active {
+  background: rgba(var(--overlay-rgb), 0.055);
+}
+
+.home-mate-list-item.is-active .home-mate-list-row { background: transparent; }
+
+.home-mate-list-overflow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 120ms ease-out;
+}
+
+.home-mate-list-item:hover .home-mate-list-overflow,
+.home-mate-list-item:focus-within .home-mate-list-overflow,
+.home-mate-list-overflow:focus-visible,
+.home-mate-list-overflow[aria-expanded="true"] { opacity: 1; }
+
+.home-mate-list-overflow:hover,
+.home-mate-list-overflow[aria-expanded="true"] {
+  background: rgba(var(--overlay-rgb), 0.07);
+  color: var(--text);
+}
+
+.home-mate-list-overflow:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.home-mate-list-overflow-mark {
+  display: block;
+  font-family: sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  transform: translateY(-1px);
+}
+
+.home-mate-row-menu {
+  position: fixed;
+  z-index: 9050;
+  min-width: 166px;
+  padding: 5px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--bg-elevated, var(--bg));
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
+}
+
+.home-mate-row-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  min-height: 34px;
+  padding: 7px 9px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.home-mate-row-menu-item:hover,
+.home-mate-row-menu-item:focus-visible {
+  outline: none;
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+.home-mate-row-menu-item .lucide { width: 14px; height: 14px; }
+
+.home-mate-settings-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.38);
+  backdrop-filter: blur(2px);
+}
+
+body.home-mate-settings-open .profile-popover { z-index: 9050; }
+body.home-mate-settings-open #confirm-modal { z-index: 9100; }
+
+.home-mate-settings-dialog {
+  display: flex;
+  width: min(720px, calc(100vw - 48px));
+  height: min(590px, calc(100vh - 64px));
+  max-height: 720px;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--bg);
+  box-shadow: 0 24px 72px rgba(0, 0, 0, 0.24);
+  animation: home-mate-settings-in 140ms ease-out;
+}
+
+@keyframes home-mate-settings-in {
+  from { opacity: 0; transform: translateY(5px) scale(0.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.home-mate-settings-header {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 72px;
+  padding: 14px 18px 13px 22px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.home-mate-settings-header > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.home-mate-settings-header span {
+  overflow: hidden;
+  color: var(--text-dimmer);
+  font-size: 10px;
+  font-weight: 620;
+  letter-spacing: 0.02em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-mate-settings-header h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+}
+
+.home-mate-settings-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-dimmer);
+  cursor: pointer;
+}
+
+.home-mate-settings-close:hover { background: var(--bg-hover); color: var(--text); }
+.home-mate-settings-close:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.home-mate-settings-close .lucide { width: 16px; height: 16px; }
+
+.home-mate-settings-layout {
+  display: grid;
+  min-height: 0;
+  flex: 1 1 auto;
+  grid-template-columns: 172px minmax(0, 1fr);
+}
+
+.home-mate-settings-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 10px;
+  border-right: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg-hover) 38%, var(--bg));
+}
+
+.home-mate-settings-nav button {
+  width: 100%;
+  min-height: 36px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 540;
+  text-align: left;
+  cursor: pointer;
+}
+
+.home-mate-settings-nav button:hover { background: rgba(var(--overlay-rgb), 0.045); color: var(--text); }
+.home-mate-settings-nav button.is-active { background: rgba(var(--overlay-rgb), 0.065); color: var(--text); font-weight: 640; }
+.home-mate-settings-nav button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+.home-mate-settings-content { min-width: 0; min-height: 0; overflow-y: auto; }
+
+.home-mate-settings-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 520px;
+  padding: 24px 26px 30px;
+}
+
+.home-mate-settings-identity,
+.home-mate-settings-summary,
+.home-mate-settings-memory {
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.home-mate-settings-identity > span {
+  color: var(--text-dimmer);
+  font-size: 9px;
+  font-weight: 680;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.home-mate-settings-identity h3,
+.home-mate-settings-summary h3,
+.home-mate-settings-memory h3 {
+  margin: 5px 0 4px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.home-mate-settings-identity p,
+.home-mate-settings-summary p,
+.home-mate-settings-memory p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.home-mate-settings-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.home-mate-settings-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 620;
+  cursor: pointer;
+}
+
+.home-mate-settings-action:hover { background: var(--bg-hover); color: var(--text); }
+.home-mate-settings-action:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.home-mate-settings-action.is-danger { color: var(--danger); }
+.home-mate-settings-action .lucide { width: 14px; height: 14px; }
+
+.home-mate-settings-empty {
+  padding: 20px 0;
+  color: var(--text-dimmer);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.home-mate-settings-file {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.home-mate-settings-file .lucide { width: 14px; height: 14px; color: var(--text-dimmer); }
+
+@media (hover: none), (pointer: coarse) {
+  .home-mate-list-overflow { opacity: 0.68; }
+}
+
+@media (max-width: 768px) {
+  #home-hub.home-settings-drawer-masked .home-sidebar,
+  #home-hub.home-settings-drawer-masked .home-sidebar-backdrop { visibility: hidden; }
+
+  .home-mate-list-overflow { opacity: 1; }
+
+  .home-mate-settings-overlay {
+    padding: max(8px, var(--safe-top)) 0 max(8px, var(--safe-bottom, 0px));
+    background: rgba(0, 0, 0, 0.28);
+  }
+
+  .home-mate-settings-dialog {
+    width: 100%;
+    height: 100%;
+    max-height: none;
+    border-right: 0;
+    border-left: 0;
+    border-radius: 0;
+  }
+
+  .home-mate-settings-header { min-height: 62px; padding: 10px 12px 10px 16px; }
+  .home-mate-settings-layout { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); }
+  .home-mate-settings-nav {
+    flex-direction: row;
+    gap: 4px;
+    padding: 8px 10px;
+    overflow-x: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .home-mate-settings-nav button { width: auto; min-width: max-content; text-align: center; }
+  .home-mate-settings-body { padding: 20px 18px 28px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-mate-list-overflow { transition: none; }
+  .home-mate-settings-dialog { animation: none; }
+}

@@ -76,6 +76,7 @@ test("Antigravity adapter uses the official streaming CLI protocol", async funct
     effort: "high",
     resumeSessionId: "previous-session",
     systemPrompt: "Project instructions",
+    env: { PROJECT_TOKEN: "scoped" },
     adapterOptions: { ANTIGRAVITY: { dangerouslySkipPermissions: true } },
   });
   assert.strictEqual(handle.pushMessage("Say hello"), true);
@@ -92,6 +93,7 @@ test("Antigravity adapter uses the official streaming CLI protocol", async funct
     "--dangerously-skip-permissions",
   ]);
   assert.strictEqual(calls[1].input.message.content, "Project instructions\n\nSay hello");
+  assert.strictEqual(calls[0].options.env.PROJECT_TOKEN, "scoped");
   assert.ok(events.some(function(event) { return event.yokeType === "text_delta" && event.text === "hello"; }));
   assert.ok(events.some(function(event) { return event.yokeType === "tool_start" && event.toolName === "Bash"; }));
   assert.ok(events.some(function(event) { return event.yokeType === "tool_result" && event.content === "/project\n"; }));

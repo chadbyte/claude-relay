@@ -6,14 +6,19 @@ var { dispatchMessageSafely } = require("../lib/project-connection");
 function createHarness(options) {
   var sent = [];
   var starts = [];
+  var records = [];
   var mates = options.mates || {};
   var proposal = attachDebateProposal({
     cwd: options.cwd || "/projects/example",
     isMate: !!options.isMate,
+    isHostAgent: !!options.isHostAgent,
     sendTo: function (ws, msg) { sent.push(msg); },
     buildMateCtx: function (userId) { return { userId: userId }; },
     getMate: function (mateCtx, mateId) { return mates[mateId] || null; },
+    getVendorModelCatalog: options.getVendorModelCatalog,
+    getVendorModelCatalogForSession: options.getVendorModelCatalog ? function (session, vendor) { return options.getVendorModelCatalog(null, vendor); } : undefined,
     getProjectOwnerId: function () { return "project-owner"; },
+    recordSessionEvent: function (session, event) { records.push(event); },
     startDebate: function (session, briefData, moderatorId, ws) {
       starts.push({ session: session, briefData: briefData, moderatorId: moderatorId, ws: ws });
       if (options.startError) throw options.startError;
@@ -33,6 +38,7 @@ function createHarness(options) {
     session: session,
     sent: sent,
     starts: starts,
+    records: records,
   };
 }
 
@@ -75,6 +81,33 @@ test("normal project proposals use an explicit moderator and their bound session
   assert.match(result.content[0].text, /approved and started/i);
 });
 
+test("proposal approval exposes defaults and starts with revalidated per-participant model overrides", async function () {
+  var harness = createHarness({
+    mates: {
+      mate_mod: { id: "mate_mod", vendor: "claude", model: "sonnet" },
+      mate_panel: { id: "mate_panel", vendor: "codex", model: "gpt-5.6" },
+    },
+    getVendorModelCatalog: function (ws, vendor) {
+      return Promise.resolve(vendor === "claude"
+        ? { models: [{ value: "sonnet", displayName: "Sonnet" }, { value: "opus", displayName: "Opus" }] }
+        : { models: [{ value: "gpt-5.6", displayName: "GPT-5.6" }, { value: "gpt-5.6-mini", displayName: "GPT-5.6 mini" }] });
+    },
+  });
+  var resultPromise = harness.tool.handler(proposalArgs({ moderatorId: "mate_mod" }));
+  await new Promise(function (resolve) { setImmediate(resolve); });
+  assert.equal(harness.records[0].proposal.modelSelections[0].role, "moderator");
+  assert.equal(harness.records[0].proposal.modelSelections[1].role, "panelist");
+  harness.proposal.handleMessage({ _clayUser: { id: "user-1" } }, {
+    type: "debate_proposal_response", proposalId: harness.records[0].proposal.proposalId, action: "start",
+    modelOverrides: [{ mateId: "mate_mod", model: "opus" }, { mateId: "mate_panel", model: "gpt-5.6-mini" }],
+  });
+  await resultPromise;
+  assert.deepEqual(harness.starts[0].briefData.participantModels, [
+    { mateId: "mate_mod", vendor: "claude", model: "opus" },
+    { mateId: "mate_panel", vendor: "codex", model: "gpt-5.6-mini" },
+  ]);
+});
+
 test("Mate project proposals use the current Mate as moderator", async function () {
   var harness = createHarness({
     cwd: "/mates/mate_self",
@@ -90,6 +123,62 @@ test("Mate project proposals use the current Mate as moderator", async function 
   await resultPromise;
 
   assert.equal(harness.starts[0].moderatorId, "mate_self");
+});
+
+test("Home planning proposal tools fail closed unless bound to an owned builtin Clay session", async function () {
+  var harness = createHarness({
+    cwd: "/mates/builtin:clay",
+    isMate: true,
+    isHostAgent: true,
+    mates: { "builtin:clay": { id: "builtin:clay" }, mate_panel: { id: "mate_panel" } },
+  });
+  harness.session.homeDebatePlanning = true;
+  harness.session.debateSetupMode = true;
+  harness.session.history = [
+    { type: "tool_executing", id: "topic", name: "AskUserQuestion" },
+    { type: "ask_user_answered", toolId: "topic", answers: { 0: "Housing" } },
+  ];
+  var unbound = harness.proposal.getToolDefs(null)[0];
+  var noSession = await unbound.handler(proposalArgs());
+  assert.equal(noSession.isError, true);
+  assert.match(noSession.content[0].text, /active Clay session/i);
+
+  var nonClay = createHarness({
+    cwd: "/mates/custom-mate",
+    isMate: true,
+    isHostAgent: false,
+    mates: { "custom-mate": { id: "custom-mate" }, mate_panel: { id: "mate_panel" } },
+  });
+  nonClay.session.homeDebatePlanning = true;
+  nonClay.session.debateSetupMode = true;
+  nonClay.session.history = harness.session.history.slice();
+  var rejected = await nonClay.proposal.getToolDefs(nonClay.session)[0].handler(proposalArgs());
+  assert.equal(rejected.isError, true);
+  assert.match(rejected.content[0].text, /owned Clay planning session/i);
+
+  harness.session.ownerId = "other-user";
+  var wrongOwner = await harness.proposal.getToolDefs(harness.session)[0].handler(proposalArgs());
+  assert.equal(wrongOwner.isError, true);
+  assert.match(wrongOwner.content[0].text, /owned Clay planning session/i);
+});
+
+test("a form-seeded owned Home session may propose without a synthetic topic answer event", async function () {
+  var harness = createHarness({
+    cwd: "/mates/builtin:clay",
+    isMate: true,
+    isHostAgent: true,
+    mates: { "builtin:clay": { id: "builtin:clay" }, mate_panel: { id: "mate_panel" } },
+  });
+  harness.session.ownerId = "project-owner";
+  harness.session.homeDebatePlanning = true;
+  harness.session.debateSetupMode = true;
+  harness.session.homeDebateInitialTopic = "Local-first storage";
+  harness.session.history = [];
+  var resultPromise = harness.proposal.getToolDefs(harness.session)[0].handler(proposalArgs());
+  harness.proposal.handleMessage({}, { type: "debate_proposal_response", action: "start" });
+  var result = await resultPromise;
+  assert.equal(result.isError, undefined);
+  assert.equal(harness.starts.length, 1);
 });
 
 test("invalid panelist payloads are rejected before creating a proposal", async function () {
