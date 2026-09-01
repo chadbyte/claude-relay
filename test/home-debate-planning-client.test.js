@@ -244,11 +244,13 @@ test("Home live debate reducer renders multiple speaker identities without trans
   var originalMarked = global.marked;
   var originalMermaid = global.mermaid;
   var originalPurifier = global.DOMPurify;
+  var originalNodeFilter = global.NodeFilter;
   global.document = {
     createElement: function (tag) { return new FakeElement(tag); },
     getElementById: function () { return null; },
     querySelector: function () { return null; },
     querySelectorAll: function () { return []; },
+    createTreeWalker: function () { return { nextNode: function () { return null; } }; },
     addEventListener: function () {},
   };
   global.window = { addEventListener: function () {}, matchMedia: function () { return { matches: false }; } };
@@ -256,6 +258,7 @@ test("Home live debate reducer renders multiple speaker identities without trans
   global.marked = { use: function () {}, parse: function (value) { return value; } };
   global.mermaid = { initialize: function () {} };
   global.DOMPurify = { sanitize: function (value) { return value; } };
+  global.NodeFilter = { SHOW_TEXT: 4 };
   try {
     var storeModule = await import(pathToFileURL(path.join(__dirname, "../lib/public/modules/store.js")).href);
     storeModule.store.set({ cachedMatesList: [], cachedAllUsers: [{ id: "user-a", displayName: "Ari", avatarSeed: "ari" }], myUserId: "user-a" });
@@ -340,6 +343,7 @@ test("Home live debate reducer renders multiple speaker identities without trans
     global.marked = originalMarked;
     global.mermaid = originalMermaid;
     global.DOMPurify = originalPurifier;
+    global.NodeFilter = originalNodeFilter;
   }
   var css = fs.readFileSync(path.join(__dirname, "../lib/public/css/home-debate-live.css"), "utf8");
   assert.match(css, /prefers-reduced-motion: reduce/);
@@ -480,7 +484,7 @@ test("Home debate launch immediately renders a dedicated correlated loading tran
   }
   var chat = fs.readFileSync(path.join(__dirname, "../lib/public/modules/home-mate-chat.js"), "utf8");
   assert.match(chat, /var hasConversation = debateLaunching \|\| messages\.length/);
-  assert.match(chat, /inputEl\.disabled = debateLaunching \|\|/);
+  assert.match(chat, /if \(debateLaunching \|\| mateCreationActive \|\| !!debatePhase\) inputEl\.disabled = true/);
   assert.match(chat, /debateLaunching \? "Preparing your debate…"/);
   assert.match(chat, /if \(debateLaunching\) \{\s*transcript\.appendChild\(createHomeDebateLaunchRow\(\)\)/);
   var launch = fs.readFileSync(path.join(__dirname, "../lib/public/modules/home-debate-launch.js"), "utf8");
