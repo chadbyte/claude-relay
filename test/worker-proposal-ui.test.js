@@ -11,7 +11,7 @@ test("Worker proposal card exposes runtime controls and sends one decision messa
   assert.match(source, /worker-proposal-model/);
   assert.match(source, /worker-proposal-effort-btn/);
   assert.match(source, /type: "worker_proposal_response"/);
-  assert.match(source, /Run with Worker/);
+  assert.match(source, /Run with Split Worker/);
   assert.match(source, /status === "completed"\) return "Completed"/);
   assert.match(source, /statusLabel\(status\) \+ \(autoApproved \? " · auto-approved" : ""\)/);
 });
@@ -40,7 +40,7 @@ test("title bar moves Worker creation into the labeled session actions menu", fu
   var actions = fs.readFileSync(path.join(root, "lib/public/modules/session-actions.js"), "utf8");
   assert.match(html, /id="header-session-actions-btn"[^>]*aria-label="Session actions"/);
   assert.doesNotMatch(html, /id="header-add-worker-btn"/);
-  assert.match(actions, /actionRow\("bot", "Add AI worker"/);
+  assert.match(actions, /actionRow\("bot", "Add Split Worker"/);
   assert.match(actions, /openPairDialog/);
 });
 
@@ -54,6 +54,18 @@ test("title bar presents a labeled session actions button in the status area", f
 
   assert.ok(renameAt > 0 && renameAt < fullAccessAt);
   assert.ok(actionsAt > statusAt);
-  assert.match(html, /id="header-session-actions-btn"[^>]*>[\s\S]*Add AI worker[\s\S]*session-actions-trigger-chevron/);
+  assert.match(html, /id="header-session-actions-btn"[^>]*>[\s\S]*Add Split Worker[\s\S]*session-actions-trigger-chevron/);
   assert.match(panels, /statusArea\.insertBefore\(hCtxEl, statusArea\.firstChild\)/);
+});
+
+test("Split Worker labels do not rename distinct Worker proposal or runtime protocol", function () {
+  var pairSource = fs.readFileSync(path.join(root, "lib/project-session-pair.js"), "utf8");
+  var proposalSource = fs.readFileSync(path.join(root, "lib/project-worker-proposal.js"), "utf8");
+  var capsuleSource = fs.readFileSync(path.join(root, "lib/tool-capsule-source.js"), "utf8");
+
+  assert.match(pairSource, /Split Worker · /);
+  assert.match(proposalSource, /visible Split Worker session/);
+  assert.match(proposalSource, /type: "worker_proposal"/);
+  assert.match(proposalSource, /name: "propose_worker"/);
+  assert.match(capsuleSource, /runtime === "worker"/);
 });

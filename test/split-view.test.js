@@ -128,7 +128,7 @@ test("session actions replace the dedicated worker button and stay out of split 
   assert.doesNotMatch(html, /id="header-add-worker-btn"/);
   assert.match(actionsSource, /!!state\.splitPanes/);
   assert.match(actionsSource, /state\.paneMode/);
-  assert.match(actionsSource, /Add AI worker/);
+  assert.match(actionsSource, /Add Split Worker/);
   assert.match(actionsSource, /Send context to another agent/);
   assert.match(actionsSource, /handoff_session_options/);
   assert.match(actionsSource, /Reasoning effort/);
@@ -140,12 +140,15 @@ test("configured pair roles are status labels rather than role-transfer controls
   var paneCss = fs.readFileSync(path.join(__dirname, "../lib/public/css/pane.css"), "utf8");
 
   assert.match(pairSource, /document\.createElement\("span"\)/);
-  assert.match(pairSource, /Worker controlled by the Driver/);
-  assert.doesNotMatch(pairSource, /Worker — click to make this session the Driver instead/);
+  assert.match(pairSource, /Split Worker controlled by the Driver/);
+  assert.match(pairSource, /var role = isDriver \? "Driver" : "Split Worker"/);
+  assert.match(pairSource, /role\.toLowerCase\(\)\.replace\(\/ \/g, "-"\)/);
+  assert.match(paneCss, /\.split-pair-role-split-worker/);
+  assert.doesNotMatch(pairSource, /Split Worker — click to make this session the Driver instead/);
   assert.doesNotMatch(paneCss, /button\.split-pair-role/);
 });
 
-test("configured Workers preserve direct human messaging and stopping", function () {
+test("configured Split Workers preserve direct human messaging and stopping", function () {
   var pairSource = fs.readFileSync(path.join(__dirname, "../lib/public/modules/split-pair-ui.js"), "utf8");
   var messageSource = fs.readFileSync(path.join(__dirname, "../lib/public/modules/app-messages.js"), "utf8");
   var paneCss = fs.readFileSync(path.join(__dirname, "../lib/public/css/pane.css"), "utf8");

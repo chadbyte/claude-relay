@@ -135,7 +135,7 @@ body.pane-mode #input-area {
 }
 
 .split-pair-role-driver { color: var(--accent); background: color-mix(in srgb, var(--accent) 13%, transparent); }
-.split-pair-role-worker { color: var(--text-secondary); background: var(--bg-alt); }
+.split-pair-role-split-worker { color: var(--text-secondary); background: var(--bg-alt); }
 
 /* Pair roles are status labels. Control remains with the Driver through MCP. */
 
