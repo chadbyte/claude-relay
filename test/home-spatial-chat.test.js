@@ -224,7 +224,7 @@ test("Mate and new-conversation actions live in the Home sidebar", function () {
   assert.doesNotMatch(homeMarkup, /id="home-mate-chat-actions"/);
   assert.match(homeSidebarSource, /startNewHomeConversation/);
   assert.match(homeSidebarSource, /openHomeDebatesArchive/);
-  assert.match(chatSource, /export function openHomeMateAction\(kind\)/);
+  assert.match(chatSource, /export function openHomeMateAction\(kind, initialTopic\)/);
   assert.match(chatSource, /openHomeMateSettings\(mate\.id, sessionModelChooseEl/);
   assert.match(chatSource, /kind !== "debate"/);
 });

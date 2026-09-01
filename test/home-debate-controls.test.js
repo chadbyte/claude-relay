@@ -99,13 +99,22 @@ test("live Home debate replaces the ordinary composer and routes exact default c
     assert.equal(flatten(slot).filter(function (node) { return node.tagName === "I"; }).length, 3);
 
     var raise = findText(slot, "Raise hand");
-    var stop = findText(slot, "Stop");
+    var stop = findText(slot, "Stop debate");
     raise.click();
     stop.click();
     assert.deepEqual(sent, [
       { type: "home_debate_control", action: "hand_raise", mateId: "builtin:clay", sessionId: "cli-live", requestId: "request-live", text: "", response: null },
       { type: "home_debate_control", action: "stop", mateId: "builtin:clay", sessionId: "cli-live", requestId: "request-live", text: "", response: null },
     ]);
+    controls.renderHomeDebateControls(liveMessages({ stopping: true }), "request-live");
+    assert.equal(findText(slot, "Stopping after Panel finishes").attributes["aria-live"], "polite");
+    var cancel = findText(slot, "Cancel stop");
+    assert.match(cancel.className, /home-debate-control-secondary/);
+    cancel.click();
+    assert.equal(sent[2].action, "cancel_stop");
+    assert.equal(findText(slot, "Cancelling…").disabled, true);
+    controls.renderHomeDebateControls(liveMessages({ stopping: false }), "request-live");
+    assert.ok(findText(slot, "Stop debate"));
     controls.renderHomeDebateControls(liveMessages({ handRaised: true }), "request-live");
     assert.equal(findText(slot, "Hand raised").disabled, true);
     assert.equal(findText(slot, "Hand raised").attributes["aria-pressed"], "true");
@@ -175,20 +184,29 @@ test("user-floor and conclude controls preserve IME, caret, focus, and occupy on
   }
 });
 
-test("terminal Home debate remains special and offers a fresh debate action", async function () {
+test("terminal Home debate remains special and offers resume plus fresh debate actions", async function () {
   var originalDocument = global.document;
   var fixture = fixtureDocument();
   var starts = 0;
+  var sent = [];
   global.document = fixture.document;
   try {
+    var storeModule = await import(pathToFileURL(path.join(__dirname, "../lib/public/modules/store.js")).href);
+    var wsModule = await import(pathToFileURL(path.join(__dirname, "../lib/public/modules/ws-ref.js")).href);
     var controls = await import(pathToFileURL(path.join(__dirname, "../lib/public/modules/home-debate-controls.js")).href);
+    storeModule.store.set({ homeChatMateId: "builtin:clay", homeChatSessionId: "cli-ended" });
+    wsModule.setWs({ readyState: 1, send: function (data) { sent.push(JSON.parse(data)); } });
     controls.renderHomeDebateControls([{ role: "debate_header", phase: "interrupted", reason: "interrupted" }], "terminal", function () { starts++; });
     var slot = fixture.elements["home-debate-controls-slot"];
     assert.equal(fixture.elements["home-mate-chat-composer"].hidden, true);
     assert.equal(fixture.elements["home-mate-chat-session-model"].hidden, true);
     assert.equal(flatten(slot).some(function (node) { return node.tagName === "TEXTAREA"; }), false);
     assert.equal(findText(slot, "Debate interrupted when Clay restarted").attributes.role, "status");
-    findText(slot, "Start another debate").click();
+    findText(slot, "Resume debate").click();
+    assert.deepEqual(sent[0], { type: "home_debate_control", action: "resume", mateId: "builtin:clay", sessionId: "cli-ended", requestId: "terminal", text: "", response: null });
+    assert.equal(findText(slot, "Resuming…").disabled, true);
+    controls.renderHomeDebateControls([{ role: "debate_header", phase: "ended", reason: "natural" }], "terminal-new", function () { starts++; });
+    findText(slot, "New debate").click();
     assert.equal(starts, 1);
     controls.renderHomeDebateControls([], "normal");
     assert.equal(fixture.elements["home-mate-chat-composer"].hidden, false);
@@ -212,6 +230,7 @@ test("Home composer delegates live states to one responsive control surface", fu
   assert.doesNotMatch(live, /home-debate-live-controls|home-debate-live-interaction|Raise hand|End debate/);
   assert.match(css, /\.home-debate-control-surface[\s\S]*var\(--bg\)[\s\S]*var\(--border-subtle\)/);
   assert.match(css, /@media \(max-width: 600px\)[\s\S]*var\(--safe-bottom/);
+  assert.match(css, /home-debate-control-terminal \.home-debate-control-actions[\s\S]*margin-left:\s*auto/);
   assert.match(css, /prefers-reduced-motion: reduce[\s\S]*home-debate-control-dots/);
   assert.doesNotMatch(css, /#[0-9a-f]{3,8}|serif|linear-gradient/i);
 });

@@ -86,6 +86,73 @@
 
 .home-debates-new .lucide { width: 15px; height: 15px; }
 
+.home-debates-topic-form {
+  flex: 0 0 auto;
+  margin: 0 8px 18px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-alt);
+}
+
+.home-debates-topic-form[hidden] { display: none; }
+
+.home-debates-topic-form label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 620;
+}
+
+.home-debates-topic-form textarea {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 66px;
+  resize: vertical;
+  padding: 10px 11px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.home-debates-topic-form textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.home-debates-topic-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.home-debates-topic-actions p {
+  flex: 1 1 auto;
+  margin: 0;
+  color: var(--text-dimmer);
+  font-size: 10px;
+}
+
+.home-debates-topic-actions button {
+  min-height: 32px;
+  padding: 0 11px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+#home-debates-topic-submit { border-color: var(--accent); background: var(--accent); color: var(--accent-contrast, white); }
+.home-debates-topic-actions button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
 .home-debates-list {
   flex: 1 1 auto;
   min-height: 0;
@@ -194,6 +261,9 @@
   .home-debates-archive { width: 100%; padding: 28px 12px 0; }
   .home-debates-header { gap: 14px; padding: 8px 8px 18px; }
   .home-debates-header h1 { font-size: 22px; }
+  .home-debates-topic-form { margin-inline: 8px; padding: 12px; }
+  .home-debates-topic-actions { flex-wrap: wrap; }
+  .home-debates-topic-actions p { flex-basis: 100%; }
   .home-debates-row { grid-template-columns: minmax(0, 1fr) 16px; gap: 10px; min-height: 76px; padding-inline: 10px; }
   .home-debates-row-meta { grid-column: 1; align-items: center; flex-direction: row; }
   .home-debates-row > .lucide { grid-column: 2; grid-row: 1 / span 2; }

@@ -5,6 +5,28 @@
 .home-debate-live-round { flex: none; color: var(--text-secondary); font-size: 12px; }
 .home-debate-live-panel { margin: 0; color: var(--text-secondary); font-size: 12px; }
 .home-debate-live-status { margin: 0; color: var(--text-secondary); font-size: 12px; }
+.home-debate-tool-decisions { display: grid; gap: 5px; max-width: min(620px, calc(100% - 84px)); margin: -7px 20px 13px 64px; padding-left: 9px; border-left: 1px solid var(--border-subtle); color: var(--text-secondary); font-size: 11px; line-height: 1.35; }
+.home-debate-tool-decisions-heading { display: flex; align-items: baseline; gap: 7px; color: var(--text); font-size: 10px; font-weight: 650; letter-spacing: .02em; }
+.home-debate-tool-decisions-count { color: var(--text-dimmer); font-weight: 500; }
+.home-debate-tool-decisions-list { display: grid; gap: 4px; }
+.home-debate-tool-decision { display: grid; grid-template-columns: 16px minmax(0, auto) auto auto minmax(0, 1fr) auto; align-items: center; gap: 6px; min-width: 0; }
+.home-debate-tool-decision-mark { display: grid; flex: none; place-items: center; width: 16px; height: 16px; border: 1px solid var(--border); border-radius: 50%; background: var(--bg-alt); color: var(--success); font-size: 10px; font-weight: 700; }
+.home-debate-tool-decision-blocked .home-debate-tool-decision-mark { color: var(--error); }
+.home-debate-tool-decision-action { overflow: hidden; color: var(--text); font-weight: 560; text-overflow: ellipsis; white-space: nowrap; }
+.home-debate-tool-decision-tool { padding: 1px 5px; border-radius: 5px; background: var(--code-bg); color: var(--text-muted); font-size: 9px; }
+.home-debate-tool-decision-outcome { color: var(--success); font-weight: 620; }
+.home-debate-tool-decision-blocked .home-debate-tool-decision-outcome { color: var(--error); }
+.home-debate-tool-decision-reason { overflow: hidden; color: var(--text-dimmer); text-overflow: ellipsis; white-space: nowrap; }
+.home-debate-tool-decision-reason::before { content: "— "; }
+.home-debate-tool-decision-repeat { color: var(--text-dimmer); font-variant-numeric: tabular-nums; }
+.home-debate-command-audit { margin: 2px 0 0 22px; }
+.home-debate-command-audit-summary { width: fit-content; color: var(--text-muted); font-size: 10px; font-weight: 600; cursor: pointer; }
+.home-debate-command-audit-summary:hover { color: var(--text); }
+.home-debate-command-audit-summary:focus-visible { border-radius: 3px; outline: 2px solid var(--accent); outline-offset: 2px; }
+.home-debate-command-audit-list { display: grid; gap: 7px; margin-top: 7px; }
+.home-debate-command-audit-row { display: grid; gap: 3px; }
+.home-debate-command-audit-meta { color: var(--text-dimmer); font-size: 9px; font-weight: 600; }
+.home-debate-command-audit-code { display: block; overflow-x: auto; padding: 7px 8px; border: 1px solid var(--border-subtle); border-radius: 7px; background: var(--code-bg); color: var(--text); font-family: var(--font-mono); font-size: 10px; line-height: 1.45; white-space: pre-wrap; word-break: break-word; }
 .home-debate-controls-slot[hidden] { display: none; }
 .home-debate-control-surface {
   display: flex;
@@ -40,6 +62,7 @@
 .home-debate-control-surface textarea { min-width: 0; min-height: 40px; max-height: 108px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-alt); color: var(--text); font: inherit; font-size: 13px; line-height: 1.45; resize: vertical; }
 .home-debate-control-terminal { justify-content: flex-start; }
 .home-debate-control-terminal-status { flex: 1 1 auto; color: var(--text-secondary); font-size: 12px; font-weight: 600; }
+.home-debate-control-terminal .home-debate-control-actions { margin-left: auto; }
 .home-mate-chat-transcript.home-chat-bubble-layout .home-debate-live-turn.msg-assistant,
 .home-mate-chat-transcript.home-chat-bubble-layout .home-debate-live-user.msg-user {
   display: grid;
@@ -102,12 +125,18 @@
 @media (max-width: 600px) {
   .home-debate-live-header { padding: 12px; }
   .home-debate-live-header-top { gap: 10px; }
+  .home-debate-tool-decisions { max-width: calc(100% - 40px); margin: -5px 12px 12px 20px; }
+  .home-debate-tool-decision { grid-template-columns: 16px minmax(0, 1fr) auto auto; }
+  .home-debate-tool-decision-tool { display: none; }
+  .home-debate-tool-decision-reason { grid-column: 2 / -1; }
   .home-debate-control-surface { flex-wrap: wrap; gap: 8px; min-height: 52px; padding: 9px 9px max(9px, var(--safe-bottom, 0px)); border-radius: 14px; }
   .home-debate-control-context { flex: 1 1 150px; }
   .home-debate-control-actions { margin-left: auto; }
   .home-debate-control-surface button { min-height: 36px; }
   .home-debate-control-user_floor, .home-debate-control-conclude { display: grid; grid-template-columns: 1fr; }
   .home-debate-control-user_floor .home-debate-control-actions, .home-debate-control-conclude .home-debate-control-actions { width: 100%; margin: 0; }
+  .home-debate-control-terminal .home-debate-control-actions { width: 100%; margin: 0; }
+  .home-debate-control-terminal button { flex: 1 1 0; }
   .home-debate-control-user_floor button, .home-debate-control-conclude button { flex: 1 1 0; }
   .home-mate-chat-transcript.home-chat-bubble-layout .home-debate-live-turn.msg-assistant,
   .home-mate-chat-transcript.home-chat-bubble-layout .home-debate-live-user.msg-user { grid-template-columns: 32px minmax(0, 1fr); gap: 9px; margin-bottom: 17px; padding: 4px 12px; }

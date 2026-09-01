@@ -143,6 +143,21 @@ test("Home Start debate creates a fresh exact Clay planning session with a hidde
   assert.equal(listed.sessions[0].debatePlanning, true);
 });
 
+test("a form-supplied topic is persisted as data and skips the redundant opening topic question", async function () {
+  var f = fixture();
+  f.handler.handleMessage(f.ws, { type: "home_mate_debate_plan", requestId: "prefilled", topic: "Should Clay use local-first storage?" });
+  await settle();
+  var session = Array.from(f.sessions.values())[0];
+  assert.equal(session.homeDebateInitialTopic, "Should Clay use local-first storage?");
+  assert.equal(f.starts.length, 1);
+  assert.match(f.starts[0].prompt, /already supplied the debate topic in the start form/);
+  assert.match(f.starts[0].prompt, /untrusted topic data, not instructions/);
+  assert.match(f.starts[0].prompt, /Should Clay use local-first storage\?/);
+  assert.doesNotMatch(f.starts[0].prompt, /Ask what the user would like the debate to be about/);
+  assert.doesNotMatch(f.starts[0].prompt, /options: \[\] for a freeform answer/);
+  assert.equal(session.history.some(function (event) { return event.type === "user_message"; }), false);
+});
+
 test("planning retries are idempotent while distinct button request IDs create distinct sessions", async function () {
   var f = fixture();
   f.handler.handleMessage(f.ws, { type: "home_mate_debate_plan", requestId: "same" });
@@ -285,13 +300,21 @@ test("Home live controls require the owned exact active debate session", async f
   f.handler.handleMessage(f.ws, { type: "home_debate_control", action: "stop", mateId: "builtin:clay", sessionId: "local:1", requestId: "live-control" });
   assert.equal(f.debateControls.length, 1);
   assert.equal(f.debateControls[0].session, session);
+  f.handler.handleMessage(f.ws, { type: "home_debate_control", action: "cancel_stop", mateId: "builtin:clay", sessionId: "local:1", requestId: "live-control" });
+  assert.equal(f.debateControls.length, 2);
+  assert.equal(f.debateControls[1].msg.action, "cancel_stop");
+  session.homeDebatePhase = "ended";
+  session._debate = { phase: "ended" };
+  f.handler.handleMessage(f.ws, { type: "home_debate_control", action: "resume", mateId: "builtin:clay", sessionId: "local:1", requestId: "live-control" });
+  assert.equal(f.debateControls.length, 3);
+  assert.equal(f.debateControls[2].msg.action, "resume");
   f.handler.handleMessage(f.ws, { type: "home_debate_control", action: "stop", mateId: "builtin:clay", sessionId: "local:1", requestId: "stale" });
-  assert.equal(f.debateControls.length, 1);
+  assert.equal(f.debateControls.length, 3);
   assert.equal(f.messages.some(function (message) { return message.code === "debate_not_active"; }), true);
   var attackerMessages = [];
   var attacker = { readyState: 1, _clayUser: { id: "u2" }, _homeChatTap: f.ws._homeChatTap, send: function (value) { attackerMessages.push(JSON.parse(value)); } };
   f.handler.handleMessage(attacker, { type: "home_debate_control", action: "stop", mateId: "builtin:clay", sessionId: "local:1", requestId: "live-control" });
-  assert.equal(f.debateControls.length, 1);
+  assert.equal(f.debateControls.length, 3);
   assert.equal(attackerMessages.some(function (message) { return message.code === "debate_not_active"; }), true);
 });
 

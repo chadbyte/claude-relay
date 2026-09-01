@@ -26,6 +26,7 @@ function serverFixture() {
     analyst: new Map(),
   };
   sessionsByMate.clay.set(1, debateSession(1, "u1", "planning", 10, []));
+  sessionsByMate.clay.get(1).homeDebateInitialTopic = "Prefilled planning topic";
   sessionsByMate.clay.set(2, debateSession(2, "u1", "live", 70, [{
     type: "debate_started", topic: "Architecture direction", format: "round_robin", moderatorId: "clay", moderatorName: "Clay",
     panelists: [{ mateId: "analyst", name: "Analyst", role: "skeptic" }],
@@ -68,6 +69,7 @@ test("Home debate archive is owned, metadata-driven, complete, and newest first"
   assert.equal(debates[0].topic, "Architecture direction");
   assert.equal(debates[0].format, "round_robin");
   assert.equal(debates[0].round, 2);
+  assert.equal(debates[6].topic, "Prefilled planning topic");
   assert.deepEqual(debates[0].participants, [
     { mateId: "clay", name: "Clay", role: "moderator" },
     { mateId: "analyst", name: "Analyst", role: "skeptic" },
@@ -134,7 +136,7 @@ test("opening Debates owns the full Home stage and sends only an archive request
     removeEventListener: function () {},
   };
   documentRef.body = new FakeElement("body", documentRef);
-  var ids = ["home-debates-archive", "home-mate-chat", "home-mate-chat-messages", "home-mate-chat-suggestions", "home-sidebar-debate", "home-debates-title", "home-debates-summary", "home-debates-list", "home-debates-new"];
+  var ids = ["home-debates-archive", "home-mate-chat", "home-mate-chat-messages", "home-mate-chat-suggestions", "home-sidebar-debate", "home-debates-title", "home-debates-summary", "home-debates-list", "home-debates-new", "home-debates-topic-form", "home-debates-topic", "home-debates-topic-status", "home-debates-topic-cancel", "home-debates-topic-submit"];
   for (var i = 0; i < ids.length; i++) elements[ids[i]] = new FakeElement("div", documentRef);
   elements.composer = new FakeElement("div", documentRef);
   var sent = [];
@@ -179,9 +181,17 @@ test("opening Debates owns the full Home stage and sends only an archive request
     }) });
     assert.equal(elements["home-debates-list"].children.length, 7);
     assert.equal(elements["home-debates-summary"].textContent, "7 debates");
-    delete elements["home-mate-chat"];
     elements["home-debates-new"].click();
+    assert.equal(elements["home-debates-topic-form"].hidden, false);
+    assert.equal(documentRef.activeElement, elements["home-debates-topic"]);
+    assert.equal(sent.filter(function (message) { return message.type === "home_mate_debate_plan"; }).length, 0);
+    elements["home-debates-topic-form"].listeners.submit({ preventDefault: function () {} });
+    assert.equal(elements["home-debates-topic-status"].textContent, "Enter a topic to start the debate.");
+    elements["home-debates-topic"].value = "Should Clay prioritize local-first storage?";
+    delete elements["home-mate-chat"];
+    elements["home-debates-topic-form"].listeners.submit({ preventDefault: function () {} });
     assert.equal(sent.filter(function (message) { return message.type === "home_mate_debate_plan"; }).length, 1);
+    assert.equal(sent.filter(function (message) { return message.type === "home_mate_debate_plan"; })[0].topic, "Should Clay prioritize local-first storage?");
     assert.equal(storeModule.store.get('homeSubSurface'), "chat");
     assert.equal(elements["home-debates-archive"].hidden, true);
   } finally {
@@ -207,7 +217,8 @@ test("archive source uses exact chat restore and New debate is the only launch p
   var router = fs.readFileSync(path.join(root, "lib/public/modules/app-message-router.js"), "utf8");
   var schema = fs.readFileSync(path.join(root, "lib/ws-schema.js"), "utf8");
   assert.match(archive, /openHomeConversation\(debate\.mateId, debate\.sessionId\)/);
-  assert.match(archive, /function startNewDebate\(\)[\s\S]*openHomeMateAction\("debate"\)/);
+  assert.match(archive, /function startNewDebate\(\)[\s\S]*homeDebateTopicFormOpen: true/);
+  assert.match(archive, /function submitNewDebate\(event\)[\s\S]*openHomeMateAction\("debate", topic\.slice\(0, 1000\)\)/);
   assert.match(sidebar, /function openDebatesFromSidebar\(\)[\s\S]*openHomeDebatesArchive\(\)[\s\S]*closeNarrowDrawer\(false\)/);
   assert.doesNotMatch(sidebar, /openHomeMateAction\("debate"\)|openMateActionFromSidebar/);
   assert.match(hub, /if \(!restoreHomeDebatesArchive\(\) && state\.homeChatMateId\) resumeHomeChat\(\)/);
@@ -217,9 +228,10 @@ test("archive source uses exact chat restore and New debate is the only launch p
   assert.match(surface, /homeSubSurface: normalizeSubSurface\(preference\.subSurface\)/);
   assert.match(css, /\.home-debates-list \{[\s\S]*flex: 1 1 auto;[\s\S]*min-height: 0;[\s\S]*overflow-y: auto;/);
   assert.match(css, /@media \(max-width: 768px\)/);
+  assert.match(css, /\.home-debates-topic-form textarea[\s\S]*resize: vertical/);
   assert.doesNotMatch(archive, /slice\(0,\s*5\)|MAX_(?:DEBATE|ARCHIVE)/i);
   assert.match(serverChat, /homeDebates\.handle\(ws, userId, msg\)/);
-  assert.match(project, /msg\.type === "home_debates_list"[\s\S]*opts\.onDmMessage\(ws, msg\)/);
+  assert.match(project, /msg\.type === "home_debates_list"[\s\S]*opts\.onDmMessage\(ws, msg, slug\)/);
   assert.match(router, /msg\.type === "home_debates_state"[\s\S]*handleHomeDebatesState\(msg\)/);
   assert.match(schema, /"home_debates_list"[\s\S]*"home_debates_state"/);
 });

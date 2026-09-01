@@ -54,6 +54,27 @@ function fixture(home) {
 
 function brief() { return { topic: "Housing policy", format: "round_table", panelists: [{ mateId: "panel-1", role: "Analyst", brief: "Examine trade-offs" }] }; }
 
+test("Home debate pins approved moderator and panelist models for the exact debate", async function (t) {
+  var f = fixture(true);
+  t.after(f.restore);
+  var selected = brief();
+  selected.participantModels = [
+    { mateId: "builtin:clay", vendor: "claude", model: "claude-opus" },
+    { mateId: "panel-1", vendor: "codex", model: "gpt-5.6" },
+  ];
+  var ws = { _clayUser: { id: "user-a" }, _homeChatTap: { mateSlug: "mate-builtin:clay", sessionId: 7 } };
+  f.engine.handleMcpDebateApproval(f.session, selected, "builtin:clay", ws);
+  await settle();
+  assert.equal(f.mentionOptions[0].vendor, "claude");
+  assert.equal(f.mentionOptions[0].model, "claude-opus");
+  assert.deepEqual(f.session.debateState.participantModels, selected.participantModels);
+  assert.deepEqual(f.session.history[0].participantModels, selected.participantModels);
+  f.mentionOptions[0].onDone("@Panel, respond.");
+  await settle();
+  assert.equal(f.mentionOptions[1].vendor, "codex");
+  assert.equal(f.mentionOptions[1].model, "gpt-5.6");
+});
+
 test("Home approval reuses the exact planning session and projects canonical live turns", async function (t) {
   var f = fixture(true);
   t.after(f.restore);
@@ -87,6 +108,116 @@ test("Home approval reuses the exact planning session and projects canonical liv
   assert.match(projected[1].avatarCustom, /builtin%3Aclay/);
 });
 
+test("Home conclude control rebuilds a missing live runtime and resumes the exact debate", async function (t) {
+  var f = fixture(true);
+  t.after(f.restore);
+  var ws = { _clayUser: { id: "user-a" }, _homeChatTap: { mateSlug: "mate-builtin:clay", sessionId: 7 }, _clayActiveSession: 7 };
+  f.session.homeDebatePhase = "live";
+  f.session.history = [
+    { type: "debate_started", topic: "Housing policy", format: "round_table", moderatorId: "builtin:clay", panelists: [{ mateId: "panel-1", role: "Analyst", brief: "Examine trade-offs" }] },
+    { type: "debate_turn_done", mateId: "builtin:clay", mateName: "Clay", role: "moderator", round: 2, text: "A closing thought." },
+    { type: "debate_conclude_confirm", topic: "Housing policy", round: 2 },
+  ];
+
+  assert.equal(f.session._debate, undefined);
+  assert.equal(f.engine.handleHomeControl(ws, { action: "resume", text: "Compare implementation paths" }, f.session), true);
+  await settle();
+
+  assert.equal(f.created(), 0);
+  assert.equal(f.manager.sessions.size, 1);
+  assert.equal(f.session._debate.phase, "live");
+  assert.equal(f.session._debate.awaitingConcludeConfirm, false);
+  assert.equal(f.session.homeDebatePhase, "live");
+  assert.equal(f.session.debateState.awaitingConcludeConfirm, false);
+  assert.equal(f.mentionOptions.length, 1);
+  assert.match(f.mentionOptions[0].initialMessage, /Compare implementation paths/);
+  assert.deepEqual(f.events.map(function (entry) { return entry.event.type; }), ["debate_user_resume", "debate_resumed", "debate_turn"]);
+});
+
+test("an ended Home debate can be resumed repeatedly in the same exact session", async function (t) {
+  var f = fixture(true);
+  t.after(f.restore);
+  var ws = { _clayUser: { id: "user-a" }, _homeChatTap: { mateSlug: "mate-builtin:clay", sessionId: 7 }, _clayActiveSession: 7 };
+  f.session.homeDebatePhase = "ended";
+  f.session.debateState = { phase: "ended", topic: "Housing policy", format: "round_table", moderatorId: "builtin:clay", panelists: [{ mateId: "panel-1", role: "Analyst", brief: "Examine trade-offs" }], round: 3, debateId: "durable-debate", ownerId: "user-a" };
+  f.session.history = [
+    { type: "debate_started", topic: "Housing policy", format: "round_table", moderatorId: "builtin:clay", panelists: [{ mateId: "panel-1", role: "Analyst" }] },
+    { type: "debate_turn_done", mateId: "panel-1", mateName: "Panel", role: "Analyst", round: 3, text: "First ending." },
+    { type: "debate_ended", reason: "natural", round: 3 },
+  ];
+  assert.equal(f.engine.handleHomeControl(ws, { action: "resume" }, f.session), true);
+  await settle();
+  assert.equal(f.session.homeDebatePhase, "live");
+  assert.equal(f.session._debate.debateId, "durable-debate");
+  assert.equal(f.session._debate.panelists[0].brief, "Examine trade-offs");
+  assert.equal(f.mentionOptions.length, 1);
+
+  f.session.history.push({ type: "debate_ended", reason: "user_stopped", round: 3 });
+  f.session.homeDebatePhase = "ended";
+  f.session.debateState.phase = "ended";
+  delete f.session._debate;
+  assert.equal(f.engine.handleHomeControl(ws, { action: "resume" }, f.session), true);
+  await settle();
+  assert.equal(f.session.homeDebatePhase, "live");
+  assert.equal(f.manager.sessions.size, 1);
+  assert.equal(f.mentionOptions.length, 2);
+  assert.equal(f.session.history.filter(function (event) { return event.type === "debate_resumed"; }).length, 2);
+});
+
+test("a pending Home debate stop is server-confirmed and can be cancelled before the turn ends", async function (t) {
+  var f = fixture(true);
+  t.after(f.restore);
+  var ws = { _clayUser: { id: "user-a" }, _homeChatTap: { mateSlug: "mate-builtin:clay", sessionId: 7 }, _clayActiveSession: 7 };
+  f.engine.handleMcpDebateApproval(f.session, brief(), "builtin:clay", ws);
+  await settle();
+  assert.equal(f.session._debate.turnInProgress, true);
+  assert.equal(f.engine.handleHomeControl(ws, { action: "stop" }, f.session), true);
+  assert.equal(f.session._debate.phase, "ending");
+  assert.equal(f.session.debateState.phase, "ending");
+  assert.equal(f.events[f.events.length - 1].event.type, "debate_stop_requested");
+  assert.equal(f.engine.handleHomeControl(ws, { action: "cancel_stop" }, f.session), true);
+  assert.equal(f.session._debate.phase, "live");
+  assert.equal(f.session.debateState.phase, "live");
+  assert.equal(f.events[f.events.length - 1].event.type, "debate_stop_cancelled");
+  f.mentionOptions[0].onDone("Continue with @Panel on implementation trade-offs.");
+  assert.equal(f.session.homeDebatePhase, "live");
+  assert.equal(f.events.some(function (entry) { return entry.event.type === "debate_ended"; }), false);
+});
+
+test("debate moderator records auditable Bash commands without exposing unrelated tool input", async function (t) {
+  var f = fixture(true);
+  t.after(f.restore);
+  var ws = { _clayUser: { id: "user-a" }, _homeChatTap: { mateSlug: "mate-builtin:clay", sessionId: 7 }, _clayActiveSession: 7 };
+  f.engine.handleMcpDebateApproval(f.session, brief(), "builtin:clay", ws);
+  await settle();
+  var handler = f.mentionOptions[0].canUseTool;
+  var allowed = await handler("Bash", { command: "rg -n housing lib", secret: "never-project-this" }, { toolUseID: "tool-safe" });
+  var blocked = await handler("Edit", { file_path: "/tmp/private", new_string: "never-project-this" }, { toolUseID: "tool-write" });
+  assert.equal(allowed.behavior, "allow");
+  assert.equal(blocked.behavior, "deny");
+  assert.match(blocked.message, /moderator blocked/);
+  var decisions = f.session.history.filter(function (event) { return event.type === "debate_tool_decision"; });
+  assert.deepEqual(decisions.map(function (event) { return [event.decisionId, event.mateName, event.toolName, event.decision]; }), [
+    ["tool-safe", "Clay", "Bash", "allowed"],
+    ["tool-write", "Clay", "Edit", "blocked"],
+  ]);
+  assert.equal(decisions[0].action, "Run read-only shell commands (rg)");
+  assert.equal(decisions[0].reason, "Read-only investigation");
+  assert.equal(decisions[1].action, "Edit a project file");
+  assert.equal(decisions[1].reason, "Would modify project files");
+  assert.equal(decisions[0].command, "rg -n housing lib");
+  assert.equal(decisions[1].command, "");
+  assert.doesNotMatch(JSON.stringify(decisions), /never-project-this|\/tmp\/private/);
+  var projected = decisions.map(function (event) { return homeEvents.transformEvent(event, "builtin:clay", f.session, "request-tools", "durable-tools"); });
+  assert.deepEqual(projected.map(function (event) { return [event.eventType, event.decisionId, event.decision, event.toolName]; }), [
+    ["debate_tool_decision", "tool-safe", "allowed", "Bash"],
+    ["debate_tool_decision", "tool-write", "blocked", "Edit"],
+  ]);
+  assert.equal(projected[0].requestId, "request-tools");
+  assert.equal(projected[0].sessionId, "durable-tools");
+  assert.equal(projected[0].command, "rg -n housing lib");
+});
+
 test("legacy project approval still creates a dedicated live debate session", function (t) {
   var f = fixture(false);
   t.after(f.restore);
@@ -104,6 +235,11 @@ test("Home live history restores one finalized turn without duplicating streamed
     { type: "debate_stream", turnId: "d:1", mateId: "builtin:clay", delta: "Hello " },
     { type: "debate_stream", turnId: "d:1", mateId: "builtin:clay", delta: "panel" },
     { type: "debate_turn_done", turnId: "d:1", mateId: "builtin:clay", mateName: "Clay", role: "moderator", round: 1, text: "Hello panel" },
+    { type: "debate_stop_requested", topic: "Housing", round: 1 },
+    { type: "debate_stop_cancelled", topic: "Housing", round: 1 },
+    { type: "debate_tool_decision", decisionId: "tool-1", mateId: "panel-1", mateName: "Panel", toolName: "Bash", action: "Run read-only shell commands (rg)", decision: "allowed", reason: "Read-only investigation" },
+    { type: "debate_tool_decision", decisionId: "tool-2", mateId: "panel-1", mateName: "Panel", toolName: "Bash", action: "Run read-only shell commands (rg)", decision: "allowed", reason: "Read-only investigation" },
+    { type: "debate_tool_decision", decisionId: "tool-3", mateId: "panel-1", mateName: "Panel", toolName: "Edit", action: "Edit a project file", decision: "blocked", reason: "Would modify project files" },
     { type: "debate_ended", topic: "Housing", round: 1, reason: "interrupted" },
   ];
   var messages = homeEvents.historyToHomeChat(history, true);
@@ -114,6 +250,12 @@ test("Home live history restores one finalized turn without duplicating streamed
   assert.equal(turns[0].mateName, "Clay");
   assert.equal(turns[0].avatarSeed, "clay-seed");
   assert.equal(turns[0].avatarCustom, "data:image/svg+xml,clay");
+  var decision = messages.find(function (message) { return message.role === "debate_tool_decision"; });
+  assert.equal(decision.decisionId, "tool-1");
+  assert.equal(decision.toolName, "Bash");
+  assert.equal(decision.decision, "allowed");
+  assert.equal(decision.entries.length, 3);
+  assert.equal(messages.find(function (message) { return message.role === "debate_header"; }).stopping, false);
   assert.equal(messages.find(function (message) { return message.role === "debate_header"; }).phase, "interrupted");
 });
 

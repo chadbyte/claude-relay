@@ -135,6 +135,6 @@ test("ordinary identity styles expose shared headers without affecting Debate-ow
   assert.doesNotMatch(css, /home-chat-ordinary-user[^}]*grid-template|home-chat-ordinary-user > \.dm-bubble-avatar|home-chat-ordinary-user \.dm-bubble-header/);
   assert.doesNotMatch(css, /\.home-mate-chat-transcript\.home-chat-bubble-layout \.dm-bubble-avatar,\s*\.home-mate-chat-transcript\.home-chat-bubble-layout \.dm-bubble-header\s*\{\s*display:\s*none/);
   assert.match(chat, /if \(message\.role === "proposal" \|\| message\.role === "question"\) return createHomeDebateTranscriptCard/);
-  assert.match(chat, /if \(\["debate_header", "debate_turn", "debate_user"\][\s\S]*return createHomeDebateLiveCard/);
+  assert.match(chat, /if \(\["debate_header", "debate_turn", "debate_user", "debate_tool_decision"\][\s\S]*return createHomeDebateLiveCard/);
   assert.match(chat, /createHomeOrdinaryBubble\(message, mate, mateName, timeText\)/);
 });

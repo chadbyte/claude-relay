@@ -220,12 +220,40 @@ body.home-surface-boot-pending #connect-overlay.hidden {
 }
 
 .home-mate-chat-stage {
+  position: relative;
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   min-height: 0;
   overflow: hidden;
 }
+
+.home-chat-new-activity {
+  position: absolute;
+  z-index: 4;
+  bottom: 86px;
+  left: 50%;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--text);
+  box-shadow: 0 7px 20px rgba(var(--shadow-rgb), .14);
+  font: inherit;
+  font-size: 10px;
+  font-weight: 620;
+  cursor: pointer;
+  transform: translateX(-50%);
+}
+
+.home-chat-new-activity[hidden], .home-debates-open .home-chat-new-activity { display: none; }
+.home-chat-new-activity .lucide { width: 13px; height: 13px; }
+.home-chat-new-activity:hover { background: var(--bg-alt); }
+.home-chat-new-activity:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .home-mate-chat-messages {
   flex: 1 1 auto;

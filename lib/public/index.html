@@ -169,9 +169,19 @@
                     </div>
                     <button id="home-debates-new" class="home-debates-new" type="button"><i data-lucide="messages-square" aria-hidden="true"></i><span>New debate</span></button>
                   </header>
+                  <form id="home-debates-topic-form" class="home-debates-topic-form" hidden>
+                    <label for="home-debates-topic">What should the debate be about?</label>
+                    <textarea id="home-debates-topic" rows="2" maxlength="1000" required placeholder="Enter a question or topic"></textarea>
+                    <div class="home-debates-topic-actions">
+                      <p id="home-debates-topic-status" role="status" aria-live="polite">Press Ctrl or Command + Enter to start.</p>
+                      <button id="home-debates-topic-cancel" type="button">Cancel</button>
+                      <button id="home-debates-topic-submit" type="submit">Start debate</button>
+                    </div>
+                  </form>
                   <div id="home-debates-list" class="home-debates-list" aria-label="Debate archive"></div>
                 </section>
                 <div class="home-mate-chat-messages" id="home-mate-chat-messages"></div>
+                <button id="home-chat-new-activity" class="home-chat-new-activity" type="button" hidden><i data-lucide="arrow-down" aria-hidden="true"></i><span>New activity</span></button>
                 <div class="home-mate-chat-composer-frame">
                   <div id="home-mate-chat-composer" class="home-mate-chat-composer">
                     <textarea id="home-mate-chat-input" rows="1" placeholder="Message"></textarea>
