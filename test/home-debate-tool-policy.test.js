@@ -9,6 +9,23 @@ test("a form-supplied topic unlocks grounded planning without fabricating an ini
   assert.equal(policy.initialToolDecision(seeded, "Read", { file_path: "README.md" }), null);
 });
 
+test("Mate creation presents the next question before loading skills or context", function () {
+  var session = {
+    mateCreationMode: true,
+    history: [
+      { type: "tool_executing", name: "AskUserQuestion", id: "mate_creation_intent_7" },
+      { type: "ask_user_answered", toolId: "mate_creation_intent_7", answers: { 0: "A research partner" } },
+    ],
+  };
+  assert.equal(policy.initialToolDecision(session, "Skill", { skill: "clay-mate-interview" }).behavior, "deny");
+  assert.equal(policy.initialToolDecision(session, "Bash", { command: "sed -n '1,240p' SKILL.md" }).behavior, "deny");
+  assert.equal(policy.initialToolDecision(session, "Read", { file_path: "common-knowledge.json" }).behavior, "deny");
+  assert.equal(policy.initialToolDecision(session, "ask_user_questions", { questions: [] }).behavior, "allow");
+  session.history.push({ type: "tool_executing", name: "AskUserQuestion", id: "provider-question-1" });
+  assert.equal(policy.initialToolDecision(session, "Read", { file_path: "relevant-context.md" }), null);
+  assert.equal(policy.initialToolDecision(session, "Skill", { skill: "clay-mate-interview" }).behavior, "deny");
+});
+
 test("debate moderator allows non-mutating investigation capabilities", function () {
   assert.equal(policy.debateToolDecision("Read", { file_path: "/tmp/a" }).allowed, true);
   assert.equal(policy.debateToolDecision("WebSearch", { query: "housing policy" }).allowed, true);

@@ -426,7 +426,8 @@ test("Home archive New debate selects builtin Clay while the sidebar only opens 
   assert.match(chat, /type: "home_mate_debate_plan"/);
   assert.doesNotMatch(chat, /openDebateModal|clay:home-debate/);
   assert.match(sidebar, /openHomeDebatesArchive\(\);[\s\S]*closeNarrowDrawer\(false\)/);
-  assert.doesNotMatch(sidebar, /home_mate_debate_plan|openHomeMateAction/);
+  var debateSidebarHandler = sidebar.slice(sidebar.indexOf("function openDebatesFromSidebar"), sidebar.indexOf("function startMateCreationFromSidebar"));
+  assert.doesNotMatch(debateSidebarHandler, /home_mate_debate_plan|openHomeMateAction/);
   assert.match(archive, /function startNewDebate\(\)[\s\S]*homeDebateTopicFormOpen: true/);
   assert.match(archive, /openHomeMateAction\("debate", topic\.slice\(0, 1000\)\)/);
   assert.match(router, /home_debate_question[\s\S]*handleHomeDebateTranscript/);
@@ -434,7 +435,7 @@ test("Home archive New debate selects builtin Clay while the sidebar only opens 
   assert.match(project, /home_debate_question_response[\s\S]*opts\.onDmMessage\(ws, msg\)/);
   assert.match(project, /onUserInputRequest: function \(session, request, respond\)[\s\S]*_askUser\.createHandler\(session\)/);
   assert.doesNotMatch(project, /_askUser\.getToolDefs\(session\)/);
-  assert.match(sdkBridge, /requestedUserInputMode = session\.debateSetupMode \? "fallback" : "auto"/);
+  assert.match(sdkBridge, /requestedUserInputMode = session\.debateSetupMode \|\| session\.mateCreationMode \? "fallback" : "auto"/);
   assert.match(sdkBridge, /yoke\.userInput\.fallbackToolDefs\(sessionUserInputHandler\)/);
   assert.match(schema, /"home_debate_question_response"[\s\S]*"home_debate_question"[\s\S]*"home_debate_question_resolved"/);
   assert.match(debateEngine, /var reuseHomeSession = session\.homeDebatePlanning === true[\s\S]*if \(reuseHomeSession\)[\s\S]*session\.homeDebatePhase = "live"[\s\S]*else \{[\s\S]*createSession\(liveOpts, targetWs \|\| null\)/);

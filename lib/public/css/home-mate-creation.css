@@ -1,0 +1,34 @@
+.home-mate-proposal {
+  width: min(620px, calc(100% - 40px));
+  margin: 12px auto;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--bg-alt) 92%, transparent);
+  box-shadow: 0 16px 40px color-mix(in srgb, var(--bg) 28%, transparent);
+  color: var(--text);
+}
+.home-mate-proposal-eyebrow { color: var(--accent); font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.home-mate-proposal-name { margin: 5px 0 4px; font: inherit; font-size: 20px; font-weight: 700; letter-spacing: -.02em; }
+.home-mate-proposal-bio { margin: 0 0 16px; color: var(--text-muted); font-size: 13px; line-height: 1.55; }
+.home-mate-proposal-facts { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 8px 14px; margin: 0; padding: 14px 0; border-block: 1px solid var(--border); font-size: 12px; line-height: 1.5; }
+.home-mate-proposal-facts dt { color: var(--text-dimmer); }
+.home-mate-proposal-facts dd { margin: 0; color: var(--text-muted); }
+.home-mate-proposal-identity { margin-top: 14px; color: var(--text-muted); font-size: 12px; }
+.home-mate-proposal-identity summary { cursor: pointer; font-weight: 650; }
+.home-mate-proposal-identity pre { max-height: 260px; margin: 10px 0 0; padding: 12px; overflow: auto; border-radius: 9px; background: var(--code-bg); color: var(--text-muted); font: 11px/1.55 var(--font-mono); white-space: pre-wrap; }
+.home-mate-proposal-actions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+.home-mate-proposal-actions button { min-height: 34px; padding: 0 13px; border-radius: 8px; font: inherit; font-size: 12px; font-weight: 650; cursor: pointer; }
+.home-mate-proposal-create { border: 1px solid var(--accent); background: var(--accent); color: var(--accent-text, #fff); }
+.home-mate-proposal-open { border: 1px solid var(--accent); background: var(--accent); color: var(--accent-text, #fff); }
+.home-mate-proposal-cancel { border: 1px solid var(--border); background: transparent; color: var(--text-muted); }
+.home-mate-proposal-actions button:focus-visible, .home-mate-proposal-identity summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.home-mate-proposal-actions button:disabled { cursor: default; opacity: .58; }
+.home-mate-proposal-error { color: var(--error); font-size: 12px; }
+.home-mate-proposal-status { color: var(--success); font-size: 12px; font-weight: 650; }
+@media (max-width: 640px) {
+  .home-mate-proposal { width: calc(100% - 24px); padding: 16px; }
+  .home-mate-proposal-facts { grid-template-columns: 1fr; gap: 3px; }
+  .home-mate-proposal-facts dd + dt { margin-top: 7px; }
+  .home-mate-proposal-actions button { flex: 1; }
+}

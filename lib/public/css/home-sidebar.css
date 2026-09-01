@@ -15,8 +15,8 @@
   --home-mate-row-gap: 2px;
   --home-mate-list-edge: 1px;
   --home-mate-list-height: calc(
-    var(--home-mate-row-height) + var(--home-mate-row-height) + var(--home-mate-row-height) + var(--home-mate-row-height) + var(--home-mate-row-height) +
-    var(--home-mate-row-gap) + var(--home-mate-row-gap) + var(--home-mate-row-gap) + var(--home-mate-row-gap) +
+    var(--home-mate-row-height) + var(--home-mate-row-height) + var(--home-mate-row-height) + var(--home-mate-row-height) + var(--home-mate-row-height) + var(--home-mate-row-height) +
+    var(--home-mate-row-gap) + var(--home-mate-row-gap) + var(--home-mate-row-gap) + var(--home-mate-row-gap) + var(--home-mate-row-gap) +
     var(--home-mate-list-edge) + var(--home-mate-list-edge)
   );
   flex: 0 0 240px;
@@ -286,6 +286,32 @@
   border: 1px solid var(--border-subtle);
   border-radius: 50%;
   object-fit: cover;
+}
+
+.home-mate-list-create {
+  color: var(--text-muted);
+}
+
+.home-mate-list-create-icon {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 1px dashed var(--border);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent-bg) 54%, transparent);
+  color: var(--accent);
+}
+
+.home-mate-list-create-icon .lucide {
+  width: 14px;
+  height: 14px;
+  stroke-width: 1.8;
+}
+
+.home-mate-list-create:hover .home-mate-list-create-icon {
+  border-color: color-mix(in srgb, var(--accent) 48%, var(--border));
+  background: var(--accent-bg);
 }
 
 .home-mate-list-activity {
@@ -625,8 +651,8 @@
 @media (max-width: 768px) and (max-height: 520px) {
   .home-sidebar {
     --home-mate-list-height: calc(
-      var(--home-mate-row-height) + var(--home-mate-row-height) + var(--home-mate-row-height) +
-      var(--home-mate-row-gap) + var(--home-mate-row-gap) +
+      var(--home-mate-row-height) + var(--home-mate-row-height) + var(--home-mate-row-height) + var(--home-mate-row-height) +
+      var(--home-mate-row-gap) + var(--home-mate-row-gap) + var(--home-mate-row-gap) +
       var(--home-mate-list-edge) + var(--home-mate-list-edge)
     );
   }

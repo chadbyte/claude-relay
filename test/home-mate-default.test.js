@@ -73,8 +73,8 @@ test("new conversation belongs to the selected Mate context", function () {
   var conversationsIndex = markup.indexOf('id="home-sidebar-recent-label"');
   assert.ok(newIndex < mateListIndex && mateListIndex < conversationsIndex);
   assert.match(markup, /id="home-sidebar-new"[^>]*home-sidebar-new[^>]*title="New Chat"[^>]*aria-label="Start a new chat with the current Mate"[^>]*disabled/);
-  assert.match(hub, /\["home-sidebar-new", "Start a new chat with "\]/);
-  assert.match(hub, /control\.disabled = !mate;[\s\S]*control\.setAttribute\("aria-label", mate \? controls\[i\]\[1\] \+ name/);
+  assert.match(hub, /var newChat = document\.getElementById\("home-sidebar-new"\)/);
+  assert.match(hub, /newChat\.disabled = !mate;[\s\S]*newChat\.setAttribute\("aria-label", mate \? "Start a new chat with " \+ name/);
   assert.match(sidebar, /home-sidebar-new"\)\.addEventListener\("click", startConversationFromSidebar\)/);
   assert.match(sidebar, /startNewHomeConversation\(\);[\s\S]*closeNarrowDrawer\(true\)/);
   assert.match(chat, /export function startNewHomeConversation\(\)[\s\S]*homeChatMateId[\s\S]*home_mate_new_session/);

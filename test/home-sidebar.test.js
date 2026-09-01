@@ -7,6 +7,7 @@ var pathToFileURL = require("node:url").pathToFileURL;
 var root = path.join(__dirname, "..");
 var indexSource = fs.readFileSync(path.join(root, "lib/public/index.html"), "utf8");
 var sidebarSource = fs.readFileSync(path.join(root, "lib/public/modules/home-sidebar.js"), "utf8");
+var hubSource = fs.readFileSync(path.join(root, "lib/public/modules/app-home-hub.js"), "utf8");
 var sheetSource = fs.readFileSync(path.join(root, "lib/public/modules/home-conversations-sheet.js"), "utf8");
 var actionsSource = fs.readFileSync(path.join(root, "lib/public/modules/home-session-actions.js"), "utf8");
 var chatListSource = fs.readFileSync(path.join(root, "lib/public/modules/home-sidebar-chat-list.js"), "utf8");
@@ -30,8 +31,12 @@ test("Home sidebar follows a continuous action, Mate, and conversation hierarchy
   assert.doesNotMatch(homeMarkup, /home-mate-chat-actions/);
 });
 
-test("Home sidebar primary actions use consistent Lucide geometry and exact copy", function () {
+test("Home actions and the first Mate-list creation row use consistent Lucide geometry", function () {
   assert.match(homeMarkup, /id="home-sidebar-new"[^>]*title="New Chat"[^>]*aria-label="Start a new chat with the current Mate"[\s\S]*home-sidebar-action-icon[^>]*aria-hidden="true"[\s\S]*data-lucide="message-square-plus"[\s\S]*>New Chat<\/span>/);
+  assert.doesNotMatch(homeMarkup, /id="home-sidebar-new-mate"/);
+  assert.match(hubSource, /function createNewMateRow\(disabled\)[\s\S]*row\.id = "home-sidebar-new-mate"[\s\S]*row\.setAttribute\("aria-label", "Create a new Mate with Clay"\)[\s\S]*iconHtml\("user-round-plus"\)[\s\S]*name\.textContent = "Create new Mate"/);
+  assert.match(hubSource, /list\.innerHTML = "";[\s\S]*list\.appendChild\(createNewMateRow\(false\)\);[\s\S]*for \(var i = 0; i < visibleMates\.length; i\+\+\)/);
+  assert.match(hubSource, /openHomeMateAction\("mate"\);[\s\S]*closeHomeSidebarAfterSelection\(\)/);
   assert.match(homeMarkup, /id="home-sidebar-debate"[^>]*title="Browse debates"[^>]*aria-label="Browse debates"[^>]*aria-pressed="false"[\s\S]*home-sidebar-action-icon[^>]*aria-hidden="true"[\s\S]*data-lucide="messages-square"[\s\S]*>Debates<\/span>/);
   assert.match(homeMarkup, /id="home-tools-btn"[^>]*title="Capsules"[^>]*aria-label="Capsules"[^>]*aria-expanded="false"[\s\S]*home-sidebar-action-icon[^>]*aria-hidden="true"[\s\S]*data-lucide="box"[\s\S]*id="home-tools-label">Capsules<\/span>/);
   assert.doesNotMatch(homeMarkup.slice(homeMarkup.indexOf('id="home-sidebar-new"'), homeMarkup.indexOf('id="home-sidebar-mate-label"')), /data-lucide="(?:square-pen|mic)"|New conversation|Start debate/);
@@ -107,13 +112,13 @@ test("Home sidebar presents a complete global Mate-attributed Chats archive", fu
   assert.match(cssSource, /\.home-chat-scope-option:focus-visible \{[\s\S]*outline: 2px solid var\(--accent\)/);
 });
 
-test("Mate browsing reserves five derived rows and yields safely on short mobile viewports", function () {
+test("Mate browsing preserves five visible Mates beside its fixed creation row", function () {
   var heightContracts = Array.from(cssSource.matchAll(/--home-mate-list-height:\s*calc\(([\s\S]*?)\n\s*\);/g));
   assert.equal(heightContracts.length, 2);
-  assert.equal((heightContracts[0][1].match(/var\(--home-mate-row-height\)/g) || []).length, 5);
-  assert.equal((heightContracts[0][1].match(/var\(--home-mate-row-gap\)/g) || []).length, 4);
+  assert.equal((heightContracts[0][1].match(/var\(--home-mate-row-height\)/g) || []).length, 6);
+  assert.equal((heightContracts[0][1].match(/var\(--home-mate-row-gap\)/g) || []).length, 5);
   assert.equal((heightContracts[0][1].match(/var\(--home-mate-list-edge\)/g) || []).length, 2);
-  assert.equal((heightContracts[1][1].match(/var\(--home-mate-row-height\)/g) || []).length, 3);
+  assert.equal((heightContracts[1][1].match(/var\(--home-mate-row-height\)/g) || []).length, 4);
   assert.match(cssSource, /--home-mate-row-height: 40px;[\s\S]*--home-mate-row-gap: 2px;[\s\S]*--home-mate-list-edge: 1px;/);
   assert.match(cssSource, /--home-mate-list-height: calc\([\s\S]*var\(--home-mate-row-height\)[\s\S]*var\(--home-mate-row-gap\)[\s\S]*var\(--home-mate-list-edge\)/);
   assert.match(cssSource, /\.home-mate-list \{[\s\S]*flex: 0 0 var\(--home-mate-list-height\);[\s\S]*gap: var\(--home-mate-row-gap\);[\s\S]*min-height: var\(--home-mate-list-height\);[\s\S]*max-height: var\(--home-mate-list-height\);[\s\S]*overflow-y: auto;/);
