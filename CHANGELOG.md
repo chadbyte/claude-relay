@@ -1,3 +1,76 @@
+# [4.0.0-beta.1](https://github.com/chadbyte/clay/compare/v3.8.1...v4.0.0-beta.1) (2026-09-01)
+
+
+* feat(board)!: rebuild home as the work hub with mates beside the board ([6d83a54](https://github.com/chadbyte/clay/commit/6d83a54d06cac5ec25d7bc984e1d5b4cf4979b42))
+* feat(capsules)!: add Mate-driven Capsule Home ([e6ef64e](https://github.com/chadbyte/clay/commit/e6ef64ef3e3f2f905accb964b5411d883e23aa15))
+* feat(capsules)!: remove scratchpad and translator ([0382fb7](https://github.com/chadbyte/clay/commit/0382fb7718d7437150734cd00257ae0d65786d1b))
+
+
+### Bug Fixes
+
+* **capsules:** allow blob worker runtime ([c237f89](https://github.com/chadbyte/clay/commit/c237f8940e46eb002718f496f355d50e40504363))
+* **capsules:** preserve Korean IME composition ([fe43fb3](https://github.com/chadbyte/clay/commit/fe43fb3f3f8103ef730bfafb25745dd701f4e71f))
+* **capsules:** stabilize text input and model resolution ([433c4a5](https://github.com/chadbyte/clay/commit/433c4a5ce428e4a86ee549b28a24b0c90b31ad26))
+* **home:** apply draft models and restore composer focus ([5efb84a](https://github.com/chadbyte/clay/commit/5efb84a3194d57c477f70e54f8823b2562fff60d))
+* **home:** keep close control outside workbench ([e8259a5](https://github.com/chadbyte/clay/commit/e8259a5caa6bedad9660507655b51075ecdb120c))
+* **home:** stabilize mate model and response delivery ([c144342](https://github.com/chadbyte/clay/commit/c144342251ebedf124555e07961d9643751f8a4a))
+* **pairing:** disambiguate visible Split Workers ([59a1e1f](https://github.com/chadbyte/clay/commit/59a1e1f8c7cb7b77c7bf7d1108399d158cf441c5))
+* **search:** complete Ask Clay workspace conversations ([a9849e1](https://github.com/chadbyte/clay/commit/a9849e1d3a3cac8f73118348ed99673194725077)), closes [#213](https://github.com/chadbyte/clay/issues/213)
+* **settings:** apply saved environment to agent runtimes ([b8b3d9e](https://github.com/chadbyte/clay/commit/b8b3d9e7d99224e87cb09efea591ff985ad3bf0e))
+* **tools:** stop restarting the worker on ordinary action errors ([1759660](https://github.com/chadbyte/clay/commit/17596600a5d1fc48abe234b5efd2597a323548ab))
+* **yoke:** auto-approve structured user input ([85fa7dc](https://github.com/chadbyte/clay/commit/85fa7dc16408619a6cf0204b22404f569b394ec4))
+
+
+### Features
+
+* **board:** add per-user work board storage and websocket layer ([fe9fc07](https://github.com/chadbyte/clay/commit/fe9fc070e6b6a75ae0500d79fcf5256584188b51))
+* **board:** calm conversation stage — two-voice chat, mate switcher, no mate colors ([3407ef8](https://github.com/chadbyte/clay/commit/3407ef8cb4347d27ecbd6822433efd2d98448d00))
+* **board:** chat with mates inside the home screen ([7292564](https://github.com/chadbyte/clay/commit/7292564eafa1775681150d1fa372dc6e95a322fc))
+* **board:** collapsible dock with three states replaces the fixed split ([a135237](https://github.com/chadbyte/clay/commit/a1352371cb9a1acc80c1d1007c4182c41e116371))
+* **board:** home shell — root route, quiet home bar, project chrome retired ([619d384](https://github.com/chadbyte/clay/commit/619d384e4e4093e75b593417a671b49a2a6b3365))
+* **board:** hover identity cards, defined chat surface, board app frame ([170fffe](https://github.com/chadbyte/clay/commit/170fffe710aa4ac6cd7d57d1eba7b51b80f423e5))
+* **board:** render the work board on the home hub ([12fd3e7](https://github.com/chadbyte/clay/commit/12fd3e7c5817e14e8514c51589cc32dbbe16d1b0))
+* **board:** turn the right pane into a tool dock and abolish mate DM ([3ffe31b](https://github.com/chadbyte/clay/commit/3ffe31b99b29a154783206fcbe7d1914b7d74aea))
+* **capsules:** add ephemeral model completions ([3695ede](https://github.com/chadbyte/clay/commit/3695ede9ef773088b3d375464ad07350f6ed4fc2))
+* **capsules:** add source ownership controls ([1a54675](https://github.com/chadbyte/clay/commit/1a54675f177bd99fb96188b636015ec73311b0af))
+* **capsules:** expand declarative UI and source controls ([67aede9](https://github.com/chadbyte/clay/commit/67aede9f2772011b526593203873deac468eeec9))
+* **capsules:** expand declarative UI contract ([7f44ab7](https://github.com/chadbyte/clay/commit/7f44ab7b2fb756dac58f8a13afc846b7a3d204dc))
+* **capsules:** improve discovery and model controls ([e31fbb3](https://github.com/chadbyte/clay/commit/e31fbb38219a652fe6bb90ad9847b77b13567aa9))
+* **debate:** expand live debate controls and participant setup ([606acc2](https://github.com/chadbyte/clay/commit/606acc2008f9680363c0c2b245e678e9b60cfb5e))
+* **home:** add capsule library navigation ([73b7246](https://github.com/chadbyte/clay/commit/73b724690fb3b7842226ce3bb1ed90d6d5e5fc4b))
+* **home:** add debates archive ([a7b205c](https://github.com/chadbyte/clay/commit/a7b205c4bab91134e75ecbc76b63ed492d3ca92b))
+* **home:** add mate backstage workbench ([f1b46cc](https://github.com/chadbyte/clay/commit/f1b46cc8cb49413372053738246acd44dae85c7c))
+* **home:** add native debate planning ([cc945fc](https://github.com/chadbyte/clay/commit/cc945fc7caa2c182a9d671e742a27dc7666594e0))
+* **home:** add relationship history sidebar ([302c259](https://github.com/chadbyte/clay/commit/302c259951aaa7d103012fcb872dae06acdffb88))
+* **home:** add session details actions ([ff190f1](https://github.com/chadbyte/clay/commit/ff190f1d01427ecd7c1d5d530633b9320d95aa57))
+* **home:** centralize mate settings ([3f4af09](https://github.com/chadbyte/clay/commit/3f4af09348f1ad423ac440fbcbbc0d8a44fa38eb))
+* **home:** complete native debate workspace ([96cb1e6](https://github.com/chadbyte/clay/commit/96cb1e6d0d2a4043ea5116de25582d7c73b5c7e8))
+* **home:** float capsule workbench above conversation ([084d74d](https://github.com/chadbyte/clay/commit/084d74de5f140971e5977c4f7cbd3ab0e44b3134))
+* **home:** make conversation a resumable workspace ([a0f399e](https://github.com/chadbyte/clay/commit/a0f399e25dea8262bf5ae1a52bbae13514fe43c8))
+* **home:** polish board and avatar palette ([731bd47](https://github.com/chadbyte/clay/commit/731bd47bf25f1f19a302b4af166c5a1ebe749c26))
+* **home:** refine mate conversations and model controls ([c151ba8](https://github.com/chadbyte/clay/commit/c151ba85fd016c7bded179be2cad47f39588cb49))
+* **home:** refine overlay navigation ([5ecf420](https://github.com/chadbyte/clay/commit/5ecf420c64c977f1c8977e1f665689ee076a4d90))
+* **home:** restore exact mate conversations ([807ed51](https://github.com/chadbyte/clay/commit/807ed5149e2d487420af86c12922e41636b01a04))
+* **mates:** add Clay-led Mate creation interviews ([7d1f419](https://github.com/chadbyte/clay/commit/7d1f4191b05273373865d7777aa704eace2935a4))
+* **notes:** refine sticky note brand palette ([289e4ec](https://github.com/chadbyte/clay/commit/289e4ecf820ecc5986046b370ff3cef11834a364))
+* **search:** add Ask Clay conversation entry ([f827cd5](https://github.com/chadbyte/clay/commit/f827cd569bde7617bfe35ff835ea8cb136906b0e))
+* **tools:** the board is a capsule and a capsule is a folder ([b8ce54e](https://github.com/chadbyte/clay/commit/b8ce54e47ab91b840a07d005dfd737bd7643d3aa))
+* **tools:** tool contract skeleton — manifest, declarative UI, sandboxed logic ([5f4e672](https://github.com/chadbyte/clay/commit/5f4e672997d74d9729bee351a61a0ff0dc0ed386))
+* **tools:** universal mate control — clay_tool_* MCP surface ([a55103b](https://github.com/chadbyte/clay/commit/a55103bc3774496252d8ba68df6df587263e7387))
+* **tools:** vendor-neutral api.llm and conversational capsule authoring ([c846396](https://github.com/chadbyte/clay/commit/c84639607054cea7ccbc573d29308398d59dbdad))
+* **workspace:** add cross-project Mate orchestration ([1f1d8d9](https://github.com/chadbyte/clay/commit/1f1d8d91effec385db22c2f9de2fc37776c10461))
+* **yoke:** unify structured user input ([d3432e2](https://github.com/chadbyte/clay/commit/d3432e2459250a587091bd3352479362b056b5f2))
+
+
+### BREAKING CHANGES
+
+* remove the built-in Board Capsule and delete its saved
+data during the v7 built-in Capsule migration.
+* Scratchpad and Translator Capsule installations and their
+stored data are removed when the v6 Capsule migration runs.
+* mates are no longer shown in the sidebar icon strip.
+Open a mate from the home screen (the C button) instead.
+
 ## [3.8.1](https://github.com/chadbyte/clay/compare/v3.8.0...v3.8.1) (2026-08-30)
 
 
