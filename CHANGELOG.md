@@ -1,3 +1,10 @@
+# [4.0.0-beta.3](https://github.com/chadbyte/clay/compare/v4.0.0-beta.2...v4.0.0-beta.3) (2026-09-02)
+
+
+### Features
+
+* **ui:** redesign background-tasks bar as a quiet status line ([6ace925](https://github.com/chadbyte/clay/commit/6ace925289ad617a45a164777c722b7c7ca78606))
+
 # [4.0.0-beta.2](https://github.com/chadbyte/clay/compare/v4.0.0-beta.1...v4.0.0-beta.2) (2026-09-02)
 
 
