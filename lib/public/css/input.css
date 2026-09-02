@@ -742,6 +742,12 @@
 .background-task-icon { display: inline-flex; flex: none; color: var(--text-muted); }
 .background-task-icon i { width: 13px; height: 13px; }
 .background-task-description { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-secondary); }
+/* Housekeeping group: visible so the user can see what Clay runs on its own,
+   but subordinate to the work they actually asked for. */
+.background-tasks-section-label { padding: 9px 0 1px; border-top: 1px solid var(--border-subtle); color: var(--text-muted); font-size: 10px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; }
+.background-tasks-section-label + .background-task-row { border-top: 0; }
+.background-task-row.ambient .background-task-description { color: var(--text-muted); }
+.background-task-row.ambient .background-task-icon { opacity: .7; }
 .background-task-meta { display: inline-flex; align-items: center; gap: 7px; flex: none; color: var(--text-muted); }
 .background-task-type { font-size: 11px; }
 .background-task-elapsed { font-variant-numeric: tabular-nums; font-size: 11px; min-width: 44px; text-align: right; }

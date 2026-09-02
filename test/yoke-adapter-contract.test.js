@@ -93,14 +93,16 @@ test("YOKE background-task producers emit the normalized level-state contract", 
       subtype: "background_tasks_changed",
       tasks: [
         { task_id: "bash-1", task_type: "local_bash", description: "Wait for build" },
-        { task_id: "agent-1", task_type: "local_agent", description: "Review changes" },
+        { task_id: "agent-1", task_type: "local_agent", description: "Review changes", ambient: true },
         { task_id: "unknown-1", task_type: "native_monitor", description: "Check status" },
       ],
     },
+    // Claude reports the SDK's ambient flag; the adapter normalizes an absent
+    // value to false so hosts never have to test for undefined.
     expectedTasks: [
-      { task_id: "bash-1", task_type: "shell", description: "Wait for build" },
-      { task_id: "agent-1", task_type: "agent", description: "Review changes" },
-      { task_id: "unknown-1", task_type: "other", description: "Check status" },
+      { task_id: "bash-1", task_type: "shell", description: "Wait for build", ambient: false },
+      { task_id: "agent-1", task_type: "agent", description: "Review changes", ambient: true },
+      { task_id: "unknown-1", task_type: "other", description: "Check status", ambient: false },
     ],
   }, {
     name: "Codex",
@@ -108,6 +110,9 @@ test("YOKE background-task producers emit the normalized level-state contract", 
     rawEvent: {
       terminals: [{ id: "terminal-1", commandLine: "npm test" }],
     },
+    // Codex background terminals have no ambient concept, so the field stays
+    // absent rather than being invented as false. countUserTasks treats absent
+    // as user work, so Codex tasks keep driving the activity indicators.
     expectedTasks: [
       { task_id: "terminal-1", task_type: "shell", description: "npm test" },
     ],
