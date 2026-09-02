@@ -203,6 +203,21 @@ Consequences to preserve:
 
 `findCodexPath()` honors `CLAY_CODEX_PATH`: if it points at an existing file, that binary is used and logged; otherwise resolution falls back to the bundled `@openai/codex` platform package. Bundled remains the default - use the override for a local build or a pinned release, not as normal configuration.
 
+### 15. Thinking requires reasoning summaries to be requested
+
+The adapter maps `item/reasoning/summaryTextDelta`, `item/reasoning/textDelta`, and `item/reasoning/summaryPartAdded` onto `thinking_start` / `thinking_delta`. Those notifications only carry text when the app-server is *asked* for reasoning summaries: a reasoning item's own content is encrypted for ChatGPT-authenticated models, so the summary stream is the only readable channel.
+
+Left alone, the app-server inherits `~/.codex/config.toml`, where `model_reasoning_summary` defaults to `"auto"` and often yields nothing. Clay therefore injects, in `CODEX_REASONING_DEFAULTS` (`yoke/adapters/codex.js`):
+
+```toml
+model_reasoning_summary = "detailed"
+model_supports_reasoning_summaries = true
+```
+
+These are merged **before** `adapterOptions.CODEX.config`, so a user config key of the same name wins. `show_raw_agent_reasoning` is intentionally not set - it is encrypted on ChatGPT-auth models and noisy elsewhere, so it stays a user opt-in.
+
+This is server-level `--config`, not a `thread/start` parameter, so it applies to every thread on the shared app-server, including one-shot capsule calls (`complete-once.js` spawns nothing of its own). Do not try to vary it per query without accepting a second app-server process.
+
 ---
 
 ## Common Gotchas
