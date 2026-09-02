@@ -4,9 +4,18 @@ var attachWorkspaceQueryService = require("../lib/workspace-query-service").atta
 var clayHistory = require("../lib/clay-history-mcp-server");
 var workspaceMcp = require("../lib/workspace-query-mcp-server");
 var canonicalTurns = require("../lib/workspace-query-service").canonicalTurns;
+var attachPermissions = require("../lib/users-permissions").attachPermissions;
+
+// The real RBAC predicate, so tests exercise the actual rule that a record
+// carrying no visibility field is treated as public.
+var permissions = attachPermissions({
+  loadUsers: function () { return { users: [] }; },
+  saveUsers: function () {},
+  findUserById: function (userId) { return userId === "admin-user" ? { id: "admin-user", role: "admin" } : { id: userId, role: "user" }; },
+});
 
 function project(slug, ownerId, sessions, extra) {
-  var status = Object.assign({ projectOwnerId: ownerId, title: slug + "\nTitle", icon: "icon\u0000" }, extra || {});
+  var status = Object.assign({ slug: slug, projectOwnerId: ownerId, title: slug + "\nTitle", icon: "icon\u0000" }, extra || {});
   return {
     getStatus: function () { return status; },
     getSessionManager: function () { return { sessions: new Map(sessions.map(function (session) { return [session.localId, session]; })) }; },
@@ -40,6 +49,16 @@ function multiUserFixture() {
   projects.set("worktree", project("worktree", "user-a", [{ localId: 31, ownerId: "user-a", history: [] }], { isWorktree: true }));
   projects.set("mate-a", project("mate-a", "user-a", [{ localId: 41, ownerId: "user-a", title: "Clay source", history: [] }], { isMate: true, mateId: "clay-a" }));
   projects.set("mate-custom", project("mate-custom", "user-a", [{ localId: 42, ownerId: "user-a", title: "Custom source", history: [] }], { isMate: true, mateId: "custom-a" }));
+  // The authoritative project records. Mate projects are deliberately absent:
+  // in production they are registered on the running server and never written
+  // to the persisted project list, so no record exists for them.
+  var accessRecords = {
+    "owned": { slug: "owned", visibility: "public", ownerId: "user-a", allowedUsers: [] },
+    "other-public": { slug: "other-public", visibility: "public", ownerId: "user-b", allowedUsers: [] },
+    "other-shared": { slug: "other-shared", visibility: "private", ownerId: "user-b", allowedUsers: ["user-a"] },
+    "public-container": { slug: "public-container", visibility: "public", ownerId: null, allowedUsers: [] },
+    "worktree": { slug: "worktree", visibility: "public", ownerId: "user-a", allowedUsers: [] },
+  };
   var mates = {
     "user-a:clay-a": { id: "clay-a", createdBy: "user-a", builtinKey: "clay" },
     "user-a:custom-a": { id: "custom-a", createdBy: "user-a" },
@@ -49,9 +68,8 @@ function multiUserFixture() {
   var service = attachWorkspaceQueryService({
     getProjects: function () { return projects; },
     isMultiUser: function () { return true; },
-    canAccessProject: function (userId, status) {
-      return status.visibility === "public" || status.projectOwnerId === userId || (status.allowedUsers || []).indexOf(userId) !== -1;
-    },
+    onGetProjectAccess: function (slug) { return accessRecords[slug] || { error: "Project not found" }; },
+    canAccessProject: function (userId, access) { return permissions.canAccessProject(userId, access); },
     resolveMate: function (userId, mateId) { return mates[userId + ":" + mateId] || null; },
     assignmentService: {
       propose: function (principal, args) { assignmentCalls.push({ method: "new", principal: principal, args: args }); return { assignmentId: "new" }; },
@@ -60,7 +78,7 @@ function multiUserFixture() {
     },
   });
   var bound = service.bindSource({ projectSlug: "mate-a", projectOwnerId: "user-a", isMate: true, mateId: "clay-a", session: projects.get("mate-a").getSessionManager().sessions.get(41) });
-  return { service: service, bound: bound, owned: owned, assignmentCalls: assignmentCalls };
+  return { service: service, bound: bound, owned: owned, assignmentCalls: assignmentCalls, projects: projects, accessRecords: accessRecords, mates: mates };
 }
 
 test("workspace binding derives an exact owner from authoritative Mate and session state", function () {
