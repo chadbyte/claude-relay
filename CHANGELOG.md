@@ -1,3 +1,16 @@
+# [4.0.0-beta.2](https://github.com/chadbyte/clay/compare/v4.0.0-beta.1...v4.0.0-beta.2) (2026-09-02)
+
+
+### Bug Fixes
+
+* **capsules:** tolerate missing capsules root when seeding built-ins ([014d919](https://github.com/chadbyte/clay/commit/014d9198ac4fffebeb08dad5400876d4839b0a6c))
+* **login:** stop vendor login loop with server-owned per-vendor flow ([b9b27ad](https://github.com/chadbyte/clay/commit/b9b27ad3b533e7324330a027a54668c682f15a01))
+
+
+### Features
+
+* **codex:** update bundled codex to 0.152.1 with binary override ([43b31a1](https://github.com/chadbyte/clay/commit/43b31a1a5615f54e3d6ab958a48a4f352fd90f6e))
+
 # [4.0.0-beta.1](https://github.com/chadbyte/clay/compare/v3.8.1...v4.0.0-beta.1) (2026-09-01)
 
 
