@@ -1,3 +1,10 @@
+# [4.0.0-beta.6](https://github.com/chadbyte/clay/compare/v4.0.0-beta.5...v4.0.0-beta.6) (2026-09-02)
+
+
+### Bug Fixes
+
+* **auth:** prevent login prompt replay ([7f00048](https://github.com/chadbyte/clay/commit/7f00048eb32f6c870cee07cd62c90466cc0a0be1))
+
 # [4.0.0-beta.5](https://github.com/chadbyte/clay/compare/v4.0.0-beta.4...v4.0.0-beta.5) (2026-09-02)
 
 
