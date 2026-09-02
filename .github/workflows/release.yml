@@ -5,6 +5,16 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Serialize every release run (beta, promote, stable) so a main-push beta
+# release and a dispatched stable promotion can never mutate main/release
+# concurrently. cancel-in-progress stays false: a running release must finish.
+# Caveat: GitHub keeps only the newest *pending* run per group, so if a beta
+# push lands while a stable run is still queued, the queued stable run is
+# cancelled - re-run the promote dispatch in that case.
+concurrency:
+  group: release-pipeline
+  cancel-in-progress: false
+
 permissions:
   id-token: write
   contents: write
@@ -103,14 +113,27 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+      # Refresh origin/main immediately before merging and retry on a lost
+      # race: the checkout at job start goes stale while semantic-release
+      # runs, and direct pushes to main (PR merges) can land at any moment
+      # even with the workflow-level concurrency group.
       - name: Merge release back to main
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout main
-          git merge release --no-edit -X theirs || true
-          git checkout release -- CHANGELOG.md package.json package-lock.json 2>/dev/null || true
-          git diff --quiet || git commit -am "chore: resolve merge conflicts from release"
-          git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git main
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git checkout -B main origin/main
+            git merge release --no-edit -X theirs || true
+            git checkout release -- CHANGELOG.md package.json package-lock.json 2>/dev/null || true
+            git diff --quiet || git commit -am "chore: resolve merge conflicts from release"
+            if git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git main; then
+              exit 0
+            fi
+            echo "Push to main rejected (branch advanced during merge), retrying ($attempt/3)..."
+            sleep 10
+          done
+          echo "Failed to merge release back to main after 3 attempts" >&2
+          exit 1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
