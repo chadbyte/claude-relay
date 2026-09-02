@@ -4,196 +4,384 @@ var fs = require("node:fs");
 var path = require("node:path");
 
 var root = path.join(__dirname, "..");
-var paletteSource = fs.readFileSync(path.join(root, "lib/public/modules/tool-palette.js"), "utf8");
-var logsSource = fs.readFileSync(path.join(root, "lib/public/modules/project-logs.js"), "utf8");
-var appSource = fs.readFileSync(path.join(root, "lib/public/app.js"), "utf8");
-var messagesSource = fs.readFileSync(path.join(root, "lib/public/modules/app-messages.js"), "utf8");
-var mobileSource = fs.readFileSync(path.join(root, "lib/public/modules/sidebar-mobile.js"), "utf8");
-var css = fs.readFileSync(path.join(root, "lib/public/css/project-logs.css"), "utf8");
-var filebrowserCss = fs.readFileSync(path.join(root, "lib/public/css/filebrowser.css"), "utf8");
+function source(file) { return fs.readFileSync(path.join(root, file), "utf8"); }
+
+var paletteSource = source("lib/public/modules/tool-palette.js");
+var logsSource = source("lib/public/modules/project-logs.js");
+var renderSource = source("lib/public/modules/project-logs-render.js");
+var ambientSource = source("lib/public/modules/project-logs-ambient.js");
+var appSource = source("lib/public/app.js");
+var messagesSource = source("lib/public/modules/app-messages.js");
+var mobileSource = source("lib/public/modules/sidebar-mobile.js");
+var css = source("lib/public/css/project-logs.css");
+var filebrowserCss = source("lib/public/css/filebrowser.css");
 
 test("Project Logs occupies the project tool slot on desktop and mobile", function () {
   assert.match(paletteSource, /id: "project-logs-btn",\s+icon: "notebook-tabs",\s+label: "Logs"/);
-  assert.doesNotMatch(paletteSource, /id: "scheduler-btn"/);
   assert.match(mobileSource, /icon: "notebook-tabs", label: "Logs", action: "project-logs"/);
-  assert.match(mobileSource, /targetId = "project-logs-btn"/);
 });
 
-test("Project Logs uses store state, direct imports, and correlated WebSocket requests", function () {
+test("there is no canonical create or edit UI anywhere in the client", function () {
+  var combined = logsSource + renderSource;
+  // The ledger is authored by agent sessions, so the client must not offer or
+  // send any canonical mutation.
+  assert.equal(/project_log_create|project_log_update/.test(combined), false,
+    "the client never sends a canonical mutation message");
+  assert.equal(/New log|Create the first log|Save log/.test(combined), false, "no create affordance");
+  assert.equal(/project-log-title-input|project-log-kind-input|project-log-content-input/.test(combined), false,
+    "no entry editor fields");
+  assert.equal(/renderEditor|project-log-edit\b/.test(combined), false, "no editor at all");
+  assert.equal(/project-logs-new/.test(combined + css), false, "no create button styling either");
+
+  // Commenting is the only mutation the client performs.
+  assert.match(logsSource, /type: "project_log_comment", requestId: requestId, ref: ref, body: body/);
+  assert.match(renderSource, /handlers\.onComment\(entry\.ref, value, status, input\)/);
+});
+
+test("the client uses store state, direct imports, and correlated requests", function () {
   assert.match(logsSource, /import \{ store \} from '\.\/store\.js'/);
   assert.match(logsSource, /import \{ getWs \} from '\.\/ws-ref\.js'/);
   assert.match(logsSource, /projectLogsListRequestId/);
   assert.match(logsSource, /projectLogsReadRequestId/);
-  assert.match(logsSource, /projectLogsSaveRequestId/);
-  assert.match(logsSource, /var LOG_KINDS = \["decision", "investigation", "session-note", "runbook", "reference", "incident", "progress"\]/);
-  assert.match(logsSource, /kind: kind\.value, title: titleValue, body: contentValue/);
-  assert.doesNotMatch(logsSource, /localStorage|sessionStorage|alert\(|confirm\(|prompt\(|initProjectLogs\(ctx\)|var _ctx/);
-  // Client style rules: var only, no arrow functions.
-  assert.doesNotMatch(logsSource, /\bconst\s|\blet\s|=>/);
+  assert.match(logsSource, /projectLogsCommentRequestId/);
+  assert.match(appSource, /projectLogsView: 'list'/);
+  assert.match(appSource, /projectLogsCategory: ''/);
+  assert.match(appSource, /projectLogsCommentRequestId: null/);
+  assert.match(messagesSource, /case "project_log_commented":[\s\S]*handleProjectLogCommented\(msg\)/);
+  assert.equal(/project_log_saved/.test(messagesSource), false, "the retired response is no longer routed");
+  [["project-logs.js", logsSource], ["project-logs-render.js", renderSource]].forEach(function (pair) {
+    assert.equal(/=>/.test(pair[1]), false, "no arrow functions in " + pair[0]);
+    assert.equal(/^\s*(const|let)\s/m.test(pair[1]), false, "var only in " + pair[0]);
+    assert.equal(/localStorage|alert\(|confirm\(|prompt\(/.test(pair[1]), false, "no storage or native dialogs in " + pair[0]);
+  });
 });
 
-test("Project Logs initializes after the tool palette and routes server responses", function () {
-  assert.ok(appSource.indexOf("initToolPalettes();") < appSource.indexOf("initProjectLogs();"));
-  assert.match(messagesSource, /case "project_logs_state":[\s\S]*handleProjectLogsState\(msg\)/);
-  assert.match(messagesSource, /case "project_log_entry":[\s\S]*handleProjectLogEntry\(msg\)/);
-  assert.match(messagesSource, /case "project_log_saved":[\s\S]*handleProjectLogSaved\(msg\)/);
-  assert.match(messagesSource, /case "project_logs_error":[\s\S]*handleProjectLogsError\(msg\)/);
-  // Window state is declared in the store like every other mutable UI value.
-  assert.match(appSource, /projectLogsWide: false/);
-  assert.match(appSource, /projectLogsFullscreen: false/);
+test("Logs is one navigation stack, not a master/detail split", function () {
+  // Two sibling regions in the pane, one visible at a time.
+  assert.match(logsSource, /id="project-logs-list"/);
+  assert.match(logsSource, /id="project-logs-detail"/);
+  assert.equal(/project-logs-layout|project-logs-index/.test(logsSource + css), false,
+    "the two-column frame is gone");
+  assert.equal(/grid-template-columns/.test(css), false, "no split columns remain");
+
+  var showList = logsSource.slice(logsSource.indexOf("function showList()"), logsSource.indexOf("function showDetail("));
+  assert.match(showList, /detailEl\.classList\.add\("hidden"\)/);
+  assert.match(showList, /listEl\.classList\.remove\("hidden"\)/);
+  assert.match(showList, /backBtn\.classList\.add\("hidden"\)/);
+
+  var showDetail = logsSource.slice(logsSource.indexOf("function showDetail(entry)"), logsSource.indexOf("// --- Requests"));
+  assert.match(showDetail, /listEl\.classList\.add\("hidden"\)/);
+  assert.match(showDetail, /detailEl\.classList\.remove\("hidden"\)/);
+  assert.match(showDetail, /backBtn\.classList\.remove\("hidden"\)/);
 });
 
-test("Project Logs mounts as a workbench window beside the conversation", function () {
-  // Sibling of #app inside #main-panels, exactly like the document viewer and
-  // the terminal, rather than a child of #app that covers it.
+test("Back returns to the list preserving query, filter, and scroll", function () {
+  assert.match(logsSource, /id="project-logs-back"/);
+  assert.match(logsSource, /backBtn\.addEventListener\("click", function \(\) \{ pinOnInteraction\(\); showList\(\); \}\)/,
+    "Back returns to the list and commits a preview on the way");
+  // Scroll is captured on the way in and restored on the way back.
+  assert.match(logsSource, /store\.set\(\{ projectLogsListScroll: listEl\.scrollTop/);
+  assert.match(logsSource, /listEl\.scrollTop = store\.get\('projectLogsListScroll'\) \|\| 0;/);
+  // The list is re-shown rather than re-requested, so the search box and the
+  // category select keep their values.
+  var showList = logsSource.slice(logsSource.indexOf("function showList()"), logsSource.indexOf("function showDetail("));
+  assert.equal(/requestList\(\)/.test(showList), false, "returning does not refetch and reset the query");
+  assert.equal(/searchEl\.value = /.test(logsSource), false, "the query is never cleared");
+});
+
+test("detail renders Markdown through the shared renderer and shows the record metadata", function () {
+  assert.match(renderSource, /import \{ renderMarkdown, highlightCodeBlocks \} from '\.\/markdown\.js'/);
+  assert.match(renderSource, /markdown\.innerHTML = renderMarkdown\(entry\.body \|\| ""\)/);
+  assert.match(renderSource, /highlightCodeBlocks\(markdown\)/);
+  // Category, priority, revision, agent author and time, then the summary.
+  assert.match(renderSource, /chip\.dataset\.category = entry\.category \|\| entry\.kind/);
+  assert.match(renderSource, /flag\.dataset\.priority = entry\.priority/);
+  assert.match(renderSource, /"Revision " \+ \(entry\.revisions \|\| 1\)/);
+  assert.match(renderSource, /authorLine\(entry\)/);
+  assert.match(renderSource, /setText\(header, "\.project-log-doc-summary", entry\.summary \|\| ""\)/);
+});
+
+test("a canonical entry is attributed to the Project Driver, not the account owner", function () {
+  var authorFn = renderSource.slice(renderSource.indexOf("function authorLine(entry)"), renderSource.indexOf("function vendorLabel("));
+
+  // The server keeps full blame on the author object, but a session-authored
+  // record must not read as if the human owner wrote it.
+  assert.match(authorFn, /if \(actor\.type === "session"\)/);
+  assert.match(authorFn, /"Project Driver \(" \+ vendorLabel\(actor\.vendor\) \+ "\)" : "Project Driver"/);
+  assert.equal(/actorLabel\(actor\)[\s\S]*actor\.type === "session"/.test(authorFn), false,
+    "the owner display name is never used for a session-authored entry");
+
+  // The vendor is title-cased, so it reads as "Project Driver (Claude)".
+  assert.match(renderSource, /function vendorLabel\(vendor\)/);
+  assert.match(renderSource, /vendor\.charAt\(0\)\.toUpperCase\(\) \+ vendor\.slice\(1\)/);
+
+  // A human comment is still attributed to the human.
+  var comments = renderSource.slice(renderSource.indexOf("function renderComments("), renderSource.indexOf("export function renderDetail"));
+  assert.match(comments, /actorLabel\(comment\.author\)/);
+  assert.equal(/authorLine/.test(comments), false, "a comment never borrows the canonical byline");
+  assert.match(renderSource, /source\.displayName \|\| source\.userName \|\| source\.userId/,
+    "actorLabel still prefers a human display name");
+
+  // Both the ledger row and the detail byline use the canonical author line.
+  assert.match(renderSource, /var parts = \[authorLine\(entry\), relativeTime/);
+  assert.match(renderSource, /authorLine\(entry\),\s*\n\s*formatTime/);
+});
+
+test("the ledger row reveals history without opening the record", function () {
+  var row = renderSource.slice(renderSource.indexOf("function renderRow("), renderSource.indexOf("export function renderList"));
+  assert.match(row, /categoryLabel\(entry\.category \|\| entry\.kind\)/, "category chip");
+  assert.match(row, /entry\.priority && entry\.priority !== "normal"/, "priority only when it matters");
+  assert.match(row, /entry\.title \|\| "Untitled log"/);
+  assert.match(row, /summary\.textContent = entry\.summary/);
+  assert.match(row, /parts\.push\("v" \+ entry\.revisions\)/, "revision count");
+  assert.match(row, /entry\.commentCount \+ \(entry\.commentCount === 1 \? " comment" : " comments"\)/);
+  assert.match(row, /relativeTime\(entry\.updatedAt \|\| entry\.createdAt\)/);
+  assert.equal(/entry\.body/.test(row), false, "a row never renders the record body");
+});
+
+test("category labels are project-defined and rendered safely", function () {
+  // No label table and no per-category CSS: the vocabulary is not known at
+  // build time, so nothing may be hard-coded against it.
+  assert.equal(/CATEGORY_LABELS\s*=/.test(renderSource), false, "no exhaustive label map");
+  assert.equal(/data-category="/.test(css), false, "no per-category CSS selectors");
+  assert.equal(/\.project-log-chip\.[a-z]/.test(css), false, "no exhaustive chip classes");
+  assert.match(css, /Categories are project-defined/, "the neutral styling is deliberate");
+
+  // Priority keeps the only stable colour, because urgency is a fixed scale.
+  assert.match(css, /\.project-log-priority\[data-priority="urgent"\]/);
+  assert.match(css, /\.project-log-priority\[data-priority="important"\]/);
+
+  // Any label is de-slugged for display and reaches the DOM as text, never markup.
+  assert.match(renderSource, /export function categoryLabel\(value\)/);
+  // Any script, not just Latin: labels are only ever de-slugged for display.
+  assert.equal(/[a-z]\.charCodeAt|\/\[a-z\]\//.test(renderSource), false,
+    "the client makes no ASCII assumption about a category label");
+  assert.match(renderSource, /chip\.textContent = categoryLabel\(entry\.category \|\| entry\.kind\)/);
+  assert.match(renderSource, /option\.textContent = categoryLabel\(categories\[i\]\)/);
+  assert.equal(/innerHTML\s*=\s*[^;]*categoryLabel/.test(renderSource), false,
+    "a category is never interpolated into markup");
+  // The chip is length-bounded so a long label cannot break the row.
+  assert.match(css, /\.project-log-chip \{[^}]*text-overflow: ellipsis/s);
+});
+
+test("category filtering is a compact control, not a dashboard", function () {
+  assert.match(renderSource, /export function renderFilter\(container, categories, selected, onChange\)/);
+  assert.match(renderSource, /select\.className = "project-logs-filter"/);
+  assert.match(renderSource, /all\.textContent = "All categories"/);
+  assert.match(logsSource, /renderFilter\(filterEl, msg\.categories, store\.get\('projectLogsCategory'\), applyFilter\)/);
+  assert.match(logsSource, /category: store\.get\('projectLogsCategory'\) \|\| ""/);
+  assert.match(css, /\.project-logs-filter \{/);
+  // Server-provided vocabulary, not a hard-coded client list.
+  assert.match(logsSource, /Array\.isArray\(msg\.categories\)/);
+  assert.equal(/"decision"|"security"|"operations"|"incident"/.test(logsSource + renderSource), false,
+    "the client hard-codes no category name at all");
+});
+
+test("the discussion section shows attributed comments and a composer", function () {
+  var comments = renderSource.slice(renderSource.indexOf("function renderComments("), renderSource.indexOf("export function renderDetail"));
+  assert.match(comments, /"Discussion \(" \+ comments\.length \+ "\)"/);
+  assert.match(comments, /actorLabel\(comment\.author\) \+ " · " \+ relativeTime\(comment\.at\)/);
+  assert.match(comments, /body\.textContent = comment\.body \|\| ""/);
+
+  assert.match(renderSource, /id="project-log-comment-input"/);
+  assert.match(renderSource, /A comment cannot be empty\./);
+  assert.match(logsSource, /statusEl\.textContent = "Logs are unavailable while disconnected\."/);
+  // A posted comment refreshes both the open record and the ledger counts.
+  var handler = logsSource.slice(logsSource.indexOf("export function handleProjectLogCommented"));
+  assert.match(handler, /showDetail\(msg\.entry\)/);
+  assert.match(handler, /requestList\(\)/);
+});
+
+test("the bounded right workbench pane is preserved", function () {
   assert.match(logsSource, /document\.getElementById\("main-panels"\)/);
   assert.match(logsSource, /panels\.appendChild\(panel\)/);
-  assert.doesNotMatch(logsSource, /getElementById\("app"\)/);
-  assert.doesNotMatch(logsSource, /app\.appendChild\(panel\)/);
-});
+  assert.doesNotMatch(logsSource, /getElementById\("messages"\)|getElementById\("input-area"\)|title-bar-content/);
 
-test("opening and closing Logs never hides chat, composer, or title bar", function () {
-  // The old fullscreen replacement hid these three; the workbench window must
-  // leave every one of them mounted and visible.
-  assert.doesNotMatch(logsSource, /getElementById\("messages"\)/);
-  assert.doesNotMatch(logsSource, /getElementById\("input-area"\)/);
-  assert.doesNotMatch(logsSource, /title-bar-content/);
-  assert.doesNotMatch(logsSource, /messages\.classList/);
-  assert.doesNotMatch(logsSource, /input\.classList/);
-
-  // Toggle behaviour is preserved.
-  assert.match(logsSource, /if \(store\.get\('projectLogsOpen'\)\) closeProjectLogs\(\);\s*\n\s*else openProjectLogs\(\);/);
-  assert.match(logsSource, /export function openProjectLogs/);
-  assert.match(logsSource, /export function closeProjectLogs/);
-  assert.match(logsSource, /panel\.classList\.remove\("hidden"\)/);
-  assert.match(logsSource, /panel\.classList\.add\("hidden"\)/);
-  // The active state on the tool button still tracks the panel.
-  assert.match(logsSource, /button\.classList\.add\("active"\)/);
-  assert.match(logsSource, /button\.classList\.remove\("active"\)/);
-});
-
-test("opening Logs claims the single right workbench slot", function () {
-  // Both are closed through their own module's exported lifecycle function,
-  // not by reaching into their DOM.
-  assert.match(logsSource, /import \{ closeFileViewer \} from '\.\/filebrowser\.js'/);
-  assert.match(logsSource, /import \{ closeTerminal \} from '\.\/terminal\.js'/);
-  assert.match(logsSource, /try \{ closeFileViewer\(\); \} catch \(e\) \{\}/);
-  assert.match(logsSource, /try \{ closeTerminal\(\); \} catch \(e\) \{\}/);
-
-  // Both calls sit inside openProjectLogs, before the panel is revealed.
-  var open = logsSource.slice(logsSource.indexOf("export function openProjectLogs"));
-  open = open.slice(0, open.indexOf("export function closeProjectLogs"));
-  assert.ok(open.indexOf("closeFileViewer()") !== -1, "the file viewer is closed on open");
-  assert.ok(open.indexOf("closeTerminal()") !== -1, "the terminal is closed on open");
-  assert.ok(open.indexOf("closeFileViewer()") < open.indexOf('panel.classList.remove("hidden")'));
-  assert.ok(open.indexOf("closeTerminal()") < open.indexOf('panel.classList.remove("hidden")'));
-
-  // Closing Logs must not close the other tools; only opening claims the slot.
-  var close = logsSource.slice(logsSource.indexOf("export function closeProjectLogs"));
-  close = close.slice(0, close.indexOf("export function handleProjectLogsState"));
-  assert.equal(close.indexOf("closeFileViewer"), -1);
-  assert.equal(close.indexOf("closeTerminal"), -1);
-
-  // The reverse direction is already wired on the other tools' buttons.
-  assert.match(appSource, /fileBrowserBtn\.addEventListener\("click", function \(\) \{ closeProjectLogs\(\);/);
-  assert.match(appSource, /terminalSidebarBtn\.addEventListener\("click", function \(\) \{ closeProjectLogs\(\);/);
-
-  // These functions are hoisted declarations, so the import cycle they close is
-  // safe: neither is invoked during module evaluation.
-  var filebrowserSource = fs.readFileSync(path.join(root, "lib/public/modules/filebrowser.js"), "utf8");
-  var terminalSource = fs.readFileSync(path.join(root, "lib/public/modules/terminal.js"), "utf8");
-  assert.match(filebrowserSource, /export function closeFileViewer\(\)/);
-  assert.match(terminalSource, /export function closeTerminal\(\)/);
-  var topLevel = logsSource.slice(0, logsSource.indexOf("function nextRequestId"));
-  assert.equal(/closeFileViewer\(\)|closeTerminal\(\)/.test(topLevel), false,
-    "neither is called at module evaluation time");
-});
-
-test("Logs reuses the shared panel window controls rather than a new system", function () {
-  assert.match(logsSource, /id="project-logs-wide"/);
-  assert.match(logsSource, /id="project-logs-fullscreen"/);
-  assert.match(logsSource, /id="project-logs-close"/);
-  assert.match(logsSource, /aria-pressed="false"/);
-  // panel-fullscreen is the existing shared class that already hides #app and
-  // the title bar at desktop widths; Logs must use it, not reimplement it.
-  assert.match(logsSource, /classList\.toggle\("panel-fullscreen"/);
-  assert.match(filebrowserCss, /#main-panels:has\(\.panel-fullscreen:not\(\.hidden\)\) > #app \{ display: none; \}/);
-  assert.match(filebrowserCss, /#main-column:has\(\.panel-fullscreen:not\(\.hidden\)\) > \.title-bar-content \{ display: none; \}/);
-
-  // Fullscreen is dropped on close and on project switch, so a reopen is always
-  // a bounded pane that leaves the conversation visible.
-  assert.match(logsSource, /applyWindowState\(store\.get\('projectLogsWide'\), false\)/);
-  assert.match(logsSource, /applyWindowState\(false, false\)/);
-});
-
-test("Logs is a bounded, resizable right pane on desktop and an overlay on mobile", function () {
-  // Desktop: same geometry contract as #file-viewer and #terminal-container.
   assert.match(css, /@media \(min-width: 1024px\) \{[\s\S]*#project-logs-panel \{[\s\S]*width: 50%;[\s\S]*max-width: 720px;[\s\S]*min-width: 360px;/);
-  assert.match(css, /#project-logs-panel \{[\s\S]*align-self: center;[\s\S]*flex-shrink: 0;/);
   assert.match(css, /animation: workbench-panel-in/);
   assert.match(filebrowserCss, /@keyframes workbench-panel-in/);
-
-  // Resizable through the same width steps the other tools expose.
-  assert.match(css, /#project-logs-panel\.project-logs-wide \{[\s\S]*width: 70%;[\s\S]*max-width: 1200px;/);
-  assert.match(css, /#project-logs-panel\.panel-fullscreen \{[\s\S]*width: 100%;[\s\S]*max-width: none;/);
-
-  // Mobile: full overlay with safe-area padding, and no meaningless size controls.
+  assert.match(css, /#project-logs-panel\.project-logs-wide \{[\s\S]*width: 70%;/);
+  assert.match(css, /#project-logs-panel\.panel-fullscreen \{[\s\S]*width: 100%;/);
   assert.match(css, /@media \(max-width: 1023px\) \{[\s\S]*#project-logs-panel \{[\s\S]*position: fixed;[\s\S]*z-index: 300;/);
   assert.match(css, /padding-top: var\(--safe-top\);/);
-  assert.match(css, /#project-logs-wide,\s*\n\s*#project-logs-fullscreen \{ display: none; \}/);
-  assert.match(css, /@media \(prefers-reduced-motion: reduce\) \{\s*\n\s*#project-logs-panel \{ animation: none; \}/);
 
-  // The old absolutely positioned overlay-on-#app geometry is gone.
-  assert.doesNotMatch(css, /\.project-logs-panel \{[\s\S]*position: absolute;[\s\S]*inset: 0;/);
+  // Still claims the single right slot and still closes cleanly.
+  assert.match(logsSource, /try \{ closeFileViewer\(\); \} catch \(e\) \{\}/);
+  assert.match(logsSource, /try \{ closeTerminal\(\); \} catch \(e\) \{\}/);
+  assert.match(logsSource, /applyWindowState\(store\.get\('projectLogsWide'\), false\)/);
 });
 
-test("panel-relative layout keeps the ledger readable inside a narrow window", function () {
-  // Index column is narrower in the bounded pane and widens when there is room.
-  assert.match(css, /\.project-logs-layout \{[^}]*grid-template-columns: 220px minmax\(0, 1fr\)/s);
-  assert.match(css, /#project-logs-panel\.project-logs-wide \.project-logs-layout,\s*\n#project-logs-panel\.panel-fullscreen \.project-logs-layout \{ grid-template-columns: 280px minmax\(0, 1fr\); \}/);
-  // Document padding is panel-relative, not viewport-relative, except fullscreen.
-  assert.match(css, /\.project-log-document \{[^}]*padding: 26px 24px/s);
-  assert.match(css, /#project-logs-panel\.panel-fullscreen \.project-log-document,[\s\S]*padding: clamp\(28px, 5vw, 64px\)/);
-
-  // The editor height must resolve to 220px bounded and 340px fullscreen. Both
-  // selectors have the same specificity for the base rule, so declaration order
-  // decides: assert the effective value, not merely that both strings exist.
-  var textareaRules = [];
-  var ruleRe = /([^{}]+)\{([^}]*)\}/g;
-  var match;
-  while ((match = ruleRe.exec(css))) {
-    var selector = match[1].trim();
-    if (selector.indexOf(".project-log-editor textarea") === -1) continue;
-    var height = /min-height:\s*(\d+)px/.exec(match[2]);
-    if (height) textareaRules.push({ selector: selector, minHeight: Number(height[1]), at: match.index });
-  }
-  assert.equal(textareaRules.length, 2, "exactly one bounded rule and one fullscreen override");
-
-  var bounded = textareaRules.filter(function (rule) { return rule.selector.indexOf("panel-fullscreen") === -1; });
-  var fullscreen = textareaRules.filter(function (rule) { return rule.selector.indexOf("panel-fullscreen") !== -1; });
-  assert.equal(bounded.length, 1);
-  assert.equal(fullscreen.length, 1);
-  assert.equal(bounded[0].minHeight, 220, "the bounded pane resolves to 220px");
-  assert.equal(fullscreen[0].minHeight, 340, "fullscreen resolves to 340px");
-  assert.ok(bounded[0].at < fullscreen[0].at,
-    "the fullscreen override is declared after the base rule so it wins the cascade");
-  assert.match(css, /@media \(max-width: 768px\) \{[\s\S]*grid-template-columns: 1fr/);
-  assert.match(css, /\.project-log-row\.active/);
-  assert.match(css, /\.project-log-markdown/);
+test("switching project resets the ledger view completely", function () {
+  var init = logsSource.slice(logsSource.indexOf("export function initProjectLogs"));
+  assert.match(init, /if \(state\.currentSlug === previous\.currentSlug\) return;/);
+  assert.match(init, /closeProjectLogs\(\);/);
+  assert.match(init, /projectLogsView: "list"/);
+  assert.match(init, /projectLogsCategory: ""/);
+  assert.match(init, /projectLogsListScroll: 0/);
+  assert.match(init, /projectLogsCommentRequestId: null/);
 });
 
-test("markdown rendering, the editor, and project-switch reset are preserved", function () {
-  assert.match(logsSource, /import \{ renderMarkdown, highlightCodeBlocks \} from '\.\/markdown\.js'/);
-  assert.match(logsSource, /markdown\.innerHTML = renderMarkdown\(entry\.content \|\| entry\.body \|\| ""\)/);
-  assert.match(logsSource, /highlightCodeBlocks\(markdown\)/);
+test("comment status and the Project Driver response are shown under each comment", function () {
+  var comments = renderSource.slice(renderSource.indexOf("function renderComments("), renderSource.indexOf("// A compact, read-only record"));
 
-  assert.match(logsSource, /project-log-title-input/);
-  assert.match(logsSource, /project-log-kind-input/);
-  assert.match(logsSource, /project-log-content-input/);
-  assert.match(logsSource, /type: existing \? "project_log_update" : "project_log_create"/);
-  assert.match(logsSource, /Title and record are required\./);
-  assert.match(logsSource, /Logs are unavailable while disconnected\./);
+  // Every state a comment can be in has an honest label.
+  assert.match(renderSource, /"pending": "Awaiting Project Driver review"/);
+  assert.match(renderSource, /"clarification-needed": "Project Driver asked a question"/);
+  assert.match(renderSource, /"incorporated": "Incorporated"/);
+  assert.match(renderSource, /"declined": "Declined"/);
 
-  // Switching project closes the panel and clears every correlated request id.
-  assert.match(logsSource, /if \(state\.currentSlug === previous\.currentSlug\) return;[\s\S]*closeProjectLogs\(\);[\s\S]*projectLogsEntries: \[\][\s\S]*projectLogsSaveRequestId: null/);
+  assert.match(comments, /badge\.dataset\.status = status/);
+  assert.match(comments, /badge\.textContent = COMMENT_STATUS_LABELS\[status\] \|\| status/);
+  assert.match(comments, /var status = comment\.status \|\| "pending"/, "an unreviewed comment reads as pending");
+
+  // The Driver's answer sits beneath the comment it answers.
+  assert.match(comments, /comment\.review && comment\.review\.response/);
+  assert.match(comments, /responseBody\.textContent = comment\.review\.response/);
+  assert.match(comments, /parts\.push\("revision " \+ comment\.review\.revision\)/);
+  assert.match(comments, /var parts = \["Project Driver"\]/);
+  // Rendered as text, never markup.
+  assert.equal(/innerHTML[^;]*comment\.review/.test(comments), false);
+  assert.match(css, /\.project-log-comment-status-badge\[data-status="incorporated"\]/);
+  assert.match(css, /\.project-log-comment-response \{/);
+});
+
+test("posting a comment settles to Awaiting review rather than Posting", function () {
+  assert.match(logsSource, /statusEl\.textContent = "Posting\.\.\."/);
+  assert.match(logsSource, /store\.set\(\{ projectLogsCommentStatusEl: statusEl \}\)/);
+  var handler = logsSource.slice(logsSource.indexOf("export function handleProjectLogCommented"));
+  assert.match(handler, /pendingStatus\.textContent = "Awaiting Project Driver review"/);
+  assert.match(handler, /store\.set\(\{ projectLogsCommentStatusEl: null \}\)/);
+  assert.match(appSource, /projectLogsCommentStatusEl: null/);
+});
+
+test("the version history is a read-only timeline with no revert control", function () {
+  var history = renderSource.slice(renderSource.indexOf("function renderHistory("), renderSource.indexOf("function historyVerb("));
+  assert.match(history, /"Version history \(" \+ history\.length \+ "\)"/);
+  assert.match(history, /if \(history\.length < 2\) return null;/, "a single-revision entry needs no timeline");
+  assert.match(history, /label\.textContent = "v" \+ revision\.revision/);
+  assert.match(history, /revision\.changed\.join\(", "\)/);
+  assert.match(history, /reason\.textContent = revision\.reason/);
+  assert.match(renderSource, /revision\.revertedFrom \? "Reverted to v" \+ revision\.revertedFrom/);
+  assert.match(renderSource, /if \(revision\.op === "incorporate"\) return "Incorporated a comment"/);
+
+  // Restoring a revision is the Driver's decision, so there is no control here.
+  assert.equal(/revert_log|project_log_revert|Revert<|onRevert/.test(renderSource + logsSource), false,
+    "the client never offers or sends a revert");
+  assert.equal(/review_log_comment|project_log_review/.test(renderSource + logsSource), false,
+    "nor a review");
+  // Metadata only: the timeline never renders a body.
+  assert.equal(/revision\.snapshot|revision\.body/.test(history), false);
+  assert.match(css, /\.project-log-history \{/);
+});
+
+
+// --- Ambient discovery ----------------------------------------------------
+
+test("the edge handle is a real accessible control, not a hover-only affordance", function () {
+  assert.match(ambientSource, /handle = document\.createElement\("button"\)/);
+  assert.match(ambientSource, /handle\.type = "button"/);
+  assert.match(ambientSource, /handle\.setAttribute\("aria-label", "Open Project Logs"\)/);
+  assert.match(ambientSource, /handle\.title = handle\.getAttribute\("aria-label"\)/);
+  assert.match(ambientSource, /handle\.addEventListener\("click", function/, "click works without hover");
+  assert.match(ambientSource, /handle\.addEventListener\("focus", function/, "so does keyboard focus");
+  // The unread state is announced, not only drawn.
+  assert.match(ambientSource, /" new entry" : " new entries"/);
+  assert.match(css, /\.project-logs-handle:focus-visible \{ outline: 2px solid var\(--accent\)/);
+  // Slim, on the right boundary, desktop only.
+  assert.match(css, /@media \(min-width: 1024px\) \{[\s\S]*\.project-logs-handle \{[\s\S]*right: 0;/);
+  assert.match(css, /@media \(max-width: 1023px\) \{\s*\n\s*\.project-logs-handle \{ display: none; \}/);
+});
+
+test("hover preview reveals without opening, and any interaction pins", function () {
+  // Hover is only wired where a real pointer exists.
+  assert.match(ambientSource, /\(hover: hover\) and \(pointer: fine\)/);
+  assert.match(ambientSource, /if \(hoverCapable\) \{\s*\n\s*handle\.addEventListener\("pointerenter", showPreview\);/);
+  assert.match(ambientSource, /handle\.addEventListener\("pointerleave", scheduleClose\)/);
+
+  // Moving from the handle into the panel keeps it revealed.
+  assert.match(ambientSource, /export function bindPanelHover\(panel\)/);
+  assert.match(ambientSource, /panel\.addEventListener\("pointerenter", cancelClose\)/);
+  assert.match(logsSource, /bindPanelHover\(panel\)/);
+
+  // A forgiving delay, and a pinned pane is never closed by the pointer.
+  assert.match(ambientSource, /var CLOSE_DELAY_MS = (\d+);/);
+  var delay = Number(/var CLOSE_DELAY_MS = (\d+);/.exec(ambientSource)[1]);
+  assert.ok(delay >= 250 && delay <= 800, "the delay is forgiving but not sticky, got " + delay);
+  assert.match(ambientSource, /if \(store\.get\('projectLogsPinned'\)\) return;/);
+
+  // Escape closes a preview.
+  assert.match(ambientSource, /if \(event\.key !== "Escape"\) return;[\s\S]*hidePreview\(\)/);
+
+  // Meaningful interactions commit the preview.
+  assert.match(logsSource, /function pinOnInteraction\(\)/);
+  assert.match(logsSource, /searchEl\.addEventListener\("focus", pinOnInteraction\)/);
+  assert.match(logsSource, /panel\.addEventListener\("pointerdown", pinOnInteraction\)/);
+  assert.match(logsSource, /function applyFilter\(category\) \{\s*\n\s*pinOnInteraction\(\);/);
+  assert.match(logsSource, /function submitComment\(ref, body, statusEl, inputEl\) \{\s*\n\s*pinOnInteraction\(\);/);
+  // A preview is visually distinct from a committed open.
+  assert.match(css, /#project-logs-panel\.project-logs-previewing \{/);
+});
+
+test("an update marks the ambient cues and never opens the pane", function () {
+  var handler = logsSource.slice(logsSource.indexOf("export function handleProjectLogUpdated"));
+  handler = handler.slice(0, handler.indexOf("export function handleProjectLogsError"));
+  assert.match(handler, /noteCanonicalUpdate\(msg\)/);
+  assert.equal(/openProjectLogs|revealPreview|showDetail|pinFromPreview|focus\(/.test(handler), false,
+    "an update never opens, reveals, or steals focus");
+  // The list only refreshes when it is already the visible surface.
+  assert.match(handler, /if \(store\.get\('projectLogsOpen'\) && store\.get\('projectLogsView'\) !== "detail"\) requestList\(\)/);
+
+  // Both surfaces carry the marker.
+  assert.match(ambientSource, /handle\.classList\.toggle\("has-unread", unread > 0\)/);
+  assert.match(ambientSource, /button\.classList\.toggle\("project-logs-unread", unread > 0\)/);
+  assert.match(paletteSource, /id: "project-logs-btn"[\s\S]*countId: "project-logs-count"/);
+  assert.match(css, /\.project-logs-handle\.has-unread \.project-logs-handle-notch \{ background: var\(--accent\)/);
+
+  // No OS notification, sound, modal, or focus theft anywhere in the client.
+  assert.equal(/new Notification|Audio\(|\.play\(\)|alert\(|confirm\(/.test(logsSource + ambientSource), false);
+});
+
+test("updates are deduped by ref and revision so replays do not re-pulse", function () {
+  assert.match(ambientSource, /var seen = store\.get\('projectLogsSeenRevisions'\) \|\| \{\}/);
+  assert.match(ambientSource, /if \(seen\[key\] >= msg\.revision\) return false;/);
+  assert.match(ambientSource, /if \(!msg \|\| !msg\.ref \|\| !msg\.revision\) return false;/);
+  // An update while the pane is open is acknowledged, not counted.
+  assert.match(ambientSource, /projectLogsUnread: visible \? 0 :/);
+  assert.match(ambientSource, /if \(!visible\) flourish\(\)/);
+  assert.match(appSource, /projectLogsSeenRevisions: \{\}/);
+  assert.equal(/localStorage|sessionStorage/.test(ambientSource), false, "no client-side persistence");
+});
+
+test("reduced motion keeps the static marker and drops the flourish", function () {
+  assert.match(ambientSource, /function prefersReducedMotion\(\)/);
+  assert.match(ambientSource, /if \(prefersReducedMotion\(\)\) return;/);
+  var flourish = ambientSource.slice(ambientSource.indexOf("function flourish()"));
+  flourish = flourish.slice(0, flourish.indexOf("export function acknowledgeUpdates"));
+  assert.equal(/document\.body|#app|main-panels/.test(flourish), false, "nothing whole-screen is animated");
+
+  assert.match(css, /@media \(prefers-reduced-motion: reduce\) \{[\s\S]*\.project-logs-pulse \{ animation: none; \}/);
+  // The static unread colour is outside the motion query, so it survives.
+  // There is more than one reduced-motion block, so target the one that owns
+  // the pulse and read only as far as its closing brace.
+  var pulseRule = css.indexOf(".project-logs-pulse { animation: none; }");
+  assert.notEqual(pulseRule, -1);
+  var blockStart = css.lastIndexOf("@media (prefers-reduced-motion: reduce)", pulseRule);
+  var block = css.slice(blockStart, css.indexOf("}", css.indexOf(".project-logs-handle-notch { transition: none; }", blockStart)) + 1);
+  assert.match(block, /\.project-logs-pulse \{ animation: none; \}/);
+  assert.equal(/has-unread|background: var\(--accent\)/.test(block), false,
+    "the unread marker is never inside the reduced-motion block");
+});
+
+test("opening acknowledges, and project switch resets without animating", function () {
+  var open = logsSource.slice(logsSource.indexOf("export function openProjectLogs"));
+  open = open.slice(0, open.indexOf("export function closeProjectLogs"));
+  assert.match(open, /acknowledgeUpdates\(\)/);
+  assert.match(open, /projectLogsPinned: true, projectLogsPreview: false/);
+  assert.match(open, /panel\.classList\.remove\("project-logs-previewing"\)/);
+
+  var init = logsSource.slice(logsSource.indexOf("export function initProjectLogs"));
+  assert.match(init, /resetAmbient\(\)/);
+  assert.match(ambientSource, /export function resetAmbient\(\)[\s\S]*projectLogsUnread: 0[\s\S]*projectLogsSeenRevisions: \{\}/);
+  // Acknowledgement is server-free: no preference write, no storage.
+  assert.equal(/fetch\(|localStorage/.test(ambientSource), false);
 });

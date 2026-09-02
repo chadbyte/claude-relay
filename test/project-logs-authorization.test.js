@@ -103,7 +103,7 @@ test("a project session binds to exactly its own project's Logs with session att
   assert.equal(bound.canWrite, true);
   assert.equal(bound.isClay, false);
 
-  var entry = bound.createLog({ kind: "decision", title: "Bound write" });
+  var entry = bound.createLog({ kind: "decision", summary: "Recorded for the ledger.", title: "Bound write" });
   assert.equal(entry.createdBy.type, "session");
   assert.equal(entry.createdBy.sessionKey, "cli-owned");
   assert.equal(entry.createdBy.userId, "owner");
@@ -156,7 +156,7 @@ test("multi-user mode fails closed on an unattributed session", function () {
 test("shared-project members read each other's entries with attribution intact", function () {
   var w = workspace();
   var memberBound = w.service.bindProjectSession({ projectSlug: "shared", session: w.sharedSession });
-  memberBound.createLog({ kind: "investigation", title: "Member finding", body: "traced the retry loop" });
+  memberBound.createLog({ kind: "investigation", summary: "Traced the retry loop.", title: "Member finding", body: "traced the retry loop" });
 
   // "owner" is not the owner of "shared" but is in allowedUsers.
   var guest = w.service.bindUser({ projectSlug: "shared", user: { id: "owner", displayName: "Owner" } });
@@ -166,13 +166,21 @@ test("shared-project members read each other's entries with attribution intact",
   assert.equal(listed.entries[0].createdBy.userId, "member");
   assert.equal(listed.entries[0].createdBy.displayName, "Member", "the other member's authorship is preserved");
 
-  var edited = guest.updateLog({ ref: listed.entries[0].ref, body: "traced the retry loop to the daemon" });
-  assert.equal(edited.createdBy.userId, "member", "original authorship is never overwritten");
-  assert.equal(edited.updatedBy.userId, "owner");
-  assert.equal(edited.updatedBy.type, "user");
+  // A human may not revise a canonical entry, however privileged.
+  assert.throws(function () {
+    guest.updateLog({ ref: listed.entries[0].ref, body: "traced the retry loop to the daemon" });
+  }, /agent sessions/);
+
+  // Participation is a comment, attributed to the commenting user, and it
+  // leaves canonical blame untouched.
+  var commented = guest.commentLog({ ref: listed.entries[0].ref, body: "Confirmed on staging." });
+  assert.equal(commented.createdBy.userId, "member", "original authorship is never overwritten");
+  assert.equal(commented.revisions, 1, "a comment is not a revision");
+  assert.equal(commented.comments[0].author.userId, "owner");
+  assert.equal(commented.comments[0].author.type, "user");
 
   var blame = guest.logHistory({ ref: listed.entries[0].ref });
-  assert.deepEqual(blame.revisions.map(function (r) { return r.author.userId; }), ["member", "owner"]);
+  assert.deepEqual(blame.revisions.map(function (r) { return r.author.userId; }), ["member"]);
 
   // A user with no grant on a private project gets nothing.
   assert.equal(w.service.bindUser({ projectSlug: "private", user: { id: "owner" } }), null);
@@ -182,7 +190,7 @@ test("shared-project members read each other's entries with attribution intact",
 test("a worktree shares the parent project's Logs and inherits its authorization", function () {
   var w = workspace();
   var parentBound = w.service.bindProjectSession({ projectSlug: "owned", session: w.ownedSession });
-  parentBound.createLog({ kind: "progress", title: "Parent entry" });
+  parentBound.createLog({ kind: "progress", summary: "Recorded for the ledger.", title: "Parent entry" });
 
   var worktreeBound = w.service.bindProjectSession({ projectSlug: "owned-wt", session: w.worktreeSession });
   assert.ok(worktreeBound, "a worktree with no owner of its own inherits the parent's visibility");
@@ -191,7 +199,7 @@ test("a worktree shares the parent project's Logs and inherits its authorization
   assert.equal(seen.total, 1, "the worktree reads the parent project's Logs rather than an empty fork");
   assert.equal(seen.entries[0].title, "Parent entry");
 
-  worktreeBound.createLog({ kind: "session-note", title: "Worktree entry" });
+  worktreeBound.createLog({ kind: "progress", summary: "Recorded for the ledger.", title: "Worktree entry" });
   assert.equal(parentBound.listLogs({}).total, 2, "worktree writes land in the parent's Logs");
 });
 
@@ -219,9 +227,9 @@ test("ordinary Mates are denied and Mate projects have no Logs", function () {
 test("authoritative builtin Clay reads authorized projects only, and never writes", function () {
   var w = workspace();
   w.service.bindProjectSession({ projectSlug: "owned", session: w.ownedSession })
-    .createLog({ kind: "decision", title: "Owned decision", body: "adopt append-only logs" });
+    .createLog({ kind: "decision", summary: "Adopt append-only logs.", title: "Owned decision", body: "adopt append-only logs" });
   w.service.bindProjectSession({ projectSlug: "shared", session: w.sharedSession })
-    .createLog({ kind: "decision", title: "Shared decision" });
+    .createLog({ kind: "decision", summary: "Recorded for the ledger.", title: "Shared decision" });
 
   var clay = w.service.bindMate({ projectSlug: "mate-home", projectOwnerId: "owner", isMate: true, mateId: "mate-id", session: w.mateSession });
   assert.ok(clay);
@@ -283,14 +291,14 @@ test("a bound principal loses access when project visibility changes mid-session
   handle.getStatus = function () { return revoked; };
 
   assert.throws(function () { guest.listLogs({}); }, /not available/, "authorization is re-checked on every call");
-  assert.throws(function () { guest.createLog({ kind: "decision", title: "No" }); }, /not available/);
+  assert.throws(function () { guest.commentLog({ ref: "log:aaaaaaaaaaaaaaaaaaaaaaaa", body: "No" }); }, /not available/);
 });
 
 test("a captured project-session binding stops working when its exact session goes away", function () {
   var w = workspace();
   var bound = w.service.bindProjectSession({ projectSlug: "owned", session: w.ownedSession });
   assert.ok(bound);
-  bound.createLog({ kind: "decision", title: "While live" });
+  bound.createLog({ kind: "decision", summary: "Recorded for the ledger.", title: "While live" });
   assert.equal(bound.listLogs({}).total, 1, "valid while the session is live");
 
   // The exact session object is dropped after the binding was captured.
@@ -298,7 +306,7 @@ test("a captured project-session binding stops working when its exact session go
   manager.delete(1);
   assert.throws(function () { bound.listLogs({}); }, /no longer valid/, "identity is re-derived on every call");
   assert.throws(function () { bound.searchLogs({ query: "while" }); }, /no longer valid/);
-  assert.throws(function () { bound.createLog({ kind: "decision", title: "After removal" }); }, /no longer valid/);
+  assert.throws(function () { bound.createLog({ kind: "decision", summary: "Recorded for the ledger.", title: "After removal" }); }, /no longer valid/);
   assert.throws(function () { bound.readLog({ ref: "log:aaaaaaaaaaaaaaaaaaaaaaaa" }); }, /no longer valid/);
   assert.throws(function () { bound.logHistory({ ref: "log:aaaaaaaaaaaaaaaaaaaaaaaa" }); }, /no longer valid/);
 
@@ -309,7 +317,7 @@ test("a captured project-session binding stops working when its exact session go
   // Restoring the exact same object restores the capability.
   manager.set(1, w.ownedSession);
   assert.equal(bound.listLogs({}).total, 1);
-  var written = bound.createLog({ kind: "progress", title: "After restore" });
+  var written = bound.createLog({ kind: "progress", summary: "Recorded for the ledger.", title: "After restore" });
   assert.equal(written.createdBy.sessionKey, "cli-owned", "attribution is re-derived too");
 });
 
@@ -328,7 +336,7 @@ test("a captured user binding still re-checks project authorization per call", f
 test("a captured Clay Logs binding re-checks the Mate registry and owner per call", function () {
   var w = workspace();
   w.service.bindProjectSession({ projectSlug: "owned", session: w.ownedSession })
-    .createLog({ kind: "decision", title: "Owned decision" });
+    .createLog({ kind: "decision", summary: "Recorded for the ledger.", title: "Owned decision" });
 
   var clay = w.service.bindMate({ projectSlug: "mate-home", projectOwnerId: "owner", isMate: true, mateId: "mate-id", session: w.mateSession });
   assert.ok(clay);
@@ -349,7 +357,7 @@ test("a Clay Logs binding is lost when the Mate stops being authoritative Clay",
   var builtinKey = "clay";
   var w = workspace({ resolveMate: function (ownerId, mateId) { return { id: mateId, createdBy: ownerId, builtinKey: builtinKey }; } });
   w.service.bindProjectSession({ projectSlug: "owned", session: w.ownedSession })
-    .createLog({ kind: "decision", title: "Owned decision" });
+    .createLog({ kind: "decision", summary: "Recorded for the ledger.", title: "Owned decision" });
 
   var clay = w.service.bindMate({ projectSlug: "mate-home", projectOwnerId: "owner", isMate: true, mateId: "mate-id" });
   assert.ok(clay);
@@ -358,4 +366,126 @@ test("a Clay Logs binding is lost when the Mate stops being authoritative Clay",
   builtinKey = null;
   assert.throws(function () { clay.listLogs({ projectSlug: "owned" }); }, /no longer valid/,
     "a demoted Mate loses the read view through a captured handler");
+});
+
+
+// --- Canonical authorship -------------------------------------------------
+
+test("only Project Driver sessions may write canonical entries", function () {
+  var w = workspace();
+  var agent = w.service.bindProjectSession({ projectSlug: "owned", session: w.ownedSession });
+  assert.equal(agent.canWrite, true);
+  assert.equal(agent.canComment, true);
+  var entry = agent.createLog({ kind: "decision", title: "Agent decision", summary: "The agent recorded this." });
+  assert.equal(entry.createdBy.type, "session");
+
+  // The project owner is a human, and humans do not author the ledger.
+  var owner = w.service.bindUser({ projectSlug: "owned", user: { id: "owner", displayName: "Owner" } });
+  assert.ok(owner, "the owner is still bound for reading and commenting");
+  assert.equal(owner.canWrite, false);
+  assert.equal(owner.canComment, true);
+  assert.throws(function () { owner.createLog({ kind: "decision", title: "Human", summary: "No." }); }, /agent sessions/);
+  assert.throws(function () { owner.updateLog({ ref: entry.ref, title: "Human edit" }); }, /agent sessions/);
+  assert.throws(function () { owner.linkLog({ ref: entry.ref, links: [{ ref: "session:x" }] }); }, /agent sessions/);
+  assert.throws(function () { owner.removeLog({ ref: entry.ref }); }, /agent sessions/);
+
+  // The record is untouched by the refusals.
+  assert.equal(owner.readLog({ ref: entry.ref }).revisions, 1);
+  assert.equal(owner.readLog({ ref: entry.ref }).title, "Agent decision");
+
+  // Commenting is the human capability, and it is attributed to the human.
+  var commented = owner.commentLog({ ref: entry.ref, body: "Noted." });
+  assert.equal(commented.comments[0].author.userId, "owner");
+  assert.equal(commented.comments[0].author.type, "user");
+  assert.equal(commented.revisions, 1);
+  assert.equal(commented.createdBy.type, "session", "the canonical author is still the agent");
+});
+
+test("legacy human-authored entries stay readable but are no longer editable", function () {
+  var w = workspace();
+  // Written through a session binding, standing in for an entry an earlier
+  // build let a human create: what matters is that a human cannot revise it.
+  var agent = w.service.bindProjectSession({ projectSlug: "owned", session: w.ownedSession });
+  var legacy = agent.createLog({ kind: "progress", title: "Older entry", summary: "Recorded under the previous rules." });
+
+  var owner = w.service.bindUser({ projectSlug: "owned", user: { id: "owner" } });
+  assert.equal(owner.readLog({ ref: legacy.ref }).title, "Older entry", "still readable");
+  assert.equal(owner.logHistory({ ref: legacy.ref }).total, 1, "history preserved");
+  assert.throws(function () { owner.updateLog({ ref: legacy.ref, title: "Edited" }); }, /agent sessions/);
+  assert.equal(owner.commentLog({ ref: legacy.ref, body: "Adding context." }).commentCount, 1,
+    "but a human can still participate by commenting");
+});
+
+// --- Review and revision authority ---------------------------------------
+
+test("only the Project Driver may review feedback or change revisions", function () {
+  var w = workspace();
+  var agent = w.service.bindProjectSession({ projectSlug: "owned", session: w.ownedSession });
+  var entry = agent.createLog({ kind: "decision", title: "Adopt X", summary: "Chose X." });
+  var owner = w.service.bindUser({ projectSlug: "owned", user: { id: "owner", displayName: "Owner" } });
+  var commentId = owner.commentLog({ ref: entry.ref, body: "Please mention Y." }).comments[0].id;
+
+  // The human who wrote the comment cannot review it into the record.
+  assert.throws(function () {
+    owner.reviewLogComment({ ref: entry.ref, commentId: commentId, action: "incorporate", summary: "Y." });
+  }, /agent sessions can review/);
+  assert.throws(function () {
+    owner.revertLog({ ref: entry.ref, revision: 1, reason: "no" });
+  }, /agent sessions can review/);
+  assert.throws(function () { owner.listLogFeedback({}); }, /agent sessions can review/);
+
+  // Reading a revision is a read, so a human may do it.
+  assert.equal(owner.readLogRevision({ ref: entry.ref, revision: 1 }).snapshot.title, "Adopt X");
+
+  // The Driver can, and its discovery surface finds the pending comment.
+  var feedback = agent.listLogFeedback({});
+  assert.equal(feedback.total, 1);
+  assert.equal(feedback.feedback[0].ref, entry.ref);
+  assert.equal(feedback.feedback[0].title, "Adopt X");
+  assert.equal(feedback.feedback[0].category, "decision");
+  assert.equal(feedback.feedback[0].commentId, commentId);
+  assert.equal(feedback.feedback[0].body, "Please mention Y.");
+  assert.equal(feedback.feedback[0].author.userId, "owner");
+
+  var reviewed = agent.reviewLogComment({
+    ref: entry.ref, commentId: commentId, action: "incorporate",
+    response: "Added Y.", summary: "Chose X, noting Y.",
+  });
+  assert.equal(reviewed.comments[0].status, "incorporated");
+  assert.equal(agent.listLogFeedback({}).total, 0, "the queue drains once reviewed");
+
+  var everted = agent.revertLog({ ref: entry.ref, revision: 1, reason: "Y was wrong." });
+  assert.equal(everted.revisions, 3);
+  assert.equal(everted.summary, "Chose X.");
+});
+
+test("Clay may read revisions but never review or revert", function () {
+  var w = workspace();
+  w.service.bindProjectSession({ projectSlug: "owned", session: w.ownedSession })
+    .createLog({ kind: "decision", title: "Owned decision", summary: "Recorded." });
+  var clay = w.service.bindMate({ projectSlug: "mate-home", projectOwnerId: "owner", isMate: true, mateId: "mate-id", session: w.mateSession });
+  var ref = clay.listLogs({ projectSlug: "owned" }).entries[0].ref;
+
+  assert.equal(clay.readLogRevision({ projectSlug: "owned", ref: ref, revision: 1 }).snapshot.title, "Owned decision");
+  assert.throws(function () { clay.reviewLogComment({ projectSlug: "owned", ref: ref, commentId: "x", action: "decline", response: "no" }); }, /read-only/);
+  assert.throws(function () { clay.revertLog({ projectSlug: "owned", ref: ref, revision: 1, reason: "no" }); }, /read-only/);
+  assert.throws(function () { clay.listLogFeedback({ projectSlug: "owned" }); }, /read-only/);
+});
+
+test("a stale Driver session loses review and revert authority", function () {
+  var w = workspace();
+  var agent = w.service.bindProjectSession({ projectSlug: "owned", session: w.ownedSession });
+  var entry = agent.createLog({ kind: "decision", title: "Adopt X", summary: "Chose X." });
+  var owner = w.service.bindUser({ projectSlug: "owned", user: { id: "owner" } });
+  var commentId = owner.commentLog({ ref: entry.ref, body: "A note." }).comments[0].id;
+
+  w.projects.get("owned")._sessions.sessions.delete(1);
+  assert.throws(function () { agent.listLogFeedback({}); }, /no longer valid/);
+  assert.throws(function () {
+    agent.reviewLogComment({ ref: entry.ref, commentId: commentId, action: "decline", response: "no" });
+  }, /no longer valid/);
+  assert.throws(function () { agent.revertLog({ ref: entry.ref, revision: 1, reason: "no" }); }, /no longer valid/);
+
+  w.projects.get("owned")._sessions.sessions.set(1, w.ownedSession);
+  assert.equal(agent.listLogFeedback({}).total, 1, "restoring the exact session restores authority");
 });
