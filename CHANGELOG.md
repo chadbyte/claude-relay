@@ -1,3 +1,10 @@
+# [4.0.0-beta.7](https://github.com/chadbyte/clay/compare/v4.0.0-beta.6...v4.0.0-beta.7) (2026-09-02)
+
+
+### Bug Fixes
+
+* **auth:** recheck Codex credentials after login ([1c9d1e4](https://github.com/chadbyte/clay/commit/1c9d1e4f700a64b27e2b642119e5b0a8d339a47e))
+
 # [4.0.0-beta.6](https://github.com/chadbyte/clay/compare/v4.0.0-beta.5...v4.0.0-beta.6) (2026-09-02)
 
 
