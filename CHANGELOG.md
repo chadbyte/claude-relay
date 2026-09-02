@@ -1,3 +1,10 @@
+# [4.0.0-beta.5](https://github.com/chadbyte/clay/compare/v4.0.0-beta.4...v4.0.0-beta.5) (2026-09-02)
+
+
+### Features
+
+* **sdk:** update claude-agent-sdk to 0.3.258 and adopt new capabilities ([a82f16d](https://github.com/chadbyte/clay/commit/a82f16d5ecd4615ab98f7d4a4293f20c39bcf15c))
+
 # [4.0.0-beta.4](https://github.com/chadbyte/clay/compare/v4.0.0-beta.3...v4.0.0-beta.4) (2026-09-02)
 
 
