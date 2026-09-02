@@ -68,3 +68,28 @@ test("Codex fails closed when OS-user isolation lacks a mapped Linux user", asyn
     /requires a mapped Linux user/
   );
 });
+
+test("Codex auth refresh restarts only the matching Linux user runtime", async function() {
+  var servers = [];
+  var adapter = createCodexAdapter({
+    cwd: process.cwd(),
+    osUsers: true,
+    resolveOsUserInfo: fakeUserInfo,
+    createAppServer: function(options) {
+      var server = createFakeServer(options);
+      servers.push(server);
+      return server;
+    },
+  });
+
+  await adapter.init({ linuxUser: "alice" });
+  await adapter.init({ linuxUser: "bob" });
+  await adapter.refreshAuthIdentity("alice");
+
+  assert.strictEqual(servers[0].started, false, "Alice's stale app-server is stopped");
+  assert.strictEqual(servers[1].started, true, "Bob's authenticated app-server stays running");
+
+  await adapter.init({ linuxUser: "alice" });
+  await adapter.init({ linuxUser: "bob" });
+  assert.strictEqual(servers.length, 3, "only Alice gets a fresh app-server");
+});

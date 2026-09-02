@@ -68,6 +68,7 @@ function createHarness(opts) {
     getOsUserInfoForWs: options.getOsUserInfoForWs || function () { return null; },
     getOsUserInfoForLinuxUser: options.getOsUserInfoForLinuxUser || function () { return null; },
     getLinuxUserForSession: options.getLinuxUserForSession || function () { return null; },
+    refreshVendorAuthEverywhere: options.refreshVendorAuthEverywhere || null,
   });
 
   return {
@@ -163,6 +164,25 @@ test("successful login restarts the vendor adapter, announces auth_refreshed and
   assert.deepStrictEqual(h.tm.closed, [terminalId], "the login terminal does not linger in the sidebar");
   assert.deepStrictEqual(h.login.listFlows(), [], "the flow record is cleared");
   assert.deepStrictEqual(h.lastOf("vendor_login_state").flows, []);
+});
+
+test("successful login refreshes the authenticated identity across all projects", async function () {
+  var refreshes = [];
+  var h = createHarness({
+    refreshVendorAuthEverywhere: function (vendor, linuxUser) {
+      refreshes.push({ vendor: vendor, linuxUser: linuxUser });
+      return Promise.resolve(true);
+    },
+  });
+  h.login.handleVendorLoginMessage({}, { type: "vendor_login_start", vendor: "codex", auto: true });
+  h.tm.emitData(h.tm.created[0].id, "Successfully logged in.\r\n");
+
+  await new Promise(function (resolve) { setTimeout(resolve, 2200); });
+  await flush();
+
+  assert.deepStrictEqual(refreshes, [{ vendor: "codex", linuxUser: null }]);
+  assert.deepStrictEqual(h.shutdowns, [], "the server-wide coordinator owns adapter refresh");
+  assert.strictEqual(h.lastOf("auth_refreshed").adapterRestarted, true);
 });
 
 test("logging out does not read as a successful login", async function () {
