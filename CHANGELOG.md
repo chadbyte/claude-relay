@@ -1,3 +1,10 @@
+# [4.0.0-beta.8](https://github.com/chadbyte/clay/compare/v4.0.0-beta.7...v4.0.0-beta.8) (2026-09-02)
+
+
+### Bug Fixes
+
+* **auth:** refresh Codex login across projects ([626e9ab](https://github.com/chadbyte/clay/commit/626e9ab698de832f0f64c46154f94ce7873aa33d))
+
 # [4.0.0-beta.7](https://github.com/chadbyte/clay/compare/v4.0.0-beta.6...v4.0.0-beta.7) (2026-09-02)
 
 
