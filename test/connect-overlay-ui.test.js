@@ -33,7 +33,13 @@ test("connection overlay starts with connecting wording", function() {
 test("reconnect wording is only set after a prior connection", function() {
   var connection = source("lib/public/modules/app-connection.js");
   assert.match(connection, /var hasConnectedOnce = false/);
-  assert.match(connection, /if \(hasConnectedOnce && connectOverlay\)[\s\S]*Reconnecting to server…/);
+  // The reveal now goes through showOverlayNow(), which still only swaps in the
+  // reconnect wording once a first connection has succeeded. The startup
+  // "Connecting…" text in index.html is left untouched on the first pass.
+  assert.match(
+    connection,
+    /function showOverlayNow\(\)[\s\S]*if \(hasConnectedOnce\) \{[\s\S]*Reconnecting to server…[\s\S]*\}\s*\n\s*connectOverlay\.classList\.remove\("hidden"\);/
+  );
 });
 
 test("pane overlays use a quiet themed loading state", function() {
