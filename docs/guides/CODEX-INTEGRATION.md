@@ -187,6 +187,22 @@ Stored in `lib/codex-defaults.js`. Do not scatter defaults across multiple files
 
 `danger-full-access` + `approval_policy: "never"` is a combination the user chose explicitly. Do not auto-upgrade to it from code. It completely disables the sandbox.
 
+### 13. Login does not reach a running app-server
+
+`codex app-server` reads `~/.codex/auth.json` **once, at spawn**. One app-server is shared by every Codex session in a project (`_appServer` in the adapter), so running `codex login` in a terminal changes nothing for sessions that are already up: every query keeps getting 401 -> `auth_required`, and the client keeps re-opening the login flow.
+
+The fix is a restart, not a re-read. `lib/project-vendor-login.js` owns the login terminal, watches its output for the vendor's success line, and then calls `adapter.shutdown()` (which fans out to `shutdownUserRuntimes`, so per-OS-user runtimes are covered too). The next query re-inits and spawns a process that reads the new credentials.
+
+Consequences to preserve:
+
+- **One login terminal per vendor per project.** The server holds the record; `auto` requests (driven by `auth_required`) never open a second prompt while a flow is live. Client-side flags are not a substitute - they reset on banner dismiss.
+- **The login terminal must spawn with the identity the adapter will use.** The adapter only gets `osUserInfo` when `_runtimeLinuxUser` is set, which comes from the *session owner*, not the connected client. `resolveLoginIdentity()` prefers the session identity so credentials land in the HOME the app-server reads.
+- **Split panes forward, they do not start.** A pane has no banner surface, so it posts `clay-pane-auth-required` to the parent shell (`pane-bridge.js` -> `split-view.js`) rather than running its own flow.
+
+### 14. Choosing a different codex binary
+
+`findCodexPath()` honors `CLAY_CODEX_PATH`: if it points at an existing file, that binary is used and logged; otherwise resolution falls back to the bundled `@openai/codex` platform package. Bundled remains the default - use the override for a local build or a pinned release, not as normal configuration.
+
 ---
 
 ## Common Gotchas
@@ -230,6 +246,10 @@ When changing Codex adapter code:
 - [ ] Stop button during generation: typing clears, "interrupted" message appears, send button restored
 - [ ] Server restart does not break MCP (extension state resends)
 - [ ] Second project using Codex routes through global `/api/mcp-bridge` (not per-slug)
+- [ ] `auth_required` opens exactly one login terminal, no matter how many sessions or panes report it
+- [ ] Finishing `codex login --device-auth` closes the login terminal, drops it from the sidebar list, and shows "Signed in to Codex"
+- [ ] The next message in the *same* session succeeds without opening a new session
+- [ ] Dismissing the login modal kills its terminal instead of leaving it in the sidebar
 
 ---
 
