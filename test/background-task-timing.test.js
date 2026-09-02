@@ -147,3 +147,145 @@ test("the sidebar task-count badge keeps its own style rule", function () {
     "the activity indicator has a reduced-motion fallback"
   );
 });
+
+// --- ambient (housekeeping) tasks ------------------------------------------
+
+test("the Claude adapter forwards the ambient flag and defaults it to false", function () {
+  var normalize = require("../lib/yoke/adapters/claude").contractTestKit.normalizeEvent;
+  var events = normalize({
+    type: "system",
+    subtype: "background_tasks_changed",
+    tasks: [
+      { task_id: "t1", task_type: "local_bash", description: "npm test" },
+      { task_id: "t2", task_type: "local_agent", description: "watcher", ambient: true },
+      { task_id: "t3", task_type: "local_bash", description: "explicit", ambient: false },
+    ],
+  });
+  var result = Array.isArray(events) ? events[0] : events;
+  assert.strictEqual(result.tasks[0].ambient, false, "absent normalizes to false, not undefined");
+  assert.strictEqual(result.tasks[1].ambient, true);
+  assert.strictEqual(result.tasks[2].ambient, false);
+  // The existing normalization must survive alongside the new field.
+  assert.strictEqual(result.tasks[0].task_type, "shell");
+  assert.strictEqual(result.tasks[1].task_type, "agent");
+});
+
+test("the start-time merge preserves the ambient flag", function () {
+  var merged = timing.mergeStartTimes([], [
+    task("a", { ambient: true }),
+    task("b", { ambient: false }),
+  ], T0);
+  assert.strictEqual(merged[0].ambient, true);
+  assert.strictEqual(merged[1].ambient, false);
+
+  // And across a re-emission, alongside the carried-forward stamp.
+  var again = timing.mergeStartTimes(merged, [task("a", { ambient: true })], T0 + 5000);
+  assert.strictEqual(again[0].ambient, true);
+  assert.strictEqual(again[0].started_at, T0, "ambient tasks keep their elapsed clock too");
+});
+
+test("Codex tasks carry no ambient flag and count as user work", function () {
+  var tasks = backgroundTasks.mapTerminals({ terminals: [{ id: "term-1", command: "npm test" }] });
+  assert.strictEqual(tasks[0].ambient, undefined, "Codex has no ambient concept");
+  assert.strictEqual(timing.countUserTasks(tasks), 1, "absent must not be read as ambient");
+});
+
+test("counting and splitting ignore ambient housekeeping", function () {
+  var list = [
+    task("user-1"),
+    task("amb-1", { ambient: true }),
+    task("user-2", { ambient: false }),
+    task("amb-2", { ambient: true }),
+  ];
+  assert.strictEqual(timing.countUserTasks(list), 2);
+  assert.deepStrictEqual(timing.userTasks(list).map(function (t) { return t.task_id; }), ["user-1", "user-2"]);
+  assert.deepStrictEqual(timing.ambientTasks(list).map(function (t) { return t.task_id; }), ["amb-1", "amb-2"]);
+
+  // Ambient-only reads as "no user work running".
+  assert.strictEqual(timing.countUserTasks([task("amb", { ambient: true })]), 0);
+  assert.strictEqual(timing.countUserTasks([]), 0);
+  assert.strictEqual(timing.countUserTasks(null), 0);
+});
+
+test("the sidebar badge and change notifications count user work only", function () {
+  // sessions.js feeds every sidebar badge site from this one field, and
+  // sdk-message-processor decides whether to rebroadcast the session list from
+  // the same count. Both must ignore ambient watchers.
+  var sessions = fs.readFileSync(path.join(__dirname, "..", "lib", "sessions.js"), "utf8");
+  assert.ok(
+    /backgroundTaskCount: backgroundTaskTiming\.countUserTasks\(s\.activeBackgroundTasks\)/.test(sessions),
+    "the sidebar badge counts non-ambient tasks"
+  );
+  var processor = fs.readFileSync(path.join(__dirname, "..", "lib", "sdk-message-processor.js"), "utf8");
+  assert.strictEqual(
+    (processor.match(/backgroundTaskTiming\.countUserTasks\(/g) || []).length, 3,
+    "both the init reset and the changed handler's before/after counts use it"
+  );
+  assert.ok(
+    !/previousBackgroundTaskCount !== activeBackgroundTasks\.length/.test(processor),
+    "the raw length comparison is gone"
+  );
+});
+
+// --- client rendering ------------------------------------------------------
+
+function loadClientHelpers() {
+  var source = fs.readFileSync(
+    path.join(__dirname, "..", "lib", "public", "modules", "background-tasks-ui.js"),
+    "utf8"
+  );
+  var start = source.indexOf("export function isAmbientTask");
+  var end = source.indexOf("function taskRowHtml");
+  assert.ok(start !== -1 && end > start, "isAmbientTask and splitTasks must be present");
+  var body = source.slice(start, end).replace(/export function/g, "function");
+  return new Function(body + "\nreturn { isAmbientTask: isAmbientTask, splitTasks: splitTasks };")();
+}
+
+test("the composer splits user work from housekeeping", function () {
+  var helpers = loadClientHelpers();
+  var split = helpers.splitTasks([
+    { task_id: "u1", description: "build" },
+    { task_id: "a1", description: "watcher", ambient: true },
+    { task_id: "u2", description: "test", ambient: false },
+    null,
+  ]);
+  assert.deepStrictEqual(split.user.map(function (t) { return t.task_id; }), ["u1", "u2"]);
+  assert.deepStrictEqual(split.ambient.map(function (t) { return t.task_id; }), ["a1"]);
+  assert.deepStrictEqual(helpers.splitTasks(null), { user: [], ambient: [] });
+});
+
+test("the composer bar hides entirely when only housekeeping is running", function () {
+  // Ambient-only must read as quiet: no bar, no dots, no count. Pin the guard
+  // so nobody restores the old `tasks.length === 0` check.
+  var source = fs.readFileSync(
+    path.join(__dirname, "..", "lib", "public", "modules", "background-tasks-ui.js"),
+    "utf8"
+  );
+  assert.ok(
+    /if \(split\.user\.length === 0\) \{[\s\S]{0,200}?existing\.remove\(\)/.test(source),
+    "the bar is removed when no user task is running"
+  );
+  assert.ok(
+    !/if \(tasks\.length === 0\)/.test(source),
+    "the raw total-length guard is gone"
+  );
+  // Summary and aria label count user work only.
+  assert.ok(/var taskLabel = split\.user\.length === 1/.test(source));
+  assert.ok(/var summary = split\.user\.length \+ ' ' \+ taskLabel/.test(source));
+});
+
+test("housekeeping rows keep Stop and elapsed, under a labelled section", function () {
+  var source = fs.readFileSync(
+    path.join(__dirname, "..", "lib", "public", "modules", "background-tasks-ui.js"),
+    "utf8"
+  );
+  assert.ok(source.indexOf("background-tasks-section-label") !== -1, "the group has a section label");
+  assert.ok(/for \(var a = 0; a < split\.ambient\.length; a\+\+\) html \+= taskRowHtml\(split\.ambient\[a\], now\)/.test(source),
+    "ambient rows reuse taskRowHtml, so Stop and elapsed behave identically");
+  assert.ok(/isAmbientTask\(task\) \? ' ambient' : ''/.test(source), "ambient rows are marked for styling");
+
+  var css = fs.readFileSync(path.join(__dirname, "..", "lib", "public", "css", "input.css"), "utf8");
+  assert.ok(/\.background-task-row\.ambient \.background-task-description \{ color: var\(--text-muted\)/.test(css),
+    "housekeeping descriptions are muted");
+  assert.ok(css.indexOf(".background-tasks-section-label") !== -1, "the section label is styled");
+});
