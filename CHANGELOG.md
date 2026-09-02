@@ -1,3 +1,18 @@
+# [4.0.0-beta.10](https://github.com/chadbyte/clay/compare/v4.0.0-beta.9...v4.0.0-beta.10) (2026-09-02)
+
+
+### Bug Fixes
+
+* **ui:** preserve Logs toolbar position ([0c00ddd](https://github.com/chadbyte/clay/commit/0c00dddb83a8f17d6ce79523f771251365213353))
+* **ui:** prevent reconnect redraw flicker ([f13da17](https://github.com/chadbyte/clay/commit/f13da17ac5d125e2e8bfe500b6f79f584200edad))
+
+
+### Features
+
+* **home:** move scheduled tasks into home ([1b6c1b8](https://github.com/chadbyte/clay/commit/1b6c1b800fcf3bbd66de79c73751ff0dee31f274))
+* **knowledge:** add unified knowledge and project logs ([8377d8f](https://github.com/chadbyte/clay/commit/8377d8f1eaff1b97d36bbe665dac2692a51f1c99))
+* **logs:** evolve project logs into an ambient ledger ([8fda0f0](https://github.com/chadbyte/clay/commit/8fda0f0137af66250614850f7d14458f91cf5ea4))
+
 # [4.0.0-beta.9](https://github.com/chadbyte/clay/compare/v4.0.0-beta.8...v4.0.0-beta.9) (2026-09-02)
 
 
