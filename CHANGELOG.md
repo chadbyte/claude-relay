@@ -1,3 +1,10 @@
+# [4.0.0-beta.4](https://github.com/chadbyte/clay/compare/v4.0.0-beta.3...v4.0.0-beta.4) (2026-09-02)
+
+
+### Features
+
+* **codex:** request detailed reasoning summaries so thinking renders ([f2bb21d](https://github.com/chadbyte/clay/commit/f2bb21dc87853381a63b52b4eeaa277c8fdbbf3f))
+
 # [4.0.0-beta.3](https://github.com/chadbyte/clay/compare/v4.0.0-beta.2...v4.0.0-beta.3) (2026-09-02)
 
 
