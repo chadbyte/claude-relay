@@ -1,3 +1,10 @@
+# [4.0.0-beta.9](https://github.com/chadbyte/clay/compare/v4.0.0-beta.8...v4.0.0-beta.9) (2026-09-02)
+
+
+### Bug Fixes
+
+* **auth:** trust Codex runtime authentication failures ([371ed5d](https://github.com/chadbyte/clay/commit/371ed5df53168ad1fac347a8a8685e8ee3297305))
+
 # [4.0.0-beta.8](https://github.com/chadbyte/clay/compare/v4.0.0-beta.7...v4.0.0-beta.8) (2026-09-02)
 
 
