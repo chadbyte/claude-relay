@@ -523,9 +523,18 @@ test("background task state replaces the prior set and init clears it", function
   });
   var session = { localId: 15, activeBackgroundTasks: [{ task_id: "old" }] };
   var tasks = [{ task_id: "new", task_type: "shell", description: "Waiting" }];
+  var before = Date.now();
   bridge.processSDKMessage(session, { yokeType: "background_tasks_changed", tasks: tasks });
-  assert.deepStrictEqual(session.activeBackgroundTasks, tasks);
-  assert.deepStrictEqual(direct[0], { type: "active_background_tasks", tasks: tasks });
+  // The stored set replaces the prior one and gains a start stamp (see
+  // lib/background-task-timing.js) that drives the composer's elapsed timer.
+  assert.strictEqual(session.activeBackgroundTasks.length, 1);
+  var stored = session.activeBackgroundTasks[0];
+  assert.strictEqual(stored.task_id, "new");
+  assert.strictEqual(stored.task_type, "shell");
+  assert.strictEqual(stored.description, "Waiting");
+  assert.ok(stored.started_at >= before && stored.started_at <= Date.now(),
+    "a newly seen task is stamped with the current time");
+  assert.deepStrictEqual(direct[0], { type: "active_background_tasks", tasks: session.activeBackgroundTasks });
   assert.strictEqual(broadcasts, 0);
   bridge.processSDKMessage(session, { yokeType: "background_tasks_changed", tasks: [] });
   assert.deepStrictEqual(session.activeBackgroundTasks, []);
