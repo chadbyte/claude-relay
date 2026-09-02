@@ -41,6 +41,7 @@ Wires all modules, sets up session manager and SDK bridge, dispatches messages.
 | `project-user-mention.js` | (called from project.js) `user_mention` | User-to-user @mention side conversations within a session. Records to history, broadcasts to other session viewers, queues transcript into `pendingMentionContexts` for the next coding-agent turn, fires alarm-center notification + push for the target user (push only when offline) |
 | `project-memory.js` | `memory_list`, `memory_search`, `memory_delete` | Session digest memory |
 | `project-mcp.js` | `mcp_servers_available`, `mcp_tool_result`, `mcp_tool_error`, `mcp_toggle_server` | Remote MCP server bridge via Chrome Extension |
+| `project-vendor-login.js` | `vendor_login_start`, `vendor_login_cancel`, `vendor_login_state_request` | Vendor `auth_required` recovery. One login terminal per vendor per project (server-tracked), success detection on PTY output, adapter restart so the new credentials are read, `auth_refreshed` broadcast, terminal cleanup |
 
 ### Infrastructure Modules
 
@@ -171,6 +172,7 @@ Bootstraps UI, initializes store, wires remaining Tier 3 modules. All business l
 | `app-loop-ui.js` | Ralph Loop UI: bars, banners, preview modal, execution modal |
 | `app-loop-wizard.js` | Ralph Loop wizard: step navigation, mode/authorship selection, data collection |
 | `app-notifications.js` | Notification center panel, badge, rendering, click-to-navigate |
+| `vendor-login.js` | Client half of the vendor login flow: requests the server-owned login terminal, opens/re-attaches the modal, login banners, split-pane forwarding. `app-notifications.js` depends on this module, never the reverse |
 | `app-debate-ui.js` | Debate sticky banner, floor/conclude/ended modes, bottom bar, hand raise |
 | `background-tasks-ui.js` | Active background-task indicator and task stop controls |
 | `app-skills-install.js` | Skill install dialog, requireSkills, requireClayMateInterview |
