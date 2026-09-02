@@ -6,7 +6,7 @@
 #scheduler-panel {
   position: absolute;
   inset: 0;
-  z-index: 40;
+  z-index: 240;
   background: var(--bg);
   display: flex;
   flex-direction: column;
