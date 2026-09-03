@@ -147,7 +147,13 @@ test("opening the browser claims the single right workbench slot", function () {
 
 test("opening another right tool closes the browser", function () {
   assert.match(logsSource, /import \{ closeNotesBrowser \} from '\.\/sticky-notes-browser\.js'/);
-  assert.match(logsSource, /closeNotesBrowser\(\);\n\s*hideNotes\(\);/, "Logs claims the slot back");
+  var openLogs = logsSource.substring(logsSource.indexOf("export function openProjectLogs()"),
+    logsSource.indexOf("export function closeProjectLogs()"));
+  assert.match(openLogs, /closeNotesBrowser\(\);/, "Logs claims the browser's workbench slot");
+  assert.doesNotMatch(openLogs, /hideNotes\(\)/,
+    "opening Logs never hides the persistent floating-note canvas");
+  assert.doesNotMatch(logsSource, /import \{ hideNotes \} from '\.\/sticky-notes\.js'/,
+    "Logs has no authority over sticky-note canvas visibility");
   // The file browser, git, and terminal sidebar buttons close it too.
   var closers = appSource.match(/if \(isNotesBrowserOpen\(\)\) closeNotesBrowser\(\);/g) || [];
   assert.ok(closers.length >= 3, "every competing sidebar entry closes the browser");
