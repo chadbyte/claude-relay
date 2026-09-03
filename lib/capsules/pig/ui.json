@@ -1,0 +1,46 @@
+{
+  "type": "stack",
+  "props": { "gap": "md" },
+  "children": [
+    {
+      "type": "chart",
+      "bind": "userScoreSeries",
+      "props": { "label": "Your score", "kind": "progress", "categoryKey": "seat", "valueKey": "value", "max": 100 }
+    },
+    {
+      "type": "chart",
+      "bind": "mateScoreSeries",
+      "props": { "label": "Your Mate's score", "kind": "progress", "categoryKey": "seat", "valueKey": "value", "max": 100 }
+    },
+    { "type": "text", "props": { "text": { "$bind": "$state.turnTotalText", "fallback": "Turn total 0 of 100." }, "role": "output" } },
+    {
+      "type": "row",
+      "props": { "gap": "sm", "wrap": true },
+      "children": [
+        {
+          "type": "button",
+          "action": "roll",
+          "when": { "all": [{ "equals": { "path": "$state.status", "value": "playing" } }, { "equals": { "path": "$state.turn", "value": "user" } }] },
+          "props": { "label": "Roll", "variant": "primary" },
+          "else": { "type": "button", "action": "roll", "props": { "label": "Roll", "variant": "primary", "disabled": true } }
+        },
+        {
+          "type": "button",
+          "action": "hold",
+          "when": { "all": [{ "equals": { "path": "$state.status", "value": "playing" } }, { "equals": { "path": "$state.turn", "value": "user" } }] },
+          "props": { "label": "Hold", "variant": "secondary" },
+          "else": { "type": "button", "action": "hold", "props": { "label": "Hold", "variant": "secondary", "disabled": true } }
+        },
+        { "type": "button", "action": "reset", "props": { "label": "Reset", "variant": "ghost" } }
+      ]
+    },
+    {
+      "type": "list",
+      "bind": "recentRolls",
+      "props": { "variant": "divided", "gap": "xs" },
+      "children": [
+        { "type": "text", "props": { "text": "$item.text", "role": "body" } }
+      ]
+    }
+  ]
+}
