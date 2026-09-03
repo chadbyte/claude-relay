@@ -192,6 +192,8 @@ test("the response tool is offered to the Driver only", function () {
   assert.equal(world.router.getToolDefs(world.driver).length, 1, "the Driver gets it");
   assert.deepEqual(world.router.getToolDefs(world.worker), [], "the Worker does not");
   assert.deepEqual(world.router.getToolDefs(makeSession(99, null)), [], "an ungrouped session does not");
+  assert.equal(world.router.getToolDefs(world.driver, { dormantDriver: true }).length, 1,
+    "the pair coordinator may pre-mount it for an eligible future Driver");
   assert.deepEqual(world.router.getToolDefs(null), []);
 });
 
@@ -500,7 +502,7 @@ test("the router is wired through a getter and never to a Mate project", functio
 });
 
 test("the Driver tool is mounted alongside the existing pair tools", function () {
-  assert.match(pairSource, /\.concat\(workerPermission\.getToolDefs\(boundSession\)\)/);
+  assert.match(pairSource, /\.concat\(workerPermission\.getToolDefs\(boundSession, \{ dormantDriver: !group \}\)\)/);
   // The existing structural exclusion still hides every pair tool from a Worker.
   assert.match(pairSource, /if \(group && group\.pair && group\.pair\.driverId !== boundSession\.localId\) return \[\];/);
 });
