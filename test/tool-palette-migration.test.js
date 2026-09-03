@@ -17,7 +17,7 @@ function loadNormalizer() {
   assert.notEqual(end, -1);
   var body = source.slice(start, end)
     .replace(/^export function/gm, "function");
-  var factory = new Function(body + "\nreturn { normalizeToolPreferences: normalizeToolPreferences, LEGACY_SESSION_TOOL_IDS: LEGACY_SESSION_TOOL_IDS };");
+  var factory = new Function(body + "\nreturn { normalizeToolPreferences: normalizeToolPreferences, LEGACY_SESSION_TOOL_IDS: LEGACY_SESSION_TOOL_IDS, RETIRED_SESSION_TOOL_IDS: RETIRED_SESSION_TOOL_IDS };");
   return factory();
 }
 
@@ -30,7 +30,6 @@ var DEFAULT_ORDER = [
   "sticky-notes-sidebar-btn",
   "scheduler-btn",
   "loop-tool-btn",
-  "git-sidebar-btn",
   "mcp-btn",
   "skills-btn",
 ];
@@ -54,19 +53,18 @@ test("a visible legacy tool is replaced at its exact index", function () {
     "sticky-notes-sidebar-btn",
     "project-logs-btn",
     "loop-tool-btn",
-    "git-sidebar-btn",
     "mcp-btn",
     "skills-btn",
   ]);
 });
 
 test("a customized order keeps every other choice", function () {
-  var custom = ["skills-btn", "scheduler-btn", "git-sidebar-btn", "file-browser-btn"];
+  var custom = ["skills-btn", "scheduler-btn", "terminal-sidebar-btn", "file-browser-btn"];
   var result = normalize("session", { order: custom, hidden: [] });
-  assert.deepEqual(result.order, ["skills-btn", "project-logs-btn", "git-sidebar-btn", "file-browser-btn"]);
+  assert.deepEqual(result.order, ["skills-btn", "project-logs-btn", "terminal-sidebar-btn", "file-browser-btn"]);
   assert.equal(result.migrated, true);
   // The input is not mutated.
-  assert.deepEqual(custom, ["skills-btn", "scheduler-btn", "git-sidebar-btn", "file-browser-btn"]);
+  assert.deepEqual(custom, ["skills-btn", "scheduler-btn", "terminal-sidebar-btn", "file-browser-btn"]);
 });
 
 test("a hidden legacy tool stays hidden as Project Logs", function () {
@@ -84,33 +82,33 @@ test("a hidden legacy tool stays hidden as Project Logs", function () {
 test("an explicit Project Logs preference is never repositioned", function () {
   // The user already reordered Logs to the front and a stale legacy id remains.
   var result = normalize("session", {
-    order: ["project-logs-btn", "file-browser-btn", "scheduler-btn", "git-sidebar-btn"],
+    order: ["project-logs-btn", "file-browser-btn", "scheduler-btn", "terminal-sidebar-btn"],
     hidden: [],
   });
   assert.equal(result.migrated, true, "the stale id is still cleaned up");
-  assert.deepEqual(result.order, ["project-logs-btn", "file-browser-btn", "git-sidebar-btn"],
+  assert.deepEqual(result.order, ["project-logs-btn", "file-browser-btn", "terminal-sidebar-btn"],
     "the chosen position wins and the legacy id is dropped, not swapped in");
   assert.equal(result.order.indexOf("project-logs-btn"), 0);
 });
 
 test("an explicitly hidden Project Logs stays hidden even with a visible legacy id", function () {
   var result = normalize("session", {
-    order: ["file-browser-btn", "scheduler-btn", "git-sidebar-btn"],
+    order: ["file-browser-btn", "scheduler-btn", "terminal-sidebar-btn"],
     hidden: ["project-logs-btn"],
   });
   assert.equal(result.migrated, true);
   assert.deepEqual(result.hidden, ["project-logs-btn"], "the user's hide choice is preserved");
-  assert.deepEqual(result.order, ["file-browser-btn", "git-sidebar-btn"],
+  assert.deepEqual(result.order, ["file-browser-btn", "terminal-sidebar-btn"],
     "the legacy id is removed rather than un-hiding Logs");
   assert.equal(result.order.indexOf("project-logs-btn"), -1);
 });
 
 test("both ids present in one list deduplicate to a single entry", function () {
   var result = normalize("session", {
-    order: ["file-browser-btn", "scheduler-btn", "project-logs-btn", "git-sidebar-btn"],
+    order: ["file-browser-btn", "scheduler-btn", "project-logs-btn", "terminal-sidebar-btn"],
     hidden: [],
   });
-  assert.deepEqual(result.order, ["file-browser-btn", "project-logs-btn", "git-sidebar-btn"]);
+  assert.deepEqual(result.order, ["file-browser-btn", "project-logs-btn", "terminal-sidebar-btn"]);
   assert.equal(result.order.filter(function (id) { return id === "project-logs-btn"; }).length, 1);
 
   // Reversed input order: the explicit entry still wins its own position.
@@ -121,8 +119,8 @@ test("both ids present in one list deduplicate to a single entry", function () {
   assert.deepEqual(reversed.order, ["project-logs-btn"]);
 
   // A duplicated legacy id collapses too.
-  var doubled = normalize("session", { order: ["scheduler-btn", "git-sidebar-btn", "scheduler-btn"], hidden: [] });
-  assert.deepEqual(doubled.order, ["project-logs-btn", "git-sidebar-btn"]);
+  var doubled = normalize("session", { order: ["scheduler-btn", "terminal-sidebar-btn", "scheduler-btn"], hidden: [] });
+  assert.deepEqual(doubled.order, ["project-logs-btn", "terminal-sidebar-btn"]);
 });
 
 test("preferences without the legacy id are left completely alone", function () {
@@ -157,6 +155,63 @@ test("missing or malformed preference shapes fail safe", function () {
 
   assert.doesNotThrow(function () { normalize("session", {}); });
   assert.doesNotThrow(function () { normalize("session", undefined); });
+});
+
+// --- Git retirement -------------------------------------------------------
+
+test("Git is retired from the session palette with no replacement", function () {
+  assert.deepEqual(api.RETIRED_SESSION_TOOL_IDS, ["git-sidebar-btn"]);
+  assert.equal(api.LEGACY_SESSION_TOOL_IDS["git-sidebar-btn"], undefined,
+    "Git is dropped, never remapped onto another tool's slot");
+});
+
+test("a saved Git preference is dropped from order and hidden alike", function () {
+  var visible = normalize("session", {
+    order: ["file-browser-btn", "git-sidebar-btn", "skills-btn"],
+    hidden: [],
+  });
+  assert.equal(visible.migrated, true, "the drop is written back so it does not linger");
+  assert.deepEqual(visible.order, ["file-browser-btn", "skills-btn"],
+    "every other tool keeps its relative position");
+  assert.deepEqual(visible.hidden, []);
+
+  var hidden = normalize("session", {
+    order: ["file-browser-btn"],
+    hidden: ["git-sidebar-btn", "mcp-btn"],
+  });
+  assert.equal(hidden.migrated, true);
+  assert.deepEqual(hidden.hidden, ["mcp-btn"]);
+  assert.deepEqual(hidden.order, ["file-browser-btn"]);
+});
+
+test("the retirement composes with the legacy remap in one pass", function () {
+  var result = normalize("session", {
+    order: ["git-sidebar-btn", "scheduler-btn", "file-browser-btn"],
+    hidden: [],
+  });
+  assert.equal(result.migrated, true);
+  assert.deepEqual(result.order, ["project-logs-btn", "file-browser-btn"],
+    "Logs inherits the legacy slot and Git simply disappears");
+});
+
+test("preferences that never mentioned Git are left alone", function () {
+  var current = { order: ["file-browser-btn", "mcp-btn"], hidden: [] };
+  var result = normalize("session", current);
+  assert.equal(result.migrated, false, "no gratuitous write-back");
+  assert.deepEqual(result.order, current.order);
+});
+
+test("the mate palette is unaffected by the Git retirement", function () {
+  var result = normalize("mate", { order: ["mate-memory-btn", "git-sidebar-btn"], hidden: [] });
+  assert.equal(result.migrated, false);
+  assert.deepEqual(result.order, ["mate-memory-btn", "git-sidebar-btn"]);
+});
+
+test("no palette registry lists Git as a tile", function () {
+  assert.equal(/id: "git-sidebar-btn"/.test(source), false,
+    "Git no longer consumes an icon slot in either palette");
+  assert.equal(/countId: "git-sidebar-count"/.test(source), false,
+    "the tile badge is gone with the tile");
 });
 
 // --- Wiring ---------------------------------------------------------------
