@@ -3,7 +3,7 @@ var assert = require("node:assert");
 var fs = require("fs");
 var os = require("os");
 var path = require("path");
-var { createSplitGroupStore, autoGroupName } = require("../lib/session-split-groups");
+var { attachSplitGroups, createSplitGroupStore, autoGroupName } = require("../lib/session-split-groups");
 
 function loadClientHelpers() {
   var file = path.join(__dirname, "../lib/public/modules/split-group-helpers.js");
@@ -250,10 +250,46 @@ test("autoGroupName truncates both titles and joins them with the separator", fu
     "1234567890123456789… | abcdefghijklmnopqrs…");
 });
 
+test("pane connections receive pair roles for Worker chrome enforcement", function (t) {
+  var dir = fs.mkdtempSync(path.join(os.tmpdir(), "clay-split-pane-state-"));
+  t.after(function () { fs.rmSync(dir, { recursive: true, force: true }); });
+  var sessions = new Map([
+    [1, { localId: 1, title: "Driver", ownerId: null }],
+    [2, { localId: 2, title: "Worker", ownerId: null }],
+  ]);
+  var sent = [];
+  var attached = attachSplitGroups({
+    sm: {
+      sessions: sessions,
+      sessionsDir: dir,
+      setOnSessionDeleted: function () {},
+      setOnSessionRenamed: function () {},
+      setOnSessionIdentityAssigned: function () {},
+    },
+    clients: new Set(),
+    usersModule: null,
+    sendTo: function (ws, message) { sent.push({ ws: ws, message: message }); },
+  });
+  attached.store.create(null, {
+    members: [1, 2],
+    pair: { driverId: 1, workerId: 2 },
+  });
+  var pane = { _clayPane: true };
+  attached.sendConnectionState(pane);
+
+  assert.strictEqual(sent.length, 1);
+  assert.strictEqual(sent[0].ws, pane);
+  assert.deepStrictEqual(sent[0].message.groups[0].pair, { driverId: 1, workerId: 2 });
+});
+
 test("client helpers derive grouped ids and preserve stored member order", async function () {
   var helpers = await loadClientHelpers();
   var groups = [{ id: "a", members: [2, 1] }, { id: "b", members: [3, 4] }];
   assert.deepStrictEqual(Array.from(helpers.groupedSessionIds(groups)), [2, 1, 3, 4]);
   assert.strictEqual(helpers.findSplitGroup(groups, [2, 1]).id, "a");
   assert.strictEqual(helpers.findSplitGroup(groups, [1, 2]), null);
+  assert.strictEqual(helpers.isConfiguredWorker([
+    { id: "pair", members: [1, 2], pair: { driverId: 1, workerId: 2 } },
+  ], 2), true);
+  assert.strictEqual(helpers.isConfiguredWorker([{ id: "plain", members: [1, 2] }], 2), false);
 });

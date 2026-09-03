@@ -10,7 +10,6 @@ function source(file) { return fs.readFileSync(path.join(root, file), "utf8"); }
 var paletteSource = source("lib/public/modules/tool-palette-order.js");
 var logsSource = source("lib/public/modules/project-logs.js");
 var renderSource = source("lib/public/modules/project-logs-render.js");
-var ambientSource = source("lib/public/modules/project-logs-ambient.js");
 var appSource = source("lib/public/app.js");
 var messagesSource = source("lib/public/modules/app-messages.js");
 var mobileSource = source("lib/public/modules/sidebar-mobile.js");
@@ -78,8 +77,8 @@ test("Logs is one navigation stack, not a master/detail split", function () {
 
 test("Back returns to the list preserving query, filter, and scroll", function () {
   assert.match(logsSource, /id="project-logs-back"/);
-  assert.match(logsSource, /backBtn\.addEventListener\("click", function \(\) \{ pinOnInteraction\(\); showList\(\); \}\)/,
-    "Back returns to the list and commits a preview on the way");
+  assert.match(logsSource, /backBtn\.addEventListener\("click", showList\)/,
+    "Back returns directly to the preserved list");
   // Scroll is captured on the way in and restored on the way back.
   assert.match(logsSource, /store\.set\(\{ projectLogsListScroll: listEl\.scrollTop/);
   assert.match(logsSource, /listEl\.scrollTop = store\.get\('projectLogsListScroll'\) \|\| 0;/);
@@ -176,6 +175,16 @@ test("category filtering is a compact control, not a dashboard", function () {
   assert.match(logsSource, /Array\.isArray\(msg\.categories\)/);
   assert.equal(/"decision"|"security"|"operations"|"incident"/.test(logsSource + renderSource), false,
     "the client hard-codes no category name at all");
+});
+
+test("loading, empty, filtered-empty, and error states stay inside the ledger", function () {
+  assert.match(logsSource, /"Loading the project ledger\.\.\."/);
+  assert.match(logsSource, /"No entries match this search or category\."/);
+  assert.match(logsSource, /"The ledger could not be loaded\. Try opening Logs again\."/);
+  assert.match(logsSource, /listEl\.setAttribute\("aria-busy", "true"\)/);
+  assert.match(logsSource, /listEl\.removeAttribute\("aria-busy"\)/);
+  assert.match(renderSource, /export function renderList\(listEl, entries, onOpen, emptyState\)/);
+  assert.match(css, /\.project-logs-list\[aria-busy="true"\]/);
 });
 
 test("the discussion section shows attributed comments and a composer", function () {
@@ -276,113 +285,52 @@ test("the version history is a read-only timeline with no revert control", funct
 });
 
 
-// --- Ambient discovery ----------------------------------------------------
-
-test("the edge handle is a real accessible control, not a hover-only affordance", function () {
-  assert.match(ambientSource, /handle = document\.createElement\("button"\)/);
-  assert.match(ambientSource, /handle\.type = "button"/);
-  assert.match(ambientSource, /handle\.setAttribute\("aria-label", "Open Project Logs"\)/);
-  assert.match(ambientSource, /handle\.title = handle\.getAttribute\("aria-label"\)/);
-  assert.match(ambientSource, /handle\.addEventListener\("click", function/, "click works without hover");
-  assert.match(ambientSource, /handle\.addEventListener\("focus", function/, "so does keyboard focus");
-  // The unread state is announced, not only drawn.
-  assert.match(ambientSource, /" new entry" : " new entries"/);
-  assert.match(css, /\.project-logs-handle:focus-visible \{ outline: 2px solid var\(--accent\)/);
-  // Slim, on the right boundary, desktop only.
-  assert.match(css, /@media \(min-width: 1024px\) \{[\s\S]*\.project-logs-handle \{[\s\S]*right: 0;/);
-  assert.match(css, /@media \(max-width: 1023px\) \{\s*\n\s*\.project-logs-handle \{ display: none; \}/);
+test("Logs opens only through the explicit tool controls", function () {
+  assert.equal(fs.existsSync(path.join(root, "lib/public/modules/project-logs-ambient.js")), false,
+    "the ambient module is removed");
+  assert.equal(/project-logs-handle|project-logs-previewing|projectLogsPreview|projectLogsPinned/.test(logsSource + css + appSource), false,
+    "no edge, preview, or pin state remains");
+  assert.match(logsSource, /button\.addEventListener\("click", function \(\) \{/);
+  assert.match(logsSource, /else openProjectLogs\(\)/);
 });
 
-test("hover preview reveals without opening, and any interaction pins", function () {
-  // Hover is only wired where a real pointer exists.
-  assert.match(ambientSource, /\(hover: hover\) and \(pointer: fine\)/);
-  assert.match(ambientSource, /if \(hoverCapable\) \{\s*\n\s*handle\.addEventListener\("pointerenter", showPreview\);/);
-  assert.match(ambientSource, /handle\.addEventListener\("pointerleave", scheduleClose\)/);
-
-  // Moving from the handle into the panel keeps it revealed.
-  assert.match(ambientSource, /export function bindPanelHover\(panel\)/);
-  assert.match(ambientSource, /panel\.addEventListener\("pointerenter", cancelClose\)/);
-  assert.match(logsSource, /bindPanelHover\(panel\)/);
-
-  // A forgiving delay, and a pinned pane is never closed by the pointer.
-  assert.match(ambientSource, /var CLOSE_DELAY_MS = (\d+);/);
-  var delay = Number(/var CLOSE_DELAY_MS = (\d+);/.exec(ambientSource)[1]);
-  assert.ok(delay >= 250 && delay <= 800, "the delay is forgiving but not sticky, got " + delay);
-  assert.match(ambientSource, /if \(store\.get\('projectLogsPinned'\)\) return;/);
-
-  // Escape closes a preview.
-  assert.match(ambientSource, /if \(event\.key !== "Escape"\) return;[\s\S]*hidePreview\(\)/);
-
-  // Meaningful interactions commit the preview.
-  assert.match(logsSource, /function pinOnInteraction\(\)/);
-  assert.match(logsSource, /searchEl\.addEventListener\("focus", pinOnInteraction\)/);
-  assert.match(logsSource, /panel\.addEventListener\("pointerdown", pinOnInteraction\)/);
-  assert.match(logsSource, /function applyFilter\(category\) \{\s*\n\s*pinOnInteraction\(\);/);
-  assert.match(logsSource, /function submitComment\(ref, body, statusEl, inputEl\) \{\s*\n\s*pinOnInteraction\(\);/);
-  // A preview is visually distinct from a committed open.
-  assert.match(css, /#project-logs-panel\.project-logs-previewing \{/);
-});
-
-test("an update marks the ambient cues and never opens the pane", function () {
+test("an update marks the explicit button and never opens the pane", function () {
   var handler = logsSource.slice(logsSource.indexOf("export function handleProjectLogUpdated"));
   handler = handler.slice(0, handler.indexOf("export function handleProjectLogsError"));
   assert.match(handler, /noteCanonicalUpdate\(msg\)/);
-  assert.equal(/openProjectLogs|revealPreview|showDetail|pinFromPreview|focus\(/.test(handler), false,
-    "an update never opens, reveals, or steals focus");
+  assert.equal(/openProjectLogs|showDetail|focus\(/.test(handler), false,
+    "an update never opens or steals focus");
   // The list only refreshes when it is already the visible surface.
   assert.match(handler, /if \(store\.get\('projectLogsOpen'\) && store\.get\('projectLogsView'\) !== "detail"\) requestList\(\)/);
 
-  // Both surfaces carry the marker.
-  assert.match(ambientSource, /handle\.classList\.toggle\("has-unread", unread > 0\)/);
-  assert.match(ambientSource, /button\.classList\.toggle\("project-logs-unread", unread > 0\)/);
+  // The explicit button carries the restrained marker.
+  assert.match(logsSource, /button\.classList\.toggle\("project-logs-unread", unread > 0\)/);
   assert.match(paletteSource, /id: "project-logs-btn"[\s\S]*countId: "project-logs-count"/);
-  assert.match(css, /\.project-logs-handle\.has-unread \.project-logs-handle-notch \{ background: var\(--accent\)/);
+  assert.match(css, /#project-logs-btn\.project-logs-unread \{ color: var\(--accent\); \}/);
 
   // No OS notification, sound, modal, or focus theft anywhere in the client.
-  assert.equal(/new Notification|Audio\(|\.play\(\)|alert\(|confirm\(/.test(logsSource + ambientSource), false);
+  assert.equal(/new Notification|Audio\(|\.play\(\)|alert\(|confirm\(/.test(logsSource), false);
 });
 
-test("updates are deduped by ref and revision so replays do not re-pulse", function () {
-  assert.match(ambientSource, /var seen = store\.get\('projectLogsSeenRevisions'\) \|\| \{\}/);
-  assert.match(ambientSource, /if \(seen\[key\] >= msg\.revision\) return false;/);
-  assert.match(ambientSource, /if \(!msg \|\| !msg\.ref \|\| !msg\.revision\) return false;/);
+test("updates are deduped by ref and revision without client persistence", function () {
+  assert.match(logsSource, /var seen = store\.get\('projectLogsSeenRevisions'\) \|\| \{\}/);
+  assert.match(logsSource, /if \(seen\[msg\.ref\] >= msg\.revision\) return false;/);
+  assert.match(logsSource, /if \(!msg \|\| !msg\.ref \|\| !msg\.revision\) return false;/);
   // An update while the pane is open is acknowledged, not counted.
-  assert.match(ambientSource, /projectLogsUnread: visible \? 0 :/);
-  assert.match(ambientSource, /if \(!visible\) flourish\(\)/);
+  assert.match(logsSource, /projectLogsUnread: store\.get\('projectLogsOpen'\) \? 0 :/);
   assert.match(appSource, /projectLogsSeenRevisions: \{\}/);
-  assert.equal(/localStorage|sessionStorage/.test(ambientSource), false, "no client-side persistence");
-});
-
-test("reduced motion keeps the static marker and drops the flourish", function () {
-  assert.match(ambientSource, /function prefersReducedMotion\(\)/);
-  assert.match(ambientSource, /if \(prefersReducedMotion\(\)\) return;/);
-  var flourish = ambientSource.slice(ambientSource.indexOf("function flourish()"));
-  flourish = flourish.slice(0, flourish.indexOf("export function acknowledgeUpdates"));
-  assert.equal(/document\.body|#app|main-panels/.test(flourish), false, "nothing whole-screen is animated");
-
-  assert.match(css, /@media \(prefers-reduced-motion: reduce\) \{[\s\S]*\.project-logs-pulse \{ animation: none; \}/);
-  // The static unread colour is outside the motion query, so it survives.
-  // There is more than one reduced-motion block, so target the one that owns
-  // the pulse and read only as far as its closing brace.
-  var pulseRule = css.indexOf(".project-logs-pulse { animation: none; }");
-  assert.notEqual(pulseRule, -1);
-  var blockStart = css.lastIndexOf("@media (prefers-reduced-motion: reduce)", pulseRule);
-  var block = css.slice(blockStart, css.indexOf("}", css.indexOf(".project-logs-handle-notch { transition: none; }", blockStart)) + 1);
-  assert.match(block, /\.project-logs-pulse \{ animation: none; \}/);
-  assert.equal(/has-unread|background: var\(--accent\)/.test(block), false,
-    "the unread marker is never inside the reduced-motion block");
+  assert.equal(/localStorage|sessionStorage/.test(logsSource), false, "no client-side persistence");
 });
 
 test("opening acknowledges, and project switch resets without animating", function () {
   var open = logsSource.slice(logsSource.indexOf("export function openProjectLogs"));
   open = open.slice(0, open.indexOf("export function closeProjectLogs"));
   assert.match(open, /acknowledgeUpdates\(\)/);
-  assert.match(open, /projectLogsPinned: true, projectLogsPreview: false/);
-  assert.match(open, /panel\.classList\.remove\("project-logs-previewing"\)/);
+  assert.match(open, /store\.set\(\{ projectLogsOpen: true \}\)/);
 
   var init = logsSource.slice(logsSource.indexOf("export function initProjectLogs"));
-  assert.match(init, /resetAmbient\(\)/);
-  assert.match(ambientSource, /export function resetAmbient\(\)[\s\S]*projectLogsUnread: 0[\s\S]*projectLogsSeenRevisions: \{\}/);
+  assert.match(init, /projectLogsUnread: 0/);
+  assert.match(init, /projectLogsSeenRevisions: \{\}/);
   // Acknowledgement is server-free: no preference write, no storage.
-  assert.equal(/fetch\(|localStorage/.test(ambientSource), false);
+  assert.equal(/fetch\(|localStorage/.test(logsSource), false);
 });

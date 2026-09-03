@@ -101,8 +101,9 @@ test("configured pairs expose partner tools only to the Driver", function () {
   assert.deepStrictEqual(f.attached.getToolDefs(f.worker), []);
   assert.match(f.attached.getSystemPrompt(f.driver), /Driver/);
   assert.match(f.attached.getSystemPrompt(f.driver), /reuse the same Split Worker for follow-up implementation|Reuse the existing Split Worker/);
-  assert.match(f.attached.getSystemPrompt(f.driver), /human may still message or stop the Split Worker directly/);
-  assert.match(f.attached.getSystemPrompt(f.driver), /close_partner immediately/);
+  assert.match(f.attached.getSystemPrompt(f.driver), /A human Stop is authoritative/);
+  assert.match(f.attached.getSystemPrompt(f.driver), /do not retry, send more work, or replace/);
+  assert.match(f.attached.getSystemPrompt(f.driver), /Use close_partner when they ask to close/);
   assert.match(f.attached.getSystemPrompt(f.driver), /Sub-agent/);
   assert.match(f.attached.getToolDefs(f.driver)[0].description, /reuse the same Split Worker for follow-up implementation/);
   assert.strictEqual(f.attached.getSystemPrompt(f.worker), "");
@@ -131,7 +132,10 @@ test("send_to_partner records attribution and returns the response", async funct
 test("send_to_partner creates and opens a visible Worker when the Driver is unpaired", async function () {
   var f = fixture(false, { ungrouped: true });
   assert.match(f.attached.getSystemPrompt(f.driver), /opens it in the right pane automatically/);
-  var tool = f.attached.getToolDefs(f.driver)[0];
+  var initialTools = f.attached.getToolDefs(f.driver);
+  var tool = initialTools[0];
+  assert.ok(initialTools.some(function (item) { return item.name === "respond_to_worker_permission"; }),
+    "the long-lived Driver query can answer permissions after it creates the pair");
   var result = parseToolResult(await tool.handler({ message: "Build the feature", timeoutSeconds: 2 }));
 
   assert.deepStrictEqual(result, { status: "complete", response: "Partner result", workerCreated: true, partnerId: 2 });
@@ -233,6 +237,35 @@ test("the detached monitor reports interruption as partial, not completion", asy
   assert.match(f.driverPushes[0], /Split Worker execution interrupted/);
   assert.match(f.driverPushes[0], /PARTIAL/);
   assert.doesNotMatch(f.driverPushes[0], /completed/);
+});
+
+test("a human Worker stop suppresses push-back and blocks retries until a new Driver message", async function () {
+  var f = fixture(true);
+  var tool = f.attached.getToolDefs(f.driver)[0];
+  await tool.handler({ message: "Inspect the tests", wait: false });
+  assert.equal(f.attached.handleHumanStop(f.worker), true);
+  await new Promise(function (resolve) { setTimeout(resolve, 50); });
+
+  assert.deepStrictEqual(f.driverPushes, [], "the stopped result cannot wake the Driver");
+  var blocked = await tool.handler({ message: "Retry automatically" });
+  assert.equal(blocked.isError, true);
+  assert.match(blocked.content[0].text, /human stopped/);
+
+  assert.equal(f.attached.beginHumanTurn(f.driver), true);
+  var resumed = parseToolResult(await tool.handler({ message: "The human asked to continue", timeoutSeconds: 2 }));
+  assert.equal(resumed.status, "complete");
+});
+
+test("operation ids keep a replayed delegation from being sent twice", async function () {
+  var f = fixture(true);
+  var tool = f.attached.getToolDefs(f.driver)[0];
+  var args = { message: "Inspect once", timeoutSeconds: 2, operationId: "turn-7-send-1" };
+  var first = await tool.handler(args);
+  var second = await tool.handler(args);
+
+  assert.deepStrictEqual(second, first);
+  assert.equal(f.starts.length, 1);
+  assert.equal(f.worker.history.filter(function (item) { return item.type === "user_message"; }).length, 1);
 });
 
 test("a new Worker turn clears an earlier interrupted state", async function () {

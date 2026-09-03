@@ -298,6 +298,24 @@ test("replace_partner swaps in a fresh Worker and preserves the old session", as
   assert.notEqual(world.groups[0].pair.workerId, oldWorker.localId);
 });
 
+test("replacement is limited to one successful generation per human turn", async function (t) {
+  var world = makeWorld();
+  t.after(world.dispose);
+  await makePair(world);
+
+  var first = parse(await world.tool("replace_partner").handler({}));
+  assert.equal(first.status, "replaced");
+  var blocked = await world.tool("replace_partner").handler({});
+  assert.equal(blocked.isError, true);
+  assert.match(blocked.content[0].text, /replacement limit/);
+  assert.equal(world.created.length, 2, "the blocked retry creates no session");
+
+  world.attached.beginHumanTurn(world.driver);
+  var nextTurn = parse(await world.tool("replace_partner").handler({}));
+  assert.equal(nextTurn.status, "replaced");
+  assert.equal(world.created.length, 3);
+});
+
 test("replacement refuses an active Worker unless interrupt is explicit", async function (t) {
   var world = makeWorld();
   t.after(world.dispose);
@@ -571,7 +589,8 @@ test("the Driver prompt states the management objective without proposal languag
 test("server conventions and module sizes hold", function () {
   var files = ["lib/project-pair-lifecycle.js", "lib/session-driver-eligibility.js",
     "lib/session-pair-prompts.js", "lib/session-pair-factory.js",
-    "lib/project-session-pair.js", "lib/session-pair-mcp-server.js"];
+    "lib/project-session-pair.js", "lib/session-pair-mcp-server.js",
+    "lib/session-pair-turn-control.js"];
   for (var i = 0; i < files.length; i++) {
     var src = fs.readFileSync(path.join(root, files[i]), "utf8");
     assert.equal(/=>/.test(src), false, files[i] + ": no arrow functions");
