@@ -189,14 +189,20 @@ test("one act pipeline: user and Mate share the same persisted game", async func
   assert.strictEqual(start.scores.user, 0);
 
   var rolled = await runtime.act(USER, "roll", {});
-  assert.strictEqual(rolled.turnTotal, 3);
+  assert.strictEqual(rolled.state.turnTotal, 3);
+  // The act carries its own causality for a watching Display.
+  assert.strictEqual(rolled.event.actor, "user");
+  assert.strictEqual(rolled.event.action, "roll");
+  assert.strictEqual(rolled.event.previous.turnTotal, 0);
+  assert.deepStrictEqual(rolled.event.next, rolled.state);
+  assert.strictEqual(rolled.event.seq, rolled.state.eventSeq);
   await runtime.act(USER, "hold", {});
 
   await assert.rejects(function () { return runtime.act(USER, "roll", {}); }, /out of turn/);
 
   var mateRolled = await runtime.act(MATE, "roll", {});
-  assert.strictEqual(mateRolled.turnTotal, 2);
-  assert.strictEqual(mateRolled.scores.user, 3);
+  assert.strictEqual(mateRolled.state.turnTotal, 2);
+  assert.strictEqual(mateRolled.state.scores.user, 3);
 
   // A separate runtime instance for the same user reads the same stored game,
   // and the Mate sees exactly what the user sees.
@@ -220,7 +226,8 @@ test("concurrent acts serialize across separately created runtime instances", as
 
   // Two rolls that arrive together must both land on the running total. An
   // unserialized read-modify-write would read 0 twice and lose one of them.
-  var rolls = await Promise.all([rollerA.act(USER, "roll", {}), rollerB.act(USER, "roll", {})]);
+  var rolls = (await Promise.all([rollerA.act(USER, "roll", {}), rollerB.act(USER, "roll", {})]))
+    .map(function (result) { return result.state; });
   var latest = rolls[0].recentRolls.length === 2 ? rolls[0] : rolls[1];
   assert.strictEqual(latest.turnTotal, 7);
   assert.strictEqual(latest.recentRolls.length, 2);
@@ -281,20 +288,31 @@ test("the human WebSocket path and the Mate MCP path drive one shared game", asy
   // State only: a Mate never sees Display, and neither surface returns one.
   assert.strictEqual(userState.ui, undefined);
   assert.strictEqual(userState.controls, undefined);
-  // Acting does not push anything to anyone; the initiator gets the reply.
-  assert.deepStrictEqual(sent, []);
+  // Every successful act pushes its causal event to the user's Displays.
+  assert.strictEqual(sent.length, 1);
+  assert.strictEqual(sent[0].type, "tool_server_event");
+  assert.strictEqual(sent[0].toolId, "pig");
+  assert.strictEqual(sent[0].event.actor, "user");
+  assert.strictEqual(sent[0].event.action, "roll");
+  assert.deepStrictEqual(sent[0].event.next, userState);
+  sent.length = 0;
 
   var mateView = await tools.controlForMate("default", "mate-folder", "pig", "snapshot", {});
   assert.strictEqual(mateView.ui, undefined);
   assert.strictEqual(mateView.controls, undefined);
   assert.strictEqual(mateView.turnTotal, userState.turnTotal);
   assert.strictEqual(mateView.turn, userState.turn);
+  // Reading pushes nothing; only a state change does.
+  assert.deepStrictEqual(sent, []);
 
   if (userState.turn === "user") {
     await assert.rejects(function () {
       return tools.controlForMate("default", "mate-folder", "pig", "act", { actionId: "roll", args: {} });
     }, /out of turn/);
+    // A refused act changed nothing, so nothing is pushed.
+    assert.deepStrictEqual(sent, []);
   }
+  sent.length = 0;
 
   assert.strictEqual(tools.handleMessage(socket, { type: "tool_server_control", toolId: "pig", kind: "snapshot", requestId: "snap-1" }), true);
   for (var i = 0; i < 50 && sent.length === 0; i++) await new Promise(function (resolve) { setTimeout(resolve, 5); });
@@ -306,11 +324,91 @@ test("the human WebSocket path and the Mate MCP path drive one shared game", asy
   assert.strictEqual(sent[0].state.userScoreSeries.length, 1);
 });
 
+test("acts push ordered causal events to every open Display of the acting user", async function () {
+  var userId = "pig-events";
+  var eventsA = [];
+  var eventsB = [];
+  var eventsStranger = [];
+  function client(userIdOwner, sink) {
+    return {
+      readyState: 1,
+      _clayUser: { id: userIdOwner },
+      send: function (payload) { sink.push(JSON.parse(payload)); },
+    };
+  }
+  var windowA = client(userId, eventsA);
+  var windowB = client(userId, eventsB);
+  var stranger = client("someone-else", eventsStranger);
+  var projects = new Map();
+  projects.set("home", { forEachClient: function (fn) { fn(windowA); fn(windowB); fn(stranger); } });
+
+  // One scripted die shared across per-act runtime instances, exactly as
+  // production creates a runtime per call over one stored game.
+  var die = scriptedDice([2, 3, 1]);
+  var tools = serverTools.attachTools({
+    users: {
+      isMultiUser: function () { return true; },
+      findUserById: function (id) { return { id: id }; },
+    },
+    projects: projects,
+    serverRuntimes: {
+      hasRuntime: serverRuntimes.hasRuntime,
+      createRuntime: function (toolId, ctx) {
+        return serverRuntimes.createRuntime(toolId, ctx, { rollDie: die });
+      },
+    },
+  });
+  tools.installedManifests(userId);
+
+  await tools.controlForUser(userId, "pig", "act", { actionId: "roll", args: {} });
+  await tools.controlForUser(userId, "pig", "act", { actionId: "hold", args: {} });
+  await tools.controlForMate(userId, "mate-folder", "pig", "act", { actionId: "roll", args: {} });
+  await tools.controlForMate(userId, "mate-folder", "pig", "act", { actionId: "roll", args: {} });
+  await assert.rejects(function () {
+    return tools.controlForMate(userId, "mate-folder", "pig", "act", { actionId: "roll", args: {} });
+  }, /out of turn/);
+
+  // Both of the user's windows saw the same stream; a stranger saw nothing.
+  assert.deepStrictEqual(eventsA, eventsB);
+  assert.deepStrictEqual(eventsStranger, []);
+  assert.strictEqual(eventsA.length, 4, "four state changes, four events, and no event for the refused act");
+  eventsA.forEach(function (msg) {
+    assert.strictEqual(msg.type, "tool_server_event");
+    assert.strictEqual(msg.toolId, "pig");
+  });
+  var events = eventsA.map(function (msg) { return msg.event; });
+  assert.deepStrictEqual(events.map(function (e) { return e.actor; }), ["user", "user", "mate", "mate"]);
+  assert.deepStrictEqual(events.map(function (e) { return e.action; }), ["roll", "hold", "roll", "roll"]);
+  // Ordered stream: seq grows by exactly one per act, and previous chains onto
+  // the prior event's next, so the Display can replay the game step by step.
+  for (var i = 0; i < events.length; i++) {
+    assert.strictEqual(events[i].seq, events[i].next.eventSeq);
+    if (i > 0) {
+      assert.strictEqual(events[i].seq, events[i - 1].seq + 1);
+      assert.deepStrictEqual(events[i].previous, events[i - 1].next);
+    }
+  }
+  // The Mate's bust is fully attributed: turn total 3 wiped, play passed back.
+  var bust = events[3];
+  assert.strictEqual(bust.previous.turnTotal, 3);
+  assert.strictEqual(bust.next.turnTotal, 0);
+  assert.strictEqual(bust.next.turn, "user");
+
+  // A reset starts a new game but never restarts the event clock, so a
+  // Display that saw event N can never mistake the fresh game for stale news.
+  await tools.controlForUser(userId, "pig", "act", { actionId: "reset", args: {} });
+  var resetEvent = eventsA[4].event;
+  assert.strictEqual(resetEvent.action, "reset");
+  assert.strictEqual(resetEvent.seq, events[3].seq + 1);
+  assert.strictEqual(resetEvent.next.scores.user, 0);
+  assert.strictEqual(resetEvent.previous.scores.user, 2);
+});
+
 test("the die stays inside Logic and stays on a real die face", async function () {
   var runtime = runtimeFor("pig-random");
   var seen = Object.create(null);
   for (var i = 0; i < 60; i++) {
-    var state = await runtime.act(USER, "roll", {});
+    var state = (await runtime.act(USER, "roll", {})).state;
     if (state.lastRoll !== null) seen[state.lastRoll] = true;
     if (state.turn !== "user") await runtime.act(MATE, "hold", {});
     if (state.status === "complete") await runtime.act(USER, "reset", {});
