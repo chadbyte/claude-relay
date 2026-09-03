@@ -319,6 +319,73 @@
 .notif-banner-update-now:hover { opacity: 0.85; }
 .notif-banner-update-now:disabled { opacity: 0.6; cursor: default; }
 
+/* Snooze: the quiet sibling of "Update now". Same button metrics so the two
+   sit on one row, but a bordered surface instead of the accent fill, because
+   postponing should never read as the primary action. */
+.notif-banner-snooze { position: relative; display: inline-flex; }
+.notif-banner-snooze-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  border: 1px solid rgba(var(--overlay-rgb), 0.22);
+  background: transparent;
+  color: inherit;
+  opacity: 0.85;
+  transition: opacity 0.15s, border-color 0.15s;
+}
+.notif-banner-snooze-btn:hover { opacity: 1; border-color: rgba(var(--overlay-rgb), 0.4); }
+.notif-banner-snooze-btn:focus-visible {
+  outline: none;
+  opacity: 1;
+  border-color: var(--accent, #6c5ce7);
+  box-shadow: 0 0 0 2px rgba(var(--overlay-rgb), 0.18);
+}
+.notif-banner-snooze-btn .lucide { width: 11px; height: 11px; }
+
+.notif-banner-snooze-menu {
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 0;
+  z-index: 5;
+  min-width: 116px;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  border-radius: 8px;
+  border: 1px solid rgba(var(--overlay-rgb), 0.16);
+  background: var(--bg-alt, #20201d);
+  box-shadow: 0 8px 22px rgba(var(--shadow-rgb), 0.32);
+}
+.notif-banner-snooze-item {
+  padding: 5px 8px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+.notif-banner-snooze-item:hover { background: rgba(var(--overlay-rgb), 0.1); }
+.notif-banner-snooze-item:focus-visible {
+  outline: none;
+  background: rgba(var(--overlay-rgb), 0.14);
+  box-shadow: inset 0 0 0 1px var(--accent, #6c5ce7);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .notif-banner-snooze-btn { transition: none; }
+}
+
 .light-theme .notif-banner-clear-all {
   background:
     linear-gradient(180deg, rgba(255,255,255,0.54), rgba(255,255,255,0.28)),
