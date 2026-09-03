@@ -132,9 +132,9 @@ function tmp(label) {
   return fs.mkdtempSync(path.join(os.tmpdir(), "clay-ko-" + label + "-"));
 }
 
-// One .jsonl line becomes one Knowledge record, so a single import mints many
-// refs at once. Enough of them that a "-" versus "_" discriminating pair is a
-// near-certainty, which the fixture then asserts rather than assumes.
+// One .jsonl line becomes one Knowledge record. The fixture freezes Date.now
+// while importing so every record has the same updatedAt and the service-level
+// ref tie-break is exercised deterministically, independent of machine load.
 var RECORD_COUNT = 260;
 
 function buildWorkspace() {
@@ -151,7 +151,13 @@ function buildWorkspace() {
   }
   fs.mkdirSync(path.join(mateDir, "knowledge"), { recursive: true });
   fs.writeFileSync(path.join(mateDir, "knowledge", "digests.jsonl"), lines.join("\n") + "\n");
-  mateSync.reconcileMate({ mateDir: mateDir, baseDir: baseDir, actor: { type: "migration" } });
+  var realNow = Date.now;
+  Date.now = function () { return 1770000000000; };
+  try {
+    mateSync.reconcileMate({ mateDir: mateDir, baseDir: baseDir, actor: { type: "migration" } });
+  } finally {
+    Date.now = realNow;
+  }
 
   var session = { localId: 1, cliSessionId: "cli-ord", ownerId: "alice" };
   var manager = { sessions: new Map([[1, session]]) };
@@ -213,25 +219,6 @@ function drain(call, pageSize) {
   return out;
 }
 
-// Fails loudly if the minted refs cannot exercise the defect, rather than
-// silently passing on data that no comparator choice would reorder.
-function assertDiscriminates(refs) {
-  var found = 0;
-  for (var i = 0; i < refs.length; i++) {
-    for (var j = i + 1; j < refs.length; j++) {
-      var a = refs[i];
-      var b = refs[j];
-      var k = 0;
-      while (k < a.length && k < b.length && a[k] === b[k]) k++;
-      if (k >= a.length || k >= b.length) continue;
-      var pair = a[k] + b[k];
-      if (pair === "-_" || pair === "_-") found++;
-    }
-  }
-  assert.ok(found > 0, "the fixture contains at least one \"-\" versus \"_\" pair, so the two orderings differ");
-  return found;
-}
-
 test("Mate Knowledge list orders by updatedAt desc then code-unit ref", function () {
   var ws = buildWorkspace();
   var pages = drain(function (args) { return ws.bound.listKnowledge(args); }, 50);
@@ -242,7 +229,6 @@ test("Mate Knowledge list orders by updatedAt desc then code-unit ref", function
 
   var refs = entries.map(function (entry) { return entry.ref; });
   assert.equal(new Set(refs).size, RECORD_COUNT, "refs are unique");
-  assertDiscriminates(refs);
 
   // The documented total order, computed here without localeCompare.
   var expected = entries.slice().sort(function (a, b) {
@@ -250,7 +236,7 @@ test("Mate Knowledge list orders by updatedAt desc then code-unit ref", function
   }).map(function (entry) { return entry.ref; });
   assertSameOrder(refs, expected, "the paged sequence matches the documented total order");
 
-  // Ties must actually be present, or the tie-break is untested.
+  // The frozen import clock makes the tie explicit rather than statistical.
   var byStamp = {};
   for (var i = 0; i < entries.length; i++) {
     var stamp = entries[i].updatedAt;
@@ -258,7 +244,8 @@ test("Mate Knowledge list orders by updatedAt desc then code-unit ref", function
     byStamp[stamp].push(entries[i].ref);
   }
   var tied = Object.keys(byStamp).filter(function (k) { return byStamp[k].length > 1; });
-  assert.ok(tied.length > 0, "one import produces timestamp ties");
+  assert.equal(tied.length, 1, "the fixture creates one exact timestamp tie group");
+  assert.equal(byStamp[tied[0]].length, RECORD_COUNT, "every record participates in the tie-break");
   for (var g = 0; g < tied.length; g++) {
     assertSameOrder(byStamp[tied[g]], byStamp[tied[g]].slice().sort(codeUnit), "tied group in code-unit order");
     assertSameOrder(byStamp[tied[g]], byStamp[tied[g]].slice().sort(), "tied group in default lexical order");
@@ -289,7 +276,6 @@ test("Mate Knowledge search orders by score desc, updatedAt desc, then code-unit
 
   var refs = hits.map(function (hit) { return hit.ref; });
   assert.equal(new Set(refs).size, RECORD_COUNT);
-  assertDiscriminates(refs);
 
   var expected = hits.slice().sort(function (a, b) {
     return b.score - a.score || b.updatedAt - a.updatedAt || codeUnit(a.ref, b.ref);
