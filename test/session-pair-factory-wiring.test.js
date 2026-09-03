@@ -240,12 +240,12 @@ test("the Mate guard actually fires again", async function (t) {
   assert.deepEqual(world.created, [], "and no session either");
 });
 
-test("owner, eligibility and preflight guarantees still hold after the fix", async function (t) {
-  // Eligibility: a below-tier Driver gets no tools and creates nothing.
+test("owner and preflight guarantees still hold after the fix", async function (t) {
+  // Model tier is the user's choice, including in multi-user projects.
   var below = makeWorld({ multiUser: true, ownerId: "alice" });
   t.after(below.dispose);
   below.driver.model = "claude-sonnet-5";
-  assert.equal(below.tool("send_to_partner"), null, "no pair tools below the Driver tier");
+  assert.ok(below.tool("send_to_partner"), "pair tools are mounted for the selected model");
   assert.equal(below.groups.length, 0);
 
   // Preflight: an unavailable vendor is refused and nothing is created.

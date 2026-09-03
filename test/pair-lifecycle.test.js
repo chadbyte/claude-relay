@@ -225,7 +225,8 @@ test("partner_status reports bounded capacity and no transcript", async function
   assert.equal(typeof status.continuity.historyEntries, "number");
   assert.equal(status.replaceSafe, true);
   assert.equal(status.replaceBlockedReason, null);
-  assert.equal(status.driverTier, "Fable");
+  assert.equal(Object.prototype.hasOwnProperty.call(status, "driverTier"), false,
+    "status does not imply a model-tier policy");
 
   var text = JSON.stringify(status);
   assert.equal(text.indexOf("a very long private answer"), -1, "no transcript is returned");
@@ -453,18 +454,18 @@ test("replacement records the observed signals for the generation it closed", as
 
 // --- Security -------------------------------------------------------------
 
-test("an ineligible Driver model gets no pair tools at all", function () {
+test("Driver tools are available regardless of model tier", function () {
   var below = makeWorld({ driverModel: "claude-sonnet-5" });
-  assert.deepEqual(below.tools(), [], "Sonnet is below the Fable threshold");
+  assert.ok(below.tools().length > 0, "Sonnet can drive when the user chooses it");
 
   var none = makeWorld({ driverModel: "" });
-  assert.deepEqual(none.tools(), [], "no resolved model fails closed");
+  assert.ok(none.tools().length > 0, "the provider default may resolve at query start");
 
   var eligible = makeWorld({ driverModel: "claude-fable-5" });
   assert.ok(eligible.tools().length > 0);
 });
 
-test("pair creation itself fails closed for an ineligible model", function () {
+test("pair creation preserves explicit roles for a user-selected Driver model", function () {
   var factory = require("../lib/session-pair-factory");
   var driver = { localId: 1, ownerId: null, vendor: "claude", model: "claude-sonnet-5", history: [] };
   var sessions = new Map([[1, driver]]);
@@ -484,14 +485,19 @@ test("pair creation itself fails closed for an ineligible model", function () {
     },
     splitStore: {
       groupForMember: function () { return null; },
-      create: function () { throw new Error("group should never be created"); },
+      create: function (ws, msg) {
+        return { ok: true, group: { members: msg.members, pair: msg.pair } };
+      },
     },
     ctx: { isMate: false, usersModule: { isMultiUser: function () { return false; } }, sendTo: function () {} },
   });
 
-  assert.throws(function () {
-    f.createPairRecord({ _clayUser: null }, { driver: { sessionId: 1 }, worker: { vendor: "codex" } });
-  }, /Fable tier or higher/, "role assignment is refused with a clear English reason");
+  var created = f.createPairRecord(
+    { _clayUser: null },
+    { driver: { sessionId: 1 }, worker: { vendor: "codex" } }
+  );
+  assert.equal(created.group.pair.driverId, driver.localId, "the existing session remains the Driver");
+  assert.equal(created.group.pair.workerId, created.worker.localId, "the new session is explicitly the Worker");
 });
 
 test("only the exact live Driver of the exact pair can manage it", async function (t) {
@@ -605,9 +611,7 @@ test("server conventions and module sizes hold", function () {
 
 // --- No orphans on rejection ---------------------------------------------
 
-test("a rejected Driver leaves no orphan session behind", function (t) {
-  // Nothing may be created when a request is rejected, so each case asserts on
-  // the exact set of sessions the factory made.
+test("Driver model choice and failed pair preflight preserve exact roles without orphans", function (t) {
   var factory = require("../lib/session-pair-factory");
 
   function harness(options) {
@@ -651,31 +655,33 @@ test("a rejected Driver leaves no orphan session behind", function (t) {
     return { f: f, sessions: sessions, createdSpecs: createdSpecs, groupsCreated: groupsCreated };
   }
 
-  // 1. Existing Driver below tier: evaluated before anything is created.
+  // 1. An existing Driver below the former tier threshold is allowed.
   var h1 = harness({ existingDriver: { localId: 1, ownerId: null, vendor: "claude", model: "claude-sonnet-5", history: [] } });
-  assert.throws(function () {
-    h1.f.createPairRecord({ _clayUser: null }, { driver: { sessionId: 1 }, worker: { vendor: "codex" } });
-  }, /Fable tier or higher/);
-  assert.deepEqual(h1.createdSpecs, [], "no session was created");
-  assert.equal(h1.sessions.size, 1, "only the pre-existing Driver remains");
-  assert.deepEqual(h1.groupsCreated, []);
+  var existingCreated = h1.f.createPairRecord(
+    { _clayUser: null },
+    { driver: { sessionId: 1 }, worker: { vendor: "codex" } }
+  );
+  assert.equal(h1.createdSpecs.length, 1, "only the Worker was created");
+  assert.equal(existingCreated.group.pair.driverId, 1);
+  assert.equal(existingCreated.group.pair.workerId, existingCreated.worker.localId);
 
-  // 2. Newly requested Driver whose effective model is below tier: the tier is
-  //    judged before either session exists.
+  // 2. A newly requested Driver may use the vendor's lower-tier default.
   var h2 = harness({ defaultModelByVendor: { claude: "claude-sonnet-5" } });
-  assert.throws(function () {
-    h2.f.createPairRecord({ _clayUser: null }, { driver: { vendor: "claude" }, worker: { vendor: "codex" } });
-  }, /Fable tier or higher/);
-  assert.deepEqual(h2.createdSpecs, [], "neither Driver nor Worker was created");
-  assert.equal(h2.sessions.size, 0);
+  var defaultCreated = h2.f.createPairRecord(
+    { _clayUser: null },
+    { driver: { vendor: "claude" }, worker: { vendor: "codex" } }
+  );
+  assert.equal(h2.createdSpecs.length, 2, "Driver and Worker were created");
+  assert.equal(defaultCreated.group.pair.driverId, defaultCreated.driver.localId);
+  assert.equal(defaultCreated.group.pair.workerId, defaultCreated.worker.localId);
 
-  // 3. Newly requested Driver with an explicit below-tier model.
+  // 3. A newly requested Driver may use an explicit available lower-tier model.
   var h3 = harness({ defaultModelByVendor: { claude: "claude-fable-5" } });
-  assert.throws(function () {
-    h3.f.createPairRecord({ _clayUser: null },
-      { driver: { vendor: "claude", model: "claude-sonnet-5" }, worker: { vendor: "codex" } });
-  }, /Fable tier or higher/);
-  assert.deepEqual(h3.createdSpecs, [], "the explicit request is judged, not the default");
+  var explicitCreated = h3.f.createPairRecord(
+    { _clayUser: null },
+    { driver: { vendor: "claude", model: "claude-sonnet-5" }, worker: { vendor: "codex" } }
+  );
+  assert.equal(explicitCreated.driver.model, "claude-sonnet-5");
 
   // 4. An unusable Worker request also creates nothing, including no Driver.
   var h4 = harness({ defaultModelByVendor: { claude: "claude-fable-5" } });
