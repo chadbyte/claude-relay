@@ -1,3 +1,24 @@
+# [4.0.0-beta.11](https://github.com/chadbyte/clay/compare/v4.0.0-beta.10...v4.0.0-beta.11) (2026-09-03)
+
+
+### Bug Fixes
+
+* **daemon:** preserve live processes on permission errors ([1aba098](https://github.com/chadbyte/clay/commit/1aba098c7142b4d0c9030dc02f91985d18d1a88d))
+* **knowledge:** make result ordering deterministic ([e154fb6](https://github.com/chadbyte/clay/commit/e154fb69492de8d2e1316fb25aa90c3db3c9575d))
+* **security:** enforce authoritative workspace access ([010c983](https://github.com/chadbyte/clay/commit/010c983b80548938d4bcf5aa35ad71a94bdaeb41))
+
+
+### Features
+
+* expand home board operations and worker orchestration ([#475](https://github.com/chadbyte/clay/issues/475)) ([fe49f3c](https://github.com/chadbyte/clay/commit/fe49f3c2a4260c44c3c152f91569cd75f945cdc2))
+* **git:** add persistent repository status placard ([a5e7e44](https://github.com/chadbyte/clay/commit/a5e7e444c0bfe199e20736f519de5fafc6a5a846))
+* **logs:** define sticky note attention lifecycle ([ce5ba32](https://github.com/chadbyte/clay/commit/ce5ba32fd0f3f25933824c75423586b163f5bfc8))
+* **notes:** preserve completed sticky notes ([c3a735d](https://github.com/chadbyte/clay/commit/c3a735de9ff94d5f76fa28499fae16ffbefcf89d))
+* **toolbar:** restore scheduled tasks button ([daa8bef](https://github.com/chadbyte/clay/commit/daa8bef50632d35059c80c6cd78112333cbdecbe))
+* **updater:** add admin-only notification snoozing ([d773411](https://github.com/chadbyte/clay/commit/d7734115ded0070babe88d7187f2442456a04de4))
+* **worker:** automate driver-managed worker lifecycle ([62e4171](https://github.com/chadbyte/clay/commit/62e4171e1547c12b4fea12e9c28d8d4f66951a43))
+* **worker:** route permission decisions through driver ([cb7673c](https://github.com/chadbyte/clay/commit/cb7673c6843b4cfc37e219536e352c7bc9fb5362))
+
 # [4.0.0-beta.10](https://github.com/chadbyte/clay/compare/v4.0.0-beta.9...v4.0.0-beta.10) (2026-09-02)
 
 
