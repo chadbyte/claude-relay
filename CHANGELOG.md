@@ -1,3 +1,14 @@
+# [4.0.0-beta.13](https://github.com/chadbyte/clay/compare/v4.0.0-beta.12...v4.0.0-beta.13) (2026-09-03)
+
+
+### Bug Fixes
+
+* **home:** generate meaningful chat titles ([8ad903f](https://github.com/chadbyte/clay/commit/8ad903feba3e5ade9752d74a36484b82968c5630))
+* **logs:** preserve sticky notes when opening ledger ([94de68e](https://github.com/chadbyte/clay/commit/94de68ef26a218cd5763be2636c27425e9e81578))
+* **logs:** remove edge reveal interaction ([34f9e90](https://github.com/chadbyte/clay/commit/34f9e90e9e4fc2b042fe9b20892671d91f798c6a))
+* **logs:** reserve learning for user moments ([8e0b511](https://github.com/chadbyte/clay/commit/8e0b511403b8cbc96f06fe9f35c37b3ff07ca80f))
+* **worker:** enforce human stop across pair lifecycle ([9999881](https://github.com/chadbyte/clay/commit/999988150e08af72fbf85780a58acf1ec8b3602a))
+
 # [4.0.0-beta.12](https://github.com/chadbyte/clay/compare/v4.0.0-beta.11...v4.0.0-beta.12) (2026-09-03)
 
 
