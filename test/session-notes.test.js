@@ -3,6 +3,7 @@ var assert = require("node:assert");
 var notesModule = require("../lib/project-session-notes");
 var pairModule = require("../lib/project-session-pair");
 var createSDKBridge = require("../lib/sdk-bridge").createSDKBridge;
+var lifecycle = require("../lib/notes-lifecycle");
 
 function parseResult(result) {
   return JSON.parse(result.content[0].text);
@@ -38,15 +39,25 @@ function createFixture(initialNotes) {
       }
       return null;
     },
-    remove: function (id) {
+    close: function (id, actor) {
       for (var i = 0; i < notes.length; i++) {
-        if (notes[i].id === id) {
-          notes.splice(i, 1);
-          return true;
-        }
+        if (notes[i].id !== id) continue;
+        lifecycle.applyClose(notes[i], actor || null, Date.now());
+        return notes[i];
       }
-      return false;
+      return null;
     },
+    reopen: function (id) {
+      for (var i = 0; i < notes.length; i++) {
+        if (notes[i].id !== id) continue;
+        lifecycle.applyReopen(notes[i]);
+        return notes[i];
+      }
+      return null;
+    },
+    // Present only so a test can prove nothing ever calls it.
+    removeCalls: 0,
+    remove: function () { nm.removeCalls++; return false; },
   };
   var attached = notesModule.attachSessionNotes({
     nm: nm,
@@ -88,6 +99,8 @@ test("session note handlers list, create, and update shared notes", async functi
     color: "blue",
     updatedAt: 1,
     origin: null,
+    state: "open",
+    closedAt: null,
   }]);
 
   var created = parseResult(await tools.write_note.handler({ text: "Remember the API decision", color: "green" }));
@@ -174,14 +187,14 @@ test("write_note caps new active notes at twenty but still permits updates", asy
   var tools = toolsFor(f);
   var createResult = await tools.write_note.handler({ text: "One too many" });
   assert.strictEqual(createResult.isError, true);
-  assert.match(createResult.content[0].text, /20 active notes/);
+  assert.match(createResult.content[0].text, /20 open notes/);
 
   var updateResult = await tools.write_note.handler({ id: "note-0", text: "Consolidated fact" });
   assert.strictEqual(updateResult.isError, undefined);
   assert.strictEqual(f.notes[0].text, "Consolidated fact");
 });
 
-test("remove_note enforces calling-session ownership", async function () {
+test("the deprecated remove_note closes instead of deleting, and still enforces ownership", async function () {
   var f = createFixture([
     { id: "own", text: "Own", origin: { sessionId: 7, vendor: "kiro" } },
     { id: "other", text: "Other", origin: { sessionId: 8, vendor: "claude" } },
@@ -195,9 +208,16 @@ test("remove_note enforces calling-session ownership", async function () {
   assert.strictEqual(f.notes.length, 3);
 
   var ownResult = parseResult(await tool.handler({ id: "own" }));
-  assert.deepStrictEqual(ownResult, { removed: true, id: "own" });
-  assert.strictEqual(f.notes.length, 2);
-  assert.deepStrictEqual(f.broadcasts[0], { type: "note_deleted", id: "own" });
+  // The old response shape survives so an existing caller still parses it, but
+  // it now states plainly that nothing was deleted.
+  assert.deepStrictEqual(ownResult, { removed: true, closed: true, deleted: false, id: "own", state: "closed" });
+  assert.strictEqual(f.notes.length, 3, "the record is still there");
+  assert.strictEqual(lifecycle.stateOf(f.notes[0]), "closed");
+  assert.strictEqual(f.broadcasts[0].type, "note_updated", "no note_deleted is ever broadcast");
+  assert.strictEqual(f.nm.removeCalls, 0, "the destructive path is never reached");
+  // Closed notes leave the active board but remain queryable.
+  assert.deepStrictEqual(parseResult(await toolsFor(f).list_notes.handler({})).map(function (n) { return n.id; }), ["other", "user"]);
+  assert.deepStrictEqual(parseResult(await toolsFor(f).list_notes.handler({ state: "closed" })).map(function (n) { return n.id; }), ["own"]);
 });
 
 test("sticky-note prompt announces an empty board and proactive policy", function () {

@@ -87,10 +87,12 @@ test("the contract states both layers and what makes them different", function (
     /Sticky Notes and Project Logs are two different layers and must not be confused/,
     /transient attention layer/,
     /unresolved, actionable/,
-    /removed once it no longer does/,
+    /closed once it no longer does/,
+    /Closing is reversible and never deletes the note/,
     /durable project-scoped ledger/,
     /discovery, evidence, impact, decision, remediation, and outcome/,
     /permanently, versioned/,
+    /long after the note has been closed/,
   ], "boundary");
 });
 
@@ -108,7 +110,7 @@ test("correlation runs log-first and carries the opaque ref into the note", func
     /create or update the log entry first, then write the note/,
     /include the entry's opaque log: reference in the note text/,
     /must never depend on a note id for its identity/,
-    /notes are removed and ids do not survive/,
+    /the note is a transient alert and the ledger must stand on its own/,
   ], "correlation");
   // The direction matters: the note points at the log, never the reverse.
   var refIdx = CONTRACT.indexOf("opaque log: reference in the note text");
@@ -141,11 +143,12 @@ test("the resolution lifecycle ends with the note gone and the entry kept", func
     /When the defect is fixed, revise that same entry/,
     /the remediation, how it was verified, and the outcome/,
     /new canonical revision/,
-    /only then remove the Sticky Note/,
-    /The note goes; the entry stays/,
+    /only then close the Sticky Note/,
+    /Close it, never delete it/,
+    /the note leaves the active board and the entry stays permanent/,
   ], "resolution");
   var reviseIdx = CONTRACT.indexOf("When the defect is fixed, revise that same entry");
-  var removeIdx = CONTRACT.indexOf("only then remove the Sticky Note");
+  var removeIdx = CONTRACT.indexOf("only then close the Sticky Note");
   assert.ok(reviseIdx !== -1 && removeIdx > reviseIdx, "the revision is ordered before the removal");
 });
 
@@ -154,6 +157,13 @@ test("a defect fixed inside the current task opens no note", function () {
     /find and fully fix a defect inside the current task, do not open a Sticky Note for it at all/,
     /write a log entry only when the discovery itself has durable value/,
   ], "same-task exception");
+});
+
+test("the contract never tells the Driver to delete or remove a note", function () {
+  assert.doesNotMatch(CONTRACT, /remove the Sticky Note|delete the Sticky Note|remove the note|delete the note/i,
+    "resolution closes the note; it never erases it");
+  assert.match(CONTRACT, /close the Sticky Note/, "and says close explicitly");
+  assert.doesNotMatch(CONTRACT, /\barchive\b/i, "Archive is not this lifecycle's vocabulary");
 });
 
 test("noise is excluded from the ledger in both directions", function () {
