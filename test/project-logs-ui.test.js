@@ -6,7 +6,8 @@ var path = require("node:path");
 var root = path.join(__dirname, "..");
 function source(file) { return fs.readFileSync(path.join(root, file), "utf8"); }
 
-var paletteSource = source("lib/public/modules/tool-palette.js");
+// The tool registry lives in tool-palette-order.js; tool-palette.js owns the DOM.
+var paletteSource = source("lib/public/modules/tool-palette-order.js");
 var logsSource = source("lib/public/modules/project-logs.js");
 var renderSource = source("lib/public/modules/project-logs-render.js");
 var ambientSource = source("lib/public/modules/project-logs-ambient.js");
