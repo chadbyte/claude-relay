@@ -100,6 +100,16 @@ test("session spawn parses a valid batch", function() {
   ]);
 });
 
+test("session spawn is explicit that it cannot substitute for a Split Worker", function () {
+  var defs = require("../lib/session-spawn-mcp-server").getToolDefs({
+    spawn: function () {},
+    check: function () {},
+  });
+  var spawn = defs.filter(function (tool) { return tool.name === "spawn_sessions"; })[0];
+  assert.match(spawn.description, /does not create a visible Driver\/Split Worker pair/);
+  assert.match(spawn.description, /use send_to_partner/);
+});
+
 test("session spawn rejects a non-array batch", function() {
   assert.throws(function() {
     spawnModule.parseBatch("{}");

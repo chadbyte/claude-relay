@@ -308,10 +308,9 @@ test("the Driver can close an idle Worker while preserving its session", async f
 
   assert.deepStrictEqual(result, { status: "closed", partnerId: 2, interrupted: false, historyPreserved: true });
   assert.strictEqual(f.getGroup(), null);
-  // The now-ungrouped Worker is a Codex session with no resolved model, so it
-  // is below the Driver threshold and gets no pair tools: an ineligible model
-  // cannot create a pair with itself as Driver.
-  assert.strictEqual(f.attached.getToolDefs(f.worker).length, 0);
+  // Once ungrouped, this ordinary project chat may become a Driver regardless
+  // of its selected model. Closing the pair changes its role, not its agency.
+  assert.ok(f.attached.getToolDefs(f.worker).length > 0);
 });
 
 test("closing a running Worker interrupts it before dissolving the pair", async function () {

@@ -60,6 +60,7 @@ function fixture(opts) {
   });
 
   var sent = [];
+  var feedback = [];
   var attached = attachProjectLogs({
     service: service,
     sm: projects.get(options.mate ? "mate-home" : "app").getSessionManager(),
@@ -68,9 +69,10 @@ function fixture(opts) {
     isMate: !!options.mate,
     mateId: options.mate ? "mate-id" : null,
     sendTo: function (ws, message) { sent.push(message); },
+    onFeedback: function (entry) { feedback.push(entry); },
   });
 
-  return { attached: attached, sent: sent, session: session, otherSession: otherSession, mateSession: mateSession, service: service, projects: projects };
+  return { attached: attached, sent: sent, feedback: feedback, session: session, otherSession: otherSession, mateSession: mateSession, service: service, projects: projects };
 }
 
 function ws(user) {
@@ -131,6 +133,8 @@ test("the WebSocket round trip emits exactly the client protocol payloads", func
   assert.equal(commented.entry.comments[0].body, "Confirmed.");
   assert.equal(commented.entry.comments[0].author.userId, "owner");
   assert.equal(commented.entry.revisions, 1, "a comment is not a revision");
+  assert.equal(f.feedback.length, 1, "the exact persisted entry is handed to immediate delivery");
+  assert.equal(f.feedback[0].ref, entry.ref);
 
   // A valid category this project has never used narrows to nothing rather
   // than erroring, and the vocabulary is still reported.
