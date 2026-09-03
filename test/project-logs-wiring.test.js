@@ -755,12 +755,15 @@ test("the prompt count reflects every live entry, not just the first page", func
 test("the guidance names both kinds of learning moment", function () {
   var learning = logsMcp.LEARNING_CONTRACT;
 
+  assert.match(learning, /exclusively about the user's learning/i);
+  assert.match(learning, /never a record of something you, the Driver, learned or discovered/i);
+
   // (a) a direct conceptual question.
-  assert.match(learning, /asks a conceptual question directly/i);
+  assert.match(learning, /user asks a conceptual question directly/i);
   assert.match(learning, /durable and relevant to this project/i);
 
   // (b) the vague intuition that gets a precise name, which is the easy one to miss.
-  assert.match(learning, /describes something in their own approximate words/i);
+  assert.match(learning, /user describes something in their own approximate words/i);
   assert.match(learning, /precise term, model, or mechanism/i);
   assert.match(learning, /easier to miss/i);
 
@@ -796,11 +799,17 @@ test("capture is the default, without fabrication or grading", function () {
 
 test("noise exclusions and the update-not-duplicate rule are explicit", function () {
   var learning = logsMcp.LEARNING_CONTRACT;
+  assert.match(learning, /engineering lessons/i);
+  assert.match(learning, /repository discoveries/i);
+  assert.match(learning, /investigation outcomes/i);
+  assert.match(learning, /defect causes/i);
+  assert.match(learning, /implementation insights/i);
+  assert.match(learning, /use an appropriate category such as `investigation`, `defect`, `decision`, or `reference`/i);
   assert.match(learning, /routine command syntax/i);
   assert.match(learning, /trivial confirmations/i);
-  assert.match(learning, /facts the person clearly already knows/i);
+  assert.match(learning, /facts the user clearly already knows/i);
   assert.match(learning, /every explanation you happen to give/i);
-  assert.match(learning, /conceptual model becomes measurably more precise/i);
+  assert.match(learning, /user's conceptual model becomes measurably more precise/i);
   assert.match(learning, /refines or supersedes an existing learning entry, revise that entry/i);
   assert.match(learning, /instead of adding a near-duplicate/i);
 });
@@ -817,6 +826,8 @@ test("learning stays an adaptive category, never an enum", function () {
   assert.equal(logsMcp.SEED_CATEGORIES.indexOf("learning"), -1,
     "learning is not bolted onto the seed list either");
   assert.match(create.inputSchema.kind.description, /this project's own vocabulary, not a fixed list/i);
+  assert.match(create.inputSchema.kind.description, /learning.*only for a user learning moment/i);
+  assert.match(create.inputSchema.kind.description, /never for knowledge or lessons acquired by the Driver/i);
 
   // A project may actually use it, and it normalizes like any other label.
   var f = fixture();
@@ -844,7 +855,7 @@ test("the learning guidance reaches the Driver without injecting record content"
   });
 
   var prompt = f.attached.getSystemPrompt(f.session);
-  assert.match(prompt, /Capture durable learning moments as Project Logs/);
+  assert.match(prompt, /Capture durable user learning moments as Project Logs/);
   assert.match(prompt, /backdrop-filter/, "the worked example is guidance, so it is expected");
 
   // Guidance only: no ledger content, refs, titles, or counts of records.
