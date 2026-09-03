@@ -463,3 +463,55 @@ body.sticky-note-interacting .split-pane-frame {
   font-size: 13px;
   font-weight: 700;
 }
+
+/* Driver-operated Split Worker surface.
+   ------------------------------------------------------------------
+   The composer is gone, so the region needs to read as "execution
+   surface", not "chat with a broken input". The whole treatment is one
+   line in the composer's own footprint: same content width, same
+   horizontal rhythm, deliberately shorter than the input it replaces so
+   the transcript gains the space rather than a warning banner taking it.
+
+   Utilitarian on purpose. A hairline top rule and a small steady dot
+   carry the state; there is no panel, no card, no icon set, no colour
+   alarm. The dot does not pulse — a standing condition should not
+   animate. Muted text, uppercase micro-label with wide tracking: it
+   reads as instrumentation, which is what it is. */
+#input-area .worker-pane-status {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  max-width: var(--content-width);
+  margin: 0 auto;
+  padding: 9px 12px calc(9px + var(--safe-bottom, 0px));
+  border-top: 1px solid var(--border-subtle);
+  color: var(--text-dimmer);
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  user-select: none;
+}
+#input-area .worker-pane-status.visible { display: flex; }
+
+.worker-pane-status-mark {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--text-dimmer);
+  /* A faint halo so the dot reads as a live indicator at 5px rather than
+     as a stray period, without becoming a status "light". */
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--text-dimmer) 14%, transparent);
+}
+
+/* The composer is hidden rather than removed, so the transcript keeps its
+   scroll container and nothing reflows when a pair dissolves. */
+body.worker-pane-locked #input-wrapper { display: none; }
+body.worker-pane-locked #input-area {
+  padding-top: 0;
+  background: transparent;
+}

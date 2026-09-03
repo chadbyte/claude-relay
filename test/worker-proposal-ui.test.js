@@ -23,9 +23,15 @@ test("message routing renders and updates Worker proposal lifecycle events", fun
   assert.match(source, /msg\.name\.indexOf\("propose_worker"\)/);
 });
 
-test("posting the approval card does not trigger a redundant tool permission prompt", function () {
+test("the retired proposal tool is no longer whitelisted, because it is no longer offered", function () {
+  // A qualified Driver creates and manages its Split Worker directly, so
+  // propose_worker is mounted for nobody. Keeping a whitelist entry for a tool
+  // no model can call would only be a dead auto-approval.
   var source = fs.readFileSync(path.join(root, "lib/sdk-bridge.js"), "utf8");
-  assert.match(source, /propose_worker: true/);
+  assert.equal(/propose_worker/.test(source), false);
+  // The lifecycle tools that replaced it are auto-approved instead.
+  assert.match(source, /replace_partner: true/);
+  assert.match(source, /partner_status: true/);
 });
 
 test("Worker proposal card keeps responsive controls inside split panes", function () {

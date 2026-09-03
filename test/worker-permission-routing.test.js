@@ -172,11 +172,19 @@ test("a Driver from another user cannot answer even with the right request id", 
   route(world);
   var requestId = world.resumes[0].meta.requestId;
 
-  // Same localId, different owner: identity is re-derived, not trusted.
+  // Same localId, different owner, not the live entry: refused by the
+  // exact-live-object guard, which is the earlier and stronger invariant.
   var impostor = makeSession(1, "mallory");
   var denied = await world.router.handleDriverResponse({ requestId: requestId, decision: "allow" }, impostor);
   assert.equal(denied.isError, true);
-  assert.match(denied.content[0].text, /access denied/);
+  assert.match(denied.content[0].text, /no longer live/);
+
+  // The owner check still has its own teeth: the live Driver object itself,
+  // whose ownership changed after the request was opened, is also refused.
+  world.driver.ownerId = "mallory";
+  var reowned = await world.router.handleDriverResponse({ requestId: requestId, decision: "allow" }, world.driver);
+  assert.equal(reowned.isError, true);
+  assert.match(reowned.content[0].text, /access denied/);
 });
 
 test("the response tool is offered to the Driver only", function () {
@@ -435,8 +443,13 @@ test("the router cannot reach the mode-mutating plan decisions at all", function
   // project-sessions.js, which the router never travels.
   assert.equal(/allow_accept_edits|allow_clear_context/.test(routerCode), false,
     "no mode-changing decision string appears in router code");
-  assert.equal(/setPermissionMode|currentPermissionMode|allowedTools/.test(routerCode), false,
-    "and the router touches neither the permission mode nor persistent grants");
+  // The router may *read* a mode — inheritedPermissionMode resolves the
+  // Driver's, which is the whole point of Driver-operated inheritance — but it
+  // must never write one, nor grant a tool persistently.
+  assert.equal(/setPermissionMode|\.permissionMode\s*=|allowedTools/.test(routerCode), false,
+    "the router writes neither a permission mode nor a persistent grant");
+  assert.match(routerCode, /return driver\.permissionMode \|\| sm\.currentPermissionMode/,
+    "it reads the Driver's mode, which is a read and not a mutation");
   // The explanation is still required to be present, in the comments.
   assert.match(routerSource, /decision\s*\n\/\/ strings\* carried on the permission_response WebSocket message/);
 
@@ -536,4 +549,160 @@ test("identity is re-derived from the live pair, never taken from arguments", fu
   assert.match(fn, /record\.driverId !== caller\.localId/, "the caller must be the recorded Driver");
   assert.match(fn, /caller\.ownerId \|\| null\) !== record\.ownerId/, "and the same owner");
   assert.match(fn, /if \(!pairStillExact\(record\)\)/, "and the pair must still be exactly that pair");
+});
+
+// --- Exact live session objects, not just ids ----------------------------
+//
+// A localId is reusable and a session object can be replaced in the manager by
+// a rehydrated or forged one carrying the same id. Identity by id alone would
+// let a stale object inherit the Driver's permission mode, be treated as
+// Driver-operated, open a routed request against the wrong object, or answer
+// one through a captured handler.
+
+function impostorOf(session, overrides) {
+  return Object.assign({
+    localId: session.localId,
+    ownerId: session.ownerId,
+    history: [],
+    destroying: false,
+  }, overrides || {});
+}
+
+test("a stale Worker object no longer inherits the Driver's permission mode", function () {
+  var world = makeWorld();
+  world.driver.permissionMode = "bypassPermissions";
+
+  // Live: the configured Worker inherits skip mode from its Driver.
+  assert.equal(world.router.inheritedPermissionMode(world.worker), "bypassPermissions");
+
+  // The manager entry is replaced by a different object with the same id.
+  var stale = world.worker;
+  var impostor = impostorOf(stale);
+  world.sessions.set(stale.localId, impostor);
+
+  assert.equal(world.router.inheritedPermissionMode(stale), null,
+    "the stale object inherits nothing, so the caller keeps its own resolution");
+  assert.equal(world.router.inheritedPermissionMode(impostor), "bypassPermissions",
+    "and the live object still does");
+
+  // A stale Driver object is equally powerless to donate a mode.
+  var liveWorker = impostor;
+  var staleDriver = world.driver;
+  world.sessions.set(staleDriver.localId, impostorOf(staleDriver, { permissionMode: "default" }));
+  assert.equal(world.router.inheritedPermissionMode(liveWorker), "default",
+    "inheritance follows the live Driver entry, not the object that was captured");
+});
+
+test("a stale Worker object is not Driver-operated, so it cannot be mutated as one", function () {
+  var world = makeWorld();
+  assert.equal(world.router.isDriverOperated(world.worker), true);
+
+  var stale = world.worker;
+  world.sessions.set(stale.localId, impostorOf(stale));
+
+  assert.equal(world.router.isDriverOperated(stale), false,
+    "the wrong object is never treated as the configured Worker");
+  assert.equal(world.router.isDriverOperated(world.sessions.get(stale.localId)), true,
+    "while the live entry still is, so the human-send refusal still applies to it");
+
+  // The Driver side too: a stale Driver object is not a Worker either way.
+  assert.equal(world.router.isDriverOperated(world.driver), false);
+});
+
+test("a live server-resolved configured Worker stays blocked from human sends", function () {
+  // isDriverOperated is what the ordinary-message refusal consults, so the
+  // property that matters is that the live entry keeps answering true.
+  var world = makeWorld();
+  var live = world.sessions.get(world.worker.localId);
+  assert.equal(world.router.isDriverOperated(live), true, "before any swap");
+
+  var replaced = impostorOf(world.worker);
+  world.sessions.set(world.worker.localId, replaced);
+  assert.equal(world.router.isDriverOperated(replaced), true,
+    "after a rehydration the new live entry is still the configured Worker");
+  assert.equal(world.router.isDriverOperated(world.worker), false,
+    "and only the stale object loses the role");
+
+  // Dissolving the pair is the only thing that actually lifts the block.
+  world.dissolve();
+  assert.equal(world.router.isDriverOperated(replaced), false);
+});
+
+test("a stale Worker object cannot open a routed permission request", function () {
+  var world = makeWorld();
+  var stale = world.worker;
+  world.sessions.set(stale.localId, impostorOf(stale));
+
+  assert.equal(world.router.routeIfWorker(stale, { toolName: "Write", input: {} }), null,
+    "no request is created, so the call falls back to the ordinary human flow");
+  assert.deepEqual(world.resumes, [], "and no Driver was asked to decide");
+  assert.equal(world.router.pendingCountFor(stale), 0);
+});
+
+test("a captured Driver handler cannot answer after its session object is replaced", async function () {
+  var world = makeWorld();
+  var decision = route(world);
+  var requestId = world.resumes[0].meta.requestId;
+  var captured = world.router.getToolDefs(world.driver)[0].handler;
+
+  // The Driver entry is replaced by a same-id object mid-request.
+  var staleDriver = world.driver;
+  var newDriver = impostorOf(staleDriver);
+  world.sessions.set(staleDriver.localId, newDriver);
+
+  var viaStale = await captured({ requestId: requestId, decision: "allow" });
+  assert.equal(viaStale.isError, true, "the captured handler is refused");
+  assert.match(viaStale.content[0].text, /no longer live/);
+  assert.equal(world.router.pendingCountFor(newDriver), 0, "the Worker id is what pends, not the Driver");
+  // Refusing a stale handler does not kill the request: a live Driver could
+  // still legitimately answer it.
+  assert.equal(world.router.pendingCountFor(world.worker), 1);
+
+  // The replacement cannot inherit the open request either: it is the live
+  // entry, but not the object the request was opened against.
+  // It is the live entry, but not the object the request was opened against,
+  // which is a pair change: refused, and the request is failed closed.
+  var viaNew = await world.router.handleDriverResponse(
+    { requestId: requestId, decision: "allow" }, newDriver);
+  assert.equal(viaNew.isError, true);
+  assert.match(viaNew.content[0].text, /pair changed/);
+
+  var resolved = await decision;
+  assert.equal(resolved.behavior, "deny", "the request failed closed rather than resolving");
+});
+
+test("a replaced Worker object fails an open request closed", async function () {
+  var world = makeWorld();
+  var decision = route(world);
+  var requestId = world.resumes[0].meta.requestId;
+  var handler = world.router.getToolDefs(world.driver)[0].handler;
+
+  world.sessions.set(world.worker.localId, impostorOf(world.worker));
+
+  var res = await handler({ requestId: requestId, decision: "allow" });
+  assert.equal(res.isError, true);
+  assert.match(res.content[0].text, /pair changed/);
+  assert.equal((await decision).behavior, "deny");
+});
+
+test("the record binds the exact objects, and every entry point shares one check", function () {
+  var src = fs.readFileSync(path.join(root, "lib/project-worker-permission.js"), "utf8");
+
+  var resolve = src.slice(src.indexOf("function resolveWorkerPair(session)"));
+  resolve = resolve.slice(0, resolve.indexOf("function pairStillExact"));
+  assert.match(resolve, /if \(sm\.sessions\.get\(session\.localId\) !== session\) return null;/);
+  assert.ok(resolve.indexOf("sm.sessions.get(session.localId) !== session") < resolve.indexOf("groupForMember"),
+    "identity is settled before the group lookup");
+
+  // One shared gate: routing, the role predicate and inheritance all go
+  // through resolveWorkerPair, so none of them can drift.
+  assert.match(src, /function driverOperatedPair\(session\) \{\s*\n\s*var resolved = resolveWorkerPair\(session\);/);
+  assert.match(src, /function isDriverOperated\(session\) \{\s*\n\s*return !!driverOperatedPair\(session\);/);
+  assert.match(src, /function inheritedPermissionMode\(session\) \{\s*\n\s*var resolved = driverOperatedPair\(session\);/);
+  assert.match(src, /function routeIfWorker\(session, req\) \{[\s\S]*?var resolved = resolveWorkerPair\(session\);/);
+
+  var exact = src.slice(src.indexOf("function pairStillExact(record)"));
+  exact = exact.slice(0, exact.indexOf("function clearRecord"));
+  assert.match(exact, /if \(driver !== record\.driverRef \|\| worker !== record\.workerRef\) return false;/);
+  assert.match(src, /driverRef: resolved\.driver,\s*\n\s*workerRef: session,/);
 });

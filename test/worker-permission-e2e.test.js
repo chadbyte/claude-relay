@@ -199,15 +199,17 @@ test("the answer tool is auto-approved under both naming forms and nothing broad
   assert.deepEqual(world.bridge.checkToolWhitelist("mcp__clay-sessions__respond_to_worker_permission", args), allow,
     "and the clay-sessions MCP name");
 
-  // No prefix was widened.
+  // No prefix was widened. close_partner is now auto-approved too, as one of
+  // the autonomous pair lifecycle tools, so the boundary to assert is the one
+  // that creates arbitrary sessions and the one that borrows the name.
   assert.equal(world.bridge.checkToolWhitelist("mcp__clay-sessions__spawn_sessions", {}), null,
     "spawn_sessions still prompts");
-  assert.equal(world.bridge.checkToolWhitelist("mcp__clay-sessions__close_partner", {}), null,
-    "close_partner still prompts");
   assert.equal(world.bridge.checkToolWhitelist("respond_to_worker_permission_extra", args), null,
     "no prefix match");
   assert.equal(world.bridge.checkToolWhitelist("mcp__evil__respond_to_worker_permission", args), null,
     "and not under some other server");
+  assert.equal(world.bridge.checkToolWhitelist("mcp__clay-sessions__evil__respond_to_worker_permission", args), null,
+    "the server segment is matched exactly");
 });
 
 test("skip permissions passes the Worker through without involving the Driver", async function () {
