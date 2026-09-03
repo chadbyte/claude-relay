@@ -68,7 +68,9 @@ test("session switches replace the previous vendor for model menu routing", asyn
 
 test("split view promotes one sticky-note canvas above both panes", function () {
   var splitSource = fs.readFileSync(path.join(__dirname, "../lib/public/modules/split-view.js"), "utf8");
-  var notesSource = fs.readFileSync(path.join(__dirname, "../lib/public/modules/sticky-notes.js"), "utf8");
+  // Drag and resize, and therefore pointer capture, live in the card module
+  // since the sticky-note canvas was split up.
+  var notesSource = fs.readFileSync(path.join(__dirname, "../lib/public/modules/sticky-notes-card.js"), "utf8");
   var paneCss = fs.readFileSync(path.join(__dirname, "../lib/public/css/pane.css"), "utf8");
 
   assert.match(splitSource, /mainPanelsEl\.appendChild\(stickyNotesContainer\)/);

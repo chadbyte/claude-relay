@@ -86,7 +86,7 @@ function fixture() {
 }
 
 async function postProposal(f) {
-  var tool = f.attached.getToolDefs(f.session)[0];
+  var tool = f.attached.retiredToolDefs(f.session)[0];
   var result = parseToolResult(await tool.handler({
     summary: "The implementation is large enough to benefit from a dedicated Worker.",
     plan: "1. Inspect the current flow\n2. Implement the change\n3. Run focused tests",
@@ -112,8 +112,13 @@ test("Fable detection respects the session model before the global fallback", fu
 
 test("only an unpaired Fable session receives the Worker proposal tool and prompt", function () {
   var f = fixture();
-  assert.deepStrictEqual(f.attached.getToolDefs(f.session).map(function (tool) { return tool.name; }), ["propose_worker"]);
-  assert.match(f.attached.getSystemPrompt(f.session), /implementation-heavy/);
+  // The proposal path is retired: a qualified Driver creates and manages its
+  // Split Worker on its own authority, so the tool is offered to nobody and
+  // the guidance never tells a model to propose. The definitions are retained
+  // only so an older client's in-flight proposal still resolves.
+  assert.deepStrictEqual(f.attached.getToolDefs(f.session), []);
+  assert.strictEqual(f.attached.getSystemPrompt(f.session), "");
+  assert.deepStrictEqual(f.attached.retiredToolDefs(f.session).map(function (tool) { return tool.name; }), ["propose_worker"]);
   f.session.model = "claude-sonnet-4-6";
   assert.deepStrictEqual(f.attached.getToolDefs(f.session), []);
   assert.strictEqual(f.attached.getSystemPrompt(f.session), "");
@@ -151,7 +156,7 @@ test("a same-vendor fallback recommends a non-Fable execution model", async func
 test("skip permissions auto-approves and starts a Worker", async function () {
   var f = fixture();
   f.session.permissionMode = "bypassPermissions";
-  var tool = f.attached.getToolDefs(f.session)[0];
+  var tool = f.attached.retiredToolDefs(f.session)[0];
   var result = parseToolResult(await tool.handler({
     summary: "The implementation is large enough to benefit from a dedicated Worker.",
     plan: "1. Inspect the current flow\n2. Implement the change\n3. Run focused tests",
@@ -183,7 +188,7 @@ test("skip permissions off leaves a Worker proposal pending", async function () 
 test("auto-approved proposal updates carry the auto-approval marker", async function () {
   var f = fixture();
   f.session.dangerouslySkipPermissions = true;
-  var tool = f.attached.getToolDefs(f.session)[0];
+  var tool = f.attached.retiredToolDefs(f.session)[0];
   await tool.handler({
     summary: "The implementation is large enough to benefit from a dedicated Worker.",
     plan: "1. Inspect the current flow\n2. Implement the change\n3. Run focused tests",

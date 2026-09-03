@@ -247,6 +247,15 @@
           </div>
           <div id="session-actions"></div>
           <div id="session-actions-hidden" class="tool-palette-hidden-section hidden"></div>
+          <!-- Repository placard. Hidden until a real Git repository is
+               confirmed, so non-Git projects and pending detection show
+               nothing rather than an empty block. -->
+          <div id="git-placard" class="git-placard hidden" role="group">
+            <div id="git-placard-body" class="git-placard-body" aria-hidden="true"></div>
+            <button id="git-placard-more" class="git-placard-more" type="button" aria-label="Open Git panel for more repository detail" title="More Git detail">
+              <span>More</span><i data-lucide="chevron-right"></i>
+            </button>
+          </div>
         </div>
         <div id="sidebar-sessions-header">
           <div id="sessions-header-content">
