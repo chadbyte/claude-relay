@@ -1,3 +1,11 @@
+# [4.0.0-beta.12](https://github.com/chadbyte/clay/compare/v4.0.0-beta.11...v4.0.0-beta.12) (2026-09-03)
+
+
+### Bug Fixes
+
+* **worker:** restore split worker creation ([e954274](https://github.com/chadbyte/clay/commit/e95427406683712f375bc630d6a207f8c553ec62))
+* **worker:** restore split worker creation ([#476](https://github.com/chadbyte/clay/issues/476)) ([ddb7170](https://github.com/chadbyte/clay/commit/ddb7170d25ee3d062b81a37c61c3ff3d64231f94))
+
 # [4.0.0-beta.11](https://github.com/chadbyte/clay/compare/v4.0.0-beta.10...v4.0.0-beta.11) (2026-09-03)
 
 
