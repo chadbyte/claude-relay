@@ -63,6 +63,10 @@ Wires all modules, sets up session manager and SDK bridge, dispatches messages.
 | `server-home-capsule-creation.js` | Validates bounded Capsule creation intents and builds the approval-preserving Mate conversation context |
 | `workspace-assignment-service.js` + `project-delegated-session.js` + `project-delegated-follow-up.js` | Durable per-user assignment proposals, exact-session approval routing, private model-resolved delegated sessions, and strictly eligible existing-session follow-ups |
 | `tool-ui-spec.js` + `tool-ui-spec-advanced.js` | Canonical safe Capsule declarative vocabulary, bounded condition/dynamic-value validation, field and collection constraints |
+| `capsule-display-floor.js` | The mandatory declarative floor element of a Capsule's Display set: registration and Mate-catalog gates that always validate the tree itself (see docs/guides/CAPSULE_DISPLAY.md) |
+| `capsule-server-runtimes.js` | Trusted server-runtime Logic registry for shipped Capsules; per-call runtime creation over the Capsule datastore |
+| `capsule-pig-logic.js` + `capsule-tictactoe-logic.js` | Deterministic shipped-Capsule Logic: seat resolution, rule enforcement, persisted monotonic event clock, `{state, event}` act contract |
+| `capsule-frame-server.js` | Isolated separate-origin host for opt-in rich Display frames: one-time token URLs, nonce-only no-network frame CSP, in-frame postMessage bridge |
 | `public/modules/tool-renderer.js` + `tool-renderer-advanced.js` + `tool-renderer-chart.js` + `tool-ui-evaluator.js` | Host-rendered Capsule controls, accessible advanced primitives, truthful fixed chart geometry, safe state evaluation, and defensive collection normalization |
 | `project-session-pair.js` | **Coordinator** for the visible Driver/Split Worker pair. Owns delegation (`send_to_partner`), `read_partner`, interrupt/close, the delegated-result push-back, and the shared `resumeDriverWithMessage` / `requestDetach` used by both the push-back and permission routing. `groupAndPartner` requires **exact live session object identity** (`sm.sessions.get(caller.localId) === caller`) so a captured stale handler cannot drive a pair. Mounts the pair tools only for the Driver, and only when it is eligible; a plain side-by-side split (no `pair` roles) keeps the original four tools and no lifecycle tools. Delegates creation, lifecycle and prompt text to the modules below — add new pair behavior there, not here |
 | `session-driver-eligibility.js` | Structural capability check for the Driver role. Model and vendor choice belongs to the user: every installed, available project-chat model may drive. Only surfaces that cannot host pair controls, such as embedded terminal sessions, are excluded |
@@ -188,6 +192,7 @@ Bootstraps UI, initializes store, wires remaining Tier 3 modules. All business l
 | `home-mate-creation.js` | Clay-led Mate creation proposal card, exact response routing, and restored status |
 | `home-capsule-creation-intent.js` | Resolves the server-restored selected Mate and hands Workbench Capsule descriptions into an exact Home conversation |
 | `home-capsule-library.js` | Create-first Workbench library surface and installed Capsule inventory |
+| `home-tool-frame.js` | Host side of the sandboxed rich Display frame: frame URL request, allow-scripts iframe mount, bounded act relay into the shared pipeline, floor fallback |
 | `search-clay-chat.js` | Query-bound compact Clay conversation inside global search, with exact-session expansion to Home |
 | `app-rate-limit.js` | Rate limit UI, countdown timers, scheduled message bubbles, fast mode indicator |
 | `app-cursors.js` | Remote cursor presence, text selection sharing, cursor toggle UI |
