@@ -1,3 +1,12 @@
+# [4.0.0-beta.14](https://github.com/chadbyte/clay/compare/v4.0.0-beta.13...v4.0.0-beta.14) (2026-09-03)
+
+
+### Bug Fixes
+
+* **logs:** deliver comments to the authoring session ([bc0d6e7](https://github.com/chadbyte/clay/commit/bc0d6e7f5469902aa88d8798f631542c4ac3518c))
+* **logs:** skip redundant permission prompts ([fe57a63](https://github.com/chadbyte/clay/commit/fe57a632a73da06118d57cf4af98ca0f2e1c5a7a))
+* **pair:** honor driver choice and bound overload retries ([b04bdb2](https://github.com/chadbyte/clay/commit/b04bdb2bcb5f0a0b914e3b476bc363307b01cb44))
+
 # [4.0.0-beta.13](https://github.com/chadbyte/clay/compare/v4.0.0-beta.12...v4.0.0-beta.13) (2026-09-03)
 
 
