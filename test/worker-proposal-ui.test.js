@@ -59,11 +59,14 @@ test("title bar presents a labeled session actions button in the status area", f
 });
 
 test("Split Worker labels do not rename distinct Worker proposal or runtime protocol", function () {
-  var pairSource = fs.readFileSync(path.join(root, "lib/project-session-pair.js"), "utf8");
+  // Session titles are assigned where a pair is created, which is
+  // session-pair-factory.js; project-session-pair.js operates an existing one.
+  var factorySource = fs.readFileSync(path.join(root, "lib/session-pair-factory.js"), "utf8");
   var proposalSource = fs.readFileSync(path.join(root, "lib/project-worker-proposal.js"), "utf8");
   var capsuleSource = fs.readFileSync(path.join(root, "lib/tool-capsule-source.js"), "utf8");
 
-  assert.match(pairSource, /Split Worker · /);
+  assert.match(factorySource, /Split Worker · /);
+  assert.match(factorySource, /Driver · /);
   assert.match(proposalSource, /visible Split Worker session/);
   assert.match(proposalSource, /type: "worker_proposal"/);
   assert.match(proposalSource, /name: "propose_worker"/);

@@ -91,7 +91,9 @@ function fixture(configured, options) {
 
 test("configured pairs expose partner tools only to the Driver", function () {
   var f = fixture(true);
-  assert.deepStrictEqual(f.attached.getToolDefs(f.driver).map(function (tool) { return tool.name; }), ["send_to_partner", "read_partner", "interrupt_partner", "close_partner"]);
+  // A configured Driver also answers its Split Worker's permission requests,
+  // so the decision tool sits with the other partner-control tools.
+  assert.deepStrictEqual(f.attached.getToolDefs(f.driver).map(function (tool) { return tool.name; }), ["send_to_partner", "read_partner", "interrupt_partner", "close_partner", "respond_to_worker_permission"]);
   assert.deepStrictEqual(f.attached.getToolDefs(f.worker), []);
   assert.match(f.attached.getSystemPrompt(f.driver), /Driver/);
   assert.match(f.attached.getSystemPrompt(f.driver), /completed Split Worker turn leaves the Split Worker session available/);
