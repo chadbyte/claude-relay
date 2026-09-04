@@ -93,7 +93,7 @@ test("Home sidebar presents a complete global Mate-attributed Chats archive", fu
   assert.match(chatListSource, /home-sidebar-recent-copy/);
   assert.match(chatListSource, /home-sidebar-recent-title/);
   assert.match(chatListSource, /home-sidebar-recent-mate/);
-  assert.match(chatListSource, /className = "home-sidebar-recent-item"[\s\S]*chat\.mateId === activeMateId && chat\.sessionId === activeSessionId[\s\S]*row\.setAttribute\("aria-current", "page"\)/);
+  assert.match(chatListSource, /className = "home-sidebar-recent-item"[\s\S]*chat\.mateId === store\.get\('homeChatMateId'\) && chat\.sessionId === store\.get\('homeChatSessionId'\)[\s\S]*row\.setAttribute\("aria-current", "page"\)/);
   assert.match(chatListSource, /createHomeSessionActionsTrigger\(chat\)/);
   assert.match(actionsCss, /\.home-sidebar-recent-item\.is-active[\s\S]*background: rgba\(var\(--overlay-rgb\), 0\.05\)/);
   assert.doesNotMatch(cssSource, /home-sidebar-recent-row\.is-active/);
@@ -221,7 +221,8 @@ test("All chats is a searchable custom sheet", function () {
   assert.match(sheetSource, /className = "home-conversations-sheet-item"/);
   assert.match(sheetSource, /title\.textContent = "All chats"/);
   assert.match(sheetSource, /searchInput\.placeholder = "Search chats"/);
-  assert.match(sheetSource, /var all = getHomeSessionConversations\(\)\.filter/);
+  assert.match(sheetSource, /buildSessionHierarchy\(getHomeSessionConversations\(\)\)/);
+  assert.match(sheetSource, /conversationMatches\(root\.workers\[i\], query\)/);
   assert.doesNotMatch(sheetSource, /homeChatScope|data-home-chat-scope/);
   assert.doesNotMatch(sheetSource, /All conversations|Search conversations|No conversations/);
   assert.doesNotMatch(sheetSource, /alert\(|confirm\(|prompt\(/);

@@ -2,6 +2,7 @@ var test = require("node:test");
 var assert = require("node:assert");
 var fs = require("node:fs");
 var path = require("node:path");
+var pathToFileURL = require("node:url").pathToFileURL;
 
 var root = path.join(__dirname, "..");
 
@@ -12,8 +13,61 @@ test("Worker proposal card exposes runtime controls and sends one decision messa
   assert.match(source, /worker-proposal-effort-btn/);
   assert.match(source, /type: "worker_proposal_response"/);
   assert.match(source, /Run with Split Worker/);
+  assert.match(source, /Replace Split Worker/);
+  assert.match(source, /Awaiting your choice/);
+  assert.match(source, /Driver's recommendation rationale/);
+  assert.match(source, /Driver recommendation auto-accepted under Full auto/);
   assert.match(source, /status === "completed"\) return "Completed"/);
-  assert.match(source, /statusLabel\(status\) \+ \(autoApproved \? " · auto-approved" : ""\)/);
+  assert.doesNotMatch(source, /Suggested by Fable/);
+});
+
+test("resolved audit cards prefer the selected runtime over the Driver recommendation", async function () {
+  var module = await import(pathToFileURL(path.join(root, "lib/public/modules/worker-proposal-state.js")).href);
+  var pending = module.workerProposalSelection({
+    recommendedVendor: "codex",
+    recommendedModel: "gpt-5.6-sol",
+    recommendedEffort: "high",
+  });
+  assert.deepStrictEqual(pending, {
+    selected: false,
+    vendor: "codex",
+    model: "gpt-5.6-sol",
+    effort: "high",
+  });
+
+  var manualOverride = module.workerProposalSelection({
+    recommendedVendor: "codex",
+    recommendedModel: "gpt-5.6-sol",
+    recommendedEffort: "high",
+    selectedVendor: "claude",
+    selectedModel: "claude-sonnet-5",
+    selectedEffort: "medium",
+  });
+  assert.deepStrictEqual(manualOverride, {
+    selected: true,
+    vendor: "claude",
+    model: "claude-sonnet-5",
+    effort: "medium",
+  });
+  var synced = null;
+  module.syncWorkerProposalSelection({
+    selectedVendor: "claude",
+    selectedModel: "claude-sonnet-5",
+    selectedEffort: "medium",
+  }, function (selection) { synced = selection; });
+  assert.deepStrictEqual(synced, manualOverride, "a selection-bearing update synchronizes the visible controls");
+
+  var automaticModel = module.workerProposalSelection({
+    recommendedVendor: "codex",
+    recommendedModel: "gpt-5.6-sol",
+    recommendedEffort: "high",
+    selectedVendor: "codex",
+    selectedModel: "",
+    selectedEffort: "low",
+  });
+  assert.equal(automaticModel.model, "", "an explicitly selected automatic model never falls back to the recommendation");
+  var source = fs.readFileSync(path.join(root, "lib/public/modules/worker-proposal.js"), "utf8");
+  assert.match(source, /syncWorkerProposalSelection\(msg, card\._syncWorkerProposalSelection\)/);
 });
 
 test("message routing renders and updates Worker proposal lifecycle events", function () {
@@ -23,15 +77,16 @@ test("message routing renders and updates Worker proposal lifecycle events", fun
   assert.match(source, /msg\.name\.indexOf\("propose_worker"\)/);
 });
 
-test("the retired proposal tool is no longer whitelisted, because it is no longer offered", function () {
-  // A qualified Driver creates and manages its Split Worker directly, so
-  // propose_worker is mounted for nobody. Keeping a whitelist entry for a tool
-  // no model can call would only be a dead auto-approval.
+test("proposal tools are provider-approved while runtime auto-accept remains card-audited", function () {
   var source = fs.readFileSync(path.join(root, "lib/sdk-bridge.js"), "utf8");
-  assert.equal(/propose_worker/.test(source), false);
-  // The lifecycle tools that replaced it are auto-approved instead.
+  assert.match(source, /propose_worker: true/);
   assert.match(source, /replace_partner: true/);
   assert.match(source, /partner_status: true/);
+  var proposal = fs.readFileSync(path.join(root, "lib/project-worker-proposal.js"), "utf8");
+  assert.match(proposal, /skipPermissionsEnabled/);
+  assert.match(proposal, /recommendationCanAutoAccept/);
+  assert.match(proposal, /sm\.sendAndRecord\(session, proposal\);[\s\S]*skipPermissionsEnabled/);
+  assert.match(proposal, /decisionMode: autoAccepted \? "driver_recommendation" : "user"/);
 });
 
 test("Worker proposal card keeps responsive controls inside split panes", function () {
@@ -73,7 +128,7 @@ test("Split Worker labels do not rename distinct Worker proposal or runtime prot
 
   assert.match(factorySource, /Split Worker · /);
   assert.match(factorySource, /Driver · /);
-  assert.match(proposalSource, /visible Split Worker session/);
+  assert.match(proposalSource, /visible Split Worker/);
   assert.match(proposalSource, /type: "worker_proposal"/);
   assert.match(proposalSource, /name: "propose_worker"/);
   assert.match(capsuleSource, /runtime === "worker"/);

@@ -26,6 +26,7 @@ function fixture(configured, options) {
     modelsByVendor: { claude: [{ value: "fable", resolvedModel: "claude-fable-5", displayName: "Claude Fable" }, { value: "sonnet", resolvedModel: "claude-sonnet-5", displayName: "Claude Sonnet" }], codex: ["gpt-5.6-terra", "gpt-5.6-sol", "gpt-5.6-luna"] },
     capabilitiesByVendor: {},
     sendAndRecord: function (session, message) { session.history.push(message); },
+    saveSessionFile: function () {},
     sendToSession: function (session, message) { if (message.type === "pair_session_created") pairMessages.push(message); },
     broadcastSessionList: function () {},
     createSessionRaw: function (spec) {
@@ -129,20 +130,23 @@ test("send_to_partner records attribution and returns the response", async funct
   assert.deepStrictEqual(f.driverPushes, []);
 });
 
-test("send_to_partner creates and opens a visible Worker when the Driver is unpaired", async function () {
+test("an unpaired Driver can only post the runtime configuration proposal", async function () {
   var f = fixture(false, { ungrouped: true });
-  assert.match(f.attached.getSystemPrompt(f.driver), /opens it in the right pane automatically/);
+  assert.match(f.attached.getSystemPrompt(f.driver), /runtime configuration card/);
   var initialTools = f.attached.getToolDefs(f.driver);
+  assert.deepStrictEqual(initialTools.map(function (item) { return item.name; }), ["propose_worker", "respond_to_worker_permission"]);
   var tool = initialTools[0];
   assert.ok(initialTools.some(function (item) { return item.name === "respond_to_worker_permission"; }),
-    "the long-lived Driver query can answer permissions after it creates the pair");
-  var result = parseToolResult(await tool.handler({ message: "Build the feature", timeoutSeconds: 2 }));
-
-  assert.deepStrictEqual(result, { status: "complete", response: "Partner result", workerCreated: true, partnerId: 2 });
-  assert.deepStrictEqual(f.getGroup().pair, { driverId: 1, workerId: 2 });
-  assert.strictEqual(f.worker.vendor, "codex");
-  assert.strictEqual(f.pairMessages.length, 1);
-  assert.strictEqual(f.pairMessages[0].group.id, "sg_created");
+    "the long-lived Driver query can answer permissions after acceptance creates the pair");
+  var result = parseToolResult(await tool.handler({
+    summary: "Use a visible Worker",
+    plan: "1. Build\n2. Test",
+    message: "Build the feature",
+    recommendationRationale: "The Worker runtime is suited to implementation and test execution.",
+  }));
+  assert.strictEqual(result.status, "posted");
+  assert.strictEqual(f.getGroup(), null);
+  assert.strictEqual(f.starts.length, 0);
 });
 
 test("paired routing uses visible-session context and partner-tool precedence", function () {
@@ -159,8 +163,8 @@ test("unpaired routing distinguishes visible collaboration from internal delegat
 
   assert.match(prompt, /Internal Sub-agents are a distinct execution mechanism, not a lexical category/);
   assert.match(prompt, /only when the user clearly intends internal or background parallel delegation rather than a visible paired session/);
-  assert.match(prompt, /call send_to_partner directly/);
-  assert.match(prompt, /ask a concise clarification instead of guessing/);
+  assert.match(prompt, /use propose_worker/);
+  assert.match(prompt, /explicit choice/);
 });
 
 test("routing guidance does not enumerate language-specific keywords", function () {
@@ -171,13 +175,11 @@ test("routing guidance does not enumerate language-specific keywords", function 
   assert.doesNotMatch(prompt, /always mean|any of those terms|Terminology and routing are strict/);
 });
 
-test("send_to_partner validates its task before creating a Worker", async function () {
+test("propose_worker validates its task before showing a card", async function () {
   var f = fixture(false, { ungrouped: true });
   var tool = f.attached.getToolDefs(f.driver)[0];
-  var result = await tool.handler({ message: "  " });
-
-  assert.strictEqual(result.isError, true);
-  assert.match(result.content[0].text, /message is required/);
+  var result = parseToolResult(await tool.handler({ summary: "x", plan: "x", message: "  " }));
+  assert.match(result.error, /required/);
   assert.strictEqual(f.getGroup(), null);
   assert.strictEqual(f.pairMessages.length, 0);
 });

@@ -28,6 +28,7 @@ function fixture() {
   var starts = [];
   var pairs = [];
   var delegations = [];
+  var adapters = {};
   var sm = {
     sessions: sessions,
     installedVendors: ["claude", "codex"],
@@ -57,7 +58,8 @@ function fixture() {
     usersModule: { isMultiUser: function () { return false; } },
     getLinuxUserForSession: function () { return null; },
     onProcessingChanged: function () {},
-    adapters: {},
+    adapters: adapters,
+    recordGenerationStart: function () {},
     createPairRecord: function (ws, message) {
       pairs.push(message);
       return {
@@ -80,13 +82,14 @@ function fixture() {
     starts: starts,
     pairs: pairs,
     delegations: delegations,
+    adapters: adapters,
     sm: sm,
     ws: { _clayActiveSession: session.localId },
   };
 }
 
 async function postProposal(f) {
-  var tool = f.attached.retiredToolDefs(f.session)[0];
+  var tool = f.attached.getToolDefs(f.session)[0];
   var result = parseToolResult(await tool.handler({
     summary: "The implementation is large enough to benefit from a dedicated Worker.",
     plan: "1. Inspect the current flow\n2. Implement the change\n3. Run focused tests",
@@ -94,37 +97,59 @@ async function postProposal(f) {
     recommendedVendor: "codex",
     recommendedModel: "gpt-5.6-sol",
     recommendedEffort: "high",
+    recommendationRationale: "Codex Sol at high effort fits the implementation and verification workload.",
   }));
   assert.strictEqual(result.status, "posted");
   return f.session.history.filter(function (item) { return item.type === "worker_proposal"; })[0];
 }
 
-test("Fable detection respects the session model before the global fallback", function () {
-  var models = { claude: [
-    { value: "opaque-fable-id", displayName: "Claude Fable" },
-    { value: "claude-sonnet", displayName: "Claude Sonnet" },
-  ] };
-  assert.strictEqual(proposalModule.isFableSession({ vendor: "claude", model: "opaque-fable-id" }, models), true);
-  assert.strictEqual(proposalModule.isFableSession({ vendor: "claude", model: "claude-sonnet" }, models, "opaque-fable-id"), false);
-  assert.strictEqual(proposalModule.isFableSession({ vendor: "claude" }, models, "opaque-fable-id"), true);
-  assert.strictEqual(proposalModule.isFableSession({ vendor: "codex", model: "claude-fable" }, models), false);
-});
-
-test("only an unpaired Fable session receives the Worker proposal tool and prompt", function () {
+test("every eligible unpaired Driver receives the Worker proposal tool and prompt", function () {
   var f = fixture();
-  // The proposal path is retired: a qualified Driver creates and manages its
-  // Split Worker on its own authority, so the tool is offered to nobody and
-  // the guidance never tells a model to propose. The definitions are retained
-  // only so an older client's in-flight proposal still resolves.
-  assert.deepStrictEqual(f.attached.getToolDefs(f.session), []);
-  assert.strictEqual(f.attached.getSystemPrompt(f.session), "");
-  assert.deepStrictEqual(f.attached.retiredToolDefs(f.session).map(function (tool) { return tool.name; }), ["propose_worker"]);
+  assert.deepStrictEqual(f.attached.getToolDefs(f.session).map(function (tool) { return tool.name; }), ["propose_worker"]);
+  assert.match(f.attached.getSystemPrompt(f.session), /runtime configuration card/);
   f.session.model = "claude-sonnet-4-6";
+  assert.deepStrictEqual(f.attached.getToolDefs(f.session).map(function (tool) { return tool.name; }), ["propose_worker"]);
+  f.session.vendor = "codex";
+  f.session.model = "gpt-5.6-terra";
+  assert.deepStrictEqual(f.attached.getToolDefs(f.session).map(function (tool) { return tool.name; }), ["propose_worker"]);
+  f.session.mode = "tui";
   assert.deepStrictEqual(f.attached.getToolDefs(f.session), []);
-  assert.strictEqual(f.attached.getSystemPrompt(f.session), "");
 });
 
-test("declining a Worker suggestion resumes execution in Fable", async function () {
+test("a proposal cannot outlive its exact session while model catalogs load", async function () {
+  var f = fixture();
+  var resolveCatalog;
+  f.sm.modelsByVendor.codex = [];
+  f.adapters.codex = {
+    supportedModels: function () {
+      return new Promise(function (resolve) { resolveCatalog = resolve; });
+    },
+  };
+  var oldSession = f.session;
+  var tool = f.attached.getToolDefs(oldSession)[0];
+  var pending = tool.handler({
+    summary: "Use a visible Worker.",
+    plan: "1. Implement\n2. Verify",
+    message: "Implement and verify the change.",
+    recommendedVendor: "codex",
+    recommendedModel: "gpt-5.6-sol",
+    recommendedEffort: "high",
+    recommendationRationale: "Codex Sol at high effort fits this task.",
+  });
+  await nextTurn();
+  var replacement = Object.assign({}, oldSession, { history: [] });
+  f.sm.sessions.set(oldSession.localId, replacement);
+  resolveCatalog([{ value: "gpt-5.6-sol", displayName: "GPT-5.6 Sol" }]);
+
+  var result = parseToolResult(await pending);
+  assert.match(result.error, /session changed while Split Worker runtimes were loading/);
+  assert.strictEqual(oldSession.history.length, 0, "the stale session receives no audit record");
+  assert.strictEqual(replacement.history.length, 0, "the replacement session receives no forged record");
+  assert.strictEqual(f.pairs.length, 0);
+  assert.strictEqual(f.delegations.length, 0);
+});
+
+test("declining a Worker proposal resumes the Driver", async function () {
   var f = fixture();
   var proposal = await postProposal(f);
   assert.strictEqual(proposal.status, "pending");
@@ -137,11 +162,11 @@ test("declining a Worker suggestion resumes execution in Fable", async function 
   });
   assert.deepStrictEqual(response, { ok: true, status: "declined" });
   assert.strictEqual(proposal.status, "declined");
-  assert.match(f.starts[0].text, /Continue this task in the current session/);
+  assert.match(f.starts[0].text, /Continue this task in the current Driver session/);
   assert.strictEqual(f.session.history[f.session.history.length - 1]._internal, true);
 });
 
-test("a same-vendor fallback recommends a non-Fable execution model", async function () {
+test("a same-vendor fallback recommends a different execution model", async function () {
   var f = fixture();
   f.sm.installedVendors = ["claude"];
   f.sm.modelsByVendor.claude = [
@@ -153,10 +178,10 @@ test("a same-vendor fallback recommends a non-Fable execution model", async func
   assert.strictEqual(proposal.recommendedModel, "claude-sonnet-4-6");
 });
 
-test("skip permissions auto-approves and starts a Worker", async function () {
+test("skip permissions records the card before auto-accepting an exact recommendation", async function () {
   var f = fixture();
   f.session.permissionMode = "bypassPermissions";
-  var tool = f.attached.retiredToolDefs(f.session)[0];
+  var tool = f.attached.getToolDefs(f.session)[0];
   var result = parseToolResult(await tool.handler({
     summary: "The implementation is large enough to benefit from a dedicated Worker.",
     plan: "1. Inspect the current flow\n2. Implement the change\n3. Run focused tests",
@@ -164,15 +189,18 @@ test("skip permissions auto-approves and starts a Worker", async function () {
     recommendedVendor: "codex",
     recommendedModel: "gpt-5.6-sol",
     recommendedEffort: "high",
+    recommendationRationale: "Codex Sol at high effort fits the implementation and verification workload.",
   }));
   var proposal = f.session.history.filter(function (item) { return item.type === "worker_proposal"; })[0];
 
-  assert.strictEqual(result.status, "running");
-  assert.match(result.instruction, /auto-approved and started/);
-  assert.strictEqual(proposal.autoApproved, true);
+  assert.strictEqual(result.status, "auto_accepted");
+  assert.strictEqual(proposal.autoAccepted, true);
+  assert.strictEqual(proposal.decisionMode, "driver_recommendation");
   assert.ok(proposal.status === "running" || proposal.status === "completed");
+  assert.match(proposal.recommendationRationale, /Codex Sol/);
+  assert.strictEqual(f.session.history.indexOf(proposal) >= 0, true, "the audit card is recorded in history");
   assert.strictEqual(f.pairs.length, 1);
-  assert.ok(f.updates.some(function (message) { return message.autoApproved === true; }));
+  assert.strictEqual(f.delegations.length, 1);
 });
 
 test("skip permissions off leaves a Worker proposal pending", async function () {
@@ -185,18 +213,72 @@ test("skip permissions off leaves a Worker proposal pending", async function () 
   assert.strictEqual(f.delegations.length, 0);
 });
 
-test("auto-approved proposal updates carry the auto-approval marker", async function () {
+test("full access fails closed to a pending card when the recommendation is not exact", async function () {
   var f = fixture();
   f.session.dangerouslySkipPermissions = true;
-  var tool = f.attached.retiredToolDefs(f.session)[0];
+  var tool = f.attached.getToolDefs(f.session)[0];
   await tool.handler({
     summary: "The implementation is large enough to benefit from a dedicated Worker.",
     plan: "1. Inspect the current flow\n2. Implement the change\n3. Run focused tests",
     message: "Implement the approved change and run focused tests.",
+    recommendationRationale: "Use the best available runtime for the implementation.",
   });
 
-  var starting = f.updates.find(function (message) { return message.status === "starting"; });
-  assert.strictEqual(starting.autoApproved, true);
+  var proposal = f.session.history.filter(function (item) { return item.type === "worker_proposal"; })[0];
+  assert.strictEqual(proposal.status, "pending");
+  assert.strictEqual(f.pairs.length, 0);
+});
+
+test("full access cannot auto-accept a forged model recommendation", async function () {
+  var f = fixture();
+  f.session.permissionMode = "bypassPermissions";
+  var result = parseToolResult(await f.attached.getToolDefs(f.session)[0].handler({
+    summary: "Use a visible Worker.",
+    plan: "1. Implement\n2. Verify",
+    message: "Implement and verify the change.",
+    recommendedVendor: "codex",
+    recommendedModel: "gpt-forged",
+    recommendedEffort: "high",
+    recommendationRationale: "The claimed runtime would fit the task.",
+  }));
+  var proposal = f.session.history.filter(function (item) { return item.type === "worker_proposal"; })[0];
+
+  assert.strictEqual(result.status, "posted");
+  assert.strictEqual(proposal.status, "pending");
+  assert.strictEqual(proposal.autoAccepted, undefined);
+  assert.notStrictEqual(proposal.recommendedModel, "gpt-forged");
+  assert.strictEqual(f.pairs.length, 0);
+});
+
+test("a forged effort choice is refused instead of silently substituted", async function () {
+  var f = fixture();
+  var proposal = await postProposal(f);
+  await assert.rejects(f.attached.respondToProposal(f.ws, {
+    proposalId: proposal.proposalId,
+    accepted: true,
+    vendor: "codex",
+    model: "gpt-5.6-sol",
+    effort: "impossible",
+  }), /reasoning effort is unavailable/);
+  assert.strictEqual(proposal.status, "pending");
+  assert.strictEqual(f.pairs.length, 0);
+  assert.strictEqual(f.delegations.length, 0);
+});
+
+test("a client response cannot forge the full-access auto-accept audit state", async function () {
+  var f = fixture();
+  var proposal = await postProposal(f);
+  await f.attached.respondToProposal(f.ws, {
+    proposalId: proposal.proposalId,
+    accepted: true,
+    vendor: "codex",
+    model: "gpt-5.6-sol",
+    effort: "high",
+    autoAccepted: true,
+  });
+
+  assert.strictEqual(proposal.autoAccepted, false);
+  assert.strictEqual(proposal.decisionMode, "user");
 });
 
 test("accepting a Worker suggestion creates the split, delegates, and returns the result", async function () {
@@ -240,6 +322,7 @@ test("an interrupted Worker proposal stays interrupted and warns the Driver", as
     getLinuxUserForSession: function () { return null; },
     onProcessingChanged: function () {},
     adapters: {},
+    recordGenerationStart: function () {},
     createPairRecord: function () { return { worker: { localId: 2 }, group: { id: "sg_worker", members: [1, 2] } }; },
     sendToPartner: function () { return Promise.resolve({ content: [{ type: "text", text: JSON.stringify({ status: "interrupted", response: "Partial implementation" }) }] }); },
   });

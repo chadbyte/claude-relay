@@ -1,6 +1,6 @@
-// Autonomous Split Worker lifecycle: direct creation with no proposal, bounded
-// capacity status, safe replacement that preserves history, the active-worker
-// interrupt gate, model availability, and the per-generation evaluation ledger.
+// Split Worker lifecycle: proposal-gated creation, bounded capacity status,
+// safe replacement that preserves history, the active-worker interrupt gate,
+// model availability, and the per-generation evaluation ledger.
 
 var test = require("node:test");
 var assert = require("node:assert/strict");
@@ -61,6 +61,7 @@ function makeWorld(options) {
     capabilitiesByVendor: {},
     lastVendor: "codex",
     sendAndRecord: function (session, message) { session.history.push(message); },
+    saveSessionFile: function () {},
     sendToSession: function () {},
     broadcastSessionList: function () {},
     createSessionRaw: function (spec) {
@@ -162,6 +163,28 @@ function makeWorld(options) {
 // Without the turn-done hook the delegation token stays open, and a Worker
 // holding an open delegated task is legitimately not safe to replace.
 async function makePair(world, message) {
+  if (!world.worker()) {
+    var proposalTool = world.tool("propose_worker");
+    var posted = parse(await proposalTool.handler({
+      summary: "Use a visible Split Worker",
+      plan: "1. Execute the task\n2. Report the result",
+      message: message || "Build it",
+      recommendedVendor: "codex",
+      recommendedModel: "gpt-5.6-sol",
+      recommendedEffort: "medium",
+      recommendationRationale: "Codex Sol at medium effort is a balanced fit for implementation and reporting.",
+    }));
+    var accepted = await world.attached.respondToWorkerProposal({ _clayActiveSession: 1 }, {
+      proposalId: posted.proposalId,
+      accepted: true,
+      vendor: "codex",
+      model: "gpt-5.6-sol",
+      effort: "medium",
+    });
+    await Promise.resolve();
+    world.completeTurn();
+    return { partnerId: world.worker().localId, accepted: accepted.ok };
+  }
   var send = world.tool("send_to_partner");
   var result = parse(await send.handler({ message: message || "Build it", wait: false }));
   world.completeTurn();
@@ -169,33 +192,62 @@ async function makePair(world, message) {
   return result;
 }
 
+async function replaceThroughProposal(world, args) {
+  var input = Object.assign({
+    message: "Continue the delegated work",
+    recommendationRationale: "A fresh Codex Worker at medium effort fits the next implementation task.",
+  }, args || {});
+  var pending = world.driver.history.filter(function (item) {
+    return item && item.type === "worker_proposal" && item.action === "replace" && item.status === "pending";
+  });
+  var proposal = pending[pending.length - 1];
+  if (!proposal) {
+    var posted = parse(await world.tool("replace_partner").handler(input));
+    if (posted.error) return { isError: true, content: [{ type: "text", text: "Error: " + posted.error }] };
+    proposal = world.driver.history.filter(function (item) {
+      return item && item.type === "worker_proposal" && item.proposalId === posted.proposalId;
+    })[0];
+  }
+  var response;
+  try {
+    response = await world.attached.respondToWorkerProposal({ _clayActiveSession: 1 }, {
+      proposalId: proposal.proposalId,
+      accepted: true,
+      vendor: args && args.workerVendor || proposal.recommendedVendor,
+      model: args && args.workerModel || proposal.recommendedModel,
+      effort: args && args.workerEffort || proposal.recommendedEffort,
+    });
+  } catch (e) {
+    return { isError: true, content: [{ type: "text", text: "Error: " + (e.message || String(e)) }] };
+  }
+  if (!response.ok) return { isError: true, content: [{ type: "text", text: "Error: " + response.error }] };
+  await new Promise(function (resolve) { setImmediate(resolve); });
+  return { content: [{ type: "text", text: JSON.stringify(response.replacement) }] };
+}
+
 // --- Direct creation, no proposal ----------------------------------------
 
-test("an eligible Driver creates and opens a Worker directly, with no proposal", async function (t) {
+test("an eligible Driver is paired explicitly before seamless delegation", async function (t) {
   var world = makeWorld();
   t.after(world.dispose);
   assert.equal(world.groups.length, 0, "no pair yet");
 
   var result = await makePair(world, "Implement the parser");
-  assert.equal(result.workerCreated, true, "the Worker was created by the delegation itself");
+  assert.equal(result.accepted, true, "the Worker was created after acceptance");
   assert.equal(world.groups.length, 1);
   assert.deepEqual(world.groups[0].pair, { driverId: 1, workerId: world.worker().localId });
 
-  // No proposal tool is offered to anyone any more.
-  assert.equal(world.tool("propose_worker"), null);
+  assert.equal(world.tool("propose_worker"), null, "the creation proposal is no longer offered after pairing");
   var proposalSource = fs.readFileSync(path.join(root, "lib/project-worker-proposal.js"), "utf8");
-  assert.match(proposalSource, /function getToolDefs\(session\) \{\s*\n\s*return \[\];/,
-    "the proposal tool is retired for every session");
-  assert.match(proposalSource, /Retired: a qualified Driver creates and manages/,
-    "and the system prompt no longer suggests proposing");
+  assert.match(proposalSource, /name: "propose_worker"/);
 });
 
-test("the retired proposal path stays loadable so an old client fails safely", function () {
+test("the proposal path stays loadable and response-routed", function () {
   var proposal = require("../lib/project-worker-proposal");
   assert.equal(typeof proposal.attachWorkerProposal, "function");
   var source = fs.readFileSync(path.join(root, "lib/project-worker-proposal.js"), "utf8");
   assert.match(source, /function handleMessage/, "the client message handler is still present");
-  assert.match(source, /function retiredToolDefs/, "the definitions are kept, just not offered");
+  assert.match(source, /function getToolDefs/, "the definitions are offered while unpaired");
   var pairSource = fs.readFileSync(path.join(root, "lib/project-session-pair.js"), "utf8");
   assert.match(pairSource, /if \(workerProposal\.handleMessage\(ws, msg\)\) return true;/,
     "so an in-flight worker_proposal_response still resolves");
@@ -269,9 +321,30 @@ test("a second delegation reuses the same Worker session", async function (t) {
   var first = world.worker().localId;
 
   var again = await makePair(world, "Second task");
-  assert.equal(again.workerCreated, false, "no new Worker was created");
+  assert.equal(again.workerCreated, undefined, "delegation results have no legacy creation field");
   assert.equal(world.worker().localId, first, "the same session handled it");
   assert.equal(world.groups.length, 1);
+});
+
+test("a captured send_to_partner handler cannot create after its exact pair is gone", async function (t) {
+  var world = makeWorld();
+  t.after(world.dispose);
+  await makePair(world);
+  var captured = world.tool("send_to_partner");
+  var sessionCount = world.sessions.size;
+  var createdCount = world.created.length;
+  var creationReservations = world.driver._pairTurnControl.creations;
+
+  world.groups.length = 0;
+  var result = await captured.handler({ message: "Bypass the proposal", wait: false });
+
+  assert.equal(result.isError, true);
+  assert.match(result.content[0].text, /requires an exact existing Driver\/Split Worker pair/);
+  assert.match(result.content[0].text, /call propose_worker while unpaired/);
+  assert.equal(world.groups.length, 0, "no pair was recreated");
+  assert.equal(world.sessions.size, sessionCount, "no session was created");
+  assert.equal(world.created.length, createdCount, "the factory was never reached");
+  assert.equal(world.driver._pairTurnControl.creations, creationReservations, "no creation reservation was made");
 });
 
 // --- Replacement ----------------------------------------------------------
@@ -283,7 +356,7 @@ test("replace_partner swaps in a fresh Worker and preserves the old session", as
   var oldWorker = world.worker();
   oldWorker.history.push({ type: "user_message", text: "old work" });
 
-  var result = parse(await world.tool("replace_partner").handler({}));
+  var result = parse(await replaceThroughProposal(world, {}));
 
   assert.equal(result.status, "replaced");
   assert.equal(result.previousWorkerSessionId, oldWorker.localId);
@@ -297,6 +370,25 @@ test("replace_partner swaps in a fresh Worker and preserves the old session", as
   assert.equal(world.groups.length, 1, "exactly one pair");
   assert.equal(world.groups[0].pair.workerId, result.workerSessionId);
   assert.notEqual(world.groups[0].pair.workerId, oldWorker.localId);
+  assert.equal(oldWorker.sessionProvenance.kind, "worker");
+  assert.equal(world.worker().sessionProvenance.parentSessionOriginId, oldWorker.sessionProvenance.parentSessionOriginId);
+  assert.equal(world.worker().sessionProvenance.generation, 2);
+  assert.deepEqual(world.tools(oldWorker), [], "a replaced historical Worker never resurfaces as a Driver");
+  assert.equal(world.attached.getSystemPrompt(oldWorker), "", "a historical Worker receives no Driver proposal prompt");
+});
+
+test("dissolving a factory-created pair preserves Worker classification", async function (t) {
+  var world = makeWorld();
+  t.after(world.dispose);
+  await makePair(world);
+  var worker = world.worker();
+  var close = world.tool("close_partner");
+  var result = parse(await close.handler({}));
+  assert.equal(result.status, "closed");
+  assert.equal(world.groups.length, 0);
+  assert.equal(worker.sessionProvenance.kind, "worker");
+  assert.deepEqual(world.tools(worker), []);
+  assert.equal(world.attached.getSystemPrompt(worker), "");
 });
 
 test("replacement is limited to one successful generation per human turn", async function (t) {
@@ -304,15 +396,15 @@ test("replacement is limited to one successful generation per human turn", async
   t.after(world.dispose);
   await makePair(world);
 
-  var first = parse(await world.tool("replace_partner").handler({}));
+  var first = parse(await replaceThroughProposal(world, {}));
   assert.equal(first.status, "replaced");
-  var blocked = await world.tool("replace_partner").handler({});
+  var blocked = await replaceThroughProposal(world, {});
   assert.equal(blocked.isError, true);
   assert.match(blocked.content[0].text, /replacement limit/);
   assert.equal(world.created.length, 2, "the blocked retry creates no session");
 
   world.attached.beginHumanTurn(world.driver);
-  var nextTurn = parse(await world.tool("replace_partner").handler({}));
+  var nextTurn = parse(await replaceThroughProposal(world, {}));
   assert.equal(nextTurn.status, "replaced");
   assert.equal(world.created.length, 3);
 });
@@ -326,14 +418,21 @@ test("replacement refuses an active Worker unless interrupt is explicit", async 
   worker.isProcessing = true;
   worker.abortController = { abort: function () { aborted = true; } };
 
-  var refused = await world.tool("replace_partner").handler({});
+  var refused = await replaceThroughProposal(world, {});
   assert.equal(refused.isError, true);
   assert.match(refused.content[0].text, /mid-turn/);
   assert.match(refused.content[0].text, /interrupt set to true/);
   assert.equal(aborted, false, "nothing was stopped");
   assert.equal(world.groups[0].pair.workerId, worker.localId, "the pair is untouched");
 
-  var forced = parse(await world.tool("replace_partner").handler({ interrupt: true }));
+  var refusedProposal = world.driver.history.filter(function (item) {
+    return item && item.type === "worker_proposal" && item.action === "replace" && item.status === "pending";
+  })[0];
+  await world.attached.respondToWorkerProposal({ _clayActiveSession: 1 }, {
+    proposalId: refusedProposal.proposalId, accepted: false,
+  });
+
+  var forced = parse(await replaceThroughProposal(world, { interrupt: true }));
   assert.equal(forced.status, "replaced");
   assert.equal(forced.interrupted, true);
   assert.equal(aborted, true, "the old Worker was stopped first");
@@ -346,9 +445,8 @@ test("replacement can deliver the next task to the new Worker atomically", async
   await makePair(world, "Old task");
   var oldWorker = world.worker();
 
-  var result = parse(await world.tool("replace_partner").handler({ message: "Fresh task", wait: false }));
+  var result = parse(await replaceThroughProposal(world, { message: "Fresh task", wait: false }));
   assert.equal(result.status, "replaced");
-  assert.ok(result.delivery, "the task was delivered in the same operation");
 
   var newWorker = world.worker();
   assert.notEqual(newWorker.localId, oldWorker.localId);
@@ -376,13 +474,19 @@ test("a Worker model must be genuinely available", async function (t) {
   var world = makeWorld();
   t.after(world.dispose);
 
-  var badVendor = await world.tool("send_to_partner").handler({ message: "x", workerVendor: "not-installed" });
-  assert.equal(badVendor.isError, true);
-  assert.match(badVendor.content[0].text, /vendor is not installed/);
+  var posted = parse(await world.tool("propose_worker").handler({
+    summary: "x", plan: "x", message: "x", recommendationRationale: "Use a confirmed runtime.",
+  }));
+  await assert.rejects(world.attached.respondToWorkerProposal({ _clayActiveSession: 1 }, {
+    proposalId: posted.proposalId, accepted: true, vendor: "not-installed", model: "", effort: "medium",
+  }), /not installed/);
   assert.equal(world.groups.length, 0, "nothing was created");
+  await world.attached.respondToWorkerProposal({ _clayActiveSession: 1 }, {
+    proposalId: posted.proposalId, accepted: false,
+  });
 
   await makePair(world);
-  var badReplace = await world.tool("replace_partner").handler({ workerVendor: "nope" });
+  var badReplace = await replaceThroughProposal(world, { workerVendor: "nope" });
   assert.equal(badReplace.isError, true);
   assert.match(badReplace.content[0].text, /vendor is not installed/);
 
@@ -439,7 +543,7 @@ test("replacement records the observed signals for the generation it closed", as
   oldWorker.history.push({ type: "error", text: "boom" });
   oldWorker.lastContextUsage = { totalTokens: 5000, contextWindow: 10000 };
 
-  await world.tool("replace_partner").handler({ evaluation: { outcome: "failed", note: "errored out" } });
+  await replaceThroughProposal(world, { evaluation: { outcome: "failed", note: "errored out" } });
 
   var status = parse(await world.tool("partner_status").handler({}));
   var closed = status.generations[0];
@@ -519,16 +623,15 @@ test("only the exact live Driver of the exact pair can manage it", async functio
   // A stale pair reference cannot be managed: dissolve, then try again.
   var replace = world.tool("replace_partner");
   world.groups.length = 0;
-  var stale = await replace.handler({});
-  assert.equal(stale.isError, true);
-  assert.match(stale.content[0].text, /not in a split group/);
+  var stale = parse(await replace.handler({ message: "Continue", recommendationRationale: "Use a fresh runtime." }));
+  assert.match(stale.error, /exact paired Driver/);
 });
 
-test("no lifecycle action asks the human for approval", async function (t) {
+test("replacement raises one product-choice card, not a provider permission", async function (t) {
   var world = makeWorld();
   t.after(world.dispose);
   await makePair(world);
-  await world.tool("replace_partner").handler({});
+  await replaceThroughProposal(world, {});
   await world.tool("record_partner_evaluation").handler({ outcome: "succeeded" });
 
   // Nothing in the Driver or Worker history is a permission or proposal event.
@@ -537,7 +640,61 @@ test("no lifecycle action asks the human for approval", async function (t) {
   var gates = everything.filter(function (h) {
     return h && (h.type === "permission_request" || h.type === "worker_proposal");
   });
-  assert.deepEqual(gates, [], "no approval gate was raised for any lifecycle action");
+  assert.equal(gates.filter(function (h) { return h.type === "permission_request"; }).length, 0);
+  assert.equal(gates.filter(function (h) { return h.type === "worker_proposal" && h.action === "replace"; }).length, 1);
+});
+
+test("full access auto-accepts an exact replacement recommendation through the same transaction", async function (t) {
+  var world = makeWorld();
+  t.after(world.dispose);
+  await makePair(world);
+  var oldWorker = world.worker();
+  world.driver.permissionMode = "bypassPermissions";
+
+  var result = parse(await world.tool("replace_partner").handler({
+    message: "Continue with a fresh implementation context",
+    workerVendor: "codex",
+    workerModel: "gpt-5.6-sol",
+    workerEffort: "medium",
+    recommendationRationale: "Codex Sol at medium effort fits this bounded continuation task.",
+  }));
+  await new Promise(function (resolve) { setImmediate(resolve); });
+  var card = world.driver.history.filter(function (item) {
+    return item && item.type === "worker_proposal" && item.action === "replace";
+  })[0];
+
+  assert.equal(result.status, "auto_accepted");
+  assert.equal(card.autoAccepted, true);
+  assert.equal(card.decisionMode, "driver_recommendation");
+  assert.equal(world.sessions.has(oldWorker.localId), true, "the old Worker history remains available");
+  assert.notEqual(world.worker().localId, oldWorker.localId);
+});
+
+test("full-access auto-accept still obeys the human Stop replacement barrier", async function (t) {
+  var world = makeWorld();
+  t.after(world.dispose);
+  await makePair(world);
+  var oldWorker = world.worker();
+  var oldGroup = world.groups[0];
+  world.driver.permissionMode = "bypassPermissions";
+  assert.equal(world.attached.handleHumanStop(oldWorker), true);
+
+  var result = parse(await world.tool("replace_partner").handler({
+    message: "Retry without a new human turn",
+    workerVendor: "codex",
+    workerModel: "gpt-5.6-sol",
+    workerEffort: "medium",
+    recommendationRationale: "A fresh Codex Worker would otherwise fit this retry.",
+  }));
+  var card = world.driver.history.filter(function (item) {
+    return item && item.type === "worker_proposal" && item.action === "replace";
+  })[0];
+
+  assert.equal(result.status, "posted", "the failed automatic decision leaves user control pending");
+  assert.equal(card.status, "pending");
+  assert.match(card.error, /human stopped/);
+  assert.equal(world.groups[0], oldGroup);
+  assert.equal(world.worker(), oldWorker);
 });
 
 // --- Auto-approval and conventions ---------------------------------------
@@ -571,25 +728,28 @@ test("every lifecycle tool is auto-approved, in exactly the emittable forms", fu
   assert.equal(allowed("mcp__evil__respond_to_worker_permission"), false);
   assert.equal(allowed("mcp__clay-sessions__evil__replace_partner"), false,
     "the server segment is matched exactly, not by trailing suffix");
-  assert.equal(allowed("propose_worker"), false, "the retired proposal tool is no longer whitelisted");
-  assert.equal(allowed("mcp__clay-sessions__propose_worker"), false);
+  assert.equal(allowed("propose_worker"), true, "the non-mutating proposal itself is auto-approved");
+  assert.equal(allowed("mcp__clay-sessions__propose_worker"), true);
   assert.equal(allowed("replace_partner_extra"), false, "no prefix matching");
 });
 
-test("the Driver prompt states the management objective without proposal language", function () {
+test("the Driver prompt explains pending and audited full-access runtime decisions", function () {
   var prompts = require("../lib/session-pair-prompts");
   assert.match(prompts.DRIVER, /protect your own context/);
   assert.match(prompts.DRIVER, /keep the Split Worker compact/);
   assert.match(prompts.DRIVER, /Reuse the existing Split Worker only when its accumulated context genuinely helps/);
   assert.match(prompts.DRIVER, /replace it instead of carrying that cost forward/);
-  assert.match(prompts.DRIVER, /without asking the user and without posting any suggestion or approval card/);
+  assert.match(prompts.DRIVER, /Never tell the user that you will reuse the current Worker before checking partner_status/);
+  assert.match(prompts.DRIVER, /explicitly say that the decision changed and give the reason/);
+  assert.match(prompts.DRIVER, /replace_partner always posts that card/);
+  assert.match(prompts.DRIVER, /may auto-accept your exact server-validated recommendation/);
+  assert.match(prompts.DRIVER, /rationale explaining why all three fit the task/);
+  assert.match(prompts.DRIVER, /remains visible as an audit trail/);
   assert.match(prompts.DRIVER, /record_partner_evaluation/);
   assert.match(prompts.DRIVER, /not a general ranking of models/);
-  assert.equal(/propose_worker|suggestion card to the user|ask the user to approve/.test(prompts.DRIVER), false,
-    "no proposal or approval instruction survives");
   assert.equal(/[^\x00-\x7F]/.test(prompts.DRIVER), false, "English ASCII only");
   assert.equal(/[^\x00-\x7F]/.test(prompts.UNPAIRED), false);
-  assert.match(prompts.UNPAIRED, /Do not ask the user for permission to start one/);
+  assert.match(prompts.UNPAIRED, /call propose_worker/);
 });
 
 test("server conventions and module sizes hold", function () {
@@ -762,8 +922,8 @@ test("an explicit model must match the catalog, and an empty catalog fails close
 test("an invalid replacement vendor or model preserves the exact old pair", async function (t) {
   var cases = [
     { args: { workerVendor: "not-installed" }, error: /vendor is not installed/ },
-    { args: { workerModel: "gpt-9-imaginary" }, error: /model is not available/ },
-    { args: { workerVendor: "codex", workerModel: "claude-fable-5" }, error: /model is not available/ },
+    { args: { workerModel: "gpt-9-imaginary" }, error: /model is unavailable/ },
+    { args: { workerVendor: "codex", workerModel: "claude-fable-5" }, error: /model is unavailable/ },
   ];
   for (var i = 0; i < cases.length; i++) {
     var world = makeWorld();
@@ -777,7 +937,7 @@ test("an invalid replacement vendor or model preserves the exact old pair", asyn
     var aborted = false;
     oldWorker.abortController = { abort: function () { aborted = true; } };
 
-    var res = await world.tool("replace_partner").handler(cases[i].args);
+    var res = await replaceThroughProposal(world, cases[i].args);
     assert.equal(res.isError, true, JSON.stringify(cases[i].args) + " is refused");
     assert.match(res.content[0].text, cases[i].error);
 
@@ -804,7 +964,7 @@ test("an active Worker with an invalid replacement is not stopped", async functi
 
   // Preflight runs before the interrupt gate, so the bad runtime is reported
   // rather than the "pass interrupt true" message, and nothing is stopped.
-  var res = await world.tool("replace_partner").handler({ interrupt: true, workerVendor: "nope" });
+  var res = await replaceThroughProposal(world, { interrupt: true, workerVendor: "nope" });
   assert.equal(res.isError, true);
   assert.match(res.content[0].text, /vendor is not installed/);
   assert.equal(aborted, false, "the running Worker was left alone");
@@ -884,6 +1044,11 @@ test("a stale session object cannot drive the pair through a captured handler", 
   var lifecycleTools = ["status", "replace", "evaluate"];
   for (var i = 0; i < lifecycleTools.length; i++) {
     var res = await captured[lifecycleTools[i]].handler({ outcome: "succeeded" });
+    if (lifecycleTools[i] === "replace") {
+      var staleProposal = parse(res);
+      assert.match(staleProposal.error, /exact paired Driver/);
+      continue;
+    }
     assert.equal(res.isError, true, lifecycleTools[i] + " refuses a stale caller");
     assert.match(res.content[0].text, /no longer live/);
   }
@@ -914,7 +1079,7 @@ test("the identity check precedes eligibility and group lookup", function () {
     "and before the group lookup");
 
   var pairSource = fs.readFileSync(path.join(root, "lib/project-session-pair.js"), "utf8");
-  var gap = pairSource.slice(pairSource.indexOf("function groupAndPartner(caller)"));
+  var gap = pairSource.slice(pairSource.indexOf("function groupAndPartner(caller,"));
   gap = gap.slice(0, gap.indexOf("function broadcastDelegation"));
   assert.match(gap, /if \(sm\.sessions\.get\(caller\.localId\) !== caller\) \{/,
     "the four base tools enforce the same rule");
@@ -936,7 +1101,7 @@ test("a failed idle replacement leaves the old generation open and unevaluated",
   var realCreate = world.storeCreate;
   world.failNextCreate = true;
 
-  var res = await world.tool("replace_partner").handler({
+  var res = await replaceThroughProposal(world, {
     evaluation: { outcome: "failed", note: "should not be recorded" },
   });
   assert.equal(res.isError, true);
@@ -960,12 +1125,12 @@ test("a failed idle replacement leaves the old generation open and unevaluated",
   assert.deepEqual(world.groups[0].pair, { driverId: 1, workerId: oldWorker.localId });
   assert.notEqual(world.groups[0].id, oldGroupId, "with a newly issued group id, as documented");
 
-  // And a later successful replacement still closes generation 1 correctly.
+  // Retrying the same approved card preserves its originally proposed assessment.
   world.failNextCreate = false;
-  var ok = parse(await world.tool("replace_partner").handler({ evaluation: { outcome: "partial" } }));
+  var ok = parse(await replaceThroughProposal(world, { evaluation: { outcome: "partial" } }));
   assert.equal(ok.status, "replaced");
   assert.equal(ledger[0].endedAt !== null, true, "now it is closed");
-  assert.equal(ledger[0].evaluation.outcome, "partial");
+  assert.equal(ledger[0].evaluation.outcome, "failed");
 });
 
 test("a malformed evaluation is rejected before anything is destroyed", async function (t) {
@@ -975,7 +1140,7 @@ test("a malformed evaluation is rejected before anything is destroyed", async fu
   var oldWorker = world.worker();
   var oldGroupId = world.groups[0].id;
 
-  var res = await world.tool("replace_partner").handler({ evaluation: { outcome: "amazing" } });
+  var res = await replaceThroughProposal(world, { evaluation: { outcome: "amazing" } });
   assert.equal(res.isError, true);
   assert.match(res.content[0].text, /succeeded, partial, failed, abandoned/);
 

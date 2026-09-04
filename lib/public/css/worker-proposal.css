@@ -1,4 +1,4 @@
-/* Inline approval surface for Fable's Driver/Worker recommendation. */
+/* Inline approval surface for user-controlled Split Worker configuration. */
 
 .worker-proposal-card {
   width: min(var(--content-width), calc(100% - 40px));
@@ -67,6 +67,30 @@
 
 .worker-proposal-plan li::marker { color: var(--accent2); font-weight: 700; }
 
+.worker-proposal-rationale {
+  display: grid;
+  gap: 4px;
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border-left: 2px solid color-mix(in srgb, var(--accent2) 62%, var(--border));
+  background: color-mix(in srgb, var(--accent2) 5%, transparent);
+}
+
+.worker-proposal-rationale > span {
+  color: var(--accent2);
+  font-size: 9px;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.worker-proposal-rationale p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
 .worker-proposal-config {
   display: grid;
   grid-template-columns: minmax(120px, 0.8fr) minmax(160px, 1.2fr) minmax(190px, auto);
@@ -99,6 +123,15 @@
 .worker-proposal-effort-btn { flex: 1; min-width: 38px; border: 0; border-radius: 6px; background: transparent; color: var(--text-dimmer); font: inherit; font-size: 9px; font-weight: 650; cursor: pointer; }
 .worker-proposal-effort-btn:hover { color: var(--text); }
 .worker-proposal-effort-btn.active { background: color-mix(in srgb, var(--accent2) 18%, var(--bg)); color: var(--accent2); }
+
+.worker-proposal-decision {
+  margin-top: 9px;
+  color: var(--text-dimmer);
+  font-size: 9px;
+  line-height: 1.35;
+}
+
+.worker-proposal-decision.automatic { color: var(--accent2); }
 
 .worker-proposal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
 .worker-proposal-action { min-height: 34px; padding: 0 13px; border-radius: 9px; font: inherit; font-size: 11px; font-weight: 700; cursor: pointer; }
