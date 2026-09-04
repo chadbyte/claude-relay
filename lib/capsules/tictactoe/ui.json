@@ -1,0 +1,203 @@
+{
+  "type": "stack",
+  "props": {
+    "gap": "md"
+  },
+  "children": [
+    {
+      "type": "text",
+      "props": {
+        "text": {
+          "$bind": "$state.statusText",
+          "fallback": "You (X) to play."
+        },
+        "role": "output"
+      }
+    },
+    {
+      "type": "row",
+      "props": {
+        "gap": "sm"
+      },
+      "children": [
+        {
+          "type": "button",
+          "action": "mark",
+          "props": {
+            "label": {
+              "$bind": "$state.cell0",
+              "fallback": " "
+            },
+            "accessibleLabel": "Mark cell 0",
+            "variant": "secondary",
+            "disabled": "$state.cell0Disabled",
+            "args": {
+              "cell": 0
+            }
+          }
+        },
+        {
+          "type": "button",
+          "action": "mark",
+          "props": {
+            "label": {
+              "$bind": "$state.cell1",
+              "fallback": " "
+            },
+            "accessibleLabel": "Mark cell 1",
+            "variant": "secondary",
+            "disabled": "$state.cell1Disabled",
+            "args": {
+              "cell": 1
+            }
+          }
+        },
+        {
+          "type": "button",
+          "action": "mark",
+          "props": {
+            "label": {
+              "$bind": "$state.cell2",
+              "fallback": " "
+            },
+            "accessibleLabel": "Mark cell 2",
+            "variant": "secondary",
+            "disabled": "$state.cell2Disabled",
+            "args": {
+              "cell": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "props": {
+        "gap": "sm"
+      },
+      "children": [
+        {
+          "type": "button",
+          "action": "mark",
+          "props": {
+            "label": {
+              "$bind": "$state.cell3",
+              "fallback": " "
+            },
+            "accessibleLabel": "Mark cell 3",
+            "variant": "secondary",
+            "disabled": "$state.cell3Disabled",
+            "args": {
+              "cell": 3
+            }
+          }
+        },
+        {
+          "type": "button",
+          "action": "mark",
+          "props": {
+            "label": {
+              "$bind": "$state.cell4",
+              "fallback": " "
+            },
+            "accessibleLabel": "Mark cell 4",
+            "variant": "secondary",
+            "disabled": "$state.cell4Disabled",
+            "args": {
+              "cell": 4
+            }
+          }
+        },
+        {
+          "type": "button",
+          "action": "mark",
+          "props": {
+            "label": {
+              "$bind": "$state.cell5",
+              "fallback": " "
+            },
+            "accessibleLabel": "Mark cell 5",
+            "variant": "secondary",
+            "disabled": "$state.cell5Disabled",
+            "args": {
+              "cell": 5
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "props": {
+        "gap": "sm"
+      },
+      "children": [
+        {
+          "type": "button",
+          "action": "mark",
+          "props": {
+            "label": {
+              "$bind": "$state.cell6",
+              "fallback": " "
+            },
+            "accessibleLabel": "Mark cell 6",
+            "variant": "secondary",
+            "disabled": "$state.cell6Disabled",
+            "args": {
+              "cell": 6
+            }
+          }
+        },
+        {
+          "type": "button",
+          "action": "mark",
+          "props": {
+            "label": {
+              "$bind": "$state.cell7",
+              "fallback": " "
+            },
+            "accessibleLabel": "Mark cell 7",
+            "variant": "secondary",
+            "disabled": "$state.cell7Disabled",
+            "args": {
+              "cell": 7
+            }
+          }
+        },
+        {
+          "type": "button",
+          "action": "mark",
+          "props": {
+            "label": {
+              "$bind": "$state.cell8",
+              "fallback": " "
+            },
+            "accessibleLabel": "Mark cell 8",
+            "variant": "secondary",
+            "disabled": "$state.cell8Disabled",
+            "args": {
+              "cell": 8
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "props": {
+        "gap": "sm"
+      },
+      "children": [
+        {
+          "type": "button",
+          "action": "reset",
+          "props": {
+            "label": "Reset",
+            "accessibleLabel": "Reset the game",
+            "variant": "ghost"
+          }
+        }
+      ]
+    }
+  ]
+}

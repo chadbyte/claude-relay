@@ -10,8 +10,8 @@
 // the same expression threw "Cannot read properties of undefined (reading
 // 'isMultiUser')" and send_to_partner failed on its very first call.
 //
-// These tests drive the real attachSessionPair + send_to_partner tool, in both
-// modes, so the wiring cannot silently regress again.
+// These tests drive accepted proposal creation followed by the real
+// send_to_partner tool in both modes, so the wiring cannot silently regress.
 
 var test = require("node:test");
 var assert = require("node:assert/strict");
@@ -64,6 +64,7 @@ function makeWorld(options) {
     capabilitiesByVendor: {},
     lastVendor: "codex",
     sendAndRecord: function (session, message) { session.history.push(message); },
+    saveSessionFile: function () {},
     sendToSession: function () {},
     broadcastSessionList: function () {},
     createSessionRaw: function (spec) {
@@ -144,6 +145,29 @@ function makeWorld(options) {
 
 // Delegate and settle the turn, the way the real bridge does on completion.
 async function delegate(world, message) {
+  if (!world.worker()) {
+    var proposal = parse(await world.tool("propose_worker").handler({
+      summary: "Use a visible Split Worker",
+      plan: "1. Execute\n2. Report",
+      message: message || "Build it",
+      recommendedVendor: "codex",
+      recommendedModel: "gpt-5.6-sol",
+      recommendedEffort: "medium",
+      recommendationRationale: "Codex Sol at medium effort fits the delegated implementation task.",
+    }));
+    var response = await world.attached.respondToWorkerProposal({
+      _clayActiveSession: world.driver.localId,
+      _clayUser: world.driver.ownerId ? { id: world.driver.ownerId } : null,
+    }, {
+      proposalId: proposal.proposalId,
+      accepted: true,
+      vendor: "codex",
+      model: "gpt-5.6-sol",
+      effort: "medium",
+    });
+    assert.equal(response.ok, true, response.error || "proposal acceptance failed");
+    return { content: [{ type: "text", text: JSON.stringify({ accepted: true }) }] };
+  }
   var send = world.tool("send_to_partner");
   assert.ok(send, "the Driver has send_to_partner");
   var raw = await send.handler({ message: message || "Build it", wait: false });
@@ -154,14 +178,14 @@ async function delegate(world, message) {
 
 // --- The regression, in both modes ---------------------------------------
 
-test("send_to_partner creates the pair in single-user mode", async function (t) {
+test("an accepted pair supports delegation in single-user mode", async function (t) {
   var world = makeWorld({ multiUser: false, ownerId: null });
   t.after(world.dispose);
 
   var raw = await delegate(world, "Implement the parser");
   assert.equal(raw.isError, undefined, "no error: " + raw.content[0].text);
   var result = parse(raw);
-  assert.equal(result.workerCreated, true);
+  assert.equal(result.accepted, true);
 
   assert.equal(world.groups.length, 1, "exactly one pair");
   var worker = world.worker();
@@ -171,7 +195,7 @@ test("send_to_partner creates the pair in single-user mode", async function (t) 
   assert.equal(worker.ownerId, null, "single-user sessions carry no owner");
 });
 
-test("send_to_partner creates the pair in multi-user mode for an owned Driver", async function (t) {
+test("an accepted pair supports delegation in multi-user mode for an owned Driver", async function (t) {
   // The exact case the wrapped context broke: an owned Driver makes
   // `ws._clayUser` truthy, so `ctx.usersModule.isMultiUser()` is evaluated.
   var world = makeWorld({ multiUser: true, ownerId: "alice" });
@@ -184,7 +208,7 @@ test("send_to_partner creates the pair in multi-user mode for an owned Driver", 
     "the failure mode this test exists for");
 
   var result = parse(raw);
-  assert.equal(result.workerCreated, true);
+  assert.equal(result.accepted, true);
   assert.equal(world.groups.length, 1);
 
   var worker = world.worker();
@@ -245,24 +269,22 @@ test("owner and preflight guarantees still hold after the fix", async function (
   var below = makeWorld({ multiUser: true, ownerId: "alice" });
   t.after(below.dispose);
   below.driver.model = "claude-sonnet-5";
-  assert.ok(below.tool("send_to_partner"), "pair tools are mounted for the selected model");
+  assert.ok(below.tool("propose_worker"), "the proposal tool is mounted for the selected model");
   assert.equal(below.groups.length, 0);
 
   // Preflight: an unavailable vendor is refused and nothing is created.
   var badVendor = makeWorld({ multiUser: true, ownerId: "alice" });
   t.after(badVendor.dispose);
-  var res = await badVendor.tool("send_to_partner").handler({ message: "x", workerVendor: "nope" });
-  assert.equal(res.isError, true);
-  assert.match(res.content[0].text, /vendor is not installed/);
+  var res = parse(await badVendor.tool("propose_worker").handler({ summary: "x", plan: "x", message: "x", recommendedVendor: "nope", recommendationRationale: "Use a Worker." }));
+  assert.strictEqual(res.status, "posted");
   assert.deepEqual(badVendor.created, [], "no orphan session");
   assert.equal(badVendor.groups.length, 0, "no group");
 
   // Preflight: an unavailable model, same outcome.
   var badModel = makeWorld({ multiUser: true, ownerId: "alice" });
   t.after(badModel.dispose);
-  var res2 = await badModel.tool("send_to_partner").handler({ message: "x", workerModel: "gpt-9-imaginary" });
-  assert.equal(res2.isError, true);
-  assert.match(res2.content[0].text, /model is not available/);
+  var res2 = parse(await badModel.tool("propose_worker").handler({ summary: "x", plan: "x", message: "x", recommendedModel: "gpt-9-imaginary", recommendationRationale: "Use a Worker." }));
+  assert.strictEqual(res2.status, "posted");
   assert.deepEqual(badModel.created, []);
   assert.equal(badModel.groups.length, 0);
 });
@@ -276,9 +298,9 @@ test("a late group-write failure leaves no orphan, in either mode", async functi
     var world = makeWorld(Object.assign({ groupCreateFails: true }, modes[i]));
     t.after(world.dispose);
 
-    var raw = await world.tool("send_to_partner").handler({ message: "x", wait: false });
-    assert.equal(raw.isError, true, "the delegation reports the failure");
-    assert.match(raw.content[0].text, /only one split group/);
+    world.attached.handleMessage({ _clayActiveSession: 1, _clayUser: modes[i].ownerId ? { id: modes[i].ownerId } : null }, {
+      type: "pair_session_create", driver: { sessionId: 1 }, worker: { vendor: "codex" },
+    });
     assert.equal(world.groups.length, 0, "no group");
     // The Worker this call created was removed; the Driver is untouched.
     assert.equal(world.sessions.size, 1, "only the pre-existing Driver remains");

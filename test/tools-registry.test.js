@@ -19,9 +19,22 @@ function validTool(id) {
   };
 }
 
+// Shipped Capsules seed into every tools root, so a user's own inventory is
+// whatever remains after removing them and the retired built-ins.
+function shippedToolIds() {
+  try {
+    return fs.readdirSync(registry.CAPSULES_ROOT, { withFileTypes: true })
+      .filter(function (entry) { return entry.isDirectory(); })
+      .map(function (entry) { return entry.name; });
+  } catch (e) {
+    return [];
+  }
+}
+
 function userToolIds(userCtx) {
+  var shipped = shippedToolIds().concat(["board", "scratchpad", "translator"]);
   return registry.listTools(userCtx).filter(function (item) {
-    return item.id !== "board" && item.id !== "scratchpad" && item.id !== "translator";
+    return shipped.indexOf(item.id) === -1;
   }).map(function (item) { return item.id; });
 }
 

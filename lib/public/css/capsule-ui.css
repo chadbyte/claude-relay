@@ -384,6 +384,24 @@ textarea.tool-input { min-height: 92px; resize: vertical; }
   .tool-pagination { flex-wrap: wrap; justify-content: flex-start; }
 }
 
+/* Rich Display frame: the additive sandboxed element above the floor. */
+.home-tool-frame-wrap { width: 100%; }
+.home-tool-frame { display: block; width: 100%; min-height: 240px; border: 0; border-radius: 10px; background: var(--bg); }
+.home-tool-frame-toggle {
+  display: block; margin: 6px 0 0 auto; padding: 3px 10px;
+  border: 1px solid var(--border-subtle); border-radius: 999px;
+  background: transparent; color: var(--text-muted); font-size: 11px; cursor: pointer;
+}
+.home-tool-frame-toggle:hover { color: var(--text); border-color: var(--accent); }
+
+/* Host-side attribution flash when the other seat's act changes state. */
+@keyframes capsule-remote-act-flash {
+  0% { box-shadow: 0 0 0 2px var(--accent); }
+  100% { box-shadow: 0 0 0 2px transparent; }
+}
+.capsule-remote-act { animation: capsule-remote-act-flash 0.8s ease-out; }
+
 @media (prefers-reduced-motion: reduce) {
   .tool-button, .tool-input, .tool-select { transition: none; }
+  .capsule-remote-act { animation: none; }
 }

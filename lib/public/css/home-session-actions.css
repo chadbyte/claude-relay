@@ -22,6 +22,72 @@
 .home-sidebar-recent-item .home-sidebar-recent-row:hover,
 .home-conversations-sheet-item .home-conversations-sheet-row:hover { background: transparent; }
 
+.home-conversations-driver-header {
+  display: flex;
+  align-items: stretch;
+}
+
+.home-conversations-driver-header > .home-conversations-sheet-item {
+  min-width: 0;
+  flex: 1;
+}
+
+.home-conversations-driver-toggle {
+  width: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--text-dimmer);
+  background: transparent;
+  cursor: pointer;
+}
+
+.home-conversations-driver-toggle:hover,
+.home-conversations-driver-toggle:focus-visible {
+  color: var(--text);
+  background: rgba(var(--overlay-rgb), 0.05);
+  outline: none;
+}
+
+.home-conversations-driver-toggle .lucide {
+  width: 14px;
+  height: 14px;
+  transition: transform 0.15s ease;
+}
+
+.home-conversations-driver-toggle[aria-expanded="true"] .lucide {
+  transform: rotate(90deg);
+}
+
+.home-conversations-driver-header:not(:has(.home-conversations-sheet-item)) .home-conversations-driver-toggle {
+  width: 100%;
+  min-height: 38px;
+  padding: 0 10px;
+  justify-content: flex-start;
+  gap: 9px;
+  font: inherit;
+  font-size: 11px;
+  text-align: left;
+}
+
+.home-conversations-driver-header:not(:has(.home-conversations-sheet-item)) .home-conversations-driver-toggle span:first-of-type {
+  flex: 1;
+}
+
+.home-conversations-worker-children {
+  margin-left: 16px;
+  padding-left: 10px;
+  border-left: 1px solid color-mix(in srgb, var(--text-dimmer) 22%, transparent);
+}
+
+.home-conversations-worker-item .home-conversations-sheet-row {
+  padding-block: 8px;
+}
+
 .home-sidebar-recent-row:focus-visible,
 .home-conversations-sheet-row:focus-visible {
   position: relative;

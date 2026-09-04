@@ -502,7 +502,10 @@ test("the router is wired through a getter and never to a Mate project", functio
 });
 
 test("the Driver tool is mounted alongside the existing pair tools", function () {
-  assert.match(pairSource, /\.concat\(workerPermission\.getToolDefs\(boundSession, \{ dormantDriver: !group \}\)\)/);
+  assert.match(pairSource, /workerPermission\.getToolDefs\(boundSession, \{ dormantDriver: true \}\)/,
+    "an unpaired proposal query can answer Worker permissions after acceptance");
+  assert.match(pairSource, /workerPermission\.getToolDefs\(boundSession, \{ dormantDriver: false \}\)/,
+    "a paired Driver retains the permission decision tool");
   // The existing structural exclusion still hides every pair tool from a Worker.
   assert.match(pairSource, /if \(group && group\.pair && group\.pair\.driverId !== boundSession\.localId\) return \[\];/);
 });

@@ -6,7 +6,7 @@ var path = require("node:path");
 var root = path.join(__dirname, "..");
 var css = fs.readFileSync(path.join(root, "lib/public/css/sidebar.css"), "utf8");
 var source = fs.readFileSync(path.join(root, "lib/public/modules/sidebar-sessions.js"), "utf8");
-var renderStart = source.indexOf("function renderSessionItem(s)");
+var renderStart = source.indexOf("function renderSessionItem(s, options)");
 var renderEnd = source.indexOf("function renderSplitGroupItem", renderStart);
 var renderSource = source.slice(renderStart, renderEnd);
 
