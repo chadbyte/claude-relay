@@ -1,3 +1,14 @@
+# [4.0.0-beta.15](https://github.com/chadbyte/clay/compare/v4.0.0-beta.14...v4.0.0-beta.15) (2026-09-04)
+
+
+### Features
+
+* **capsules:** add tic-tac-toe board capsule ([e07b040](https://github.com/chadbyte/clay/commit/e07b0401d2c4d89d7b402923467e1fb1b8ff43cf))
+* **capsules:** enforce display floor and add Pig game ([771017d](https://github.com/chadbyte/clay/commit/771017d5519006cbed65768143a8415a64a3bf71))
+* **capsules:** host opt-in rich display in a sandboxed separate origin ([c434426](https://github.com/chadbyte/clay/commit/c434426ba75bfa60286bce77a92ac821b8502444))
+* **capsules:** push ordered causal act events to open displays ([5f50da1](https://github.com/chadbyte/clay/commit/5f50da146bd611e4803f4a18ef1b9f5988162e0b))
+* **split-worker:** add audited runtime and session hierarchy ([09c243f](https://github.com/chadbyte/clay/commit/09c243f671937927e4e1bfd24cda2cb8aca15759))
+
 # [4.0.0-beta.14](https://github.com/chadbyte/clay/compare/v4.0.0-beta.13...v4.0.0-beta.14) (2026-09-03)
 
 
