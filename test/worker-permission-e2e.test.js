@@ -407,11 +407,12 @@ test("Codex permission callbacks reach the shared handler", function () {
   assert.match(src, /canUseTool\("mcp__" \+ \(mcpParams\.serverName \|\| "unknown"\)/, "MCP tool approvals");
   assert.match(src, /canUseTool: queryOpts\.canUseTool \|\| null,/, "and it is threaded into the handle");
 
-  // Codex canonicalizes only these dynamic names, which is exactly why the
-  // whitelist has to cover the bare form of the answer tool too.
-  var canon = src.slice(src.indexOf("var permissionToolName = dynamicParams.tool;"));
-  canon = canon.slice(0, canon.indexOf("var permission = canUseTool"));
-  assert.match(canon, /permissionToolName === "send_to_partner" \|\| permissionToolName === "read_partner"/);
+  // Codex canonicalizes selected dynamic tools before asking the shared
+  // permission handler. The answer tool remains bare, so its whitelist entry
+  // must continue to cover that exact form.
+  var canon = src.slice(src.indexOf("function canonicalDynamicPermissionToolName"));
+  canon = canon.slice(0, canon.indexOf("// --- Event flattening"));
+  assert.match(canon, /toolName === "send_to_partner" \|\| toolName === "read_partner"/);
   assert.equal(/respond_to_worker_permission/.test(canon), false,
     "not canonicalized, so it arrives bare");
 });
