@@ -32,7 +32,7 @@ function makeWorld(options) {
   var opts = options || {};
   var nextId = 10;
   var driver = {
-    localId: 1, ownerId: opts.ownerId || null, title: "Planner", vendor: "claude",
+    localId: 1, ownerId: opts.ownerId || null, title: "Planner", vendor: opts.driverVendor || "claude",
     model: opts.driverModel === undefined ? "claude-fable-5" : opts.driverModel,
     history: [], isProcessing: false,
   };
@@ -251,6 +251,26 @@ test("the proposal path stays loadable and response-routed", function () {
   var pairSource = fs.readFileSync(path.join(root, "lib/project-session-pair.js"), "utf8");
   assert.match(pairSource, /if \(workerProposal\.handleMessage\(ws, msg\)\) return true;/,
     "so an in-flight worker_proposal_response still resolves");
+});
+
+test("Codex keeps a stable pair tool catalog across proposal acceptance", async function (t) {
+  var world = makeWorld({ driverVendor: "codex" });
+  t.after(world.dispose);
+  var initialTools = world.tools();
+  var initialNames = initialTools.map(function (tool) { return tool.name; });
+  var capturedSend = toolNamed(initialTools, "send_to_partner");
+
+  assert.ok(initialNames.indexOf("propose_worker") !== -1);
+  assert.ok(capturedSend, "the future paired tool is registered when the Codex thread starts");
+  assert.ok(initialNames.indexOf("partner_status") !== -1);
+
+  await makePair(world, "Implement the parser");
+
+  var pairedNames = world.tools().map(function (tool) { return tool.name; });
+  assert.deepEqual(pairedNames, initialNames, "resuming the Codex thread does not require a catalog update");
+  var result = parse(await capturedSend.handler({ message: "Fix the parser", wait: false }));
+  assert.equal(result.status, "running", "the handler resolves the newly created pair at call time");
+  world.completeTurn();
 });
 
 // --- Bounded status -------------------------------------------------------
