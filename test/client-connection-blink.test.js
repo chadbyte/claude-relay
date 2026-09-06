@@ -6,6 +6,7 @@ var path = require("node:path");
 var root = path.join(__dirname, "..");
 var connection = fs.readFileSync(path.join(root, "lib/public/modules/app-connection.js"), "utf8");
 var notes = fs.readFileSync(path.join(root, "lib/public/modules/sticky-notes.js"), "utf8");
+var notesCss = fs.readFileSync(path.join(root, "lib/public/css/sticky-notes.css"), "utf8");
 var sessions = fs.readFileSync(path.join(root, "lib/public/modules/sidebar-sessions.js"), "utf8");
 var globalWs = fs.readFileSync(path.join(root, "lib/server-global-ws.js"), "utf8");
 
@@ -176,6 +177,17 @@ test("an unchanged note keeps its rendered markdown, focus, and draft", function
     "a geometry-only update does not refresh icons");
   assert.equal(/rendered\.innerHTML = renderMiniMarkdown/.test(updated), false,
     "handleNoteUpdated no longer rewrites markdown directly");
+});
+
+test("floating notes do not repaint a live backdrop or blink repeatedly", function () {
+  var noteRule = slice(notesCss, ".sticky-note {", ".sticky-note:hover");
+  assert.equal(/backdrop-filter/.test(noteRule), false,
+    "composer typing cannot invalidate a live blur behind every floating note");
+  assert.match(notesCss, /\.sticky-note\.sticky-note-attention \{\s*animation: sticky-note-attention-pulse 1\.1s ease-out 1;/,
+    "a real note update gets one gentle cue rather than three flashes");
+  var pulse = slice(notesCss, "@keyframes sticky-note-attention-pulse", ".sticky-note.dragging");
+  assert.match(pulse, /0% \{[\s\S]*100% \{/);
+  assert.equal(/50%/.test(pulse), false, "the cue only fades out and never oscillates");
 });
 
 // --- Session list dirty guard --------------------------------------------
