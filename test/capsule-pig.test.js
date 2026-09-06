@@ -52,17 +52,26 @@ test("the shipped Display binds only to fields the projection publishes", functi
   var displayCtx = { userId: "pig-display", multiUser: true };
   registry.listTools(displayCtx);
   var uiTree = registry.getTool(displayCtx, "pig").uiTree;
-  var charts = uiTree.children.filter(function (node) { return node.type === "chart"; });
-  assert.strictEqual(charts.length, 2);
-  charts.forEach(function (chart) {
-    assert.strictEqual(chart.props.kind, "progress");
+  var charts = [];
+  (function walkCharts(node) {
+    if (!node || typeof node !== "object") return;
+    if (node.type === "chart") charts.push(node);
+    (node.children || []).forEach(walkCharts);
+    if (node.else) walkCharts(node.else);
+  })(uiTree);
+  var progress = charts.filter(function (chart) { return chart.props.kind === "progress"; });
+  assert.strictEqual(progress.length, 2);
+  progress.forEach(function (chart) {
     assert.strictEqual(chart.props.max, pigLogic.TARGET_SCORE);
   });
   var projection = pigLogic.project(pigLogic.newGame());
-  assert.ok(Array.isArray(projection[charts[0].bind]));
-  assert.ok(Array.isArray(projection[charts[1].bind]));
+  charts.forEach(function (chart) {
+    assert.ok(Array.isArray(projection[chart.bind]), chart.bind + " must be a published collection");
+  });
   assert.ok(Array.isArray(projection.recentRolls));
   assert.strictEqual(typeof projection.turnTotalText, "string");
+  assert.strictEqual(typeof projection.statusText, "string");
+  assert.strictEqual(typeof projection.lastRollText, "string");
 
   var buttons = [];
   (function walk(node) {
@@ -72,7 +81,7 @@ test("the shipped Display binds only to fields the projection publishes", functi
     if (node.else) walk(node.else);
   })(uiTree);
   var actions = buttons.map(function (button) { return button.action; });
-  assert.deepStrictEqual(actions.slice().sort(), ["hold", "hold", "reset", "roll", "roll"]);
+  assert.deepStrictEqual(actions.slice().sort(), ["hold", "hold", "reset", "reset", "roll", "roll"]);
   var offTurn = buttons.filter(function (button) { return button.props.disabled === true; });
   assert.strictEqual(offTurn.length, 2, "roll and hold have a disabled variant off the user's turn");
 });
@@ -388,6 +397,13 @@ test("acts push ordered causal events to every open Display of the acting user",
       assert.deepStrictEqual(events[i].previous, events[i - 1].next);
     }
   }
+  // Logic declares Mate engagement on the event: the user's hold that hands
+  // the turn over engages the Mate; the Mate's own acts never engage anyone.
+  assert.strictEqual(events[0].engage, undefined, "a roll that keeps the user's turn engages nobody");
+  assert.deepStrictEqual(events[1].engage, { kind: "turn" });
+  assert.strictEqual(events[2].engage, undefined);
+  assert.strictEqual(events[3].engage, undefined);
+
   // The Mate's bust is fully attributed: turn total 3 wiped, play passed back.
   var bust = events[3];
   assert.strictEqual(bust.previous.turnTotal, 3);
@@ -399,6 +415,7 @@ test("acts push ordered causal events to every open Display of the acting user",
   await tools.controlForUser(userId, "pig", "act", { actionId: "reset", args: {} });
   var resetEvent = eventsA[4].event;
   assert.strictEqual(resetEvent.action, "reset");
+  assert.deepStrictEqual(resetEvent.engage, { kind: "start" }, "a fresh game seats the Mate at the table");
   assert.strictEqual(resetEvent.seq, events[3].seq + 1);
   assert.strictEqual(resetEvent.next.scores.user, 0);
   assert.strictEqual(resetEvent.previous.scores.user, 2);

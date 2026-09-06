@@ -3,16 +3,42 @@
   "props": { "gap": "md" },
   "children": [
     {
-      "type": "chart",
-      "bind": "userScoreSeries",
-      "props": { "label": "Your score", "kind": "progress", "categoryKey": "seat", "valueKey": "value", "max": 100 }
+      "type": "callout",
+      "when": { "equals": { "path": "$state.complete", "value": true } },
+      "props": { "title": "Game over", "text": { "$bind": "$state.statusText", "fallback": "Game over." }, "icon": "circle-check", "variant": "soft" },
+      "else": {
+        "type": "callout",
+        "props": { "title": "Pig", "text": { "$bind": "$state.statusText", "fallback": "Your turn: roll the die." }, "icon": "sparkles", "variant": "soft" }
+      }
     },
     {
-      "type": "chart",
-      "bind": "mateScoreSeries",
-      "props": { "label": "Your Mate's score", "kind": "progress", "categoryKey": "seat", "valueKey": "value", "max": 100 }
+      "type": "row",
+      "props": { "gap": "md", "wrap": true },
+      "children": [
+        {
+          "type": "chart",
+          "bind": "userScoreSeries",
+          "props": { "label": "Your score", "kind": "progress", "categoryKey": "seat", "valueKey": "value", "max": 100 }
+        },
+        {
+          "type": "chart",
+          "bind": "mateScoreSeries",
+          "props": { "label": "Your Mate's score", "kind": "progress", "categoryKey": "seat", "valueKey": "value", "max": 100 }
+        }
+      ]
     },
-    { "type": "text", "props": { "text": { "$bind": "$state.turnTotalText", "fallback": "Turn total 0 of 100." }, "role": "output" } },
+    {
+      "type": "row",
+      "props": { "gap": "md", "align": "center", "wrap": true },
+      "children": [
+        {
+          "type": "chart",
+          "bind": "turnTotalSeries",
+          "props": { "label": "Turn total", "kind": "metric", "valueKey": "value" }
+        },
+        { "type": "text", "props": { "text": { "$bind": "$state.lastRollText", "fallback": "No rolls yet." }, "role": "muted" } }
+      ]
+    },
     {
       "type": "row",
       "props": { "gap": "sm", "wrap": true },
@@ -20,26 +46,38 @@
         {
           "type": "button",
           "action": "roll",
-          "when": { "all": [{ "equals": { "path": "$state.status", "value": "playing" } }, { "equals": { "path": "$state.turn", "value": "user" } }] },
+          "when": { "equals": { "path": "$state.userTurn", "value": true } },
           "props": { "label": "Roll", "variant": "primary" },
           "else": { "type": "button", "action": "roll", "props": { "label": "Roll", "variant": "primary", "disabled": true } }
         },
         {
           "type": "button",
           "action": "hold",
-          "when": { "all": [{ "equals": { "path": "$state.status", "value": "playing" } }, { "equals": { "path": "$state.turn", "value": "user" } }] },
+          "when": { "equals": { "path": "$state.userTurn", "value": true } },
           "props": { "label": "Hold", "variant": "secondary" },
           "else": { "type": "button", "action": "hold", "props": { "label": "Hold", "variant": "secondary", "disabled": true } }
         },
-        { "type": "button", "action": "reset", "props": { "label": "Reset", "variant": "ghost" } }
+        {
+          "type": "button",
+          "action": "reset",
+          "when": { "equals": { "path": "$state.complete", "value": true } },
+          "props": { "label": "New game", "variant": "primary" },
+          "else": { "type": "button", "action": "reset", "props": { "label": "Start over", "variant": "ghost" } }
+        }
       ]
     },
     {
-      "type": "list",
-      "bind": "recentRolls",
-      "props": { "variant": "divided", "gap": "xs" },
+      "type": "section",
+      "props": { "label": "Recent rolls", "variant": "inset", "gap": "xs" },
       "children": [
-        { "type": "text", "props": { "text": "$item.text", "role": "body" } }
+        {
+          "type": "list",
+          "bind": "recentRolls",
+          "props": { "variant": "divided", "gap": "xs" },
+          "children": [
+            { "type": "text", "props": { "text": "$item.text", "role": "body" } }
+          ]
+        }
       ]
     }
   ]

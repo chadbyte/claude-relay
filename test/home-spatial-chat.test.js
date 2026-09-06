@@ -199,15 +199,19 @@ test("Home and project chat share the fixed bubble Markdown renderer", function 
 });
 
 test("empty home chat renders contextual greeting and working suggestions", function () {
-  assert.match(chatSource, /home-mate-chat-brand/);
-  assert.match(chatSource, /symbol\.src = "\/clay-studio-symbol\.png"/);
-  assert.match(chatSource, /home-sidebar-brand-wordmark home-mate-chat-brand-wordmark/);
-  assert.match(chatSource, /wordmark\.textContent = "Clay Studio"/);
+  // The empty stage body lives in home-chat-empty-state.js; the chat surface
+  // keeps the call site.
+  var emptyStateSource = fs.readFileSync(path.join(root, "lib/public/modules/home-chat-empty-state.js"), "utf8");
+  assert.match(emptyStateSource, /home-mate-chat-brand/);
+  assert.match(emptyStateSource, /symbol\.src = "\/clay-studio-symbol\.png"/);
+  assert.match(emptyStateSource, /home-sidebar-brand-wordmark home-mate-chat-brand-wordmark/);
+  assert.match(emptyStateSource, /wordmark\.textContent = "Clay Studio"/);
   assert.match(chatSource, /if \(hasConversation\) \{[\s\S]*appendMessage[\s\S]*\} else \{\s*renderEmptyState/);
-  assert.match(chatSource, /What should we work on,/);
-  assert.match(chatSource, /getHomeMateShortBio\(mate\)/);
-  assert.match(chatSource, /Make me a small tool/);
-  assert.match(chatSource, /submitSuggestion\(suggestion\)/);
+  assert.match(emptyStateSource, /What should we work on,/);
+  assert.match(emptyStateSource, /getHomeMateShortBio\(mate\)/);
+  assert.match(emptyStateSource, /Make me a small tool/);
+  assert.match(emptyStateSource, /onSuggestion\(suggestion\)/);
+  assert.doesNotMatch(emptyStateSource, /\b(?:const|let)\b|=>|localStorage/);
 });
 
 test("Mate and new-conversation actions live in the Home sidebar", function () {

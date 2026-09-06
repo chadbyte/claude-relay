@@ -67,6 +67,10 @@ test("real Clay response permits only self and Blob Capsule workers", async func
     assert.deepEqual(findDirective(directives, "script-src"), ["script-src", "'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://esm.sh"]);
     assert.equal(findDirective(directives, "script-src").indexOf("blob:"), -1);
     assert.deepEqual(findDirective(directives, "default-src"), ["default-src", "'self'"]);
+    // The rich-Display frame lives on the same hostname at another port, so
+    // frame-src must allow exactly that: the request's own hostname, any
+    // port, the app's own scheme, and nothing wider.
+    assert.deepEqual(findDirective(directives, "frame-src"), ["frame-src", "'self'", "http://127.0.0.1:*"]);
   } finally {
     await stopFixture(fixture.child);
   }

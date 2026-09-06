@@ -64,6 +64,8 @@ test("the frame URL is one-time, and the shell carries a no-network nonce-only C
   assert.strictEqual(shell.headers["x-content-type-options"], "nosniff");
   assert.match(shell.body, /window\.ClayCapsule/);
   assert.match(shell.body, /sandbox|display\.js\?t=/);
+  assert.match(shell.body, /type: "size"/);
+  assert.match(shell.body, /ResizeObserver/);
 
   // The shell half of the token is spent.
   var replay = await request(frame.port, frame.path);
@@ -75,6 +77,7 @@ test("the frame URL is one-time, and the shell carries a no-network nonce-only C
   assert.strictEqual(display.status, 200);
   assert.match(display.headers["content-type"], /text\/javascript/);
   assert.match(display.body, /ClayCapsule/);
+  assert.match(display.body, /Pig is a push-your-luck dice game/);
   var displayReplay = await request(frame.port, "/capsule/display.js?t=" + token);
   assert.strictEqual(displayReplay.status, 403);
 
@@ -85,10 +88,11 @@ test("the frame URL is one-time, and the shell carries a no-network nonce-only C
 });
 
 test("a Capsule without a rich element gets no frame URL", async function () {
-  var ctx = ctxFor("frame-user");
+  var ctx = ctxFor("frame-floor-only");
+  fs.rmSync(path.join(registry.resolveToolsRoot(ctx), "pig", "display.js"));
   var frameServer = newFrameServer();
   await assert.rejects(function () {
-    return frameServer.issueFrameUrl(ctx, "tictactoe");
+    return frameServer.issueFrameUrl(ctx, "pig");
   }, /no rich Display/);
 });
 
@@ -149,7 +153,8 @@ test("the tool_frame_url message mints a URL over the socket, and refuses a floo
   assert.match(sent[0].frame.path, /^\/capsule\/\?t=/);
 
   sent.length = 0;
-  assert.strictEqual(tools.handleMessage(socket, { type: "tool_frame_url", toolId: "tictactoe", requestId: "f-2" }), true);
+  fs.rmSync(path.join(registry.resolveToolsRoot({ userId: "frame-ws", multiUser: true }), "pig", "display.js"));
+  assert.strictEqual(tools.handleMessage(socket, { type: "tool_frame_url", toolId: "pig", requestId: "f-2" }), true);
   for (var j = 0; j < 100 && sent.length === 0; j++) await new Promise(function (resolve) { setTimeout(resolve, 5); });
   assert.strictEqual(sent[0].ok, false);
   assert.match(sent[0].error, /no rich Display/);
