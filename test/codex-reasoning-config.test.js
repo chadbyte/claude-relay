@@ -43,6 +43,17 @@ test("the spawned app-server asks for detailed reasoning summaries", async funct
   assert.strictEqual(config.model_supports_reasoning_summaries, true);
 });
 
+test("the bundled Codex catalog exposes GPT-6 Astra as its default", async function () {
+  var adapter = createCodexAdapter({
+    cwd: process.cwd(),
+    createAppServer: function (options) { return createFakeServer(options); },
+  });
+  var models = await adapter.supportedModels();
+  var ready = await adapter.init({});
+  assert.strictEqual(models[0], "gpt-6-astra");
+  assert.strictEqual(ready.defaultModel, "gpt-6-astra");
+});
+
 test("raw agent reasoning is left to the user and never forced on", async function () {
   var config = await spawnedConfig({});
   assert.ok(

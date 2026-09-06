@@ -137,8 +137,8 @@ test("Kiro capabilities do not promise stubbed controls", async function() {
 test("clampEffort keeps supported levels and maps unsupported ones to the nearest", function() {
   assert.strictEqual(yoke.clampEffort("claude", "max"), "max");
   assert.strictEqual(yoke.clampEffort("claude", "minimal"), "low");
-  assert.strictEqual(yoke.clampEffort("codex", "minimal"), "minimal");
-  assert.strictEqual(yoke.clampEffort("codex", "max"), "xhigh");
+  assert.strictEqual(yoke.clampEffort("codex", "minimal"), "low");
+  assert.strictEqual(yoke.clampEffort("codex", "max"), "max");
   assert.strictEqual(yoke.clampEffort("codex", "medium"), "medium");
 });
 
