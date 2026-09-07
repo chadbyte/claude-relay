@@ -1,3 +1,23 @@
+# [4.0.0-beta.16](https://github.com/chadbyte/clay/compare/v4.0.0-beta.15...v4.0.0-beta.16) (2026-09-07)
+
+
+### Bug Fixes
+
+* **deps:** resolve dependency security advisories ([f799207](https://github.com/chadbyte/clay/commit/f79920747968d9e51a3d43fd71d624eb7767c722))
+* **notes:** prevent sticky note flicker ([76acd07](https://github.com/chadbyte/clay/commit/76acd07d8562776dc902fa6c65ac7740dadb0bbd))
+* **notes:** skip redundant permission prompts ([60b401c](https://github.com/chadbyte/clay/commit/60b401c9f5c4bb703fa2f3a9fc46daa0dd80d334))
+* **projects:** preserve navigation after active deletion ([ede51fd](https://github.com/chadbyte/clay/commit/ede51fd3201a3356ecc846d15f3451feb7cf829a))
+* **worker:** preserve Codex pair tools across resume ([91e38e1](https://github.com/chadbyte/clay/commit/91e38e1b3192d87508228b2b4d6cc828afb4ae35))
+* **workers:** gate orchestration guidance by model tier ([30f3977](https://github.com/chadbyte/clay/commit/30f39778395ce52a1f42ca8d296d3b0e3cfcfc87))
+
+
+### Features
+
+* **capsules:** add experimental user opt-in ([6196fe2](https://github.com/chadbyte/clay/commit/6196fe2a36f69849a50dc975c1b925644feb4053))
+* **capsules:** make Pig playable with Mate turns ([4e6b3d5](https://github.com/chadbyte/clay/commit/4e6b3d5f5508d478f6dd4472bc85b95f5a985779))
+* **codex:** add GPT-6 Astra support ([acb367f](https://github.com/chadbyte/clay/commit/acb367f0aa206393dc87fe69c3e8a478047015e0))
+* **workflow:** improve composer and Driver continuity ([6957ed3](https://github.com/chadbyte/clay/commit/6957ed325b5b89c73b2d664dd24c565c5838fa30))
+
 # [4.0.0-beta.15](https://github.com/chadbyte/clay/compare/v4.0.0-beta.14...v4.0.0-beta.15) (2026-09-04)
 
 
