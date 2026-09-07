@@ -17,11 +17,20 @@ function fixture(options) {
   var pushes = [];
   var processingChanges = 0;
   var broadcasts = 0;
+  var reviewers = [];
+  var deleted = [];
   var sm = {
     sessions: new Map([[session.localId, session]]),
     sendAndRecord: function (target, event) { records.push({ session: target, event: event }); target.history.push(event); },
     sendToSession: function (target, event) { statuses.push({ session: target, event: event }); },
     broadcastSessionList: function () { broadcasts++; },
+    createSessionRaw: function (sessionOptions) {
+      var reviewer = Object.assign({ localId: 8, history: [], isProcessing: false }, sessionOptions || {});
+      reviewers.push(reviewer);
+      sm.sessions.set(reviewer.localId, reviewer);
+      return reviewer;
+    },
+    deleteSessionQuiet: function (localId) { deleted.push(localId); sm.sessions.delete(localId); },
   };
   var sdk = {
     pushMessage: function (target, text) { pushes.push({ session: target, text: text }); return opts.pushes === true; },
@@ -51,6 +60,8 @@ function fixture(options) {
     statuses: statuses,
     starts: starts,
     pushes: pushes,
+    reviewers: reviewers,
+    deleted: deleted,
     processingChanges: function () { return processingChanges; },
     broadcasts: function () { return broadcasts; },
   };
@@ -73,11 +84,16 @@ test("new feedback wakes the exact live authoring session", function () {
   assert.equal(f.broadcasts(), 1);
 });
 
-test("a live query receives feedback without starting a second query", function () {
+test("a busy Driver gets an isolated immediate reviewer", function () {
   var f = fixture({ session: { isProcessing: true }, pushes: true });
   assert.equal(f.delivery.deliver(f.entry()), true);
-  assert.equal(f.pushes.length, 1);
-  assert.equal(f.starts.length, 0);
+  assert.equal(f.pushes.length, 0, "feedback does not queue behind the busy turn");
+  assert.equal(f.starts.length, 1);
+  assert.equal(f.reviewers.length, 1);
+  assert.equal(f.starts[0].session, f.reviewers[0]);
+  assert.equal(f.reviewers[0].hidden, true);
+  assert.equal(f.reviewers[0].singleTurn, true);
+  assert.equal(f.reviewers[0].ownerId, f.session.ownerId);
   assert.equal(f.statuses.length, 0);
   assert.equal(f.processingChanges(), 0);
 });
@@ -86,6 +102,14 @@ test("local authorship survives later durable session promotion", function () {
   var f = fixture();
   assert.equal(f.delivery.findAuthorSession(f.entry({
     updatedBy: { type: "session", userId: "owner", sessionKey: "local:7" },
+  })), f.session);
+});
+
+test("created authorship remains the fallback after a temporary reviewer update", function () {
+  var f = fixture();
+  assert.equal(f.delivery.findAuthorSession(f.entry({
+    updatedBy: { type: "session", userId: "owner", sessionKey: "deleted-reviewer" },
+    createdBy: { type: "session", userId: "owner", sessionKey: "session-author" },
   })), f.session);
 });
 

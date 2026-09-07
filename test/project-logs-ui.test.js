@@ -262,13 +262,30 @@ test("comment status and the Project Driver response are shown under each commen
   assert.match(css, /\.project-log-comment-response \{/);
 });
 
-test("posting a comment settles to Awaiting review rather than Posting", function () {
+test("posting a comment leaves Posting and reflects feedback delivery", function () {
   assert.match(logsSource, /statusEl\.textContent = "Posting\.\.\."/);
   assert.match(logsSource, /store\.set\(\{ projectLogsCommentStatusEl: statusEl \}\)/);
   var handler = logsSource.slice(logsSource.indexOf("export function handleProjectLogCommented"));
-  assert.match(handler, /pendingStatus\.textContent = "Awaiting Project Driver review"/);
+  assert.match(handler, /pendingStatus\.textContent = msg\.reviewQueued/);
+  assert.match(handler, /"Project Driver is reviewing\.\.\."/);
+  assert.match(handler, /"Awaiting Project Driver review"/);
   assert.match(handler, /store\.set\(\{ projectLogsCommentStatusEl: null \}\)/);
   assert.match(appSource, /projectLogsCommentStatusEl: null/);
+});
+
+test("queued feedback immediately shows that the Project Driver is reviewing", function () {
+  assert.match(logsSource, /msg\.reviewQueued[\s\S]*"Project Driver is reviewing\.\.\."/);
+  assert.match(logsSource, /badges\[badges\.length - 1\]\.textContent = "Project Driver is reviewing"/);
+});
+
+test("a completed comment review refreshes the open entry without stealing focus", function () {
+  var handler = logsSource.slice(logsSource.indexOf("export function handleProjectLogCommentReviewed"));
+  handler = handler.slice(0, handler.indexOf("export function handleProjectLogDeleted"));
+  assert.match(handler, /msg\.ref === store\.get\('projectLogsSelectedRef'\)/);
+  assert.match(handler, /requestEntry\(msg\.ref\)/);
+  assert.match(handler, /requestList\(\)/);
+  assert.equal(/openProjectLogs|focus\(/.test(handler), false);
+  assert.match(messagesSource, /case "project_log_comment_reviewed":[\s\S]*handleProjectLogCommentReviewed\(msg\)/);
 });
 
 test("the version history is a read-only timeline with no revert control", function () {
