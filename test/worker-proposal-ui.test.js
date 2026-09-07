@@ -96,26 +96,24 @@ test("Worker proposal card keeps responsive controls inside split panes", functi
   assert.match(source, /grid-template-columns: 1fr 1fr/);
 });
 
-test("title bar moves Worker creation into the labeled session actions menu", function () {
+test("composer exposes direct Worker creation and handoff controls", function () {
   var html = fs.readFileSync(path.join(root, "lib/public/index.html"), "utf8");
   var actions = fs.readFileSync(path.join(root, "lib/public/modules/session-actions.js"), "utf8");
-  assert.match(html, /id="header-session-actions-btn"[^>]*aria-label="Session actions"/);
-  assert.doesNotMatch(html, /id="header-add-worker-btn"/);
-  assert.match(actions, /actionRow\("bot", "Add Split Worker"/);
+  assert.doesNotMatch(html, /id="header-session-actions-btn"/);
+  assert.match(html, /id="composer-add-worker-btn"[^>]*aria-label="Add Split Worker"/);
+  assert.match(html, /id="composer-handoff-btn"[^>]*aria-label="Continue in another agent"/);
   assert.match(actions, /openPairDialog/);
 });
 
-test("title bar presents a labeled session actions button in the status area", function () {
+test("composer session actions follow the icon-only context control", function () {
   var html = fs.readFileSync(path.join(root, "lib/public/index.html"), "utf8");
   var panels = fs.readFileSync(path.join(root, "lib/public/modules/app-panels.js"), "utf8");
-  var renameAt = html.indexOf('id="header-rename-btn"');
-  var fullAccessAt = html.indexOf('id="header-full-access-btn"');
-  var statusAt = html.indexOf('<div class="status">');
-  var actionsAt = html.indexOf('id="header-session-actions-btn"');
+  var contextAt = html.indexOf('id="context-sources-btn-wrap"');
+  var workerAt = html.indexOf('id="composer-add-worker-btn"');
+  var handoffAt = html.indexOf('id="composer-handoff-btn"');
 
-  assert.ok(renameAt > 0 && renameAt < fullAccessAt);
-  assert.ok(actionsAt > statusAt);
-  assert.match(html, /id="header-session-actions-btn"[^>]*>[\s\S]*Add Split Worker[\s\S]*session-actions-trigger-chevron/);
+  assert.ok(contextAt > 0 && contextAt < workerAt && workerAt < handoffAt);
+  assert.doesNotMatch(html, /class="ctx-label"/);
   assert.match(panels, /statusArea\.insertBefore\(hCtxEl, statusArea\.firstChild\)/);
 });
 
