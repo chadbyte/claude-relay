@@ -50,6 +50,37 @@ test("records are appended, projected, and never rewritten in place", function (
   assert.equal(head.updatedBy.userId, "u2", "attribution follows the latest revision");
 });
 
+test("stable project identity preserves refs across project path changes", function () {
+  var base = tmpDir("stable-id");
+  var first = logsStore.createProjectLogsStore({ root: "/srv/old-path", baseDir: base, projectKnowledgeId: "pk_stable" });
+  var created = first.create({ kind: "progress", summary: "Stable project ledger.", title: "Move the checkout" }, SESSION_AUTHOR);
+  var moved = logsStore.createProjectLogsStore({ root: "/srv/new-path", baseDir: base, projectKnowledgeId: "pk_stable" });
+
+  assert.equal(moved.read(created.ref, false).title, "Move the checkout");
+  assert.equal(moved.filePath, first.filePath);
+});
+
+test("worktree provenance supports current, project, and all-change views", function () {
+  var store = newStore("contexts");
+  var worktreeA = { kind: "worktree", changeSetId: "cs_alpha", branch: "feature/alpha", status: "active" };
+  var worktreeB = { kind: "worktree", changeSetId: "cs_beta", branch: "feature/beta", status: "active" };
+  store.create({ kind: "decision", summary: "Applies across the project.", title: "Project policy" }, SESSION_AUTHOR);
+  store.create({ kind: "progress", summary: "Alpha implementation.", title: "Alpha work" }, SESSION_AUTHOR, worktreeA);
+  store.create({ kind: "progress", summary: "Beta implementation.", title: "Beta work" }, SESSION_AUTHOR, worktreeB);
+
+  assert.equal(store.list({ contextMode: "project" }).total, 1);
+  assert.equal(store.list({ contextMode: "current", currentChangeSetId: "cs_alpha" }).total, 2);
+  assert.equal(store.list({ contextMode: "all" }).total, 3);
+  assert.equal(store.search({ query: "implementation", contextMode: "current", currentChangeSetId: "cs_alpha" }).total, 1);
+
+  assert.equal(store.setContextState(worktreeA, "merged"), true);
+  assert.equal(store.setContextState(worktreeA, "merged"), false, "repeating one lifecycle state is a no-op");
+  var alpha = store.list({ contextMode: "current", currentChangeSetId: "cs_alpha" }).entries.filter(function (entry) {
+    return entry.context && entry.context.changeSetId === "cs_alpha";
+  })[0];
+  assert.equal(alpha.context.status, "merged");
+});
+
 test("history is a full author blame chain and delete is a tombstone", function () {
   var store = newStore("history");
   var entry = store.create({ kind: "incident", summary: "Recorded for the ledger.", title: "Daemon restart loop" }, SESSION_AUTHOR);
@@ -234,7 +265,7 @@ test("Logs search is BM25-ranked while preserving the response shape", function 
   // Response shape is exactly what the protocol already returned.
   var hit = hits.results[0];
   assert.deepEqual(Object.keys(hit).sort(), [
-    "category", "commentCount", "createdAt", "createdBy", "kind", "pendingFeedbackCount",
+    "category", "commentCount", "context", "createdAt", "createdBy", "kind", "pendingFeedbackCount",
     "priority", "ref", "revisions", "score", "snippet", "summary", "tags", "title",
     "updatedAt", "updatedBy",
   ].sort());

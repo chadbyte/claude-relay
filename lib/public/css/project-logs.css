@@ -105,7 +105,11 @@
 .project-logs-search .lucide { width: 14px; flex: 0 0 auto; }
 .project-logs-search input { width: 100%; border: 0; outline: 0; background: transparent; color: var(--text); font: inherit; font-size: 12px; }
 .project-logs-search:focus-within, .project-logs-filter:focus-visible { outline: 2px solid color-mix(in srgb, var(--accent) 35%, transparent); border-color: var(--accent); }
-.project-logs-filter { height: 36px; max-width: 42%; padding: 0 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text-secondary); font: inherit; font-size: 12px; cursor: pointer; }
+.project-logs-filter { height: 36px; max-width: 180px; padding: 0 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text-secondary); font: inherit; font-size: 12px; cursor: pointer; }
+.project-logs-context-filter { max-width: 148px; }
+.project-log-context-chip { display: inline-flex; align-items: center; min-height: 22px; padding: 2px 7px; border-radius: 999px; background: var(--bg-alt); color: var(--text-secondary); font-size: 11px; font-weight: 600; }
+.project-log-context-chip[data-status="archived"] { opacity: .72; }
+.project-log-context-chip[data-status="merged"] { color: var(--success, #2f8f57); }
 
 /* --- Ledger list: full pane, chronological, commit-history feel --- */
 .project-logs-list { flex: 1; min-height: 0; overflow-y: auto; padding: 8px 0 18px; }
@@ -139,7 +143,21 @@
 .project-log-document h1 { margin: 0 0 10px; color: var(--text); font-family: var(--font-display); font-size: clamp(24px, 2.8vw, 34px); letter-spacing: -0.025em; line-height: 1.12; }
 .project-log-doc-summary { margin: 0 0 13px; color: var(--text-secondary); font-size: 14px; line-height: 1.6; }
 .project-log-byline { margin: 0 0 25px; padding-bottom: 18px; border-bottom: 2px solid var(--border-subtle); color: var(--text-dimmer); font-size: 11px; font-family: var(--font-mono); }
+.project-log-delete-button { display: inline-flex; align-items: center; gap: 6px; margin: -11px 0 24px; padding: 6px 9px; border: 1px solid color-mix(in srgb, var(--danger) 45%, var(--border)); border-radius: 7px; background: transparent; color: var(--danger); font: inherit; font-size: 11px; font-weight: 700; cursor: pointer; }
+.project-log-delete-button .lucide { width: 13px; }
 .project-log-markdown { font-size: 14px; line-height: 1.75; }
+
+.project-log-delete-dialog { position: fixed; inset: 0; z-index: 420; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(var(--shadow-rgb), 0.5); }
+.project-log-delete-dialog.hidden { display: none; }
+.project-log-delete-dialog-card { width: min(420px, 100%); padding: 20px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg); box-shadow: 0 18px 50px rgba(var(--shadow-rgb), 0.3); }
+.project-log-delete-dialog-card h2 { margin: 0 0 9px; color: var(--text); font-family: var(--font-display); font-size: 18px; }
+.project-log-delete-dialog-card p { margin: 0; color: var(--text-secondary); font-size: 13px; line-height: 1.55; }
+.project-log-delete-dialog-title { margin-top: 9px !important; color: var(--text) !important; font-weight: 700; overflow-wrap: anywhere; }
+.project-log-delete-dialog-status { min-height: 17px; margin-top: 11px !important; color: var(--danger) !important; font-size: 11px !important; }
+.project-log-delete-dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+.project-log-delete-dialog-actions button { padding: 7px 12px; border: 1px solid var(--border); border-radius: 7px; background: var(--bg-alt); color: var(--text-secondary); font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+.project-log-delete-dialog-actions button.danger { border-color: var(--danger); background: var(--danger); color: #fff; }
+.project-log-delete-dialog-actions button:disabled { opacity: 0.5; cursor: default; }
 
 /* --- Discussion --- */
 .project-log-discussion { margin-top: 30px; padding-top: 18px; border-top: 1px solid var(--border-subtle); }
@@ -174,7 +192,7 @@
   .project-logs-subtitle { display: none; }
   .project-logs-topbar { gap: 8px; padding: 0 12px; }
   .project-logs-toolbar { padding: 10px 12px; }
-  .project-logs-filter { max-width: 44%; }
+  .project-logs-filter { max-width: 42%; }
   .project-log-row { padding: 14px 14px 13px; }
   .project-log-document { padding: 24px 18px 38px; }
 }

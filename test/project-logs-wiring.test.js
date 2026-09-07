@@ -69,7 +69,10 @@ function fixture(opts) {
     isMate: !!options.mate,
     mateId: options.mate ? "mate-id" : null,
     sendTo: function (ws, message) { sent.push(message); },
-    onFeedback: function (entry) { feedback.push(entry); },
+    onFeedback: function (entry) {
+      feedback.push(entry);
+      return options.feedbackQueued === true;
+    },
   });
 
   return { attached: attached, sent: sent, feedback: feedback, session: session, otherSession: otherSession, mateSession: mateSession, service: service, projects: projects };
@@ -96,6 +99,35 @@ function seed(f, overrides) {
   }, overrides || {}));
 }
 
+test("worktree bindings share one project ledger while defaulting to their current change set", function () {
+  var parentSession = { localId: 31, cliSessionId: "cli-parent", ownerId: "owner", vendor: "claude" };
+  var worktreeSession = { localId: 32, cliSessionId: "cli-worktree", ownerId: "owner", vendor: "codex" };
+  var projects = new Map();
+  projects.set("app", handle({
+    slug: "app", path: "/srv/app", projectOwnerId: "owner", visibility: "private", projectKnowledgeId: "pk_app",
+  }, [parentSession]));
+  projects.set("app--feature", handle({
+    slug: "app--feature", path: "/srv/app-feature", projectOwnerId: "owner", visibility: "private",
+    projectKnowledgeId: "pk_app", isWorktree: true, parentSlug: "app", changeSetId: "cs_feature", branch: "feature/log-context",
+  }, [worktreeSession]));
+  var service = attachService({
+    getProjects: function () { return projects; },
+    isMultiUser: function () { return true; },
+    canAccessProject: function (userId, status) { return status.projectOwnerId === userId; },
+    openStore: storeFactory(),
+  });
+  var parent = service.bindProjectSession({ projectSlug: "app", session: parentSession });
+  var worktree = service.bindProjectSession({ projectSlug: "app--feature", session: worktreeSession });
+  parent.createLog({ kind: "decision", title: "Project rule", summary: "Applies to every checkout." });
+  var changed = worktree.createLog({ kind: "progress", title: "Feature work", summary: "Belongs to this logical change." });
+
+  assert.equal(parent.listLogs({}).total, 1, "the main project defaults to project-wide entries");
+  assert.equal(worktree.listLogs({}).total, 2, "the worktree sees project-wide context and its own change");
+  assert.equal(worktree.listLogs({ contextMode: "project" }).total, 1);
+  assert.equal(parent.listLogs({ contextMode: "all" }).total, 2);
+  assert.equal(worktree.readLog({ ref: changed.ref }).context.changeSetId, "cs_feature");
+});
+
 test("the WebSocket round trip emits exactly the client protocol payloads", function () {
   var f = fixture();
   var owner = ws({ id: "owner", displayName: "Owner" });
@@ -106,6 +138,7 @@ test("the WebSocket round trip emits exactly the client protocol payloads", func
   assert.equal(state.type, "project_logs_state");
   assert.equal(state.requestId, "r2");
   assert.equal(state.entries.length, 1);
+  assert.equal(state.canDelete, true, "the project owner receives the delete capability");
   assert.deepEqual(state.categories, ["decision"], "the client is told this project's live vocabulary");
   var row = state.entries[0];
   assert.equal(row.ref, entry.ref);
@@ -135,6 +168,7 @@ test("the WebSocket round trip emits exactly the client protocol payloads", func
   assert.equal(commented.entry.revisions, 1, "a comment is not a revision");
   assert.equal(f.feedback.length, 1, "the exact persisted entry is handed to immediate delivery");
   assert.equal(f.feedback[0].ref, entry.ref);
+  assert.equal(commented.reviewQueued, false, "the client sees when no reviewer was started");
 
   // A valid category this project has never used narrows to nothing rather
   // than erroring, and the vocabulary is still reported.
@@ -153,6 +187,32 @@ test("the WebSocket round trip emits exactly the client protocol payloads", func
   assert.equal(searched.entries[0].body, undefined);
   f.attached.handleLogsMessage(owner, { type: "project_logs_list", requestId: "r8", query: "nothing matches this" });
   assert.deepEqual(last(f.sent).entries, []);
+
+  f.attached.handleLogsMessage(owner, { type: "project_log_delete", requestId: "r9", ref: entry.ref });
+  var deleted = last(f.sent);
+  assert.equal(deleted.type, "project_log_deleted");
+  assert.equal(deleted.requestId, "r9");
+  assert.equal(deleted.ref, entry.ref);
+  f.attached.handleLogsMessage(owner, { type: "project_logs_list", requestId: "r10", query: "" });
+  assert.equal(last(f.sent).entries.length, 0, "the deleted entry leaves the live ledger");
+});
+
+test("comment acknowledgement reports an immediately started review", function () {
+  var f = fixture({ feedbackQueued: true });
+  var entry = seed(f);
+  var owner = ws({ id: "owner", displayName: "Owner" });
+
+  f.attached.handleLogsMessage(owner, {
+    type: "project_log_comment",
+    requestId: "queued-review",
+    ref: entry.ref,
+    body: "Please review this now.",
+  });
+
+  var commented = last(f.sent);
+  assert.equal(commented.type, "project_log_commented");
+  assert.equal(commented.reviewQueued, true);
+  assert.equal(f.feedback.length, 1, "delivery is attempted exactly once");
 });
 
 test("humans cannot create or update canonical entries over the WebSocket", function () {
@@ -226,6 +286,12 @@ test("shared-project members comment with attribution preserved", function () {
   assert.equal(latest.commentCount, 2);
   assert.deepEqual(latest.comments.map(function (c) { return c.author.displayName; }), ["Owner", "Member"]);
   assert.equal(latest.createdBy.type, "session", "canonical authorship is unchanged by discussion");
+
+  f.attached.handleLogsMessage(member, { type: "project_logs_list", requestId: "a3", query: "" });
+  assert.equal(last(f.sent).canDelete, false);
+  f.attached.handleLogsMessage(member, { type: "project_log_delete", requestId: "a4", ref: entry.ref });
+  assert.equal(last(f.sent).type, "project_logs_error");
+  assert.match(last(f.sent).message, /project owner/);
 });
 
 test("Mate projects deny the Logs UI path and errors stay correlated", function () {
@@ -242,7 +308,8 @@ test("Mate projects deny the Logs UI path and errors stay correlated", function 
   assert.equal(last(f.sent).type, "project_logs_error");
 
   assert.equal(f.attached.handleLogsMessage(owner, { type: "note_create" }), false);
-  assert.equal(f.attached.handleLogsMessage(owner, { type: "project_log_delete", requestId: "m3" }), false);
+  assert.equal(f.attached.handleLogsMessage(owner, { type: "project_log_delete", requestId: "m3" }), true);
+  assert.equal(last(f.sent).type, "project_logs_error");
 });
 
 test("a store error is reported as a correlated error, not a thrown handler", function () {
@@ -482,8 +549,8 @@ test("a service-less attachment is inert rather than failing open", function () 
 });
 
 test("every Project Logs message type is registered in the WebSocket schema", function () {
-  var c2s = ["project_logs_list", "project_log_read", "project_log_comment", "project_log_create", "project_log_update"];
-  var s2c = ["project_logs_state", "project_log_entry", "project_log_commented", "project_logs_error"];
+  var c2s = ["project_logs_list", "project_log_read", "project_log_comment", "project_log_delete", "project_log_create", "project_log_update"];
+  var s2c = ["project_logs_state", "project_log_entry", "project_log_commented", "project_log_comment_reviewed", "project_log_deleted", "project_logs_error"];
   for (var i = 0; i < c2s.length; i++) {
     assert.ok(schema[c2s[i]], c2s[i] + " is missing from ws-schema");
     assert.equal(schema[c2s[i]].direction, "c2s");
@@ -972,6 +1039,10 @@ function notices(socket) {
   return socket.sent.filter(function (m) { return m.type === "project_log_updated"; });
 }
 
+function reviewNotices(socket) {
+  return socket.sent.filter(function (m) { return m.type === "project_log_comment_reviewed"; });
+}
+
 test("every canonical write notifies authorized project humans with bounded metadata", function () {
   var f = broadcastFixture();
   var defs = f.attached.getToolDefs(f.session);
@@ -1036,10 +1107,16 @@ test("participation and failed writes never notify", function () {
 
   tool("review_log_comment").handler({ ref: entry.ref, commentId: commentId, action: "clarify", response: "Which part?" });
   assert.equal(notices(f.owner).length, 0, "a clarification does not notify");
+  assert.deepEqual(reviewNotices(f.owner)[0], {
+    type: "project_log_comment_reviewed", ref: entry.ref, commentId: commentId, action: "clarify",
+  });
+  assert.equal(reviewNotices(f.member).length, 1, "shared project viewers receive the review result");
+  assert.equal(reviewNotices(f.pane).length, 0, "pane connections remain excluded");
 
   var second = agent.commentLog({ ref: entry.ref, body: "Second." }).comments[1].id;
   tool("review_log_comment").handler({ ref: entry.ref, commentId: second, action: "decline", response: "Out of scope." });
   assert.equal(notices(f.owner).length, 0, "a decline does not notify");
+  assert.equal(reviewNotices(f.owner)[1].action, "decline");
 
   // An incorporation does, because it is a revision.
   var third = agent.commentLog({ ref: entry.ref, body: "Summary is thin." }).comments[2].id;
@@ -1049,6 +1126,7 @@ test("participation and failed writes never notify", function () {
   assert.equal(notices(f.owner).length, 1);
   assert.equal(notices(f.owner)[0].op, "incorporate");
   assert.equal(notices(f.owner)[0].revision, 2);
+  assert.equal(reviewNotices(f.owner)[2].action, "incorporate");
 
   // Failures and no-ops are silent.
   f.owner.sent = [];
@@ -1073,7 +1151,9 @@ test("the update message is registered and carries no body by contract", functio
   assert.ok(schema["project_log_updated"], "registered in ws-schema");
   assert.equal(schema["project_log_updated"].direction, "s2c");
   assert.match(schema["project_log_updated"].description, /bounded ledger metadata only/i);
-  assert.deepEqual(projectLogs.NOTIFYING_OPS, ["create", "update", "link", "incorporate", "revert"]);
+  assert.deepEqual(projectLogs.NOTIFYING_OPS, ["create", "update", "link", "incorporate", "revert", "delete"]);
+  assert.ok(schema["project_log_comment_reviewed"], "comment review completion is registered");
+  assert.equal(schema["project_log_comment_reviewed"].direction, "s2c");
 
   // The notice builder clips long text and drops everything else.
   var notice = projectLogs.updateNotice({

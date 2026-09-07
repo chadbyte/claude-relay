@@ -84,9 +84,12 @@ test("exactly one heartbeat timer exists per live socket", function () {
   assert.match(start, /if \(!socket \|\| socket\.readyState !== 1 \|\| getWs\(\) !== socket\) \{\s*\n\s*stopHeartbeat\(\);\s*\n\s*return;/);
   assert.match(start, /socket\.send\(JSON\.stringify\(\{ type: "ping" \}\)\)/);
 
-  // A late or missing pong must never force a reconnect.
-  assert.equal(/pongTimeout|missedPong|awaitingPong|forceReconnect/.test(connection), false,
-    "no pong-timeout policy is invented");
+  // A half-open socket must be replaced when the server does not acknowledge
+  // the heartbeat. Browser OPEN state alone does not prove delivery.
+  assert.match(start, /heartbeatDeadlineTimer = setTimeout\([\s\S]*getWs\(\) === socket[\s\S]*connect\(\);/,
+    "a missed pong replaces the stale socket");
+  assert.match(connection, /if \(msg\.type === "pong" && heartbeatDeadlineTimer\) \{[\s\S]*clearTimeout\(heartbeatDeadlineTimer\)/,
+    "a pong cancels the reconnect deadline");
 });
 
 test("the heartbeat is cleared on close and before a new socket is created", function () {

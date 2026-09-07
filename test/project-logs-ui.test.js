@@ -21,7 +21,7 @@ test("Project Logs occupies the project tool slot on desktop and mobile", functi
   assert.match(mobileSource, /icon: "notebook-tabs", label: "Logs", action: "project-logs"/);
 });
 
-test("there is no canonical create or edit UI anywhere in the client", function () {
+test("there is no canonical create or edit UI, while the owner may delete", function () {
   var combined = logsSource + renderSource;
   // The ledger is authored by agent sessions, so the client must not offer or
   // send any canonical mutation.
@@ -33,9 +33,13 @@ test("there is no canonical create or edit UI anywhere in the client", function 
   assert.equal(/renderEditor|project-log-edit\b/.test(combined), false, "no editor at all");
   assert.equal(/project-logs-new/.test(combined + css), false, "no create button styling either");
 
-  // Commenting is the only mutation the client performs.
+  // A human may comment, and the project owner may delete through a custom
+  // confirmation dialog without gaining canonical edit authority.
   assert.match(logsSource, /type: "project_log_comment", requestId: requestId, ref: ref, body: body/);
   assert.match(renderSource, /handlers\.onComment\(entry\.ref, value, status, input\)/);
+  assert.match(logsSource, /type: "project_log_delete", requestId: requestId, ref: pendingDeleteEntry\.ref/);
+  assert.match(renderSource, /handlers && handlers\.canDelete[\s\S]*handlers\.onDelete\(entry\)/);
+  assert.match(logsSource, /role="dialog" aria-modal="true"/);
 });
 
 test("the client uses store state, direct imports, and correlated requests", function () {
@@ -47,7 +51,10 @@ test("the client uses store state, direct imports, and correlated requests", fun
   assert.match(appSource, /projectLogsView: 'list'/);
   assert.match(appSource, /projectLogsCategory: ''/);
   assert.match(appSource, /projectLogsCommentRequestId: null/);
+  assert.match(appSource, /projectLogsDeleteRequestId: null/);
+  assert.match(appSource, /projectLogsCanDelete: false/);
   assert.match(messagesSource, /case "project_log_commented":[\s\S]*handleProjectLogCommented\(msg\)/);
+  assert.match(messagesSource, /case "project_log_deleted":[\s\S]*handleProjectLogDeleted\(msg\)/);
   assert.equal(/project_log_saved/.test(messagesSource), false, "the retired response is no longer routed");
   [["project-logs.js", logsSource], ["project-logs-render.js", renderSource]].forEach(function (pair) {
     assert.equal(/=>/.test(pair[1]), false, "no arrow functions in " + pair[0]);
@@ -177,9 +184,18 @@ test("category filtering is a compact control, not a dashboard", function () {
     "the client hard-codes no category name at all");
 });
 
+test("worktree log context is visible and can be filtered without forking the ledger", function () {
+  assert.match(logsSource, /id="project-logs-context-filter-slot"/);
+  assert.match(logsSource, /contextMode: store\.get\('projectLogsContextMode'\) \|\| ""/);
+  assert.match(renderSource, /\[\["current", "Current worktree"\], \["project", "Project"\], \["all", "All changes"\]\]/);
+  assert.match(renderSource, /context\.branch \|\| "Worktree change"/);
+  assert.match(renderSource, /context\.status === "merged"/);
+  assert.match(renderSource, /context\.status === "archived"/);
+});
+
 test("loading, empty, filtered-empty, and error states stay inside the ledger", function () {
   assert.match(logsSource, /"Loading the project ledger\.\.\."/);
-  assert.match(logsSource, /"No entries match this search or category\."/);
+  assert.match(logsSource, /"No entries match the current scope, search, or category\."/);
   assert.match(logsSource, /"The ledger could not be loaded\. Try opening Logs again\."/);
   assert.match(logsSource, /listEl\.setAttribute\("aria-busy", "true"\)/);
   assert.match(logsSource, /listEl\.removeAttribute\("aria-busy"\)/);
@@ -255,13 +271,30 @@ test("comment status and the Project Driver response are shown under each commen
   assert.match(css, /\.project-log-comment-response \{/);
 });
 
-test("posting a comment settles to Awaiting review rather than Posting", function () {
+test("posting a comment leaves Posting and reflects feedback delivery", function () {
   assert.match(logsSource, /statusEl\.textContent = "Posting\.\.\."/);
   assert.match(logsSource, /store\.set\(\{ projectLogsCommentStatusEl: statusEl \}\)/);
   var handler = logsSource.slice(logsSource.indexOf("export function handleProjectLogCommented"));
-  assert.match(handler, /pendingStatus\.textContent = "Awaiting Project Driver review"/);
+  assert.match(handler, /pendingStatus\.textContent = msg\.reviewQueued/);
+  assert.match(handler, /"Project Driver is reviewing\.\.\."/);
+  assert.match(handler, /"Awaiting Project Driver review"/);
   assert.match(handler, /store\.set\(\{ projectLogsCommentStatusEl: null \}\)/);
   assert.match(appSource, /projectLogsCommentStatusEl: null/);
+});
+
+test("queued feedback immediately shows that the Project Driver is reviewing", function () {
+  assert.match(logsSource, /msg\.reviewQueued[\s\S]*"Project Driver is reviewing\.\.\."/);
+  assert.match(logsSource, /badges\[badges\.length - 1\]\.textContent = "Project Driver is reviewing"/);
+});
+
+test("a completed comment review refreshes the open entry without stealing focus", function () {
+  var handler = logsSource.slice(logsSource.indexOf("export function handleProjectLogCommentReviewed"));
+  handler = handler.slice(0, handler.indexOf("export function handleProjectLogDeleted"));
+  assert.match(handler, /msg\.ref === store\.get\('projectLogsSelectedRef'\)/);
+  assert.match(handler, /requestEntry\(msg\.ref\)/);
+  assert.match(handler, /requestList\(\)/);
+  assert.equal(/openProjectLogs|focus\(/.test(handler), false);
+  assert.match(messagesSource, /case "project_log_comment_reviewed":[\s\S]*handleProjectLogCommentReviewed\(msg\)/);
 });
 
 test("the version history is a read-only timeline with no revert control", function () {

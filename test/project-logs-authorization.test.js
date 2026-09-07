@@ -163,6 +163,7 @@ test("shared-project members read each other's entries with attribution intact",
   assert.ok(guest, "an authorized non-owner member is bound");
   var listed = guest.listLogs({});
   assert.equal(listed.total, 1);
+  assert.equal(guest.canDelete, false, "project membership does not grant destructive authority");
   assert.equal(listed.entries[0].createdBy.userId, "member");
   assert.equal(listed.entries[0].createdBy.displayName, "Member", "the other member's authorship is preserved");
 
@@ -170,6 +171,7 @@ test("shared-project members read each other's entries with attribution intact",
   assert.throws(function () {
     guest.updateLog({ ref: listed.entries[0].ref, body: "traced the retry loop to the daemon" });
   }, /agent sessions/);
+  assert.throws(function () { guest.removeLog({ ref: listed.entries[0].ref }); }, /project owner/);
 
   // Participation is a comment, attributed to the commenting user, and it
   // leaves canonical blame untouched.
@@ -387,9 +389,7 @@ test("only Project Driver sessions may write canonical entries", function () {
   assert.throws(function () { owner.createLog({ kind: "decision", title: "Human", summary: "No." }); }, /agent sessions/);
   assert.throws(function () { owner.updateLog({ ref: entry.ref, title: "Human edit" }); }, /agent sessions/);
   assert.throws(function () { owner.linkLog({ ref: entry.ref, links: [{ ref: "session:x" }] }); }, /agent sessions/);
-  assert.throws(function () { owner.removeLog({ ref: entry.ref }); }, /agent sessions/);
-
-  // The record is untouched by the refusals.
+  // The record is untouched by the canonical-write refusals.
   assert.equal(owner.readLog({ ref: entry.ref }).revisions, 1);
   assert.equal(owner.readLog({ ref: entry.ref }).title, "Agent decision");
 
@@ -399,6 +399,10 @@ test("only Project Driver sessions may write canonical entries", function () {
   assert.equal(commented.comments[0].author.type, "user");
   assert.equal(commented.revisions, 1);
   assert.equal(commented.createdBy.type, "session", "the canonical author is still the agent");
+  assert.equal(owner.canDelete, true, "the owner may delete without gaining edit authority");
+  var removed = owner.removeLog({ ref: entry.ref });
+  assert.equal(removed.deleted, true);
+  assert.equal(owner.listLogs({}).total, 0, "a deleted entry leaves the live ledger");
 });
 
 test("legacy human-authored entries stay readable but are no longer editable", function () {
