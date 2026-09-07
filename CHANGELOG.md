@@ -1,3 +1,17 @@
+# [4.0.0-beta.17](https://github.com/chadbyte/clay/compare/v4.0.0-beta.16...v4.0.0-beta.17) (2026-09-07)
+
+
+### Bug Fixes
+
+* **chat:** recover unacknowledged startup messages ([be9d9cf](https://github.com/chadbyte/clay/commit/be9d9cf6e7d531e9e1ddf40c493416790e19823f))
+* **logs:** review comments without blocking the driver ([531956a](https://github.com/chadbyte/clay/commit/531956ab0c31ded9e7199c94e29101113f9f9dba))
+
+
+### Features
+
+* **logs:** allow project owners to delete entries ([aaacb18](https://github.com/chadbyte/clay/commit/aaacb182c5ccf4e84e3bee668852d9636b564676))
+* **logs:** preserve worktree change context ([46457d1](https://github.com/chadbyte/clay/commit/46457d1f6cf7dcfe6db97016c2e01986b5e39e10))
+
 # [4.0.0-beta.16](https://github.com/chadbyte/clay/compare/v4.0.0-beta.15...v4.0.0-beta.16) (2026-09-07)
 
 
