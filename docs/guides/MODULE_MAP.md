@@ -99,6 +99,8 @@ Wires all modules, sets up session manager and SDK bridge, dispatches messages.
 | `users-auth.js` | Authentication, PIN hashing, auth tokens, multi-user mode, setup codes |
 | `users-permissions.js` | RBAC permissions, project/session access control |
 | `users-preferences.js` | DM favorites/hidden, auto-continue, chat layout, deleted builtin keys, mate onboarding |
+| `users-experimental-preferences.js` | Per-user opt-ins for experimental features, including the default-off Capsules gate |
+| `server-experimental-settings.js` | REST persistence for experimental per-user feature opt-ins |
 | `daemon-sync.js` | Shared 10-second daemon synchronization loop and non-overlapping task registry |
 | `daemon-projects.js` | Worktree tracking (scan, rescan, cleanup), removed project filtering |
 | `knowledge-record-store.js` | **Single append-only backend** for Clay Knowledge. Scope-addressed JSONL under `{CONFIG_DIR}/knowledge/`, never inside a user repo. Incremental torn-write-tolerant loading, single-syscall appends. Every Knowledge surface is a projection over this, not its own store |

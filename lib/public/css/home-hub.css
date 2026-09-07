@@ -12,6 +12,10 @@ body.home-active #sidebar-overlay,
 body.home-active .title-bar-content,
 body.home-active #user-island { display: none !important; }
 
+body.capsules-disabled #home-tools-btn,
+body.capsules-disabled #home-dock-divider,
+body.capsules-disabled #home-tool-workbench { display: none !important; }
+
 body.home-active #main-area { border: 0; border-radius: 0; }
 
 body.home-surface-boot-pending #connect-overlay.hidden {
