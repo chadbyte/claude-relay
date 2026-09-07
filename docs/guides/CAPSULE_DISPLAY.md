@@ -94,10 +94,33 @@ contract that makes this work:
   animation restate fields the projection already publishes; anything a
   Display invents on its own is something the Mate is blind to.
 
+## The engagement loop: making the Mate actually play
+
+A two-seat Capsule needs the Mate to take its turns without the user leaving
+the board. When the Mate should be engaged is a game rule, so the Capsule's
+Logic declares it on the causal event: `event.engage = {kind: "turn"}` asks
+the Mate to read the state and act, `{kind: "start"}` asks it to acknowledge
+a fresh game without acting. The host bridge (`lib/capsule-mate-turn.js`)
+knows no game: it delivers any declared engagement exactly once per event,
+and only for human-caused events, so a Mate can never wake itself. The
+opponent is the Mate that last acted on this Capsule for this user; before
+any Mate has acted, the built-in host Mate takes the seat, so a fresh game is
+playable with zero setup. An explicit "start" additionally pushes
+`capsule_game_session` to the user's clients, and the home board navigates
+into the Mate's game session, so starting a game visibly opens the table.
+
+Delivery goes through `deliverCapsuleTurn` on the Mate's project context
+(`lib/project-capsule-turn.js`): one persistent session hosts the whole game
+(found again via `session.capsuleGame.toolId`), the turn prompt is recorded as
+an internal user message, and the Mate then reads the game over
+`clay_tool_snapshot` and plays through `clay_tool_act` like always. The nudge
+carries words only; it grants no authority, and a lost nudge costs a reminder,
+never the game. Mate acts push `tool_server_event` back to the user's Display,
+so the user watches the Mate's moves land live.
+
 ## Writing a server-runtime Capsule
 
-Use `lib/capsule-pig-logic.js` (push-your-luck dice) and
-`lib/capsule-tictactoe-logic.js` (grid board) as references:
+Use `lib/capsule-pig-logic.js` (push-your-luck dice) as the reference:
 
 - Seats are resolved server-side (`seatFor`) from the actor the pipeline
   sets; never from caller-supplied text.
@@ -108,5 +131,5 @@ Use `lib/capsule-pig-logic.js` (push-your-luck dice) and
   data, not a promise about shape.
 - Register the runtime in `lib/capsule-server-runtimes.js`; only shipped
   Capsules under `lib/capsules/` may claim the server runtime.
-- Tests: see `test/capsule-pig.test.js`, `test/capsule-tictactoe.test.js`,
+- Tests: see `test/capsule-pig.test.js`,
   `test/capsule-display-floor.test.js`, `test/capsule-frame-server.test.js`.

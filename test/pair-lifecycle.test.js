@@ -32,7 +32,7 @@ function makeWorld(options) {
   var opts = options || {};
   var nextId = 10;
   var driver = {
-    localId: 1, ownerId: opts.ownerId || null, title: "Planner", vendor: "claude",
+    localId: 1, ownerId: opts.ownerId || null, title: "Planner", vendor: opts.driverVendor || "claude",
     model: opts.driverModel === undefined ? "claude-fable-5" : opts.driverModel,
     history: [], isProcessing: false,
   };
@@ -251,6 +251,26 @@ test("the proposal path stays loadable and response-routed", function () {
   var pairSource = fs.readFileSync(path.join(root, "lib/project-session-pair.js"), "utf8");
   assert.match(pairSource, /if \(workerProposal\.handleMessage\(ws, msg\)\) return true;/,
     "so an in-flight worker_proposal_response still resolves");
+});
+
+test("Codex keeps a stable pair tool catalog across proposal acceptance", async function (t) {
+  var world = makeWorld({ driverVendor: "codex" });
+  t.after(world.dispose);
+  var initialTools = world.tools();
+  var initialNames = initialTools.map(function (tool) { return tool.name; });
+  var capturedSend = toolNamed(initialTools, "send_to_partner");
+
+  assert.ok(initialNames.indexOf("propose_worker") !== -1);
+  assert.ok(capturedSend, "the future paired tool is registered when the Codex thread starts");
+  assert.ok(initialNames.indexOf("partner_status") !== -1);
+
+  await makePair(world, "Implement the parser");
+
+  var pairedNames = world.tools().map(function (tool) { return tool.name; });
+  assert.deepEqual(pairedNames, initialNames, "resuming the Codex thread does not require a catalog update");
+  var result = parse(await capturedSend.handler({ message: "Fix the parser", wait: false }));
+  assert.equal(result.status, "running", "the handler resolves the newly created pair at call time");
+  world.completeTurn();
 });
 
 // --- Bounded status -------------------------------------------------------
@@ -747,14 +767,22 @@ test("the Driver prompt explains pending and audited full-access runtime decisio
   assert.match(prompts.DRIVER, /remains visible as an audit trail/);
   assert.match(prompts.DRIVER, /record_partner_evaluation/);
   assert.match(prompts.DRIVER, /not a general ranking of models/);
+  assert.match(prompts.DRIVER, /spanning multiple modules/);
+  assert.match(prompts.DRIVER, /Your own capability is not a reason to retain that execution/);
+  assert.match(prompts.DRIVER, /unless the user explicitly asks you to work directly/);
   assert.equal(/[^\x00-\x7F]/.test(prompts.DRIVER), false, "English ASCII only");
   assert.equal(/[^\x00-\x7F]/.test(prompts.UNPAIRED), false);
   assert.match(prompts.UNPAIRED, /call propose_worker/);
+  assert.match(prompts.UNPAIRED, /crosses client\/server\/data boundaries/);
+  assert.match(prompts.UNPAIRED, /Your own capability is not a reason to skip delegation/);
+  assert.match(prompts.UNPAIRED, /unless the user explicitly asks you to work directly/);
+  var proposalSource = fs.readFileSync(path.join(root, "lib/project-worker-proposal.js"), "utf8");
+  assert.match(proposalSource, /Do not skip delegation merely because you can implement it yourself/);
 });
 
 test("server conventions and module sizes hold", function () {
   var files = ["lib/project-pair-lifecycle.js", "lib/session-driver-eligibility.js",
-    "lib/session-pair-prompts.js", "lib/session-pair-factory.js",
+    "lib/session-driver-orchestration.js", "lib/session-pair-prompts.js", "lib/session-pair-factory.js",
     "lib/project-session-pair.js", "lib/session-pair-mcp-server.js",
     "lib/session-pair-turn-control.js"];
   for (var i = 0; i < files.length; i++) {

@@ -50,7 +50,7 @@
 }
 </style>
 </head>
-<body>
+<body class="capsules-disabled">
 <div id="layout">
   <!-- === Top Bar (full width, forms reverse-ㄱ with icon strip) === -->
   <div id="top-bar">
@@ -422,9 +422,6 @@
         <div id="ralph-sticky" class="hidden"></div>
         <div id="debate-sticky" class="hidden"></div>
         <div class="status">
-          <button id="header-session-actions-btn" type="button" aria-label="Session actions" aria-haspopup="menu" aria-expanded="false">
-            <i data-lucide="bot"></i><span>Add Split Worker</span><i class="session-actions-trigger-chevron" data-lucide="chevron-down"></i>
-          </button>
           <button type="button" id="header-tui-font-btn" class="header-tui-font-btn hidden" title="Terminal font" aria-label="Terminal font">
             <i data-lucide="type"></i>
           </button>
@@ -551,13 +548,15 @@
               <button id="schedule-btn" type="button" aria-label="Schedule message" title="Schedule message"><i data-lucide="clock"></i></button>
               <button id="ask-mate-btn" type="button" aria-label="Ask Mate" title="Ask a Mate for advice on this session"><i data-lucide="at-sign"></i></button>
               <div id="context-sources-btn-wrap" class="desktop-only">
-                <button id="context-sources-add" type="button" title="Add context sources"><i data-lucide="library"></i><span class="ctx-label">Context</span></button>
+                <button id="context-sources-add" type="button" aria-label="Add context" title="Add context sources"><i data-lucide="library"></i></button>
                 <div id="context-sources-picker" class="hidden">
                   <div class="context-picker-section" id="context-picker-email"></div>
                   <div class="context-picker-section" id="context-picker-terminals"></div>
                   <div class="context-picker-section" id="context-picker-tabs"></div>
                 </div>
               </div>
+              <button id="composer-add-worker-btn" type="button" class="composer-session-action desktop-only" aria-label="Add Split Worker" title="Add Split Worker"><i data-lucide="bot"></i></button>
+              <button id="composer-handoff-btn" type="button" class="composer-session-action desktop-only" aria-label="Continue in another agent" title="Continue in another agent"><i data-lucide="send"></i></button>
             </div>
             <div id="input-bottom-right">
               <div id="active-vendor-indicator" class="hidden" title="Session vendor">
@@ -1008,6 +1007,7 @@
           <option value="us-appearance">Appearance</option>
           <option value="us-chat">Chat</option>
           <option value="us-mates">Mates</option>
+          <option value="us-experimental">Experimental</option>
           <option value="us-email">Email</option>
         </select>
         <div class="us-modal-nav-items">
@@ -1015,6 +1015,7 @@
           <button class="us-nav-item" data-section="us-appearance"><span>Appearance</span></button>
           <button class="us-nav-item" data-section="us-chat"><span>Chat</span></button>
           <button class="us-nav-item" data-section="us-mates"><span>Mates</span></button>
+          <button class="us-nav-item" data-section="us-experimental"><span>Experimental</span></button>
           <button class="us-nav-item" data-section="us-email"><span>Email</span></button>
           <div class="us-nav-separator"></div>
           <button class="us-nav-item us-nav-danger" data-section="us-logout"><span>Log Out</span></button>
@@ -1165,6 +1166,22 @@
                 <div class="settings-hint">Show Mate DM shortcuts in project workspaces. Home, Debates, mentions, and Mate memory stay available.</div>
               </div>
               <input type="checkbox" id="us-mates-enabled">
+              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Experimental section -->
+        <div class="us-section" data-section="us-experimental">
+          <h2>Experimental</h2>
+          <p class="settings-hint">Preview features may change or behave unexpectedly.</p>
+          <div class="settings-card">
+            <label class="settings-toggle-row">
+              <div>
+                <span class="settings-label">Capsules</span>
+                <div class="settings-hint">Enable persistent mini-apps that you and your Mates can use.</div>
+              </div>
+              <input type="checkbox" id="us-capsules-enabled">
               <span class="toggle-track"><span class="toggle-thumb"></span></span>
             </label>
           </div>
@@ -1526,17 +1543,22 @@
   </div>
 </div>
 
-<div id="paste-modal" class="hidden">
+<div id="paste-modal" class="hidden" role="dialog" aria-modal="true" aria-labelledby="paste-modal-title">
   <div class="confirm-backdrop"></div>
   <div class="confirm-dialog paste-modal-dialog">
     <div class="paste-modal-header">
-      <span class="paste-modal-title">Pasted content</span>
+      <span class="paste-modal-title" id="paste-modal-title">Pasted content</span>
       <div class="paste-modal-actions">
-        <button class="paste-modal-copy" title="Copy to clipboard"><i data-lucide="copy" style="width:15px;height:15px"></i></button>
-        <button class="paste-modal-close"><i data-lucide="x" style="width:16px;height:16px"></i></button>
+        <button class="paste-modal-copy" type="button" title="Copy to clipboard" aria-label="Copy pasted content"><i data-lucide="copy" style="width:15px;height:15px"></i></button>
+        <button class="paste-modal-close" type="button" aria-label="Close pasted content"><i data-lucide="x" style="width:16px;height:16px"></i></button>
       </div>
     </div>
     <pre class="paste-modal-body" id="paste-modal-body"></pre>
+    <textarea class="paste-modal-editor" id="paste-modal-editor" aria-label="Pasted content"></textarea>
+    <div class="paste-modal-footer" id="paste-modal-footer">
+      <button class="paste-modal-cancel" type="button">Cancel</button>
+      <button class="paste-modal-save" id="paste-modal-save" type="button">Save changes</button>
+    </div>
   </div>
 </div>
 

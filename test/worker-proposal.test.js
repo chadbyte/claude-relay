@@ -103,15 +103,19 @@ async function postProposal(f) {
   return f.session.history.filter(function (item) { return item.type === "worker_proposal"; })[0];
 }
 
-test("every eligible unpaired Driver receives the Worker proposal tool and prompt", function () {
+test("every eligible unpaired Driver receives the proposal tool but only high-tier models receive its prompt", function () {
   var f = fixture();
   assert.deepStrictEqual(f.attached.getToolDefs(f.session).map(function (tool) { return tool.name; }), ["propose_worker"]);
   assert.match(f.attached.getSystemPrompt(f.session), /runtime configuration card/);
   f.session.model = "claude-sonnet-4-6";
   assert.deepStrictEqual(f.attached.getToolDefs(f.session).map(function (tool) { return tool.name; }), ["propose_worker"]);
+  assert.strictEqual(f.attached.getSystemPrompt(f.session), "");
   f.session.vendor = "codex";
   f.session.model = "gpt-5.6-terra";
   assert.deepStrictEqual(f.attached.getToolDefs(f.session).map(function (tool) { return tool.name; }), ["propose_worker"]);
+  assert.strictEqual(f.attached.getSystemPrompt(f.session), "");
+  f.session.model = "gpt-6-astra";
+  assert.match(f.attached.getSystemPrompt(f.session), /runtime configuration card/);
   f.session.mode = "tui";
   assert.deepStrictEqual(f.attached.getToolDefs(f.session), []);
 });

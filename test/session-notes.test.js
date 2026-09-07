@@ -291,14 +291,22 @@ test("notes are omitted from mate sessions", function () {
   assert.strictEqual(attached.getSystemPrompt({ localId: 1 }), "");
 });
 
-test("notes whitelist auto-allows list and write but not removal", function () {
+test("notes whitelist auto-allows every reversible note operation", function () {
   var bridge = createSDKBridge({
     cwd: process.cwd(),
     sessionManager: {},
     adapter: {},
     send: function () {},
   });
-  assert.strictEqual(bridge.checkToolWhitelist("mcp__clay-notes__list_notes", {}).behavior, "allow");
-  assert.strictEqual(bridge.checkToolWhitelist("mcp__clay-notes__write_note", {}).behavior, "allow");
-  assert.strictEqual(bridge.checkToolWhitelist("mcp__clay-notes__remove_note", {}), null);
+  var tools = ["list_notes", "write_note", "close_note", "reopen_note", "remove_note"];
+  for (var i = 0; i < tools.length; i++) {
+    var input = { marker: tools[i] };
+    assert.deepStrictEqual(bridge.checkToolWhitelist("mcp__clay-notes__" + tools[i], input), {
+      behavior: "allow",
+      updatedInput: input,
+    });
+  }
+  assert.strictEqual(bridge.checkToolWhitelist("mcp__clay-notes-extra__close_note", {}), null);
+  assert.strictEqual(bridge.checkToolWhitelist("mcp__other-clay-notes__close_note", {}), null);
+  assert.strictEqual(bridge.checkToolWhitelist("close_note", {}), null);
 });

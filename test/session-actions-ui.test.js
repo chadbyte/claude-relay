@@ -5,8 +5,8 @@ var path = require("node:path");
 
 var css = fs.readFileSync(path.join(__dirname, "../lib/public/css/session-actions.css"), "utf8");
 
-test("session actions menu uses restrained focus and readable supporting copy", function () {
-  assert.match(css, /#header-session-actions-btn:focus-visible\s*\{[^}]*color-mix\(in srgb, var\(--link\) 18%, transparent\)/s);
-  assert.match(css, /\.session-actions-row-icon\s*\{[^}]*color:\s*color-mix\(in srgb, var\(--accent2\) 38%, var\(--text-secondary\)\)/s);
-  assert.match(css, /\.session-actions-row-copy > span\s*\{[^}]*color:\s*var\(--text-muted\)[^}]*font-size:\s*11px/s);
+test("composer session actions match the restrained icon toolbar", function () {
+  assert.match(css, /\.composer-session-action\s*\{[^}]*width:\s*36px[^}]*height:\s*36px[^}]*border-radius:\s*50%/s);
+  assert.match(css, /\.composer-session-action:focus-visible\s*\{[^}]*color-mix\(in srgb, var\(--link\) 18%, transparent\)/s);
+  assert.match(css, /\.composer-session-action:disabled\s*\{[^}]*opacity:\s*0\.32/s);
 });

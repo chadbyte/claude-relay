@@ -85,8 +85,6 @@
   min-height: 80px;
   border: 1px solid color-mix(in srgb, var(--note-border) calc(var(--note-opacity, 0.64) * 100%), transparent);
   background: color-mix(in srgb, var(--note-surface) calc(var(--note-opacity, 0.64) * 100%), transparent);
-  -webkit-backdrop-filter: blur(7px) saturate(0.92) contrast(1.02);
-  backdrop-filter: blur(7px) saturate(0.92) contrast(1.02);
   color: var(--note-ink);
   transition: box-shadow 0.15s;
   overflow: hidden;
@@ -97,12 +95,12 @@
 }
 
 .sticky-note.sticky-note-attention {
-  animation: sticky-note-attention-pulse 0.65s ease-in-out 3;
+  animation: sticky-note-attention-pulse 1.1s ease-out 1;
 }
 
 @keyframes sticky-note-attention-pulse {
-  0%, 100% { box-shadow: 0 2px 12px rgba(var(--shadow-rgb), 0.12); }
-  50% { box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 55%, transparent), 0 4px 20px rgba(var(--shadow-rgb), 0.2); }
+  0% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 45%, transparent), 0 4px 20px rgba(var(--shadow-rgb), 0.2); }
+  100% { box-shadow: 0 2px 12px rgba(var(--shadow-rgb), 0.12); }
 }
 
 .sticky-note.dragging,
@@ -800,8 +798,6 @@
 
 @media (prefers-reduced-transparency: reduce) {
   .sticky-note {
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
     border-color: var(--note-border);
     background: var(--note-surface);
   }

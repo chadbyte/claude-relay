@@ -53,12 +53,13 @@ test("live notes, browser cards, and picker swatches consume the shared palette"
   assert.match(css, /\.notes-browser-card-body \{ color: var\(--note-ink\); \}/);
 });
 
-test("transparent live notes blur their backdrop while preserving a readable content floor", function () {
-  assert.match(css, /\.sticky-note \{[^}]*-webkit-backdrop-filter: blur\(7px\) saturate\(0\.92\) contrast\(1\.02\);[^}]*backdrop-filter: blur\(7px\) saturate\(0\.92\) contrast\(1\.02\);/);
+test("transparent live notes avoid backdrop repaint while preserving a readable content floor", function () {
+  var liveRule = css.slice(css.indexOf(".sticky-note {"), css.indexOf(".sticky-note:hover"));
+  assert.doesNotMatch(liveRule, /backdrop-filter/);
   assert.match(css, /\.sticky-note \{[^}]*overflow: hidden;/);
   assert.match(css, /border: 1px solid color-mix\(in srgb, var\(--note-border\) calc\(var\(--note-opacity, 0\.64\) \* 100%\), transparent\)/);
   assert.match(css, /background: color-mix\(in srgb, var\(--note-surface\) calc\(var\(--note-opacity, 0\.64\) \* 100%\), transparent\)/);
-  assert.match(css, /@media \(prefers-reduced-transparency: reduce\) \{[\s\S]*\.sticky-note \{[\s\S]*-webkit-backdrop-filter: none;[\s\S]*backdrop-filter: none;[\s\S]*border-color: var\(--note-border\);[\s\S]*background: var\(--note-surface\);/);
+  assert.match(css, /@media \(prefers-reduced-transparency: reduce\) \{[\s\S]*\.sticky-note \{[\s\S]*border-color: var\(--note-border\);[\s\S]*background: var\(--note-surface\);/);
   assert.doesNotMatch(css, /\.notes-browser-card \{[^}]*backdrop-filter/);
   assert.doesNotMatch(css, /\.sticky-note-color-picker \{[^}]*backdrop-filter/);
   assert.match(canvasFamily, /opacitySlider\.min = "20"/);

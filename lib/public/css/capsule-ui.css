@@ -384,9 +384,29 @@ textarea.tool-input { min-height: 92px; resize: vertical; }
   .tool-pagination { flex-wrap: wrap; justify-content: flex-start; }
 }
 
+/* Capsule engagement note in the Mate transcript: a quiet system line, not a
+   speech bubble, because no one typed it. */
+.home-capsule-turn-note {
+  align-self: center;
+  margin: 6px auto;
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text-muted) 10%, transparent);
+  color: var(--text-muted);
+  font-size: 11.5px;
+  text-align: center;
+}
+
 /* Rich Display frame: the additive sandboxed element above the floor. */
+/* There is no global .hidden utility, so the capsule surfaces scope their own:
+   the frame stays invisible until its bridge reports ready, the floor hides
+   behind the toggle, and a cleared error leaves the screen. */
+.home-tool-frame-wrap.hidden,
+.home-tool-frame-toggle.hidden,
+.home-tool-display.hidden,
+.home-tool-error.hidden { display: none; }
 .home-tool-frame-wrap { width: 100%; }
-.home-tool-frame { display: block; width: 100%; min-height: 240px; border: 0; border-radius: 10px; background: var(--bg); }
+.home-tool-frame { display: block; width: 100%; min-height: 0; border: 0; border-radius: 10px; background: var(--bg); }
 .home-tool-frame-toggle {
   display: block; margin: 6px 0 0 auto; padding: 3px 10px;
   border: 1px solid var(--border-subtle); border-radius: 999px;

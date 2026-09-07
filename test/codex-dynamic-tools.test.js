@@ -2,6 +2,16 @@ var test = require("node:test");
 var assert = require("node:assert");
 var codexModule = require("../lib/yoke/adapters/codex");
 
+test("Codex canonicalizes every note operation to the exact Clay Notes namespace", function () {
+  var canonical = codexModule.contractTestKit.canonicalDynamicPermissionToolName;
+  var tools = ["list_notes", "write_note", "close_note", "reopen_note", "remove_note"];
+  for (var i = 0; i < tools.length; i++) {
+    assert.strictEqual(canonical(tools[i]), "mcp__clay-notes__" + tools[i]);
+  }
+  assert.strictEqual(canonical("close_note_extra"), "close_note_extra");
+  assert.strictEqual(canonical("unrelated_tool"), "unrelated_tool");
+});
+
 test("Codex registers and executes session-bound dynamic tools", async function () {
   var calls = [];
   var responses = [];

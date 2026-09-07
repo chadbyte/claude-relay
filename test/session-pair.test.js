@@ -8,8 +8,8 @@ function parseToolResult(result) {
 
 function fixture(configured, options) {
   options = options || {};
-  // The Driver role now requires a Fable-tier Claude model (or Sol-tier
-  // OpenAI), so the fixture Driver carries a real eligible model id.
+  // Fable receives proactive orchestration guidance; structural Driver
+  // capability itself remains model-agnostic.
   var driver = { localId: 1, ownerId: null, title: "Planner", vendor: "claude", model: options.driverModel || "claude-fable-5", history: [], isProcessing: false };
   var worker = { localId: 2, ownerId: null, title: "Builder", vendor: "codex", history: [], isProcessing: false };
   var sessions = new Map([[1, driver], [2, worker]]);
@@ -147,6 +147,25 @@ test("an unpaired Driver can only post the runtime configuration proposal", asyn
   assert.strictEqual(result.status, "posted");
   assert.strictEqual(f.getGroup(), null);
   assert.strictEqual(f.starts.length, 0);
+});
+
+test("only high-tier unpaired Drivers receive proactive Worker guidance", function () {
+  var high = fixture(false, { ungrouped: true, driverModel: "claude-fable-5" });
+  var lower = fixture(false, { ungrouped: true, driverModel: "claude-sonnet-5" });
+
+  assert.match(high.attached.getSystemPrompt(high.driver), /implementation-heavy/);
+  assert.strictEqual(lower.attached.getSystemPrompt(lower.driver), "");
+  assert.deepStrictEqual(lower.attached.getToolDefs(lower.driver).map(function (tool) { return tool.name; }),
+    ["propose_worker", "respond_to_worker_permission"], "the capability remains available when explicitly requested");
+});
+
+test("a lower-tier configured Driver receives pair controls without delegation judgment", function () {
+  var lower = fixture(true, { driverModel: "claude-sonnet-5" });
+  var prompt = lower.attached.getSystemPrompt(lower.driver);
+
+  assert.match(prompt, /manage that Split Worker yourself/);
+  assert.match(prompt, /partner_status/);
+  assert.doesNotMatch(prompt, /Treat work spanning multiple modules/);
 });
 
 test("paired routing uses visible-session context and partner-tool precedence", function () {

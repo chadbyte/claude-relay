@@ -122,16 +122,16 @@ test("split pane clients prepare web links before browser navigation", function 
   assert.match(bridgeSource, /forceExternalLinkToNewTab\(anchor, window\.location\.href\)/);
 });
 
-test("session actions replace the dedicated worker button and stay out of split panes", function () {
+test("session actions live beside composer context and stay out of split panes", function () {
   var html = fs.readFileSync(path.join(__dirname, "../lib/public/index.html"), "utf8");
   var actionsSource = fs.readFileSync(path.join(__dirname, "../lib/public/modules/session-actions.js"), "utf8");
 
-  assert.match(html, /id="header-session-actions-btn"/);
-  assert.doesNotMatch(html, /id="header-add-worker-btn"/);
+  assert.doesNotMatch(html, /id="header-session-actions-btn"/);
+  assert.match(html, /id="context-sources-btn-wrap"[\s\S]*id="composer-add-worker-btn"[\s\S]*id="composer-handoff-btn"/);
   assert.match(actionsSource, /!!state\.splitPanes/);
   assert.match(actionsSource, /state\.paneMode/);
-  assert.match(actionsSource, /Add Split Worker/);
-  assert.match(actionsSource, /Send context to another agent/);
+  assert.match(actionsSource, /composer-add-worker-btn/);
+  assert.match(actionsSource, /composer-handoff-btn/);
   assert.match(actionsSource, /handoff_session_options/);
   assert.match(actionsSource, /Reasoning effort/);
   assert.match(actionsSource, /model: modelSelect\.value/);

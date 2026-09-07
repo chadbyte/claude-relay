@@ -48,7 +48,7 @@ function makeEl(id, tag) {
 
 var COMPOSER_IDS = ["input", "send-btn", "attach-file-btn", "attach-image-btn",
   "input-more-btn", "shell-command-btn", "stt-btn", "schedule-btn", "ask-mate-btn",
-  "context-sources-add"];
+  "context-sources-add", "composer-add-worker-btn", "composer-handoff-btn"];
 
 function load(storeState) {
   var els = {};

@@ -418,16 +418,29 @@ test("bridge advertising and dispatch mirror the adapter path without duplicates
   }
 });
 
-test("system prompt guidance is factual and carries no persona", function () {
+test("system prompt guidance preserves user-directed work for Driver continuity", function () {
   var f = fixture();
   var prompt = f.attached.getSystemPrompt(f.session);
   assert.ok(prompt.indexOf(projectLogs.SYSTEM_PROMPT_LABEL) === 0);
-  assert.match(prompt, /durable record of decisions and work/);
-  assert.match(prompt, /the way a good Git history reads/);
+  assert.match(prompt, /durable work-continuity record/);
+  assert.match(prompt, /newly created Driver/);
+  assert.match(prompt, /every concrete user work instruction/);
+  assert.match(prompt, /not only unusually important work/);
+  assert.match(prompt, /requested outcome and material constraints/);
+  assert.match(prompt, /what was changed, discovered, or decided/);
+  assert.match(prompt, /affected area, verification, and the current result/);
+  assert.match(prompt, /remaining work and next action explicitly/);
+  assert.match(prompt, /routine work still belongs in the ledger at normal priority/);
+  assert.match(prompt, /one entry per turn/);
+  assert.match(prompt, /Repository history may show the code change but usually does not preserve the user's intent/);
+  assert.match(prompt, /clean Driver handoff/);
   assert.match(prompt, /You are the only author/);
   assert.match(prompt, /concise meaningful title/);
   assert.match(prompt, /one or two sentence summary/);
   assert.match(prompt, /Prefer updating an existing entry/);
+  assert.doesNotMatch(prompt, /Do not log conversation summaries/);
+  assert.doesNotMatch(prompt, /restatements of the request/);
+  assert.doesNotMatch(prompt, /completed-work announcements/);
   assert.match(prompt, /You are the only author/, "authorship is stated plainly");
   assert.doesNotMatch(prompt, /you are an? [a-z]/i, "no character or role description");
   assert.doesNotMatch(prompt, /your (personality|identity|character|voice)/i, "no persona framing");
@@ -435,6 +448,24 @@ test("system prompt guidance is factual and carries no persona", function () {
 
   assert.equal(f.attached.getSystemPrompt({ localId: 11, ownerId: "owner" }), "", "an unbindable session gets no guidance");
   assert.equal(fixture({ mate: true }).attached.getSystemPrompt(null), "");
+});
+
+test("write tools request one evolving task-handoff record", function () {
+  var tools = logsMcp.getToolDefs(null, false);
+  var create = tools.filter(function (tool) { return tool.name === "create_log"; })[0];
+  var update = tools.filter(function (tool) { return tool.name === "update_log"; })[0];
+
+  assert.match(create.description, /new coherent user-directed task/);
+  assert.match(create.description, /Search first/);
+  assert.doesNotMatch(create.description, /weeks from now/);
+  assert.match(create.inputSchema.summary.description, /user's requested outcome with the current result or status/);
+  var createBodyDescription = create.inputSchema.body.unwrap().description;
+  var updateBodyDescription = update.inputSchema.body.unwrap().description;
+  assert.match(createBodyDescription, /requested outcome and constraints/);
+  assert.match(createBodyDescription, /work\/result, affected area, verification, current status/);
+  assert.match(createBodyDescription, /next action when unfinished/);
+  assert.match(update.description, /work progresses, completes, becomes blocked/);
+  assert.match(updateBodyDescription, /request, current result, verification/);
 });
 
 test("a service-less attachment is inert rather than failing open", function () {
@@ -626,7 +657,7 @@ test("the pending-feedback signal is a count, never comment bodies", function ()
 
   var quiet = f.attached.getSystemPrompt(f.session);
   assert.equal(/awaits? your review/.test(quiet), false, "no signal when nothing is pending");
-  assert.match(quiet, /Project Logs are this project's durable record/);
+  assert.match(quiet, /Project Logs are this project's durable work-continuity record/);
   assert.match(quiet, /never an automatic change/, "the review contract is present from the start");
 
   var owner = ws({ id: "owner", displayName: "Owner" });

@@ -83,6 +83,7 @@ test("new conversation belongs to the selected Mate context", function () {
 test("Home never instructs the user to choose a Mate", function () {
   var homeSource = source("lib/public/modules/app-home-hub.js")
     + source("lib/public/modules/home-mate-chat.js")
+    + source("lib/public/modules/home-chat-empty-state.js")
     + source("lib/public/index.html");
   assert.doesNotMatch(homeSource, /Choose a mate to begin|Select someone to start|Select a mate/);
   assert.match(homeSource, /Getting Home ready/);

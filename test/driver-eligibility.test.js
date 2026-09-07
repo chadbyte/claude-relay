@@ -5,6 +5,7 @@ var path = require("node:path");
 
 var root = path.join(__dirname, "..");
 var eligibility = require("../lib/session-driver-eligibility");
+var orchestration = require("../lib/session-driver-orchestration");
 
 test("project chat sessions may drive regardless of vendor or model tier", function () {
   var sessions = [
@@ -33,4 +34,33 @@ test("Driver capability contains no model-tier policy", function () {
   assert.equal(/=>/.test(source), false, "no arrow functions");
   assert.equal(/^\s*(const|let)\s/m.test(source), false, "var only");
   assert.ok(source.split("\n").length < 500);
+});
+
+test("proactive orchestration is limited to explicitly high-tier model families", function () {
+  var highTier = [
+    { vendor: "claude", model: "claude-fable-5-1" },
+    { vendor: "claude", model: "claude-opus-4-6" },
+    { vendor: "codex", model: "gpt-5.6-sol" },
+    { vendor: "codex", model: "gpt-6-astra" },
+    { vendor: "codex", model: "gpt-6" },
+  ];
+  var lowerTier = [
+    { vendor: "claude", model: "claude-sonnet-5" },
+    { vendor: "claude", model: "claude-haiku-4-5" },
+    { vendor: "codex", model: "gpt-5.6-terra" },
+    { vendor: "codex", model: "gpt-5.6-luna" },
+    { vendor: "kiro", model: "some-model" },
+  ];
+  for (var i = 0; i < highTier.length; i++) {
+    assert.equal(orchestration.isHighTierDriverSession(highTier[i]), true, highTier[i].model);
+  }
+  for (var j = 0; j < lowerTier.length; j++) {
+    assert.equal(orchestration.isHighTierDriverSession(lowerTier[j]), false, lowerTier[j].model);
+  }
+});
+
+test("orchestration tier resolves the configured vendor default when the session has no model", function () {
+  var sm = { defaultModelByVendor: { codex: "gpt-6-astra", claude: "claude-sonnet-5" } };
+  assert.equal(orchestration.isHighTierDriverSession({ vendor: "codex", model: "" }, sm), true);
+  assert.equal(orchestration.isHighTierDriverSession({ vendor: "claude", model: "" }, sm), false);
 });
