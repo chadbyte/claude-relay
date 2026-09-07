@@ -106,6 +106,7 @@ test("the WebSocket round trip emits exactly the client protocol payloads", func
   assert.equal(state.type, "project_logs_state");
   assert.equal(state.requestId, "r2");
   assert.equal(state.entries.length, 1);
+  assert.equal(state.canDelete, true, "the project owner receives the delete capability");
   assert.deepEqual(state.categories, ["decision"], "the client is told this project's live vocabulary");
   var row = state.entries[0];
   assert.equal(row.ref, entry.ref);
@@ -153,6 +154,14 @@ test("the WebSocket round trip emits exactly the client protocol payloads", func
   assert.equal(searched.entries[0].body, undefined);
   f.attached.handleLogsMessage(owner, { type: "project_logs_list", requestId: "r8", query: "nothing matches this" });
   assert.deepEqual(last(f.sent).entries, []);
+
+  f.attached.handleLogsMessage(owner, { type: "project_log_delete", requestId: "r9", ref: entry.ref });
+  var deleted = last(f.sent);
+  assert.equal(deleted.type, "project_log_deleted");
+  assert.equal(deleted.requestId, "r9");
+  assert.equal(deleted.ref, entry.ref);
+  f.attached.handleLogsMessage(owner, { type: "project_logs_list", requestId: "r10", query: "" });
+  assert.equal(last(f.sent).entries.length, 0, "the deleted entry leaves the live ledger");
 });
 
 test("humans cannot create or update canonical entries over the WebSocket", function () {
@@ -226,6 +235,12 @@ test("shared-project members comment with attribution preserved", function () {
   assert.equal(latest.commentCount, 2);
   assert.deepEqual(latest.comments.map(function (c) { return c.author.displayName; }), ["Owner", "Member"]);
   assert.equal(latest.createdBy.type, "session", "canonical authorship is unchanged by discussion");
+
+  f.attached.handleLogsMessage(member, { type: "project_logs_list", requestId: "a3", query: "" });
+  assert.equal(last(f.sent).canDelete, false);
+  f.attached.handleLogsMessage(member, { type: "project_log_delete", requestId: "a4", ref: entry.ref });
+  assert.equal(last(f.sent).type, "project_logs_error");
+  assert.match(last(f.sent).message, /project owner/);
 });
 
 test("Mate projects deny the Logs UI path and errors stay correlated", function () {
@@ -242,7 +257,8 @@ test("Mate projects deny the Logs UI path and errors stay correlated", function 
   assert.equal(last(f.sent).type, "project_logs_error");
 
   assert.equal(f.attached.handleLogsMessage(owner, { type: "note_create" }), false);
-  assert.equal(f.attached.handleLogsMessage(owner, { type: "project_log_delete", requestId: "m3" }), false);
+  assert.equal(f.attached.handleLogsMessage(owner, { type: "project_log_delete", requestId: "m3" }), true);
+  assert.equal(last(f.sent).type, "project_logs_error");
 });
 
 test("a store error is reported as a correlated error, not a thrown handler", function () {
@@ -482,8 +498,8 @@ test("a service-less attachment is inert rather than failing open", function () 
 });
 
 test("every Project Logs message type is registered in the WebSocket schema", function () {
-  var c2s = ["project_logs_list", "project_log_read", "project_log_comment", "project_log_create", "project_log_update"];
-  var s2c = ["project_logs_state", "project_log_entry", "project_log_commented", "project_logs_error"];
+  var c2s = ["project_logs_list", "project_log_read", "project_log_comment", "project_log_delete", "project_log_create", "project_log_update"];
+  var s2c = ["project_logs_state", "project_log_entry", "project_log_commented", "project_log_deleted", "project_logs_error"];
   for (var i = 0; i < c2s.length; i++) {
     assert.ok(schema[c2s[i]], c2s[i] + " is missing from ws-schema");
     assert.equal(schema[c2s[i]].direction, "c2s");
@@ -1073,7 +1089,7 @@ test("the update message is registered and carries no body by contract", functio
   assert.ok(schema["project_log_updated"], "registered in ws-schema");
   assert.equal(schema["project_log_updated"].direction, "s2c");
   assert.match(schema["project_log_updated"].description, /bounded ledger metadata only/i);
-  assert.deepEqual(projectLogs.NOTIFYING_OPS, ["create", "update", "link", "incorporate", "revert"]);
+  assert.deepEqual(projectLogs.NOTIFYING_OPS, ["create", "update", "link", "incorporate", "revert", "delete"]);
 
   // The notice builder clips long text and drops everything else.
   var notice = projectLogs.updateNotice({

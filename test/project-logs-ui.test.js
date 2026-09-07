@@ -21,7 +21,7 @@ test("Project Logs occupies the project tool slot on desktop and mobile", functi
   assert.match(mobileSource, /icon: "notebook-tabs", label: "Logs", action: "project-logs"/);
 });
 
-test("there is no canonical create or edit UI anywhere in the client", function () {
+test("there is no canonical create or edit UI, while the owner may delete", function () {
   var combined = logsSource + renderSource;
   // The ledger is authored by agent sessions, so the client must not offer or
   // send any canonical mutation.
@@ -33,9 +33,13 @@ test("there is no canonical create or edit UI anywhere in the client", function 
   assert.equal(/renderEditor|project-log-edit\b/.test(combined), false, "no editor at all");
   assert.equal(/project-logs-new/.test(combined + css), false, "no create button styling either");
 
-  // Commenting is the only mutation the client performs.
+  // A human may comment, and the project owner may delete through a custom
+  // confirmation dialog without gaining canonical edit authority.
   assert.match(logsSource, /type: "project_log_comment", requestId: requestId, ref: ref, body: body/);
   assert.match(renderSource, /handlers\.onComment\(entry\.ref, value, status, input\)/);
+  assert.match(logsSource, /type: "project_log_delete", requestId: requestId, ref: pendingDeleteEntry\.ref/);
+  assert.match(renderSource, /handlers && handlers\.canDelete[\s\S]*handlers\.onDelete\(entry\)/);
+  assert.match(logsSource, /role="dialog" aria-modal="true"/);
 });
 
 test("the client uses store state, direct imports, and correlated requests", function () {
@@ -47,7 +51,10 @@ test("the client uses store state, direct imports, and correlated requests", fun
   assert.match(appSource, /projectLogsView: 'list'/);
   assert.match(appSource, /projectLogsCategory: ''/);
   assert.match(appSource, /projectLogsCommentRequestId: null/);
+  assert.match(appSource, /projectLogsDeleteRequestId: null/);
+  assert.match(appSource, /projectLogsCanDelete: false/);
   assert.match(messagesSource, /case "project_log_commented":[\s\S]*handleProjectLogCommented\(msg\)/);
+  assert.match(messagesSource, /case "project_log_deleted":[\s\S]*handleProjectLogDeleted\(msg\)/);
   assert.equal(/project_log_saved/.test(messagesSource), false, "the retired response is no longer routed");
   [["project-logs.js", logsSource], ["project-logs-render.js", renderSource]].forEach(function (pair) {
     assert.equal(/=>/.test(pair[1]), false, "no arrow functions in " + pair[0]);
