@@ -767,14 +767,22 @@ test("the Driver prompt explains pending and audited full-access runtime decisio
   assert.match(prompts.DRIVER, /remains visible as an audit trail/);
   assert.match(prompts.DRIVER, /record_partner_evaluation/);
   assert.match(prompts.DRIVER, /not a general ranking of models/);
+  assert.match(prompts.DRIVER, /spanning multiple modules/);
+  assert.match(prompts.DRIVER, /Your own capability is not a reason to retain that execution/);
+  assert.match(prompts.DRIVER, /unless the user explicitly asks you to work directly/);
   assert.equal(/[^\x00-\x7F]/.test(prompts.DRIVER), false, "English ASCII only");
   assert.equal(/[^\x00-\x7F]/.test(prompts.UNPAIRED), false);
   assert.match(prompts.UNPAIRED, /call propose_worker/);
+  assert.match(prompts.UNPAIRED, /crosses client\/server\/data boundaries/);
+  assert.match(prompts.UNPAIRED, /Your own capability is not a reason to skip delegation/);
+  assert.match(prompts.UNPAIRED, /unless the user explicitly asks you to work directly/);
+  var proposalSource = fs.readFileSync(path.join(root, "lib/project-worker-proposal.js"), "utf8");
+  assert.match(proposalSource, /Do not skip delegation merely because you can implement it yourself/);
 });
 
 test("server conventions and module sizes hold", function () {
   var files = ["lib/project-pair-lifecycle.js", "lib/session-driver-eligibility.js",
-    "lib/session-pair-prompts.js", "lib/session-pair-factory.js",
+    "lib/session-driver-orchestration.js", "lib/session-pair-prompts.js", "lib/session-pair-factory.js",
     "lib/project-session-pair.js", "lib/session-pair-mcp-server.js",
     "lib/session-pair-turn-control.js"];
   for (var i = 0; i < files.length; i++) {
