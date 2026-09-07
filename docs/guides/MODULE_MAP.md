@@ -201,7 +201,7 @@ Bootstraps UI, initializes store, wires remaining Tier 3 modules. All business l
 | `app-rate-limit.js` | Rate limit UI, countdown timers, scheduled message bubbles, fast mode indicator |
 | `app-cursors.js` | Remote cursor presence, text selection sharing, cursor toggle UI |
 | `app-rendering.js` | Message rendering, streaming, scroll management, pre-thinking dots, suggestion chips, system messages |
-| `app-projects.js` | Project list, switching, add/remove project modals, update available pill, topbar presence |
+| `app-projects.js` + `project-removal-target.js` | Project list, switching, add/remove project modals, update available pill, topbar presence; pure nearest-project destination selection after active-project removal |
 | `app-panels.js` | Config chip (model/mode/effort/thinking/beta), usage panel, status panel, context panel, context popover |
 | `model-picker.js` | Vendor model loading state, request correlation, retry/error UI, and acknowledged model selection |
 | `filebrowser-tabs.js` | Global document-viewer tab lifecycle, focus, and close behavior |
