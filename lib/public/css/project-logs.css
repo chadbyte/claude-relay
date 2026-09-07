@@ -105,7 +105,11 @@
 .project-logs-search .lucide { width: 14px; flex: 0 0 auto; }
 .project-logs-search input { width: 100%; border: 0; outline: 0; background: transparent; color: var(--text); font: inherit; font-size: 12px; }
 .project-logs-search:focus-within, .project-logs-filter:focus-visible { outline: 2px solid color-mix(in srgb, var(--accent) 35%, transparent); border-color: var(--accent); }
-.project-logs-filter { height: 36px; max-width: 42%; padding: 0 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text-secondary); font: inherit; font-size: 12px; cursor: pointer; }
+.project-logs-filter { height: 36px; max-width: 180px; padding: 0 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text-secondary); font: inherit; font-size: 12px; cursor: pointer; }
+.project-logs-context-filter { max-width: 148px; }
+.project-log-context-chip { display: inline-flex; align-items: center; min-height: 22px; padding: 2px 7px; border-radius: 999px; background: var(--bg-alt); color: var(--text-secondary); font-size: 11px; font-weight: 600; }
+.project-log-context-chip[data-status="archived"] { opacity: .72; }
+.project-log-context-chip[data-status="merged"] { color: var(--success, #2f8f57); }
 
 /* --- Ledger list: full pane, chronological, commit-history feel --- */
 .project-logs-list { flex: 1; min-height: 0; overflow-y: auto; padding: 8px 0 18px; }
@@ -188,7 +192,7 @@
   .project-logs-subtitle { display: none; }
   .project-logs-topbar { gap: 8px; padding: 0 12px; }
   .project-logs-toolbar { padding: 10px 12px; }
-  .project-logs-filter { max-width: 44%; }
+  .project-logs-filter { max-width: 42%; }
   .project-log-row { padding: 14px 14px 13px; }
   .project-log-document { padding: 24px 18px 38px; }
 }

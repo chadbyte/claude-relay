@@ -99,6 +99,35 @@ function seed(f, overrides) {
   }, overrides || {}));
 }
 
+test("worktree bindings share one project ledger while defaulting to their current change set", function () {
+  var parentSession = { localId: 31, cliSessionId: "cli-parent", ownerId: "owner", vendor: "claude" };
+  var worktreeSession = { localId: 32, cliSessionId: "cli-worktree", ownerId: "owner", vendor: "codex" };
+  var projects = new Map();
+  projects.set("app", handle({
+    slug: "app", path: "/srv/app", projectOwnerId: "owner", visibility: "private", projectKnowledgeId: "pk_app",
+  }, [parentSession]));
+  projects.set("app--feature", handle({
+    slug: "app--feature", path: "/srv/app-feature", projectOwnerId: "owner", visibility: "private",
+    projectKnowledgeId: "pk_app", isWorktree: true, parentSlug: "app", changeSetId: "cs_feature", branch: "feature/log-context",
+  }, [worktreeSession]));
+  var service = attachService({
+    getProjects: function () { return projects; },
+    isMultiUser: function () { return true; },
+    canAccessProject: function (userId, status) { return status.projectOwnerId === userId; },
+    openStore: storeFactory(),
+  });
+  var parent = service.bindProjectSession({ projectSlug: "app", session: parentSession });
+  var worktree = service.bindProjectSession({ projectSlug: "app--feature", session: worktreeSession });
+  parent.createLog({ kind: "decision", title: "Project rule", summary: "Applies to every checkout." });
+  var changed = worktree.createLog({ kind: "progress", title: "Feature work", summary: "Belongs to this logical change." });
+
+  assert.equal(parent.listLogs({}).total, 1, "the main project defaults to project-wide entries");
+  assert.equal(worktree.listLogs({}).total, 2, "the worktree sees project-wide context and its own change");
+  assert.equal(worktree.listLogs({ contextMode: "project" }).total, 1);
+  assert.equal(parent.listLogs({ contextMode: "all" }).total, 2);
+  assert.equal(worktree.readLog({ ref: changed.ref }).context.changeSetId, "cs_feature");
+});
+
 test("the WebSocket round trip emits exactly the client protocol payloads", function () {
   var f = fixture();
   var owner = ws({ id: "owner", displayName: "Owner" });

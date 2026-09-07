@@ -184,9 +184,18 @@ test("category filtering is a compact control, not a dashboard", function () {
     "the client hard-codes no category name at all");
 });
 
+test("worktree log context is visible and can be filtered without forking the ledger", function () {
+  assert.match(logsSource, /id="project-logs-context-filter-slot"/);
+  assert.match(logsSource, /contextMode: store\.get\('projectLogsContextMode'\) \|\| ""/);
+  assert.match(renderSource, /\[\["current", "Current worktree"\], \["project", "Project"\], \["all", "All changes"\]\]/);
+  assert.match(renderSource, /context\.branch \|\| "Worktree change"/);
+  assert.match(renderSource, /context\.status === "merged"/);
+  assert.match(renderSource, /context\.status === "archived"/);
+});
+
 test("loading, empty, filtered-empty, and error states stay inside the ledger", function () {
   assert.match(logsSource, /"Loading the project ledger\.\.\."/);
-  assert.match(logsSource, /"No entries match this search or category\."/);
+  assert.match(logsSource, /"No entries match the current scope, search, or category\."/);
   assert.match(logsSource, /"The ledger could not be loaded\. Try opening Logs again\."/);
   assert.match(logsSource, /listEl\.setAttribute\("aria-busy", "true"\)/);
   assert.match(logsSource, /listEl\.removeAttribute\("aria-busy"\)/);
