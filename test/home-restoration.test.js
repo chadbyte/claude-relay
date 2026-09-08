@@ -27,6 +27,17 @@ test("Home surface writes send only changed preference fields", function () {
   assert.doesNotMatch(surface, /home_surface_set", preference: next/);
 });
 
+test("Home Close requires a currently accessible return project", function () {
+  var hub = source("lib/public/modules/app-home-hub.js");
+  assert.match(hub, /function getHomeReturnSlug\(\)[\s\S]*getCachedProjects\(\)[\s\S]*homeSurfaceProjectSlug[\s\S]*!projects\[pi\]\.isMate[\s\S]*!projects\[i\]\.isMate/);
+  assert.match(hub, /syncHomeCloseControl\(\)[\s\S]*classList\.toggle\("hidden", !getHomeReturnSlug\(\)\)/);
+  assert.match(hub, /export function minimizeHomeHub\(\) \{[\s\S]*var slug = getHomeReturnSlug\(\)[\s\S]*switchProject\(slug\)/);
+  var projects = source("lib/public/modules/app-projects.js");
+  assert.match(projects, /var targetWsPath = "\/p\/" \+ slug \+ "\/ws";/);
+  assert.match(projects, /var alreadyInProject = slug === st\.currentSlug && st\.wsPath === targetWsPath;/);
+  assert.match(projects, /store\.set\(\{ wsPath: targetWsPath \}\);[\s\S]*connect\(\)/);
+});
+
 test("restored exact conversations rerender and reveal the selected Mate locally", function () {
   var chat = source("lib/public/modules/home-mate-chat.js");
   var hub = source("lib/public/modules/app-home-hub.js");
