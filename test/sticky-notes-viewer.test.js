@@ -213,6 +213,17 @@ test("closed metadata is shown without becoming a task manager", function () {
   assert.doesNotMatch(browserSource, /assignee|due date|priority|estimate/i, "no task-manager fields");
 });
 
+test("rendered sticky-note surfaces turn Project Log references into durable chips", function () {
+  assert.match(cardSource, /enhanceClayLogLinks\(rendered\)/,
+    "new floating notes enhance their rendered markdown");
+  assert.match(canvasSource, /enhanceClayLogLinks\(rendered\)/,
+    "server-updated floating notes enhance their rendered markdown");
+  assert.match(editorSource, /rendered\.innerHTML = renderMiniMarkdown\(md\);\s*enhanceClayLogLinks\(rendered\);/,
+    "returning from raw Markdown and normalizing an edit both restore chips");
+  assert.match(browserSource, /enhanceClayLogLinks\(body\)/,
+    "the Sticky Notes browser enhances log references too");
+});
+
 // --- module structure ---------------------------------------------------
 
 test("every sticky-note client module is under the size limit", function () {

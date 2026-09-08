@@ -18,6 +18,25 @@ function managerAt(root, sendEach) {
   });
 }
 
+function hierarchyElement() {
+  var attributes = {};
+  var listeners = {};
+  return {
+    children: [],
+    hidden: false,
+    className: "",
+    classList: { add: function () {} },
+    setAttribute: function (name, value) { attributes[name] = value; },
+    getAttribute: function (name) { return attributes[name]; },
+    addEventListener: function (name, listener) { listeners[name] = listener; },
+    appendChild: function (child) { this.children.push(child); return child; },
+    insertBefore: function (child) { this.children.unshift(child); return child; },
+    click: function () {
+      listeners.click({ preventDefault: function () {}, stopPropagation: function () {} });
+    },
+  };
+}
+
 test("Worker provenance survives restart and local id reassignment", function (t) {
   var root = fs.mkdtempSync(path.join(os.tmpdir(), "clay-provenance-"));
   t.after(function () { fs.rmSync(root, { recursive: true, force: true }); });
@@ -209,6 +228,32 @@ test("project hierarchy defaults open for active, current, and searched Workers"
   assert.equal(module.defaultHierarchyExpanded([{ id: 2, active: true }], null, new Set()), true);
   assert.equal(module.defaultHierarchyExpanded(idle, null, new Set([2])), true);
   assert.equal(module.defaultHierarchyExpanded(idle, new Set([2]), new Set()), true);
+  assert.equal(module.isDesktopHierarchyToggleEvent({
+    target: { closest: function (selector) { return selector === ".session-driver-toggle" ? {} : null; } },
+  }), true);
+  assert.equal(module.isDesktopHierarchyToggleEvent({
+    target: { closest: function () { return null; } },
+  }), false);
+
+  var originalDocument = global.document;
+  global.document = { createElement: function () { return hierarchyElement(); } };
+  try {
+    var rerenders = 0;
+    var tree = module.renderDesktopDriverHierarchy({
+      driver: { id: 1, title: "Driver" },
+      workers: [{ id: 2, active: true }],
+    }, function () { return hierarchyElement(); }, function () { rerenders++; }, null);
+    var row = tree.children[0];
+    var toggle = row.children[0];
+    var children = tree.children[1];
+    assert.equal(children.hidden, false);
+    toggle.click();
+    assert.equal(toggle.getAttribute("aria-expanded"), "false");
+    assert.equal(children.hidden, true);
+    assert.equal(rerenders, 0);
+  } finally {
+    global.document = originalDocument;
+  }
 });
 
 test("desktop, mobile, and Home trees expose accessible expansion controls", function () {
@@ -219,6 +264,8 @@ test("desktop, mobile, and Home trees expose accessible expansion controls", fun
   var sheet = fs.readFileSync(path.join(__dirname, "../lib/public/modules/home-conversations-sheet.js"), "utf8");
   var combined = desktop + mobile + projectHierarchy + home + sheet;
   assert.match(projectHierarchy, /session-driver-toggle[\s\S]*aria-expanded[\s\S]*aria-controls/);
+  assert.match(projectHierarchy, /children\.hidden = !nextExpanded/);
+  assert.match(desktop, /if \(isDesktopHierarchyToggleEvent\(event\)\) return;/);
   assert.match(projectHierarchy, /mobile-driver-toggle[\s\S]*aria-expanded[\s\S]*aria-controls/);
   assert.match(home, /home-sidebar-driver-toggle[\s\S]*aria-expanded[\s\S]*aria-controls/);
   assert.match(sheet, /home-conversations-driver-toggle[\s\S]*aria-expanded[\s\S]*aria-controls/);

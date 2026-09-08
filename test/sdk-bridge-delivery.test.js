@@ -195,6 +195,55 @@ test("main SDK queries expose session dynamic tools and use their canonical appr
   assert.equal((await queryOptions.canUseTool("search_workspace_history", {}, {})).behavior, "allow");
 });
 
+test("resumed Codex tools resolve the current live session handler", async function() {
+  var queryOptions = null;
+  var toolPhase = "unavailable";
+  var calls = [];
+  var adapter = {
+    vendor: "codex",
+    userInputCapability: { mode: "native", native: true },
+    createQuery: function(options) { queryOptions = options; return Promise.resolve(createEndingHandle([])); },
+  };
+  var session = {
+    localId: 33,
+    vendor: "codex",
+    cliSessionId: "resume-with-persisted-tools",
+    pendingAskUser: {},
+    pendingPermissions: {},
+    pendingElicitations: {},
+  };
+  var bridge = createSDKBridge({
+    cwd: process.cwd(),
+    sessionManager: {
+      sessions: new Map([[33, session]]), availableModels: [], saveSessionFile: function() {},
+      broadcastSessionList: function() {}, sendAndRecord: function() {}, sendToSession: function() {},
+    },
+    adapter: adapter,
+    adapters: { codex: adapter },
+    getSessionToolDefs: function() {
+      if (toolPhase === "unavailable") return [];
+      return [{
+        name: "propose_worker",
+        description: "Propose a Worker",
+        inputSchema: {},
+        handler: function(args) {
+          calls.push(args);
+          return Promise.resolve({ content: [{ type: "text", text: "posted" }] });
+        },
+      }];
+    },
+    send: function() {},
+  });
+
+  await bridge.startQuery(session, "Continue the resumed thread", null, null);
+  assert.deepEqual(queryOptions.dynamicTools, [],
+    "thread/resume relies on the dynamic catalog Codex already persisted");
+  toolPhase = "available";
+  var result = await queryOptions.callDynamicTool("propose_worker", { summary: "Delegate it" });
+  assert.equal(result.content[0].text, "posted");
+  assert.deepEqual(calls, [{ summary: "Delegate it" }]);
+});
+
 test("rewind queries receive the scoped environment when they create a temporary handle", async function() {
   var capturedOptions = null;
   var handle = createEndingHandle([]);
