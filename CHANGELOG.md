@@ -1,3 +1,20 @@
+# [4.0.0-beta.18](https://github.com/chadbyte/clay/compare/v4.0.0-beta.17...v4.0.0-beta.18) (2026-09-08)
+
+
+### Bug Fixes
+
+* **admin:** replace native destructive confirmations ([e8fbc63](https://github.com/chadbyte/clay/commit/e8fbc632d65ab1387bf90700068627d1fc705f8c))
+* **home:** restore workspace for new users ([a54f526](https://github.com/chadbyte/clay/commit/a54f526eeae66864876d18ef22f71f9bd5644643))
+* **notes:** restore isolated backdrop blur ([335884c](https://github.com/chadbyte/clay/commit/335884cdd67b8e1237cdc44548612f2237cb692a))
+* **sidebar:** collapse split worker hierarchy ([12125f5](https://github.com/chadbyte/clay/commit/12125f524c7e594d13a90742647145841eb85c8f))
+* **worker:** resolve live session tool handlers ([9980862](https://github.com/chadbyte/clay/commit/99808620276d2a7c5b79de848022fb747e19c4b2))
+
+
+### Features
+
+* **logs:** let Clay search and open cited records ([d3c148f](https://github.com/chadbyte/clay/commit/d3c148f0dbed52b14947ba6fe9986f7154432984))
+* **logs:** render log references as chips ([102aac7](https://github.com/chadbyte/clay/commit/102aac7bec2fb09f3fb11efab26d499386c17268))
+
 # [4.0.0-beta.17](https://github.com/chadbyte/clay/compare/v4.0.0-beta.16...v4.0.0-beta.17) (2026-09-07)
 
 
