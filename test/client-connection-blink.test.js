@@ -182,10 +182,14 @@ test("an unchanged note keeps its rendered markdown, focus, and draft", function
     "handleNoteUpdated no longer rewrites markdown directly");
 });
 
-test("floating notes do not repaint a live backdrop or blink repeatedly", function () {
+test("floating notes isolate live blur and never blink repeatedly", function () {
   var noteRule = slice(notesCss, ".sticky-note {", ".sticky-note:hover");
-  assert.equal(/backdrop-filter/.test(noteRule), false,
-    "composer typing cannot invalidate a live blur behind every floating note");
+  assert.match(noteRule, /backdrop-filter: blur\(7px\)/,
+    "translucent notes retain the depth cue from their live backdrop");
+  assert.match(noteRule, /contain: layout style;/,
+    "note layout changes stay inside the floating surface without clipping its shadow");
+  assert.match(noteRule, /will-change: transform, backdrop-filter;/,
+    "the browser can keep each moving blur on a stable compositor layer");
   assert.match(notesCss, /\.sticky-note\.sticky-note-attention \{\s*animation: sticky-note-attention-pulse 1\.1s ease-out 1;/,
     "a real note update gets one gentle cue rather than three flashes");
   var pulse = slice(notesCss, "@keyframes sticky-note-attention-pulse", ".sticky-note.dragging");

@@ -85,9 +85,13 @@
   min-height: 80px;
   border: 1px solid color-mix(in srgb, var(--note-border) calc(var(--note-opacity, 0.64) * 100%), transparent);
   background: color-mix(in srgb, var(--note-surface) calc(var(--note-opacity, 0.64) * 100%), transparent);
+  -webkit-backdrop-filter: blur(7px) saturate(0.92) contrast(1.02);
+  backdrop-filter: blur(7px) saturate(0.92) contrast(1.02);
   color: var(--note-ink);
   transition: box-shadow 0.15s;
   overflow: hidden;
+  contain: layout style;
+  will-change: transform, backdrop-filter;
 }
 
 .sticky-note:hover {
@@ -798,8 +802,11 @@
 
 @media (prefers-reduced-transparency: reduce) {
   .sticky-note {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
     border-color: var(--note-border);
     background: var(--note-surface);
+    will-change: transform;
   }
 }
 
