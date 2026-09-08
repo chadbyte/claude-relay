@@ -24,9 +24,20 @@ function element(tagName, classes, children) {
     tagName: tagName,
     classList: classList(classes || []),
     childNodes: children || [],
+    dataset: {},
     getAttribute: function () { return null; },
   };
 }
+
+test("sticky-note log chips serialize back to exact markdown references", async function () {
+  var markdown = await loadMarkdownModule();
+  var title = element("DIV", ["sn-title"], [textNode("Investigation")]);
+  var chip = element("BUTTON", ["clayos-log-link"], [textNode("Log")]);
+  chip.dataset.logRef = "log:AtK7V57km2QHpYCN6DQ_Xvov";
+  var rendered = element("DIV", [], [title, element("BR"), chip]);
+  rendered.querySelector = function () { return title; };
+  assert.strictEqual(markdown.extractMarkdown(rendered), "Investigation\n`log:AtK7V57km2QHpYCN6DQ_Xvov`");
+});
 
 test("sticky-note markdown renders bare and bulleted checklist markers", async function () {
   var markdown = await loadMarkdownModule();

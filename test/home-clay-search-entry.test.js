@@ -153,7 +153,7 @@ test("rendered Project Log links resolve through the exact authoritative Clay so
 test("Project Log reference parsing accepts exact refs and rejects lookalikes", function () {
   var sourceText = fs.readFileSync(path.join(__dirname, "../lib/public/modules/clay-log-links.js"), "utf8");
   var start = sourceText.indexOf("export function parseClayLogReferences(text)");
-  var end = sourceText.indexOf("\n\nexport function enhanceClayLogLinks", start);
+  var end = sourceText.indexOf("\n\nexport function isExactClayLogReference", start);
   var parseClayLogReferences = Function(sourceText.slice(start, end).replace("export ", "") + "\nreturn parseClayLogReferences;")();
   var explicit = parseClayLogReferences("See [clayos/log:AAAAAAAAAAAAAAAAAAAAAAAA — Release decision].");
   assert.deepEqual(explicit.map(function (item) { return { ref: item.ref, label: item.label }; }), [
@@ -165,6 +165,12 @@ test("Project Log reference parsing accepts exact refs and rejects lookalikes", 
   assert.equal(parseClayLogReferences("log:CCCCCCCCCCCCCCCCCCCCCCCCC").length, 0, "a 25-character lookalike is rejected");
   assert.equal(parseClayLogReferences("prefixlog:DDDDDDDDDDDDDDDDDDDDDDDD").length, 0, "an embedded identifier is rejected");
   assert.equal(parseClayLogReferences("https://example.test/log:EEEEEEEEEEEEEEEEEEEEEEEE").length, 0, "a URL path is not converted");
+
+  var exactStart = sourceText.indexOf("export function isExactClayLogReference(text)");
+  var exactEnd = sourceText.indexOf("\n\nfunction createLogLink", exactStart);
+  var isExactClayLogReference = Function(sourceText.slice(exactStart, exactEnd).replace("export ", "") + "\nreturn isExactClayLogReference;")();
+  assert.equal(isExactClayLogReference("log:FFFFFFFFFFFFFFFFFFFFFFFF"), true);
+  assert.equal(isExactClayLogReference("prefix log:FFFFFFFFFFFFFFFFFFFFFFFF"), false);
 });
 
 test("Ask Clay projects changing sanitized search stages without leaking tool details", function () {
@@ -255,14 +261,14 @@ test("global search is deterministic first and exposes an explicit branded Clay 
   assert.match(widget, /content\.appendChild\(panel\)/);
   assert.match(styles, /\.md-content:not\(:empty\) \+ \.search-clay-activity-panel/);
   assert.match(styles, /\.search-clay-transcript[\s\S]*padding: 16px 12px/);
-  assert.match(markup, /style\.css\?v=20260908-log-links1/);
+  assert.match(markup, /style\.css\?v=20260908-log-links2/);
   assert.match(widget, /identity\.innerHTML = '<span><strong>Clay<\/strong><small>Workspace search<\/small><\/span>'/);
   assert.doesNotMatch(widget, /identity\.innerHTML = '<img/);
   assert.match(palette, /class="cmd-palette-brand">Clay Studio/);
   assert.doesNotMatch(palette, /class="cmd-palette-brand"><img/);
   assert.match(styles, /\.cmd-palette\.is-chatting \.cmd-palette-footer-shortcuts \{ display: none; \}/);
-  assert.match(styleImports, /command-palette\.css\?v=20260908-log-links1/);
-  assert.match(markup, /app\.js\?v=20260908-log-links1/);
+  assert.match(styleImports, /command-palette\.css\?v=20260908-log-links2/);
+  assert.match(markup, /app\.js\?v=20260908-log-links2/);
   assert.match(markdown, /replace\(\/\\\*\\\*\[ \\t\]\+/);
   assert.match(markdown, /function normalizeAdjacentEmphasis\(text\)/);
   assert.match(markdown, /\\p\{L\}\\p\{N\}/);
@@ -290,6 +296,9 @@ test("global search is deterministic first and exposes an explicit branded Clay 
   assert.match(logLinks, /clayos\\\/\(log:\[A-Za-z0-9_-\]\{24\}\)/);
   assert.match(logLinks, /className = "clayos-log-link"/);
   assert.match(logLinks, /closest\("code, pre, a, button"\)/);
+  assert.match(logLinks, /querySelectorAll\("code"\)/);
+  assert.match(logLinks, /code\.closest\("pre"\)/);
+  assert.match(logLinks, /contentEditable = "false"/);
   assert.match(palette, /request\.type = "home_clay_log_resolve"/);
   assert.match(palette, /msg\.type !== "home_clay_log_target"/);
   assert.match(palette, /openProjectLog\(target\.ref\)/);
