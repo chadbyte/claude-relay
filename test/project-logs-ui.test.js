@@ -21,6 +21,12 @@ test("Project Logs occupies the project tool slot on desktop and mobile", functi
   assert.match(mobileSource, /icon: "notebook-tabs", label: "Logs", action: "project-logs"/);
 });
 
+test("an exact rendered log reference opens its entry directly", function () {
+  assert.match(logsSource, /export function openProjectLog\(ref\)/);
+  assert.match(logsSource, /\^log:\[A-Za-z0-9_-\]\{24\}\$/);
+  assert.match(logsSource, /openProjectLogs\(\);[\s\S]*requestEntry\(ref\);/);
+});
+
 test("there is no canonical create or edit UI, while the owner may delete", function () {
   var combined = logsSource + renderSource;
   // The ledger is authored by agent sessions, so the client must not offer or

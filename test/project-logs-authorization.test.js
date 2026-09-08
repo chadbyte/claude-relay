@@ -228,7 +228,7 @@ test("ordinary Mates are denied and Mate projects have no Logs", function () {
 
 test("authoritative builtin Clay reads authorized projects only, and never writes", function () {
   var w = workspace();
-  w.service.bindProjectSession({ projectSlug: "owned", session: w.ownedSession })
+  var ownedEntry = w.service.bindProjectSession({ projectSlug: "owned", session: w.ownedSession })
     .createLog({ kind: "decision", summary: "Adopt append-only logs.", title: "Owned decision", body: "adopt append-only logs" });
   w.service.bindProjectSession({ projectSlug: "shared", session: w.sharedSession })
     .createLog({ kind: "decision", summary: "Recorded for the ledger.", title: "Shared decision" });
@@ -242,6 +242,9 @@ test("authoritative builtin Clay reads authorized projects only, and never write
   assert.equal(clay.listLogs({ projectSlug: "owned" }).total, 1);
   assert.equal(clay.searchLogs({ projectSlug: "owned", query: "append-only" }).total, 1);
   assert.equal(clay.listLogs({ projectSlug: "shared" }).total, 1, "a project the user is a member of is readable");
+  assert.deepEqual(clay.resolveLogNavigation({ ref: ownedEntry.ref }), { projectSlug: "owned", ref: ownedEntry.ref });
+  assert.throws(function () { clay.resolveLogNavigation({ ref: "log:AAAAAAAAAAAAAAAAAAAAAAAA" }); }, /not found/);
+  assert.throws(function () { clay.resolveLogNavigation({ ref: "log:short" }); }, /Invalid log reference/);
 
   assert.throws(function () { clay.listLogs({ projectSlug: "private" }); }, /not available/);
   assert.throws(function () { clay.listLogs({ projectSlug: "mate-home" }); }, /not available/);

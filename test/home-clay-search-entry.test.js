@@ -51,6 +51,8 @@ test("global Ask Clay creates one exact owned session and records the visible us
   assert.equal(value.calls.starts[0].session, session);
   assert.match(value.calls.starts[0].text, /global search[\s\S]*Search by meaning[\s\S]*User request:\nFind my conversation about fruit/);
   assert.match(value.calls.starts[0].text, /use search_workspace_history before any other investigation/);
+  assert.match(value.calls.starts[0].text, /search_project_logs before answering/);
+  assert.match(value.calls.starts[0].text, /Do not force a workspace or Logs search when the request is a general question or task/);
   assert.match(value.calls.starts[0].text, /at most three focused search passes/);
   assert.match(value.calls.starts[0].text, /Do not use Bash, filesystem scans, or generic agents/);
 });
@@ -113,6 +115,58 @@ test("rendered session links resolve through exact search and ordinary Home Mate
   assert.match(sent[2].error, /source conversation/);
 });
 
+test("rendered Project Log links resolve through the exact authoritative Clay source", function () {
+  var sourceSession = { localId: 7, ownerId: "user-1" };
+  var sourceStatus = { slug: "mate-clay", projectOwnerId: "user-1", isMate: true, mateId: "clay-id" };
+  var sourceProject = {
+    getStatus: function () { return sourceStatus; },
+    getSessionManager: function () { return { sessions: new Map([[7, sourceSession]]) }; },
+  };
+  var sent = [];
+  var binding = null;
+  var links = attachHomeClaySessionLinks({
+    projects: new Map([["mate-clay", sourceProject]]),
+    projectLogsService: {
+      bindMate: function (value) {
+        binding = value;
+        return { resolveLogNavigation: function (args) {
+          assert.deepEqual(args, { ref: "log:AAAAAAAAAAAAAAAAAAAAAAAA" });
+          return { projectSlug: "owned", ref: args.ref };
+        } };
+      },
+    },
+    sendMessage: function (ws, payload) { sent.push(payload); },
+  });
+  var ws = { _searchClayTap: { mateSlug: "mate-clay", mateId: "clay-id", sessionId: 7 } };
+  links.resolveLog(ws, { surface: "search", requestId: "log-link-1", ref: "log:AAAAAAAAAAAAAAAAAAAAAAAA" });
+  assert.deepEqual(binding, {
+    projectSlug: "mate-clay", projectOwnerId: "user-1", isMate: true, mateId: "clay-id", session: sourceSession,
+  });
+  assert.equal(sent[0].status, "ready");
+  assert.deepEqual(sent[0].target, { projectSlug: "owned", ref: "log:AAAAAAAAAAAAAAAAAAAAAAAA" });
+
+  links.resolveLog({}, { surface: "home", requestId: "log-link-2", ref: "log:AAAAAAAAAAAAAAAAAAAAAAAA" });
+  assert.equal(sent[1].status, "error");
+  assert.match(sent[1].error, /source conversation/);
+});
+
+test("Project Log reference parsing accepts exact refs and rejects lookalikes", function () {
+  var sourceText = fs.readFileSync(path.join(__dirname, "../lib/public/modules/clay-log-links.js"), "utf8");
+  var start = sourceText.indexOf("export function parseClayLogReferences(text)");
+  var end = sourceText.indexOf("\n\nexport function enhanceClayLogLinks", start);
+  var parseClayLogReferences = Function(sourceText.slice(start, end).replace("export ", "") + "\nreturn parseClayLogReferences;")();
+  var explicit = parseClayLogReferences("See [clayos/log:AAAAAAAAAAAAAAAAAAAAAAAA — Release decision].");
+  assert.deepEqual(explicit.map(function (item) { return { ref: item.ref, label: item.label }; }), [
+    { ref: "log:AAAAAAAAAAAAAAAAAAAAAAAA", label: "Release decision" },
+  ]);
+  var bare = parseClayLogReferences("Open log:BBBBBBBBBBBBBBBBBBBBBBBB now.");
+  assert.equal(bare.length, 1);
+  assert.equal(bare[0].ref, "log:BBBBBBBBBBBBBBBBBBBBBBBB");
+  assert.equal(parseClayLogReferences("log:CCCCCCCCCCCCCCCCCCCCCCCCC").length, 0, "a 25-character lookalike is rejected");
+  assert.equal(parseClayLogReferences("prefixlog:DDDDDDDDDDDDDDDDDDDDDDDD").length, 0, "an embedded identifier is rejected");
+  assert.equal(parseClayLogReferences("https://example.test/log:EEEEEEEEEEEEEEEEEEEEEEEE").length, 0, "a URL path is not converted");
+});
+
 test("Ask Clay projects changing sanitized search stages without leaking tool details", function () {
   var session = { homeClayEntryMode: "search", model: "gpt-5.6-sol", vendor: "codex" };
   var thinking = transformEvent({ type: "thinking_start" }, "clay-id", session, "request-1", "session-1");
@@ -120,10 +174,13 @@ test("Ask Clay projects changing sanitized search stages without leaking tool de
   var searching = transformEvent({ type: "tool_start", name: "search_workspace_history" }, "clay-id", session, "request-1", "session-1");
   var specific = transformEvent({ type: "tool_executing", name: "search_workspace_history", input: { query: "fruit\u0000 notes" } }, "clay-id", session, "request-1", "session-1");
   var reviewing = transformEvent({ type: "tool_result", content: "private transcript" }, "clay-id", session, "request-1", "session-1");
+  transformEvent({ type: "tool_start", name: "search_project_logs" }, "clay-id", session, "request-1", "session-1");
+  var logSearch = transformEvent({ type: "tool_executing", name: "search_project_logs", input: { query: "release status" } }, "clay-id", session, "request-1", "session-1");
   assert.deepEqual([thinking.phase, searching.phase, reviewing.phase], ["thinking", "searching", "reviewing"]);
   assert.deepEqual([thinking.status, thought.status, searching.status, reviewing.status], ["active", "done", "active", "done"]);
   assert.equal(thought.label, "Thought through the request in 1.3s");
   assert.equal(specific.label, "Searching conversations for \u201cfruit notes\u201d");
+  assert.equal(logSearch.label, "Searching project logs for \u201crelease status\u201d");
   assert.equal(specific.activityId, searching.activityId);
   assert.equal(searching.step, 1);
   assert.equal(reviewing.step, 1);
@@ -144,6 +201,8 @@ test("global search is deterministic first and exposes an explicit branded Clay 
   var project = fs.readFileSync(path.join(root, "lib/project.js"), "utf8");
   var schema = fs.readFileSync(path.join(root, "lib/ws-schema.js"), "utf8");
   var markdown = fs.readFileSync(path.join(root, "lib/public/modules/markdown.js"), "utf8");
+  var logLinks = fs.readFileSync(path.join(root, "lib/public/modules/clay-log-links.js"), "utf8");
+  var projectLogs = fs.readFileSync(path.join(root, "lib/public/modules/project-logs.js"), "utf8");
   var router = fs.readFileSync(path.join(root, "lib/public/modules/app-message-router.js"), "utf8");
   var sessionLinks = fs.readFileSync(path.join(root, "lib/server-home-clay-session-links.js"), "utf8");
   assert.match(markup, /cmd-palette-searchbar[\s\S]*data-lucide="search"[\s\S]*Search or ask Clay/);
@@ -196,13 +255,14 @@ test("global search is deterministic first and exposes an explicit branded Clay 
   assert.match(widget, /content\.appendChild\(panel\)/);
   assert.match(styles, /\.md-content:not\(:empty\) \+ \.search-clay-activity-panel/);
   assert.match(styles, /\.search-clay-transcript[\s\S]*padding: 16px 12px/);
-  assert.match(markup, /style\.css\?v=20260901-clay-chat6/);
+  assert.match(markup, /style\.css\?v=20260908-log-links1/);
   assert.match(widget, /identity\.innerHTML = '<span><strong>Clay<\/strong><small>Workspace search<\/small><\/span>'/);
   assert.doesNotMatch(widget, /identity\.innerHTML = '<img/);
   assert.match(palette, /class="cmd-palette-brand">Clay Studio/);
   assert.doesNotMatch(palette, /class="cmd-palette-brand"><img/);
   assert.match(styles, /\.cmd-palette\.is-chatting \.cmd-palette-footer-shortcuts \{ display: none; \}/);
-  assert.match(styleImports, /command-palette\.css\?v=20260901-clay-chat2/);
+  assert.match(styleImports, /command-palette\.css\?v=20260908-log-links1/);
+  assert.match(markup, /app\.js\?v=20260908-log-links1/);
   assert.match(markdown, /replace\(\/\\\*\\\*\[ \\t\]\+/);
   assert.match(markdown, /function normalizeAdjacentEmphasis\(text\)/);
   assert.match(markdown, /\\p\{L\}\\p\{N\}/);
@@ -218,14 +278,24 @@ test("global search is deterministic first and exposes an explicit branded Clay 
   assert.equal(normalizeAdjacentEmphasis('`**code**suffix`'), '`**code**suffix`');
   assert.match(markdown, /function enhanceClaySessionLinks\(root\)/);
   assert.match(markdown, /clayos\\\/\(session:\[A-Za-z0-9_-\]\{24\}\)/);
-  assert.match(palette, /type: "home_clay_session_resolve"/);
+  assert.match(palette, /request\.type = "home_clay_session_resolve"/);
   assert.match(palette, /function handleClaySessionLinkClick\(event\)/);
   assert.match(palette, /addEventListener\("click", handleClaySessionLinkClick, true\)/);
   assert.match(palette, /openHomeConversation\(msg\.target\.mateId, msg\.target\.homeSessionId\)/);
   assert.match(router, /handleClaySessionTarget\(msg\)/);
-  assert.match(sessionLinks, /bindProjectSession\(\{ projectSlug: tap\.mateSlug, session: sourceSession \}\)/);
+  assert.match(sessionLinks, /bindProjectSession\(\{ projectSlug: selected\.tap\.mateSlug, session: selected\.session \}\)/);
   assert.match(sessionLinks, /resolveSessionNavigation\(\{ sessionRef: msg\.sessionRef \}\)/);
   assert.match(schema, /"home_clay_session_resolve"[\s\S]*"home_clay_session_target"/);
+  assert.match(markdown, /enhanceClayLogLinks\(root\)/);
+  assert.match(logLinks, /clayos\\\/\(log:\[A-Za-z0-9_-\]\{24\}\)/);
+  assert.match(logLinks, /className = "clayos-log-link"/);
+  assert.match(logLinks, /closest\("code, pre, a, button"\)/);
+  assert.match(palette, /request\.type = "home_clay_log_resolve"/);
+  assert.match(palette, /msg\.type !== "home_clay_log_target"/);
+  assert.match(palette, /openProjectLog\(target\.ref\)/);
+  assert.match(projectLogs, /export function openProjectLog\(ref\)/);
+  assert.match(sessionLinks, /bindMate\([\s\S]*resolveLogNavigation\(\{ ref: msg\.ref \}\)/);
+  assert.match(schema, /"home_clay_log_resolve"[\s\S]*"home_clay_log_target"/);
   assert.doesNotMatch(widget, /search-clay-message-label|textContent = message\.role === "user" \? "You"/);
   assert.match(project, /msg\.type === "home_clay_ask"[\s\S]*opts\.onDmMessage\(ws, msg, slug\)/);
   assert.match(schema, /"home_clay_ask"[\s\S]*direction: "c2s"/);

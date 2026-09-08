@@ -425,6 +425,11 @@ test("authoritative builtin Clay gets only the read-only cross-project tools", a
   });
 
   var defs = clay.getToolDefs(project.mateSession);
+  var clayPrompt = clay.getSystemPrompt(project.mateSession);
+  assert.match(clayPrompt, /search its Project Logs before answering/);
+  assert.match(clayPrompt, /prior work, decisions, defects, status, rationale, or unfinished work/);
+  assert.match(clayPrompt, /\[clayos\/<ref> — short label\]/);
+  assert.match(clayPrompt, /Do not search Logs for unrelated general questions/);
   assert.deepEqual(defs.map(function (d) { return d.name; }), CLAY_TOOLS);
   for (var i = 0; i < defs.length; i++) {
     assert.equal(PROJECT_TOOLS.indexOf(defs[i].name), -1, "no tool name is advertised by both sets");
@@ -514,7 +519,7 @@ test("system prompt guidance preserves user-directed work for Driver continuity"
   assert.doesNotMatch(prompt, /\bI\b/, "the guidance must not speak in the first person");
 
   assert.equal(f.attached.getSystemPrompt({ localId: 11, ownerId: "owner" }), "", "an unbindable session gets no guidance");
-  assert.equal(fixture({ mate: true }).attached.getSystemPrompt(null), "");
+  assert.equal(fixture({ mate: true, builtinKey: "researcher" }).attached.getSystemPrompt(null), "");
 });
 
 test("write tools request one evolving task-handoff record", function () {
@@ -967,7 +972,7 @@ test("the learning guidance reaches the Driver without injecting record content"
 
   // An unbound or Mate session gets nothing at all.
   assert.equal(f.attached.getSystemPrompt({ localId: 11, ownerId: "owner" }), "");
-  assert.equal(fixture({ mate: true }).attached.getSystemPrompt(null), "");
+  assert.equal(fixture({ mate: true, builtinKey: "researcher" }).attached.getSystemPrompt(null), "");
 });
 
 test("learning capture does not alter who may author or review", function () {
