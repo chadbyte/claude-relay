@@ -1,3 +1,12 @@
+# [4.0.0-beta.22](https://github.com/chadbyte/clay/compare/v4.0.0-beta.21...v4.0.0-beta.22) (2026-09-09)
+
+
+### Bug Fixes
+
+* **home:** wait for session restoration before closing Home ([e798f85](https://github.com/chadbyte/clay/commit/e798f855da430977c69dd649bea873486516a118))
+* **sessions:** allow admins to access private sessions ([3f13dec](https://github.com/chadbyte/clay/commit/3f13decd36aa77f1c8d95906bf7391329da02be1))
+* **sessions:** restore Home navigation and allow admin access ([#487](https://github.com/chadbyte/clay/issues/487)) ([a57125a](https://github.com/chadbyte/clay/commit/a57125ac84db53c7e776b1692c543146155737c4))
+
 # [4.0.0-beta.21](https://github.com/chadbyte/clay/compare/v4.0.0-beta.20...v4.0.0-beta.21) (2026-09-09)
 
 
