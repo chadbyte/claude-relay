@@ -1,3 +1,12 @@
+# [4.0.0-beta.20](https://github.com/chadbyte/clay/compare/v4.0.0-beta.19...v4.0.0-beta.20) (2026-09-09)
+
+
+### Bug Fixes
+
+* **claude:** preserve first messages during worker startup ([008199b](https://github.com/chadbyte/clay/commit/008199bfb5ca707539bf3fdea0de591d894408b0))
+* **sessions:** make sharing explicit and default to private ([cd6d5cc](https://github.com/chadbyte/clay/commit/cd6d5cc90c9e42bd5990e27a3a9cef1e75d0b3fa))
+* **sessions:** preserve startup input and enforce private defaults ([#485](https://github.com/chadbyte/clay/issues/485)) ([05f5e99](https://github.com/chadbyte/clay/commit/05f5e99d07a81252014236bbb60387621fa82c82))
+
 # [4.0.0-beta.19](https://github.com/chadbyte/clay/compare/v4.0.0-beta.18...v4.0.0-beta.19) (2026-09-09)
 
 
