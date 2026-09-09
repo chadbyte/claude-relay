@@ -1,3 +1,11 @@
+# [4.0.0-beta.21](https://github.com/chadbyte/clay/compare/v4.0.0-beta.20...v4.0.0-beta.21) (2026-09-09)
+
+
+### Bug Fixes
+
+* **ui:** show visibility badges only for shared sessions ([14bfea0](https://github.com/chadbyte/clay/commit/14bfea0734fba20b49c02abfdad9f73fd9898a8b))
+* **ui:** show visibility badges only for shared sessions ([#486](https://github.com/chadbyte/clay/issues/486)) ([fdd100e](https://github.com/chadbyte/clay/commit/fdd100ec6e0051eb3f47507b6826c3be6ff399f5))
+
 # [4.0.0-beta.20](https://github.com/chadbyte/clay/compare/v4.0.0-beta.19...v4.0.0-beta.20) (2026-09-09)
 
 
