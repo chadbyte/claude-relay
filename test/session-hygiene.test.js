@@ -45,6 +45,9 @@ test("isBlankSession rejects used, attached, or managed sessions", function () {
   assert.strictEqual(hygiene.isBlankSession(blank(1, { bookmarked: true })), false);
   assert.strictEqual(hygiene.isBlankSession(blank(1, { spawn: { parentId: 9 } })), false);
   assert.strictEqual(hygiene.isBlankSession(blank(1, { loop: { loopId: "x" } })), false);
+  assert.strictEqual(hygiene.isBlankSession(blank(1, {
+    sessionProvenance: { kind: "worker", parentSessionOriginId: "driver-origin", generation: 1 },
+  })), false);
   assert.strictEqual(hygiene.isBlankSession(blank(1, { mode: "tui" })), false);
   assert.strictEqual(hygiene.isBlankSession(blank(1, { terminalId: 3 })), false);
 });
@@ -75,6 +78,16 @@ test("findReusableBlankSession enforces ownership and returns null when nothing 
   ]);
   assert.strictEqual(hygiene.findReusableBlankSession(sessions, { vendor: "claude", ownerId: "u2" }), null);
   assert.strictEqual(hygiene.findReusableBlankSession(sessions, { vendor: "claude", ownerId: "u1" }).localId, 1);
+});
+
+test("an untouched Split Worker is neither reusable nor stale blank-session cleanup", function () {
+  var worker = blank(1, {
+    vendor: "codex",
+    sessionProvenance: { kind: "worker", parentSessionOriginId: "driver-origin", generation: 1 },
+  });
+  var sessions = toMap([worker]);
+  assert.strictEqual(hygiene.findReusableBlankSession(sessions, { vendor: "codex" }), null);
+  assert.deepStrictEqual(hygiene.collectStaleBlankSessions(sessions, null, NOW), []);
 });
 
 test("collectStaleBlankSessions keeps young blanks and the active session", function () {

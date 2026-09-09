@@ -930,6 +930,17 @@
   position: relative;
 }
 
+.session-driver-header {
+  display: flex;
+  align-items: center;
+}
+
+.session-driver-header > .session-item {
+  min-width: 0;
+  flex: 1;
+  padding-left: 0;
+}
+
 .session-driver-toggle {
   width: 18px;
   height: 24px;
