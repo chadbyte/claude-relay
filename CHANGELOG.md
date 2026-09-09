@@ -1,3 +1,10 @@
+# [4.0.0-beta.23](https://github.com/chadbyte/clay/compare/v4.0.0-beta.22...v4.0.0-beta.23) (2026-09-09)
+
+
+### Bug Fixes
+
+* **home:** restore project bootstrap and default root workspace ([e964c3a](https://github.com/chadbyte/clay/commit/e964c3a15032e334a895dc1791a1aa0fa09625c8))
+
 # [4.0.0-beta.22](https://github.com/chadbyte/clay/compare/v4.0.0-beta.21...v4.0.0-beta.22) (2026-09-09)
 
 
