@@ -1,3 +1,10 @@
+# [4.0.0-beta.24](https://github.com/chadbyte/clay/compare/v4.0.0-beta.23...v4.0.0-beta.24) (2026-09-09)
+
+
+### Bug Fixes
+
+* **auth:** enforce project and session access boundaries ([#489](https://github.com/chadbyte/clay/issues/489)) ([51a05a9](https://github.com/chadbyte/clay/commit/51a05a92a1bfa94407c03b7946bcbe96621c03d6))
+
 # [4.0.0-beta.23](https://github.com/chadbyte/clay/compare/v4.0.0-beta.22...v4.0.0-beta.23) (2026-09-09)
 
 
