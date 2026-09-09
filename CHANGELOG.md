@@ -1,3 +1,17 @@
+# [4.0.0-beta.25](https://github.com/chadbyte/clay/compare/v4.0.0-beta.24...v4.0.0-beta.25) (2026-09-09)
+
+
+### Bug Fixes
+
+* **chat:** consolidate thinking into one entry per turn ([f8a08fb](https://github.com/chadbyte/clay/commit/f8a08fb91946fa14d0a49f7b6e2c8dc0ffabba71))
+* **worker:** keep runtime inline and clarify task banner ([b544002](https://github.com/chadbyte/clay/commit/b5440027fae8b13215c1f3395ccd9c71aad40d9f))
+
+
+### Features
+
+* **chat:** show live thinking summaries with shimmer ([413290c](https://github.com/chadbyte/clay/commit/413290c452b9d0d8b537102dbce1364210e8ca7c))
+* **worker:** clarify runtime details and simplify proposal cards ([5b0d94a](https://github.com/chadbyte/clay/commit/5b0d94a3d0f4d66e2d8504b22ab002db6e9414ac))
+
 # [4.0.0-beta.24](https://github.com/chadbyte/clay/compare/v4.0.0-beta.23...v4.0.0-beta.24) (2026-09-09)
 
 
