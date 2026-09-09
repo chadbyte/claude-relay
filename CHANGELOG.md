@@ -1,3 +1,12 @@
+# [4.0.0-beta.19](https://github.com/chadbyte/clay/compare/v4.0.0-beta.18...v4.0.0-beta.19) (2026-09-09)
+
+
+### Bug Fixes
+
+* **home:** restore new user workspace access ([1f35b10](https://github.com/chadbyte/clay/commit/1f35b107c8d8c15d0917a74e3672e7bd16b776df))
+* **sessions:** preserve driver and worker hierarchy actions ([b4c6b5d](https://github.com/chadbyte/clay/commit/b4c6b5d1bba5ceece675710d45f9e0ee67d76caa))
+* **worktree:** run git operations as the project owner ([5ca1609](https://github.com/chadbyte/clay/commit/5ca16096d83826611d1509a027269a90243e9114))
+
 # [4.0.0-beta.18](https://github.com/chadbyte/clay/compare/v4.0.0-beta.17...v4.0.0-beta.18) (2026-09-08)
 
 
