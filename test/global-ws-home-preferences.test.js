@@ -39,3 +39,23 @@ test("slugless WebSocket serves Home preferences during new-user bootstrap", fun
     },
   ]);
 });
+
+test("slugless WebSocket routes Mate and Home requests without an ordinary project", function () {
+  var routed = [];
+  var globalWs = attachGlobalWs({
+    onAppMessage: function (ws, msg) {
+      if (msg.type !== "mate_list" && msg.type !== "home_debates_list") return false;
+      routed.push({ userId: ws._clayUser.id, type: msg.type });
+      return true;
+    },
+  });
+  var ws = { _clayUser: { id: "new-user" } };
+
+  globalWs.handleMessage(ws, { type: "mate_list" });
+  globalWs.handleMessage(ws, { type: "home_debates_list" });
+
+  assert.deepStrictEqual(routed, [
+    { userId: "new-user", type: "mate_list" },
+    { userId: "new-user", type: "home_debates_list" },
+  ]);
+});
